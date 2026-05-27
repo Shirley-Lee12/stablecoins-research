@@ -26,7 +26,7 @@ import * as z from "zod";
 import { format } from "date-fns";
 import { 
   BookOpen, Link as LinkIcon, Trash2, Calendar, Search, 
-  Wand2, Loader2, ExternalLink, Tags, FileText, Users
+  Wand2, Loader2, ExternalLink, Tags, FileText, Users, Building2, Plus, X as XIcon, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -60,11 +60,17 @@ export default function AcademicResources() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  const [activeView, setActiveView] = useState<"type" | "tags" | "experts">("type");
+  const [activeView, setActiveView] = useState<"type" | "tags">("type");
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [bulkMode, setBulkMode] = useState<"url" | "doi" | "manual">("url");
+  const [bulkInput, setBulkInput] = useState("");
+  const [manualRows, setManualRows] = useState<{ title: string; authors: string; year: string; type: string }[]>([
+    { title: "", authors: "", year: "", type: "paper" },
+  ]);
+  const [batchProgress, setBatchProgress] = useState<{ total: number; done: number; errors: string[] } | null>(null);
 
   const isExpertsSelected = activeView === "type" && selectedType === "__experts__";
 
@@ -197,7 +203,7 @@ export default function AcademicResources() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
           <h2 className="text-3xl font-serif font-bold text-primary tracking-tight">
-            {t("Academic Resources", "学术资源")}
+            {t("Resources", "资源")}
           </h2>
           <p className="mt-2 text-muted-foreground max-w-3xl">
             {t(
@@ -207,135 +213,256 @@ export default function AcademicResources() {
           </p>
         </div>
         
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
+          setIsAddDialogOpen(open);
+          if (!open) { setBulkInput(""); setBatchProgress(null); setManualRows([{ title: "", authors: "", year: "", type: "paper" }]); }
+        }}>
           <DialogTrigger asChild>
             <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Wand2 className="mr-2 h-4 w-4" />
-              {t("Add via AI", "AI辅助添加")}
+              <Plus className="mr-2 h-4 w-4" />
+              {t("Add Resources", "添加资源")}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{t("Add Resource", "添加资源")}</DialogTitle>
+              <DialogTitle>{t("Batch Add Resources", "批量添加资源")}</DialogTitle>
               <DialogDescription>
-                {t("Use AI to extract metadata from a URL, DOI, or text, then review and save.", "使用AI从URL、DOI或文本中提取元数据，然后检查并保存。")}
+                {t("Add multiple resources at once by URL, DOI, or manual entry.", "通过 URL、DOI 或手动输入批量添加资源。")}
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-6 py-4">
-              {/* Extraction Section */}
-              <Card className="border-secondary/20 shadow-none bg-muted/30">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2 text-secondary-foreground">
-                    <Wand2 className="h-4 w-4" />
-                    {t("Step 1: AI Extraction", "第一步：AI提取")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Form {...extractForm}>
-                    <form onSubmit={extractForm.handleSubmit(onExtractSubmit)} className="flex items-end gap-3">
-                      <div className="flex-1 space-y-3">
-                        <FormField
-                          control={extractForm.control}
-                          name="source_type"
-                          render={({ field }) => (
-                            <FormItem>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Source type" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="url">URL</SelectItem>
-                                  <SelectItem value="doi">DOI</SelectItem>
-                                  <SelectItem value="text">Raw Text</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        {sourceType === "url" && (
-                          <FormField control={extractForm.control} name="url" render={({ field }) => (
-                            <FormItem><FormControl><Input placeholder="https://..." {...field} /></FormControl></FormItem>
-                          )}/>
-                        )}
-                        {sourceType === "doi" && (
-                          <FormField control={extractForm.control} name="doi" render={({ field }) => (
-                            <FormItem><FormControl><Input placeholder="10.1000/xyz123" {...field} /></FormControl></FormItem>
-                          )}/>
-                        )}
-                        {sourceType === "text" && (
-                          <FormField control={extractForm.control} name="text" render={({ field }) => (
-                            <FormItem><FormControl><Textarea placeholder="Paste abstract or citation text..." {...field} /></FormControl></FormItem>
-                          )}/>
-                        )}
-                      </div>
-                      <Button type="submit" variant="secondary" disabled={extractResource.isPending}>
-                        {extractResource.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("Extract", "提取")}
-                      </Button>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-
-              {/* Resource Form Section */}
-              <div className="pt-2">
-                <h4 className="text-sm font-medium mb-3">{t("Step 2: Review & Save", "第二步：检查与保存")}</h4>
-                <Form {...resourceForm}>
-                  <form onSubmit={resourceForm.handleSubmit(onResourceSubmit)} className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <FormField control={resourceForm.control} name="title" render={({ field }) => (
-                        <FormItem><FormLabel>{t("Title", "标题")}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage/></FormItem>
-                      )}/>
-                      <FormField control={resourceForm.control} name="resource_type" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("Type", "类型")}</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                            <SelectContent>
-                              {RESOURCE_TYPES.map(type => (
-                                <SelectItem key={type} value={type}>{type.replace("_", " ")}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage/>
-                        </FormItem>
-                      )}/>
-                    </div>
-
-                    <FormField control={resourceForm.control} name="abstract" render={({ field }) => (
-                      <FormItem><FormLabel>{t("Abstract", "摘要")}</FormLabel><FormControl><Textarea className="h-24" {...field} /></FormControl><FormMessage/></FormItem>
-                    )}/>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <FormField control={resourceForm.control} name="authors" render={({ field }) => (
-                        <FormItem><FormLabel>{t("Authors (comma separated)", "作者 (逗号分隔)")}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage/></FormItem>
-                      )}/>
-                      <FormField control={resourceForm.control} name="tags" render={({ field }) => (
-                        <FormItem><FormLabel>{t("Tags (comma separated)", "标签 (逗号分隔)")}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage/></FormItem>
-                      )}/>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <FormField control={resourceForm.control} name="url" render={({ field }) => (
-                        <FormItem><FormLabel>URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage/></FormItem>
-                      )}/>
-                      <FormField control={resourceForm.control} name="doi" render={({ field }) => (
-                        <FormItem><FormLabel>DOI</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage/></FormItem>
-                      )}/>
-                      <FormField control={resourceForm.control} name="published_date" render={({ field }) => (
-                        <FormItem><FormLabel>{t("Date", "日期")}</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage/></FormItem>
-                      )}/>
-                    </div>
-
-                    <Button type="submit" disabled={createResource.isPending} className="w-full">
-                      {createResource.isPending ? t("Saving...", "保存中...") : t("Save Resource", "保存资源")}
-                    </Button>
-                  </form>
-                </Form>
+            <div className="space-y-4 py-2">
+              {/* Mode selector */}
+              <div className="flex rounded-md border border-border overflow-hidden">
+                {(["url", "doi", "manual"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => { setBulkMode(mode); setBulkInput(""); setBatchProgress(null); }}
+                    className={`flex-1 py-2 text-sm font-medium transition-colors ${bulkMode === mode ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted"}`}
+                  >
+                    {mode === "url" ? "URL" : mode === "doi" ? "DOI" : t("Manual", "手动")}
+                  </button>
+                ))}
               </div>
+
+              {/* URL mode */}
+              {bulkMode === "url" && (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">{t("Paste one URL per line. AI will extract metadata for each.", "每行粘贴一个 URL，AI 将自动提取每条资源的元数据。")}</p>
+                  <Textarea
+                    className="h-40 font-mono text-sm"
+                    placeholder={"https://example.com/paper1\nhttps://example.com/paper2"}
+                    value={bulkInput}
+                    onChange={(e) => setBulkInput(e.target.value)}
+                    disabled={!!batchProgress && batchProgress.done < batchProgress.total}
+                  />
+                  {batchProgress && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm">
+                        {batchProgress.done < batchProgress.total
+                          ? <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                          : <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                        <span>{t(`Processing ${batchProgress.done}/${batchProgress.total}`, `处理中 ${batchProgress.done}/${batchProgress.total}`)}</span>
+                      </div>
+                      {batchProgress.errors.length > 0 && (
+                        <div className="text-xs text-destructive space-y-0.5">
+                          {batchProgress.errors.map((e, i) => <div key={i} className="flex gap-1"><AlertCircle className="h-3 w-3 shrink-0 mt-0.5" />{e}</div>)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <Button
+                    className="w-full"
+                    disabled={!bulkInput.trim() || (!!batchProgress && batchProgress.done < batchProgress.total)}
+                    onClick={async () => {
+                      const urls = bulkInput.split("\n").map(u => u.trim()).filter(Boolean);
+                      setBatchProgress({ total: urls.length, done: 0, errors: [] });
+                      const errors: string[] = [];
+                      for (let i = 0; i < urls.length; i++) {
+                        try {
+                          const extracted = await extractResource.mutateAsync({ data: { source_type: "url", url: urls[i] } });
+                          await createResource.mutateAsync({ data: {
+                            title: extracted.title || urls[i],
+                            abstract: extracted.abstract ?? undefined,
+                            authors: extracted.authors ?? [],
+                            tags: extracted.keywords ?? [],
+                            url: urls[i],
+                            doi: extracted.doi ?? undefined,
+                            published_date: extracted.published_date ?? undefined,
+                            journal: extracted.journal ?? undefined,
+                            resource_type: "paper",
+                          }});
+                        } catch {
+                          errors.push(urls[i]);
+                        }
+                        setBatchProgress({ total: urls.length, done: i + 1, errors: [...errors] });
+                      }
+                      queryClient.invalidateQueries({ queryKey: getListResourcesQueryKey() });
+                      if (errors.length === 0) {
+                        toast({ title: t("Done", "完成"), description: t(`Added ${urls.length} resource(s).`, `已添加 ${urls.length} 条资源。`) });
+                        setIsAddDialogOpen(false);
+                        setBulkInput(""); setBatchProgress(null);
+                      }
+                    }}
+                  >
+                    <Wand2 className="mr-2 h-4 w-4" />
+                    {t("Extract & Add All", "提取并全部添加")}
+                  </Button>
+                </div>
+              )}
+
+              {/* DOI mode */}
+              {bulkMode === "doi" && (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">{t("Paste one DOI per line. AI will extract metadata for each.", "每行粘贴一个 DOI，AI 将自动提取每条资源的元数据。")}</p>
+                  <Textarea
+                    className="h-40 font-mono text-sm"
+                    placeholder={"10.1000/xyz123\n10.2000/abc456"}
+                    value={bulkInput}
+                    onChange={(e) => setBulkInput(e.target.value)}
+                    disabled={!!batchProgress && batchProgress.done < batchProgress.total}
+                  />
+                  {batchProgress && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm">
+                        {batchProgress.done < batchProgress.total
+                          ? <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                          : <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                        <span>{t(`Processing ${batchProgress.done}/${batchProgress.total}`, `处理中 ${batchProgress.done}/${batchProgress.total}`)}</span>
+                      </div>
+                      {batchProgress.errors.length > 0 && (
+                        <div className="text-xs text-destructive space-y-0.5">
+                          {batchProgress.errors.map((e, i) => <div key={i} className="flex gap-1"><AlertCircle className="h-3 w-3 shrink-0 mt-0.5" />{e}</div>)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <Button
+                    className="w-full"
+                    disabled={!bulkInput.trim() || (!!batchProgress && batchProgress.done < batchProgress.total)}
+                    onClick={async () => {
+                      const dois = bulkInput.split("\n").map(d => d.trim()).filter(Boolean);
+                      setBatchProgress({ total: dois.length, done: 0, errors: [] });
+                      const errors: string[] = [];
+                      for (let i = 0; i < dois.length; i++) {
+                        try {
+                          const extracted = await extractResource.mutateAsync({ data: { source_type: "doi", doi: dois[i] } });
+                          await createResource.mutateAsync({ data: {
+                            title: extracted.title || dois[i],
+                            abstract: extracted.abstract ?? undefined,
+                            authors: extracted.authors ?? [],
+                            tags: extracted.keywords ?? [],
+                            doi: dois[i],
+                            published_date: extracted.published_date ?? undefined,
+                            journal: extracted.journal ?? undefined,
+                            resource_type: "paper",
+                          }});
+                        } catch {
+                          errors.push(dois[i]);
+                        }
+                        setBatchProgress({ total: dois.length, done: i + 1, errors: [...errors] });
+                      }
+                      queryClient.invalidateQueries({ queryKey: getListResourcesQueryKey() });
+                      if (errors.length === 0) {
+                        toast({ title: t("Done", "完成"), description: t(`Added ${dois.length} resource(s).`, `已添加 ${dois.length} 条资源。`) });
+                        setIsAddDialogOpen(false);
+                        setBulkInput(""); setBatchProgress(null);
+                      }
+                    }}
+                  >
+                    <Wand2 className="mr-2 h-4 w-4" />
+                    {t("Extract & Add All", "提取并全部添加")}
+                  </Button>
+                </div>
+              )}
+
+              {/* Manual mode */}
+              {bulkMode === "manual" && (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">{t("Fill in title, authors, and year for each resource.", "为每条资源填写标题、作者和年份。")}</p>
+                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                    {manualRows.map((row, i) => (
+                      <div key={i} className="grid grid-cols-[1fr_auto] gap-2 items-start border border-border rounded-md p-3 bg-muted/20">
+                        <div className="space-y-2">
+                          <Input
+                            placeholder={t("Title (required)", "标题（必填）")}
+                            value={row.title}
+                            onChange={(e) => setManualRows(rows => rows.map((r, j) => j === i ? { ...r, title: e.target.value } : r))}
+                          />
+                          <div className="grid grid-cols-3 gap-2">
+                            <Input
+                              placeholder={t("Authors", "作者")}
+                              value={row.authors}
+                              onChange={(e) => setManualRows(rows => rows.map((r, j) => j === i ? { ...r, authors: e.target.value } : r))}
+                              className="col-span-1"
+                            />
+                            <Input
+                              placeholder={t("Year", "年份")}
+                              value={row.year}
+                              onChange={(e) => setManualRows(rows => rows.map((r, j) => j === i ? { ...r, year: e.target.value } : r))}
+                              className="col-span-1"
+                            />
+                            <select
+                              value={row.type}
+                              onChange={(e) => setManualRows(rows => rows.map((r, j) => j === i ? { ...r, type: e.target.value } : r))}
+                              className="col-span-1 border border-input bg-background text-sm rounded-md px-2 h-10"
+                            >
+                              {RESOURCE_TYPES.map(rt => <option key={rt} value={rt}>{rt.replace("_", " ")}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost" size="icon"
+                          className="h-8 w-8 mt-1 text-muted-foreground hover:text-destructive shrink-0"
+                          onClick={() => setManualRows(rows => rows.filter((_, j) => j !== i))}
+                          disabled={manualRows.length === 1}
+                        >
+                          <XIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => setManualRows(rows => [...rows, { title: "", authors: "", year: "", type: "paper" }])}>
+                    <Plus className="mr-2 h-4 w-4" /> {t("Add Row", "添加一行")}
+                  </Button>
+                  {batchProgress && (
+                    <div className="flex items-center gap-2 text-sm">
+                      {batchProgress.done < batchProgress.total
+                        ? <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        : <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                      <span>{t(`Saving ${batchProgress.done}/${batchProgress.total}`, `保存中 ${batchProgress.done}/${batchProgress.total}`)}</span>
+                    </div>
+                  )}
+                  <Button
+                    className="w-full"
+                    disabled={manualRows.every(r => !r.title.trim()) || (!!batchProgress && batchProgress.done < batchProgress.total)}
+                    onClick={async () => {
+                      const validRows = manualRows.filter(r => r.title.trim());
+                      setBatchProgress({ total: validRows.length, done: 0, errors: [] });
+                      for (let i = 0; i < validRows.length; i++) {
+                        const row = validRows[i];
+                        try {
+                          await createResource.mutateAsync({ data: {
+                            title: row.title.trim(),
+                            authors: row.authors ? row.authors.split(",").map(a => a.trim()).filter(Boolean) : [],
+                            published_date: row.year ? `${row.year}-01-01` : undefined,
+                            resource_type: row.type,
+                            tags: [],
+                          }});
+                        } catch {}
+                        setBatchProgress({ total: validRows.length, done: i + 1, errors: [] });
+                      }
+                      queryClient.invalidateQueries({ queryKey: getListResourcesQueryKey() });
+                      toast({ title: t("Done", "完成"), description: t(`Added ${validRows.length} resource(s).`, `已添加 ${validRows.length} 条资源。`) });
+                      setIsAddDialogOpen(false);
+                      setManualRows([{ title: "", authors: "", year: "", type: "paper" }]);
+                      setBatchProgress(null);
+                    }}
+                  >
+                    {t("Save All", "全部保存")}
+                  </Button>
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -355,14 +482,10 @@ export default function AcademicResources() {
             />
           </div>
 
-          <Tabs value={activeView} onValueChange={(v) => setActiveView(v as "type" | "tags" | "experts")} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+          <Tabs value={activeView} onValueChange={(v) => setActiveView(v as "type" | "tags")} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="type">{t("Types", "分类")}</TabsTrigger>
               <TabsTrigger value="tags">{t("Tags", "标签")}</TabsTrigger>
-              <TabsTrigger value="experts">
-                <Users className="h-3 w-3 mr-1" />
-                {t("Experts", "专家")}
-              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="type" className="mt-4 space-y-1">
@@ -414,19 +537,6 @@ export default function AcademicResources() {
               </div>
             </TabsContent>
 
-            <TabsContent value="experts" className="mt-4">
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground mb-3">
-                  {t("Browse all contributors in the resource library.", "浏览资源库中的所有作者。")}
-                </p>
-                <Link href="/experts">
-                  <Button variant="outline" className="w-full justify-start text-primary border-primary/20 hover:bg-primary/5" data-testid="link-go-to-experts">
-                    <Users className="mr-2 h-4 w-4" />
-                    {t("View All Experts & Scholars", "查看全部专家学者")}
-                  </Button>
-                </Link>
-              </div>
-            </TabsContent>
           </Tabs>
         </div>
 
@@ -489,13 +599,14 @@ export default function AcademicResources() {
                               </p>
                             </div>
                           </div>
-                          {author.resource_types.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5">
-                              {author.resource_types.slice(0, 3).map((rt) => (
-                                <span key={rt.type} className="text-xs border rounded-full px-2 py-0.5 bg-muted text-muted-foreground capitalize">
-                                  {rt.type.replace("_", " ")}{rt.count > 1 ? ` ×${rt.count}` : ""}
-                                </span>
-                              ))}
+                          {author.institution ? (
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Building2 className="h-3 w-3 shrink-0 opacity-70" />
+                              <span className="truncate">{author.institution}</span>
+                            </div>
+                          ) : (
+                            <div className="text-xs text-muted-foreground/40 italic">
+                              {t("Institution not set", "机构未设置")}
                             </div>
                           )}
                           {author.top_tags.length > 0 && (

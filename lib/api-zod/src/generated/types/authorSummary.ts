@@ -9,6 +9,7 @@ import type { AuthorSummaryResourceTypesItem } from './authorSummaryResourceType
 
 export interface AuthorSummary {
   name: string;
+  institution?: string;
   resource_count: number;
   top_tags: string[];
   resource_types: AuthorSummaryResourceTypesItem[];

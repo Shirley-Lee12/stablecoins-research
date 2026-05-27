@@ -28,7 +28,7 @@ const navItems = [
   { href: "/", labelEn: "Dashboard", labelZh: "仪表盘", icon: LayoutDashboard },
   { href: "/about-stablecoins", labelEn: "About Stablecoins", labelZh: "关于稳定币", icon: BookOpen },
   { href: "/research", labelEn: "Our Research", labelZh: "我们的研究", icon: FileText },
-  { href: "/academic-resources", labelEn: "Academic Resources", labelZh: "学术资源", icon: BookOpen },
+  { href: "/academic-resources", labelEn: "Resources", labelZh: "资源", icon: BookOpen },
   { href: "/experts", labelEn: "Experts & Scholars", labelZh: "专家学者", icon: Users },
   { href: "/regulatory", labelEn: "Regulatory Status", labelZh: "监管现状", icon: Globe },
   { href: "/quantitative", labelEn: "Quantitative Indicators", labelZh: "量化指标", icon: BarChart },

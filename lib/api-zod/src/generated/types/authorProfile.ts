@@ -10,6 +10,8 @@ import type { Resource } from './resource';
 
 export interface AuthorProfile {
   name: string;
+  institution?: string;
+  bio?: string;
   resource_count: number;
   top_tags: string[];
   resource_types: AuthorProfileResourceTypesItem[];

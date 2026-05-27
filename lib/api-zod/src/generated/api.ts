@@ -378,6 +378,7 @@ export const ListAuthorsQueryParams = zod.object({
 
 export const ListAuthorsResponseItem = zod.object({
   "name": zod.string(),
+  "institution": zod.string().optional(),
   "resource_count": zod.number(),
   "top_tags": zod.array(zod.string()),
   "resource_types": zod.array(zod.object({
@@ -397,6 +398,49 @@ export const GetAuthorParams = zod.object({
 
 export const GetAuthorResponse = zod.object({
   "name": zod.string(),
+  "institution": zod.string().optional(),
+  "bio": zod.string().optional(),
+  "resource_count": zod.number(),
+  "top_tags": zod.array(zod.string()),
+  "resource_types": zod.array(zod.object({
+  "type": zod.string(),
+  "count": zod.number()
+})),
+  "resources": zod.array(zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "title_zh": zod.string().nullish(),
+  "abstract": zod.string().nullish(),
+  "abstract_zh": zod.string().nullish(),
+  "keywords": zod.array(zod.string()).optional(),
+  "authors": zod.array(zod.string()).optional(),
+  "url": zod.string().nullish(),
+  "doi": zod.string().nullish(),
+  "resource_type": zod.enum(['paper', 'report', 'news', 'government_doc', 'blog', 'publication', 'forum', 'video']),
+  "tags": zod.array(zod.string()).optional(),
+  "published_date": zod.string().nullish(),
+  "journal": zod.string().nullish(),
+  "created_at": zod.string()
+}))
+})
+
+
+/**
+ * @summary Update author institution and bio
+ */
+export const UpdateAuthorProfileParams = zod.object({
+  "name": zod.coerce.string()
+})
+
+export const UpdateAuthorProfileBody = zod.object({
+  "institution": zod.string().optional(),
+  "bio": zod.string().optional()
+})
+
+export const UpdateAuthorProfileResponse = zod.object({
+  "name": zod.string(),
+  "institution": zod.string().optional(),
+  "bio": zod.string().optional(),
   "resource_count": zod.number(),
   "top_tags": zod.array(zod.string()),
   "resource_types": zod.array(zod.object({

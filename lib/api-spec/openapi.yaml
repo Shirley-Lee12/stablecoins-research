@@ -412,6 +412,31 @@ paths:
                 $ref: "#/components/schemas/AuthorProfile"
         "404":
           description: Not found
+    patch:
+      operationId: updateAuthorProfile
+      tags: [resources]
+      summary: Update author institution and bio
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAuthorProfile"
+      responses:
+        "200":
+          description: Updated author profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorProfile"
+        "404":
+          description: Not found
 
   /stats:
     get:
@@ -740,6 +765,8 @@ components:
       properties:
         name:
           type: string
+        institution:
+          type: string
         resource_count:
           type: integer
         top_tags:
@@ -763,6 +790,10 @@ components:
       properties:
         name:
           type: string
+        institution:
+          type: string
+        bio:
+          type: string
         resource_count:
           type: integer
         top_tags:
@@ -783,6 +814,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Resource"
+
+    UpdateAuthorProfile:
+      type: object
+      properties:
+        institution:
+          type: string
+        bio:
+          type: string
 
     PlatformStats:
       type: object

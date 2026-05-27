@@ -200,6 +200,7 @@ export type AuthorSummaryResourceTypesItem = {
 
 export interface AuthorSummary {
   name: string;
+  institution?: string;
   resource_count: number;
   top_tags: string[];
   resource_types: AuthorSummaryResourceTypesItem[];
@@ -212,10 +213,17 @@ export type AuthorProfileResourceTypesItem = {
 
 export interface AuthorProfile {
   name: string;
+  institution?: string;
+  bio?: string;
   resource_count: number;
   top_tags: string[];
   resource_types: AuthorProfileResourceTypesItem[];
   resources: Resource[];
+}
+
+export interface UpdateAuthorProfile {
+  institution?: string;
+  bio?: string;
 }
 
 export type PlatformStatsResourcesByTypeItem = {

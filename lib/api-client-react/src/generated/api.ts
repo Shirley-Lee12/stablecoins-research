@@ -40,7 +40,8 @@ import type {
   Resource,
   ResourceInput,
   ResourceUpdate,
-  Tag
+  Tag,
+  UpdateAuthorProfile
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1586,6 +1587,78 @@ export function useGetAuthor<TData = Awaited<ReturnType<typeof getAuthor>>, TErr
 
 
 
+
+export const getUpdateAuthorProfileUrl = (name: string,) => {
+
+
+
+
+  return `/api/authors/${name}`
+}
+
+/**
+ * @summary Update author institution and bio
+ */
+export const updateAuthorProfile = async (name: string,
+    updateAuthorProfile: UpdateAuthorProfile, options?: RequestInit): Promise<AuthorProfile> => {
+
+  return customFetch<AuthorProfile>(getUpdateAuthorProfileUrl(name),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateAuthorProfile,)
+  }
+);}
+
+
+
+
+export const getUpdateAuthorProfileMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAuthorProfile>>, TError,{name: string;data: BodyType<UpdateAuthorProfile>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAuthorProfile>>, TError,{name: string;data: BodyType<UpdateAuthorProfile>}, TContext> => {
+
+const mutationKey = ['updateAuthorProfile'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAuthorProfile>>, {name: string;data: BodyType<UpdateAuthorProfile>}> = (props) => {
+          const {name,data} = props ?? {};
+
+          return  updateAuthorProfile(name,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAuthorProfileMutationResult = NonNullable<Awaited<ReturnType<typeof updateAuthorProfile>>>
+    export type UpdateAuthorProfileMutationBody = BodyType<UpdateAuthorProfile>
+    export type UpdateAuthorProfileMutationError = ErrorType<void>
+
+    /**
+ * @summary Update author institution and bio
+ */
+export const useUpdateAuthorProfile = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAuthorProfile>>, TError,{name: string;data: BodyType<UpdateAuthorProfile>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAuthorProfile>>,
+        TError,
+        {name: string;data: BodyType<UpdateAuthorProfile>},
+        TContext
+      > => {
+      return useMutation(getUpdateAuthorProfileMutationOptions(options));
+    }
 
 export const getGetStatsUrl = () => {
 

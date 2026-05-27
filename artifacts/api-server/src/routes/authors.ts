@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db, resourcesTable } from "@workspace/db";
-import { ilike, sql } from "drizzle-orm";
+import { db, resourcesTable, authorProfilesTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 const router = Router();
 
@@ -23,7 +23,11 @@ function mapResource(r: typeof resourcesTable.$inferSelect) {
   };
 }
 
-function buildAuthorProfile(name: string, resources: ReturnType<typeof mapResource>[]) {
+function buildAuthorProfile(
+  name: string,
+  resources: ReturnType<typeof mapResource>[],
+  profileRow?: typeof authorProfilesTable.$inferSelect | null
+) {
   const typeCounts: Record<string, number> = {};
   const tagCounts: Record<string, number> = {};
 
@@ -43,14 +47,26 @@ function buildAuthorProfile(name: string, resources: ReturnType<typeof mapResour
     .slice(0, 8)
     .map(([tag]) => tag);
 
-  return { name, resource_count: resources.length, resource_types, top_tags };
+  return {
+    name,
+    institution: profileRow?.institution ?? undefined,
+    bio: profileRow?.bio ?? undefined,
+    resource_count: resources.length,
+    resource_types,
+    top_tags,
+  };
 }
 
 router.get("/authors", async (req, res) => {
   try {
     const search = typeof req.query.search === "string" ? req.query.search : undefined;
 
-    const allResources = await db.select().from(resourcesTable);
+    const [allResources, allProfiles] = await Promise.all([
+      db.select().from(resourcesTable),
+      db.select().from(authorProfilesTable),
+    ]);
+
+    const profileMap = new Map(allProfiles.map((p) => [p.name.toLowerCase(), p]));
 
     const authorMap: Record<string, ReturnType<typeof mapResource>[]> = {};
     for (const r of allResources) {
@@ -63,7 +79,7 @@ router.get("/authors", async (req, res) => {
     }
 
     let authors = Object.entries(authorMap).map(([name, resources]) =>
-      buildAuthorProfile(name, resources)
+      buildAuthorProfile(name, resources, profileMap.get(name.toLowerCase()))
     );
 
     if (search) {
@@ -83,6 +99,33 @@ router.get("/authors/:name", async (req, res): Promise<void> => {
   try {
     const name = decodeURIComponent(req.params.name);
 
+    const [allResources, profileRows] = await Promise.all([
+      db.select().from(resourcesTable),
+      db.select().from(authorProfilesTable).where(eq(authorProfilesTable.name, name)),
+    ]);
+
+    const authorResources = allResources
+      .filter((r) => (r.authors ?? []).some((a) => a.trim().toLowerCase() === name.toLowerCase()))
+      .map(mapResource);
+
+    if (authorResources.length === 0) {
+      res.status(404).json({ error: "Author not found" });
+      return;
+    }
+
+    const profile = buildAuthorProfile(name, authorResources, profileRows[0] ?? null);
+    res.json({ ...profile, resources: authorResources });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to get author" });
+  }
+});
+
+router.patch("/authors/:name", async (req, res): Promise<void> => {
+  try {
+    const name = decodeURIComponent(req.params.name);
+    const { institution, bio } = req.body as { institution?: string; bio?: string };
+
     const allResources = await db.select().from(resourcesTable);
     const authorResources = allResources
       .filter((r) => (r.authors ?? []).some((a) => a.trim().toLowerCase() === name.toLowerCase()))
@@ -93,11 +136,24 @@ router.get("/authors/:name", async (req, res): Promise<void> => {
       return;
     }
 
-    const profile = buildAuthorProfile(name, authorResources);
+    await db
+      .insert(authorProfilesTable)
+      .values({ name, institution: institution ?? null, bio: bio ?? null })
+      .onConflictDoUpdate({
+        target: authorProfilesTable.name,
+        set: {
+          institution: institution ?? null,
+          bio: bio ?? null,
+          updatedAt: new Date(),
+        },
+      });
+
+    const profileRows = await db.select().from(authorProfilesTable).where(eq(authorProfilesTable.name, name));
+    const profile = buildAuthorProfile(name, authorResources, profileRows[0] ?? null);
     res.json({ ...profile, resources: authorResources });
   } catch (err) {
     req.log.error(err);
-    res.status(500).json({ error: "Failed to get author" });
+    res.status(500).json({ error: "Failed to update author profile" });
   }
 });
 

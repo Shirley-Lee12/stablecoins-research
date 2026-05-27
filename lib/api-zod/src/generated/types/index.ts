@@ -32,3 +32,4 @@ export * from './resourceInput';
 export * from './resourceResourceType';
 export * from './resourceUpdate';
 export * from './tag';
+export * from './updateAuthorProfile';
