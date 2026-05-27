@@ -1,22 +1,30 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Stablecoin Research Hub API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: resources
+    description: Academic and industry resource management
+  - name: research
+    description: Our research papers
+  - name: regulatory
+    description: Regulatory timeline entries
+  - name: tags
+    description: Resource tags
+  - name: stats
+    description: Summary statistics
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +32,359 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /resources:
+    get:
+      operationId: listResources
+      tags: [resources]
+      summary: List resources with optional filters
+      parameters:
+        - name: resource_type
+          in: query
+          schema:
+            type: string
+        - name: tag
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: lang
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of resources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Resource"
+    post:
+      operationId: createResource
+      tags: [resources]
+      summary: Create a new resource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourceInput"
+      responses:
+        "201":
+          description: Created resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resource"
+
+  /resources/recent:
+    get:
+      operationId: listRecentResources
+      tags: [resources]
+      summary: Get recently added resources
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Recent resources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Resource"
+
+  /resources/extract:
+    post:
+      operationId: extractResource
+      tags: [resources]
+      summary: Extract metadata from URL, DOI, or PDF text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtractionInput"
+      responses:
+        "200":
+          description: Extracted metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtractionResult"
+
+  /resources/{id}:
+    get:
+      operationId: getResource
+      tags: [resources]
+      summary: Get a resource by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resource"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateResource
+      tags: [resources]
+      summary: Update a resource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourceUpdate"
+      responses:
+        "200":
+          description: Updated resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resource"
+    delete:
+      operationId: deleteResource
+      tags: [resources]
+      summary: Delete a resource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /research-papers:
+    get:
+      operationId: listResearchPapers
+      tags: [research]
+      summary: List our team research papers
+      responses:
+        "200":
+          description: List of research papers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResearchPaper"
+    post:
+      operationId: createResearchPaper
+      tags: [research]
+      summary: Upload a research paper
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResearchPaperInput"
+      responses:
+        "201":
+          description: Created paper
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResearchPaper"
+
+  /research-papers/{id}:
+    get:
+      operationId: getResearchPaper
+      tags: [research]
+      summary: Get a research paper by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Research paper
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResearchPaper"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteResearchPaper
+      tags: [research]
+      summary: Delete a research paper
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /regulatory-entries:
+    get:
+      operationId: listRegulatoryEntries
+      tags: [regulatory]
+      summary: List regulatory timeline entries
+      parameters:
+        - name: country
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: lang
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Regulatory entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RegulatoryEntry"
+    post:
+      operationId: createRegulatoryEntry
+      tags: [regulatory]
+      summary: Create a regulatory entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegulatoryEntryInput"
+      responses:
+        "201":
+          description: Created entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegulatoryEntry"
+
+  /regulatory-entries/timeline:
+    get:
+      operationId: getRegulatoryTimeline
+      tags: [regulatory]
+      summary: Get regulatory entries grouped by year for timeline view
+      parameters:
+        - name: lang
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Timeline grouped by year
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RegulatoryTimelineYear"
+
+  /regulatory-entries/country-stats:
+    get:
+      operationId: getRegulatoryCountryStats
+      tags: [regulatory]
+      summary: Get count of regulatory entries per country
+      responses:
+        "200":
+          description: Country statistics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CountryStat"
+
+  /regulatory-entries/{id}:
+    get:
+      operationId: getRegulatoryEntry
+      tags: [regulatory]
+      summary: Get a regulatory entry by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Regulatory entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegulatoryEntry"
+        "404":
+          description: Not found
+
+  /tags:
+    get:
+      operationId: listTags
+      tags: [tags]
+      summary: List all tags with usage counts
+      responses:
+        "200":
+          description: Tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+
+  /stats:
+    get:
+      operationId: getStats
+      tags: [stats]
+      summary: Get overall platform statistics
+      responses:
+        "200":
+          description: Platform stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformStats"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +392,330 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    Resource:
+      type: object
+      required: [id, title, resource_type, created_at]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        title_zh:
+          type: ["string", "null"]
+        abstract:
+          type: ["string", "null"]
+        abstract_zh:
+          type: ["string", "null"]
+        keywords:
+          type: array
+          items:
+            type: string
+        authors:
+          type: array
+          items:
+            type: string
+        url:
+          type: ["string", "null"]
+        doi:
+          type: ["string", "null"]
+        resource_type:
+          type: string
+          enum: [paper, report, news, government_doc, blog, publication, forum, video]
+        tags:
+          type: array
+          items:
+            type: string
+        published_date:
+          type: ["string", "null"]
+        journal:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    ResourceInput:
+      type: object
+      required: [title, resource_type]
+      properties:
+        title:
+          type: string
+        title_zh:
+          type: string
+        abstract:
+          type: string
+        abstract_zh:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        authors:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
+        doi:
+          type: string
+        resource_type:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        published_date:
+          type: string
+        journal:
+          type: string
+
+    ResourceUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        title_zh:
+          type: string
+        abstract:
+          type: string
+        abstract_zh:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        authors:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
+        doi:
+          type: string
+        resource_type:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        published_date:
+          type: string
+        journal:
+          type: string
+
+    ExtractionInput:
+      type: object
+      properties:
+        url:
+          type: string
+        doi:
+          type: string
+        text:
+          type: string
+        source_type:
+          type: string
+          enum: [url, doi, text]
+
+    ExtractionResult:
+      type: object
+      properties:
+        title:
+          type: ["string", "null"]
+        abstract:
+          type: ["string", "null"]
+        keywords:
+          type: array
+          items:
+            type: string
+        authors:
+          type: array
+          items:
+            type: string
+        published_date:
+          type: ["string", "null"]
+        journal:
+          type: ["string", "null"]
+        doi:
+          type: ["string", "null"]
+
+    ResearchPaper:
+      type: object
+      required: [id, title, created_at]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        title_zh:
+          type: ["string", "null"]
+        abstract:
+          type: ["string", "null"]
+        abstract_zh:
+          type: ["string", "null"]
+        key_innovations:
+          type: array
+          items:
+            type: string
+        key_innovations_zh:
+          type: array
+          items:
+            type: string
+        authors:
+          type: array
+          items:
+            type: string
+        published_date:
+          type: ["string", "null"]
+        pdf_url:
+          type: ["string", "null"]
+        keywords:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+
+    ResearchPaperInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        title_zh:
+          type: string
+        abstract:
+          type: string
+        abstract_zh:
+          type: string
+        key_innovations:
+          type: array
+          items:
+            type: string
+        key_innovations_zh:
+          type: array
+          items:
+            type: string
+        authors:
+          type: array
+          items:
+            type: string
+        published_date:
+          type: string
+        pdf_url:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+
+    RegulatoryEntry:
+      type: object
+      required: [id, title, country, effective_date, created_at]
+      properties:
+        id:
+          type: integer
+        country:
+          type: string
+        region:
+          type: ["string", "null"]
+        authority:
+          type: ["string", "null"]
+        title:
+          type: string
+        title_zh:
+          type: ["string", "null"]
+        summary:
+          type: ["string", "null"]
+        summary_zh:
+          type: ["string", "null"]
+        document_url:
+          type: ["string", "null"]
+        effective_date:
+          type: string
+        category:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    RegulatoryEntryInput:
+      type: object
+      required: [title, country, effective_date]
+      properties:
+        country:
+          type: string
+        region:
+          type: string
+        authority:
+          type: string
+        title:
+          type: string
+        title_zh:
+          type: string
+        summary:
+          type: string
+        summary_zh:
+          type: string
+        document_url:
+          type: string
+        effective_date:
+          type: string
+        category:
+          type: string
+
+    RegulatoryTimelineYear:
+      type: object
+      required: [year, entries]
+      properties:
+        year:
+          type: integer
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/RegulatoryEntry"
+
+    CountryStat:
+      type: object
+      required: [country, count]
+      properties:
+        country:
+          type: string
+        count:
+          type: integer
+
+    Tag:
+      type: object
+      required: [name, count]
+      properties:
+        name:
+          type: string
+        name_zh:
+          type: ["string", "null"]
+        count:
+          type: integer
+
+    PlatformStats:
+      type: object
+      required: [total_resources, total_research_papers, total_regulatory_entries, resources_by_type]
+      properties:
+        total_resources:
+          type: integer
+        total_research_papers:
+          type: integer
+        total_regulatory_entries:
+          type: integer
+        resources_by_type:
+          type: array
+          items:
+            type: object
+            required: [type, count]
+            properties:
+              type:
+                type: string
+              count:
+                type: integer
+        countries_covered:
+          type: integer
+        top_tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"

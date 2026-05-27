@@ -1,0 +1,47 @@
+I want to build a website containing stablecoin-related literature, data, and our research findings. The website will be available in both Chinese and English.
+
+
+
+Regarding stablecoin literature, I need the website to automatically extract abstracts and keywords from uploaded URLs, DOIs, or PDFs, and categorize the literature accordingly. Batch processing is required.
+
+
+
+As for the data on the website, I haven't figured out how to build it yet; for now, I'll leave a blank interface.
+
+
+
+We will upload our research findings later; for now, I'll leave a sample interface.
+
+
+
+The initial UI concept for the website is as follows:
+
+
+
+The website title is "Zhejiang University ZIBS Stablecoins Research Hub". The left sidebar will have the following functional sections:
+
+
+
+About Stablecoins (secondary functional areas: General Knowledge, Videos, Reports, News, Courses, Webinars, etc.);
+
+
+
+Our Research: This section will allow uploading and extracting of PDFs of our research findings, including abstracts and key innovations.
+
+
+
+
+
+Cutting-Edge Academic Research: This main interface will highlight the conclusions of the latest research and also include resource management and retrieval. The resource library here is categorized in two ways: 1) by resource type (papers, research reports/analyst reports, news, government documents, blogs, publications, forums, videos), focusing on the format of the resources; 2) by tags, similar to keywords in literature, focusing on the content of the resources.
+
+
+
+Regulatory Status (outlining the development of regulation chronologically and providing direct links to regulatory documents from various countries, highlighting the commonalities and differences in regulation across countries); Quantitative Indicators; Market Data (market data for stablecoins, macroeconomic data, and blockchain-related data).
+
+
+
+The top functional sections are (I've roughly listed the necessary interfaces; you'll need to combine and restructure them, ensuring clear interface categorization): User Login Register Password Reset Security and Privacy User Guide Suggestions About Us Contact Us Privacy Policy and Terms of Use
+
+
+
+The PDF I uploaded represents our current research findings; you can use Appendix 2 here to build the "Regulatory Status" interface.
