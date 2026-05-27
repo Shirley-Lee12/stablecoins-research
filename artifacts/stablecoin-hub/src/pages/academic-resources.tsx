@@ -7,6 +7,7 @@ import {
   useExtractResource, 
   useDeleteResource, 
   useListTags,
+  useListAuthors,
   getListResourcesQueryKey 
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -65,11 +66,17 @@ export default function AcademicResources() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
+  const isExpertsSelected = activeView === "type" && selectedType === "__experts__";
+
   const { data: resources, isLoading: resourcesLoading } = useListResources({
-    resource_type: activeView === "type" && selectedType ? selectedType : undefined,
+    resource_type: activeView === "type" && selectedType && !isExpertsSelected ? selectedType : undefined,
     tag: activeView === "tags" && selectedTag ? selectedTag : undefined,
-    search: searchQuery || undefined,
+    search: !isExpertsSelected ? searchQuery || undefined : undefined,
   });
+
+  const { data: authors, isLoading: authorsLoading } = useListAuthors(
+    { search: isExpertsSelected && searchQuery ? searchQuery : undefined }
+  );
 
   const { data: tags } = useListTags();
   
@@ -376,6 +383,15 @@ export default function AcademicResources() {
                   <FileText className="mr-2 h-4 w-4 opacity-70" /> {type.replace("_", " ")}
                 </Button>
               ))}
+              <div className="my-1 border-t border-border" />
+              <Button
+                variant="ghost"
+                className={`w-full justify-start font-normal ${selectedType === "__experts__" ? "bg-primary/10 text-primary" : ""}`}
+                onClick={() => setSelectedType("__experts__")}
+                data-testid="button-type-experts"
+              >
+                <Users className="mr-2 h-4 w-4 opacity-70" /> {t("Experts / Scholars", "专家学者")}
+              </Button>
             </TabsContent>
             
             <TabsContent value="tags" className="mt-4">
@@ -414,8 +430,94 @@ export default function AcademicResources() {
           </Tabs>
         </div>
 
-        {/* Resource List */}
-        <div className="flex-1 space-y-4">
+        {/* Resource List / Author Grid */}
+        <div className="flex-1">
+          {isExpertsSelected ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {authorsLoading ? "" : `${authors?.length ?? 0} ${t("contributors found", "位作者")}`}
+              </p>
+              {authorsLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Card key={i} className="shadow-sm">
+                      <CardContent className="pt-5 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="h-12 w-12 rounded-full shrink-0" />
+                          <div className="flex-1 space-y-1.5">
+                            <Skeleton className="h-4 w-36" />
+                            <Skeleton className="h-3 w-20" />
+                          </div>
+                        </div>
+                        <div className="flex gap-1.5">
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : !authors?.length ? (
+                <div className="py-12 text-center border-2 border-dashed border-border rounded-lg bg-muted/20">
+                  <Users className="h-10 w-10 mx-auto mb-4 text-muted-foreground opacity-20" />
+                  <h3 className="text-lg font-medium text-foreground">{t("No authors found", "未找到作者")}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t("Add resources with author names to see them here.", "添加带有作者姓名的资源以在此处显示。")}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {authors.map((author) => (
+                    <Link key={author.name} href={`/authors/${encodeURIComponent(author.name)}`}>
+                      <Card
+                        className="shadow-sm hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group h-full"
+                        data-testid={`card-author-inline-${author.name}`}
+                      >
+                        <CardContent className="pt-5 space-y-3">
+                          <div className="flex items-center gap-3">
+                            <div className="shrink-0 w-12 h-12 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                              <span className="text-lg font-serif font-bold text-primary">
+                                {author.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+                                {author.name}
+                              </h3>
+                              <p className="text-xs text-muted-foreground">
+                                {author.resource_count} {t("resource(s)", "篇资源")}
+                              </p>
+                            </div>
+                          </div>
+                          {author.resource_types.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {author.resource_types.slice(0, 3).map((rt) => (
+                                <span key={rt.type} className="text-xs border rounded-full px-2 py-0.5 bg-muted text-muted-foreground capitalize">
+                                  {rt.type.replace("_", " ")}{rt.count > 1 ? ` ×${rt.count}` : ""}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {author.top_tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {author.top_tags.slice(0, 4).map((tag) => (
+                                <span key={tag} className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : null}
+
+          {!isExpertsSelected && (
+          <div className="space-y-4">
           {resourcesLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="shadow-sm">
@@ -513,6 +615,8 @@ export default function AcademicResources() {
                 {t("Try adjusting your filters or search query.", "尝试调整过滤器或搜索查询。")}
               </p>
             </div>
+          )}
+          </div>
           )}
         </div>
       </div>
