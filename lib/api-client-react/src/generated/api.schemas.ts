@@ -193,6 +193,31 @@ export interface Tag {
   count: number;
 }
 
+export type AuthorSummaryResourceTypesItem = {
+  type: string;
+  count: number;
+};
+
+export interface AuthorSummary {
+  name: string;
+  resource_count: number;
+  top_tags: string[];
+  resource_types: AuthorSummaryResourceTypesItem[];
+}
+
+export type AuthorProfileResourceTypesItem = {
+  type: string;
+  count: number;
+};
+
+export interface AuthorProfile {
+  name: string;
+  resource_count: number;
+  top_tags: string[];
+  resource_types: AuthorProfileResourceTypesItem[];
+  resources: Resource[];
+}
+
 export type PlatformStatsResourcesByTypeItem = {
   type: string;
   count: number;
@@ -229,5 +254,9 @@ lang?: string;
 
 export type GetRegulatoryTimelineParams = {
 lang?: string;
+};
+
+export type ListAuthorsParams = {
+search?: string;
 };
 

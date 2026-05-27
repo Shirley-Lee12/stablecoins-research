@@ -5,10 +5,12 @@ import researchPapersRouter from "./research_papers";
 import regulatoryRouter from "./regulatory";
 import tagsRouter from "./tags";
 import statsRouter from "./stats";
+import authorsRouter from "./authors";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(authorsRouter);
 router.use(resourcesRouter);
 router.use(researchPapersRouter);
 router.use(regulatoryRouter);

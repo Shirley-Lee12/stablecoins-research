@@ -6,12 +6,17 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './authorProfile';
+export * from './authorProfileResourceTypesItem';
+export * from './authorSummary';
+export * from './authorSummaryResourceTypesItem';
 export * from './countryStat';
 export * from './extractionInput';
 export * from './extractionInputSourceType';
 export * from './extractionResult';
 export * from './getRegulatoryTimelineParams';
 export * from './healthStatus';
+export * from './listAuthorsParams';
 export * from './listRecentResourcesParams';
 export * from './listRegulatoryEntriesParams';
 export * from './listResourcesParams';

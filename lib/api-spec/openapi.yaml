@@ -372,6 +372,47 @@ paths:
                 items:
                   $ref: "#/components/schemas/Tag"
 
+  /authors:
+    get:
+      operationId: listAuthors
+      tags: [resources]
+      summary: List all authors with resource counts
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of authors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuthorSummary"
+
+  /authors/{name}:
+    get:
+      operationId: getAuthor
+      tags: [resources]
+      summary: Get author profile with all their resources
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Author profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorProfile"
+        "404":
+          description: Not found
+
   /stats:
     get:
       operationId: getStats
@@ -692,6 +733,56 @@ components:
           type: ["string", "null"]
         count:
           type: integer
+
+    AuthorSummary:
+      type: object
+      required: [name, resource_count, top_tags, resource_types]
+      properties:
+        name:
+          type: string
+        resource_count:
+          type: integer
+        top_tags:
+          type: array
+          items:
+            type: string
+        resource_types:
+          type: array
+          items:
+            type: object
+            required: [type, count]
+            properties:
+              type:
+                type: string
+              count:
+                type: integer
+
+    AuthorProfile:
+      type: object
+      required: [name, resource_count, top_tags, resource_types, resources]
+      properties:
+        name:
+          type: string
+        resource_count:
+          type: integer
+        top_tags:
+          type: array
+          items:
+            type: string
+        resource_types:
+          type: array
+          items:
+            type: object
+            required: [type, count]
+            properties:
+              type:
+                type: string
+              count:
+                type: integer
+        resources:
+          type: array
+          items:
+            $ref: "#/components/schemas/Resource"
 
     PlatformStats:
       type: object

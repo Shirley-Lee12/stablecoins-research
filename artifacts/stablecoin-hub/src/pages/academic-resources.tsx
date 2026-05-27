@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "wouter";
 import { useLanguage } from "@/lib/language-context";
 import { 
   useListResources, 
@@ -24,7 +25,7 @@ import * as z from "zod";
 import { format } from "date-fns";
 import { 
   BookOpen, Link as LinkIcon, Trash2, Calendar, Search, 
-  Wand2, Loader2, ExternalLink, Tags, FileText
+  Wand2, Loader2, ExternalLink, Tags, FileText, Users
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -58,7 +59,7 @@ export default function AcademicResources() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  const [activeView, setActiveView] = useState<"type" | "tags">("type");
+  const [activeView, setActiveView] = useState<"type" | "tags" | "experts">("type");
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -170,7 +171,7 @@ export default function AcademicResources() {
 
   const handleDelete = (id: number) => {
     if (confirm(t("Are you sure you want to delete this resource?", "您确定要删除这个资源吗？"))) {
-      deleteResource.mutate({ params: { id } }, {
+      deleteResource.mutate({ id }, {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListResourcesQueryKey() });
           toast({
@@ -347,10 +348,14 @@ export default function AcademicResources() {
             />
           </div>
 
-          <Tabs value={activeView} onValueChange={(v) => setActiveView(v as "type" | "tags")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs value={activeView} onValueChange={(v) => setActiveView(v as "type" | "tags" | "experts")} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="type">{t("Types", "分类")}</TabsTrigger>
               <TabsTrigger value="tags">{t("Tags", "标签")}</TabsTrigger>
+              <TabsTrigger value="experts">
+                <Users className="h-3 w-3 mr-1" />
+                {t("Experts", "专家")}
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="type" className="mt-4 space-y-1">
@@ -390,6 +395,20 @@ export default function AcademicResources() {
                     {language === 'zh' && tag.name_zh ? tag.name_zh : tag.name} ({tag.count})
                   </span>
                 ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="experts" className="mt-4">
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground mb-3">
+                  {t("Browse all contributors in the resource library.", "浏览资源库中的所有作者。")}
+                </p>
+                <Link href="/experts">
+                  <Button variant="outline" className="w-full justify-start text-primary border-primary/20 hover:bg-primary/5" data-testid="link-go-to-experts">
+                    <Users className="mr-2 h-4 w-4" />
+                    {t("View All Experts & Scholars", "查看全部专家学者")}
+                  </Button>
+                </Link>
               </div>
             </TabsContent>
           </Tabs>
@@ -445,7 +464,18 @@ export default function AcademicResources() {
                     </div>
                     {resource.authors && resource.authors.length > 0 && (
                       <CardDescription className="text-foreground/80 mt-1">
-                        {resource.authors.join(", ")}
+                        {resource.authors.map((author, idx) => (
+                          <span key={author}>
+                            <Link
+                              href={`/authors/${encodeURIComponent(author)}`}
+                              className="hover:text-primary hover:underline transition-colors cursor-pointer"
+                              data-testid={`link-author-${author}-${resource.id}`}
+                            >
+                              {author}
+                            </Link>
+                            {idx < (resource.authors?.length ?? 0) - 1 && ", "}
+                          </span>
+                        ))}
                         {resource.journal && <span className="italic"> — {resource.journal}</span>}
                       </CardDescription>
                     )}

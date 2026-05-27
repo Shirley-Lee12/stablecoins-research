@@ -48,9 +48,10 @@ export default function Regulatory() {
   // Queries
   const { data: timeline, isLoading: timelineLoading } = useGetRegulatoryTimeline({ lang: language });
   const { data: countryStats, isLoading: statsLoading } = useGetRegulatoryCountryStats();
+  const entriesParams = { country: selectedCountry || undefined, lang: language };
   const { data: entries, isLoading: entriesLoading } = useListRegulatoryEntries(
-    { country: selectedCountry || undefined, lang: language },
-    { query: { enabled: !!selectedCountry } }
+    entriesParams,
+    { query: { enabled: !!selectedCountry, queryKey: getListRegulatoryEntriesQueryKey(entriesParams) } }
   );
 
   const createEntry = useCreateRegulatoryEntry();

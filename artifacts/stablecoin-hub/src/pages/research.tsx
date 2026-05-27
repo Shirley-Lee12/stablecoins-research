@@ -91,7 +91,7 @@ export default function Research() {
 
   const handleDelete = (id: number) => {
     if (confirm(t("Are you sure you want to delete this paper?", "您确定要删除这篇论文吗？"))) {
-      deletePaper.mutate({ params: { id } }, {
+      deletePaper.mutate({ id }, {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListResearchPapersQueryKey() });
           toast({

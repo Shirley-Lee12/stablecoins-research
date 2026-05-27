@@ -20,11 +20,14 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AuthorProfile,
+  AuthorSummary,
   CountryStat,
   ExtractionInput,
   ExtractionResult,
   GetRegulatoryTimelineParams,
   HealthStatus,
+  ListAuthorsParams,
   ListRecentResourcesParams,
   ListRegulatoryEntriesParams,
   ListResourcesParams,
@@ -1411,6 +1414,167 @@ export function useListTags<TData = Awaited<ReturnType<typeof listTags>>, TError
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getListTagsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getListAuthorsUrl = (params?: ListAuthorsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/authors?${stringifiedParams}` : `/api/authors`
+}
+
+/**
+ * @summary List all authors with resource counts
+ */
+export const listAuthors = async (params?: ListAuthorsParams, options?: RequestInit): Promise<AuthorSummary[]> => {
+
+  return customFetch<AuthorSummary[]>(getListAuthorsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAuthorsQueryKey = (params?: ListAuthorsParams,) => {
+    return [
+    `/api/authors`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAuthorsQueryOptions = <TData = Awaited<ReturnType<typeof listAuthors>>, TError = ErrorType<unknown>>(params?: ListAuthorsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAuthors>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAuthorsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAuthors>>> = ({ signal }) => listAuthors(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAuthors>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAuthorsQueryResult = NonNullable<Awaited<ReturnType<typeof listAuthors>>>
+export type ListAuthorsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all authors with resource counts
+ */
+
+export function useListAuthors<TData = Awaited<ReturnType<typeof listAuthors>>, TError = ErrorType<unknown>>(
+ params?: ListAuthorsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAuthors>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAuthorsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetAuthorUrl = (name: string,) => {
+
+
+
+
+  return `/api/authors/${name}`
+}
+
+/**
+ * @summary Get author profile with all their resources
+ */
+export const getAuthor = async (name: string, options?: RequestInit): Promise<AuthorProfile> => {
+
+  return customFetch<AuthorProfile>(getGetAuthorUrl(name),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAuthorQueryKey = (name: string,) => {
+    return [
+    `/api/authors/${name}`
+    ] as const;
+    }
+
+
+export const getGetAuthorQueryOptions = <TData = Awaited<ReturnType<typeof getAuthor>>, TError = ErrorType<void>>(name: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthor>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthorQueryKey(name);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthor>>> = ({ signal }) => getAuthor(name, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(name), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthor>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAuthorQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthor>>>
+export type GetAuthorQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get author profile with all their resources
+ */
+
+export function useGetAuthor<TData = Awaited<ReturnType<typeof getAuthor>>, TError = ErrorType<void>>(
+ name: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthor>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAuthorQueryOptions(name,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

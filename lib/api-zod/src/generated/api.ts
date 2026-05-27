@@ -370,6 +370,59 @@ export const ListTagsResponse = zod.array(ListTagsResponseItem)
 
 
 /**
+ * @summary List all authors with resource counts
+ */
+export const ListAuthorsQueryParams = zod.object({
+  "search": zod.coerce.string().optional()
+})
+
+export const ListAuthorsResponseItem = zod.object({
+  "name": zod.string(),
+  "resource_count": zod.number(),
+  "top_tags": zod.array(zod.string()),
+  "resource_types": zod.array(zod.object({
+  "type": zod.string(),
+  "count": zod.number()
+}))
+})
+export const ListAuthorsResponse = zod.array(ListAuthorsResponseItem)
+
+
+/**
+ * @summary Get author profile with all their resources
+ */
+export const GetAuthorParams = zod.object({
+  "name": zod.coerce.string()
+})
+
+export const GetAuthorResponse = zod.object({
+  "name": zod.string(),
+  "resource_count": zod.number(),
+  "top_tags": zod.array(zod.string()),
+  "resource_types": zod.array(zod.object({
+  "type": zod.string(),
+  "count": zod.number()
+})),
+  "resources": zod.array(zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "title_zh": zod.string().nullish(),
+  "abstract": zod.string().nullish(),
+  "abstract_zh": zod.string().nullish(),
+  "keywords": zod.array(zod.string()).optional(),
+  "authors": zod.array(zod.string()).optional(),
+  "url": zod.string().nullish(),
+  "doi": zod.string().nullish(),
+  "resource_type": zod.enum(['paper', 'report', 'news', 'government_doc', 'blog', 'publication', 'forum', 'video']),
+  "tags": zod.array(zod.string()).optional(),
+  "published_date": zod.string().nullish(),
+  "journal": zod.string().nullish(),
+  "created_at": zod.string()
+}))
+})
+
+
+/**
  * @summary Get overall platform statistics
  */
 export const GetStatsResponse = zod.object({

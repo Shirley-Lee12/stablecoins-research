@@ -10,6 +10,7 @@ import {
   LayoutDashboard, 
   LineChart,
   Menu,
+  Users,
   X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ const navItems = [
   { href: "/about-stablecoins", labelEn: "About Stablecoins", labelZh: "关于稳定币", icon: BookOpen },
   { href: "/research", labelEn: "Our Research", labelZh: "我们的研究", icon: FileText },
   { href: "/academic-resources", labelEn: "Academic Resources", labelZh: "学术资源", icon: BookOpen },
+  { href: "/experts", labelEn: "Experts & Scholars", labelZh: "专家学者", icon: Users },
   { href: "/regulatory", labelEn: "Regulatory Status", labelZh: "监管现状", icon: Globe },
   { href: "/quantitative", labelEn: "Quantitative Indicators", labelZh: "量化指标", icon: BarChart },
   { href: "/market-data", labelEn: "Market Data", labelZh: "市场数据", icon: LineChart },
@@ -60,7 +62,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
         <nav className="p-4 space-y-1">
           {navItems.map((item) => {
-            const isActive = location === item.href || (location.startsWith(item.href) && item.href !== "/");
+            const isActive = location === item.href || 
+            (location.startsWith(item.href) && item.href !== "/") ||
+            (item.href === "/experts" && location.startsWith("/authors/"));
             return (
               <Link key={item.href} href={item.href} onClick={() => window.innerWidth < 1024 && setIsSidebarOpen(false)}>
                 <div className={cn(

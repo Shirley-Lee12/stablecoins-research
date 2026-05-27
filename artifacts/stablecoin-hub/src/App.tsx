@@ -10,6 +10,8 @@ import Dashboard from "@/pages/dashboard";
 import About from "@/pages/about";
 import Research from "@/pages/research";
 import AcademicResources from "@/pages/academic-resources";
+import Experts from "@/pages/experts";
+import AuthorPage from "@/pages/author";
 import Regulatory from "@/pages/regulatory";
 import MarketData from "@/pages/market-data";
 import Quantitative from "@/pages/quantitative";
@@ -24,6 +26,8 @@ function Router() {
         <Route path="/about-stablecoins" component={About} />
         <Route path="/research" component={Research} />
         <Route path="/academic-resources" component={AcademicResources} />
+        <Route path="/experts" component={Experts} />
+        <Route path="/authors/:name" component={AuthorPage} />
         <Route path="/regulatory" component={Regulatory} />
         <Route path="/market-data" component={MarketData} />
         <Route path="/quantitative" component={Quantitative} />
