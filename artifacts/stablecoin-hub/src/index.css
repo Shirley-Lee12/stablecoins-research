@@ -67,7 +67,7 @@
 }
 
 /* ============================================================
-   LIGHT MODE — clean academic blue
+   LIGHT MODE — deep navy + ocean blue
    ============================================================ */
 :root {
   --button-outline: rgba(0,0,0,.08);
@@ -77,60 +77,60 @@
   --elevate-2: rgba(0,0,0,.06);
 
   /* Backgrounds */
-  --background: 220 20% 97%;       /* #F4F6F9 — warm off-white */
-  --foreground: 220 30% 12%;       /* #171E2D — near-black */
+  --background: 210 25% 96%;       /* cool off-white */
+  --foreground: 217 40% 12%;       /* near-black navy */
 
-  /* Cards / Surfaces */
-  --card: 0 0% 100%;               /* pure white */
-  --card-foreground: 220 30% 12%;
-  --card-border: 220 20% 90%;
+  /* Cards */
+  --card: 0 0% 100%;
+  --card-foreground: 217 40% 12%;
+  --card-border: 210 20% 88%;
 
   /* Popover */
   --popover: 0 0% 100%;
-  --popover-foreground: 220 30% 12%;
-  --popover-border: 220 20% 88%;
+  --popover-foreground: 217 40% 12%;
+  --popover-border: 210 20% 86%;
 
-  /* Primary — deep institutional blue */
-  --primary: 217 63% 20%;          /* #122D5A */
+  /* Primary — deep institutional navy */
+  --primary: 217 65% 18%;          /* #0F2548 */
   --primary-foreground: 0 0% 100%;
 
-  /* Secondary — warm gold */
-  --secondary: 44 78% 52%;         /* #D4A52A */
-  --secondary-foreground: 220 30% 12%;
+  /* Secondary — deep ocean blue */
+  --secondary: 200 85% 38%;        /* #0B7EA8 deep ocean */
+  --secondary-foreground: 0 0% 100%;
 
   /* Muted */
-  --muted: 220 18% 92%;
-  --muted-foreground: 220 12% 46%;
+  --muted: 210 20% 91%;
+  --muted-foreground: 215 15% 48%;
 
   /* Accent */
-  --accent: 220 18% 92%;
-  --accent-foreground: 217 63% 20%;
+  --accent: 210 20% 91%;
+  --accent-foreground: 217 65% 18%;
 
   /* Destructive */
   --destructive: 0 84% 55%;
   --destructive-foreground: 0 0% 100%;
 
   /* Borders & inputs */
-  --border: 220 18% 87%;
-  --input: 220 18% 87%;
-  --ring: 217 63% 40%;
+  --border: 210 18% 85%;
+  --input: 210 18% 85%;
+  --ring: 200 85% 38%;
 
-  /* Sidebar — deep navy, refined */
-  --sidebar: 218 55% 15%;          /* #162440 */
-  --sidebar-foreground: 210 30% 90%;
-  --sidebar-border: 218 45% 20%;
-  --sidebar-primary: 44 78% 52%;   /* gold header band */
-  --sidebar-primary-foreground: 218 55% 12%;
-  --sidebar-accent: 218 45% 22%;
+  /* Sidebar — deep navy */
+  --sidebar: 218 58% 13%;          /* #0D1E3A */
+  --sidebar-foreground: 210 28% 88%;
+  --sidebar-border: 218 48% 18%;
+  --sidebar-primary: 200 80% 30%;  /* ocean blue header band */
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 218 48% 20%;
   --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-ring: 44 78% 52%;
+  --sidebar-ring: 200 80% 50%;
 
-  /* Charts */
-  --chart-1: 44 78% 52%;
-  --chart-2: 217 63% 38%;
-  --chart-3: 199 89% 45%;
-  --chart-4: 340 75% 52%;
-  --chart-5: 160 80% 38%;
+  /* Charts — ocean blue palette */
+  --chart-1: 200 85% 38%;
+  --chart-2: 217 65% 38%;
+  --chart-3: 185 75% 42%;
+  --chart-4: 230 65% 55%;
+  --chart-5: 160 70% 38%;
 
   /* Typography */
   --app-font-sans: 'Inter', 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
@@ -139,25 +139,18 @@
 
   --radius: 0.5rem;
 
-  /* Border color helpers */
-  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  /* Computed border helpers */
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --sidebar-accent-border: hsl(var(--sidebar-accent));
   --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --primary-border: hsl(var(--primary));
   --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --secondary-border: hsl(var(--secondary));
   --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --muted-border: hsl(var(--muted));
   --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --accent-border: hsl(var(--accent));
   --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --destructive-border: hsl(var(--destructive));
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
 /* ============================================================
-   DARK MODE — premium deep slate
+   DARK MODE — deep ocean night
    ============================================================ */
 .dark {
   --button-outline: rgba(255,255,255,.09);
@@ -167,69 +160,65 @@
   --elevate-2: rgba(255,255,255,.07);
 
   /* Backgrounds */
-  --background: 222 47% 8%;        /* #070D1A — very deep navy */
-  --foreground: 214 30% 92%;       /* #DDE4EF */
+  --background: 220 50% 7%;        /* #070F1C — deepest ocean floor */
+  --foreground: 210 30% 92%;
 
   /* Cards */
-  --card: 222 40% 12%;             /* #101A2D */
-  --card-foreground: 214 30% 92%;
-  --card-border: 222 35% 18%;
+  --card: 220 42% 11%;
+  --card-foreground: 210 30% 92%;
+  --card-border: 220 35% 17%;
 
   /* Popover */
-  --popover: 222 40% 11%;
-  --popover-foreground: 214 30% 92%;
-  --popover-border: 222 35% 18%;
+  --popover: 220 42% 10%;
+  --popover-foreground: 210 30% 92%;
+  --popover-border: 220 35% 17%;
 
-  /* Primary — gold in dark */
-  --primary: 44 78% 56%;
-  --primary-foreground: 222 47% 8%;
+  /* Primary — ocean blue in dark (was navy, now bright blue) */
+  --primary: 200 80% 55%;          /* bright ocean blue */
+  --primary-foreground: 220 50% 7%;
 
   /* Secondary */
-  --secondary: 222 35% 22%;
-  --secondary-foreground: 214 30% 88%;
+  --secondary: 220 38% 20%;
+  --secondary-foreground: 210 30% 88%;
 
   /* Muted */
-  --muted: 222 35% 18%;
-  --muted-foreground: 214 18% 58%;
+  --muted: 220 35% 16%;
+  --muted-foreground: 210 18% 56%;
 
   /* Accent */
-  --accent: 222 35% 20%;
-  --accent-foreground: 214 30% 92%;
+  --accent: 220 35% 18%;
+  --accent-foreground: 210 30% 92%;
 
   /* Destructive */
-  --destructive: 0 63% 38%;
+  --destructive: 0 60% 40%;
   --destructive-foreground: 0 0% 98%;
 
   /* Borders */
-  --border: 222 35% 20%;
-  --input: 222 35% 20%;
-  --ring: 44 78% 56%;
+  --border: 220 35% 18%;
+  --input: 220 35% 18%;
+  --ring: 200 80% 55%;
 
   /* Sidebar */
-  --sidebar: 222 50% 6%;
-  --sidebar-foreground: 214 25% 82%;
-  --sidebar-border: 222 40% 12%;
-  --sidebar-primary: 44 78% 52%;
-  --sidebar-primary-foreground: 222 47% 8%;
-  --sidebar-accent: 222 40% 14%;
-  --sidebar-accent-foreground: 214 25% 90%;
-  --sidebar-ring: 44 78% 52%;
+  --sidebar: 220 55% 5%;
+  --sidebar-foreground: 210 22% 80%;
+  --sidebar-border: 220 42% 10%;
+  --sidebar-primary: 200 72% 28%;  /* deep ocean sidebar band */
+  --sidebar-primary-foreground: 210 30% 95%;
+  --sidebar-accent: 220 42% 13%;
+  --sidebar-accent-foreground: 210 25% 90%;
+  --sidebar-ring: 200 80% 55%;
 
   /* Charts */
-  --chart-1: 44 78% 56%;
-  --chart-2: 217 60% 62%;
-  --chart-3: 199 89% 52%;
-  --chart-4: 340 75% 60%;
-  --chart-5: 160 75% 46%;
+  --chart-1: 200 80% 55%;
+  --chart-2: 217 65% 62%;
+  --chart-3: 185 75% 52%;
+  --chart-4: 230 65% 65%;
+  --chart-5: 160 70% 48%;
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  html {
-    @apply scroll-smooth;
-  }
+  * { @apply border-border; }
+  html { @apply scroll-smooth; }
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -242,9 +231,7 @@
 }
 
 @layer utilities {
-  input[type="search"]::-webkit-search-cancel-button {
-    @apply hidden;
-  }
+  input[type="search"]::-webkit-search-cancel-button { @apply hidden; }
   [contenteditable][data-placeholder]:empty::before {
     content: attr(data-placeholder);
     color: hsl(var(--muted-foreground));
@@ -256,8 +243,5 @@
     transition-duration: 150ms;
     transition-timing-function: ease;
   }
-  /* but not transforms or opacity (breaks animations) */
-  [data-motion], .animate-spin, .animate-pulse, .animate-bounce {
-    transition: none;
-  }
+  .animate-spin, .animate-pulse, .animate-bounce { transition: none; }
 }

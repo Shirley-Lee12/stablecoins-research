@@ -6,8 +6,9 @@ import { useAuth } from "@/lib/auth-context";
 import { AuthDialog } from "@/components/auth-dialog";
 import { Button } from "@/components/ui/button";
 import {
-  BarChart, BookOpen, FileText, Globe, LayoutDashboard,
-  LineChart, Menu, Users, X, Sun, Moon, Home, Database, Microscope
+  BarChart, BookOpen, Globe, LayoutDashboard,
+  LineChart, Menu, Users, X, Sun, Moon, Home, Database,
+  Microscope, LogOut, LogIn
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -17,7 +18,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
-  { href: "/", labelEn: "Overview", labelZh: "首页概览", icon: Home },
+  { href: "/", labelEn: "Overview", labelZh: "中心概览", icon: Home },
+  { href: "/dashboard", labelEn: "Dashboard", labelZh: "数据仪表盘", icon: LayoutDashboard },
   { href: "/about-stablecoins", labelEn: "About Stablecoins", labelZh: "关于稳定币", icon: BookOpen },
   { href: "/research", labelEn: "Our Research", labelZh: "我们的研究", icon: Microscope },
   { href: "/academic-resources", labelEn: "Resources", labelZh: "资源库", icon: Database },
@@ -41,33 +43,35 @@ export function Layout({ children }: { children: React.ReactNode }) {
     setAuthOpen(true);
   };
 
-  const toggleLanguage = () => setLanguage(language === "en" ? "zh" : "en");
-
   return (
     <div className="min-h-screen flex bg-background font-sans text-foreground">
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <aside className={cn(
         "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground flex flex-col transition-transform duration-300 ease-in-out border-r border-sidebar-border lg:static lg:translate-x-0",
         !isSidebarOpen && "-translate-x-full"
       )}>
-        {/* Logo / Brand */}
+        {/* Brand header — links to overview */}
         <Link href="/" onClick={() => window.innerWidth < 1024 && setIsSidebarOpen(false)}>
-          <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border bg-sidebar-primary text-sidebar-primary-foreground cursor-pointer hover:opacity-90 transition-opacity">
+          <div className="flex h-16 items-center px-4 border-b border-sidebar-border bg-sidebar-primary text-sidebar-primary-foreground cursor-pointer hover:brightness-95 transition-all">
             <div className="flex-1 min-w-0">
-              <span className="font-serif font-bold text-sm leading-tight block truncate">
+              <span className="font-serif font-bold text-sm leading-snug block">
                 {t("ZIBS Stablecoins", "浙大ZIBS稳定币")}
               </span>
-              <span className="font-serif font-bold text-sm leading-tight block truncate">
+              <span className="font-serif font-bold text-sm leading-snug block opacity-85">
                 {t("Research Hub", "研究中心")}
               </span>
             </div>
-            <Button variant="ghost" size="icon" className="lg:hidden text-sidebar-primary-foreground hover:bg-black/10 ml-2 shrink-0" onClick={(e) => { e.preventDefault(); setIsSidebarOpen(false); }}>
-              <X className="h-5 w-5" />
+            <Button
+              variant="ghost" size="icon"
+              className="lg:hidden text-sidebar-primary-foreground hover:bg-black/10 ml-2 shrink-0 h-8 w-8"
+              onClick={(e) => { e.preventDefault(); setIsSidebarOpen(false); }}
+            >
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </Link>
 
-        {/* Nav */}
+        {/* Nav items */}
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
             const isActive =
@@ -79,8 +83,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <div className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium cursor-pointer",
                   isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground/65 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                 )}>
                   <item.icon className="h-4 w-4 shrink-0" />
                   {t(item.labelEn, item.labelZh)}
@@ -91,10 +95,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Sidebar footer */}
-        <div className="p-3 border-t border-sidebar-border">
-          <p className="text-xs text-sidebar-foreground/40 px-2">
-            {t("© 2025 ZJU ZIBS", "© 2025 浙大ZIBS")}
-          </p>
+        <div className="p-3 border-t border-sidebar-border text-xs text-sidebar-foreground/35 px-5">
+          {t("© 2025 ZJU ZIBS", "© 2025 浙大ZIBS")}
         </div>
       </aside>
 
@@ -103,7 +105,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
       )}
 
-      {/* Main Content */}
+      {/* ── Main ── */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar */}
         <header className="h-14 flex items-center justify-between px-4 sm:px-6 bg-card border-b border-border sticky top-0 z-40 shadow-sm">
@@ -112,79 +114,83 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Menu className="h-4 w-4" />
             </Button>
             <Link href="/">
-              <h1 className="font-serif text-base font-bold text-primary hidden sm:block cursor-pointer hover:opacity-80 transition-opacity">
+              <h1 className="font-serif text-sm font-bold text-primary hidden sm:block cursor-pointer hover:opacity-75 transition-opacity">
                 {t("ZIBS Stablecoins Research Hub", "浙大ZIBS稳定币研究中心")}
               </h1>
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Language toggle */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleLanguage}
-              className="font-medium text-xs h-8 px-2.5 text-muted-foreground hover:text-foreground"
-            >
+          <div className="flex items-center gap-1.5">
+            {/* Language */}
+            <Button variant="ghost" size="sm" onClick={() => setLanguage(language === "en" ? "zh" : "en")}
+              className="font-medium text-xs h-8 px-2.5 text-muted-foreground hover:text-foreground">
               {language === "en" ? "中文" : "EN"}
             </Button>
 
-            {/* Theme toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              onClick={toggleTheme}
-              title={theme === "light" ? t("Switch to dark mode", "切换到深色模式") : t("Switch to light mode", "切换到浅色模式")}
-            >
+            {/* Theme */}
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={toggleTheme}
+              title={theme === "light" ? t("Dark mode", "深色模式") : t("Light mode", "浅色模式")}>
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
 
-            {/* User menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 rounded-full border border-border hover:border-primary/30">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                      {user ? user.name.charAt(0).toUpperCase() : "?"}
-                    </AvatarFallback>
-                  </Avatar>
+            {/* ── Auth area ── */}
+            {user ? (
+              <>
+                {/* Sign out button — always visible when logged in */}
+                <Button
+                  variant="ghost" size="sm"
+                  onClick={logout}
+                  className="h-8 px-2.5 text-xs text-muted-foreground hover:text-destructive gap-1.5 hidden sm:flex"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  {t("Sign Out", "退出登录")}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                {user ? (
-                  <>
+
+                {/* Avatar dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 rounded-full border border-border hover:border-primary/30 p-0">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                          {user.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-52" align="end">
                     <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-semibold leading-none">{user.name}</p>
-                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                      </div>
+                      <p className="text-sm font-semibold leading-none">{user.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground mt-1">{user.email}</p>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive cursor-pointer">
+                    <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive cursor-pointer gap-2">
+                      <LogOut className="h-3.5 w-3.5" />
                       {t("Sign Out", "退出登录")}
                     </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuLabel className="font-normal">
-                      <p className="text-sm text-muted-foreground">{t("Not signed in", "未登录")}</p>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => openAuth("login")} className="cursor-pointer font-medium">
-                      {t("Sign In", "登录")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => openAuth("register")} className="cursor-pointer">
-                      {t("Create Account", "注册账号")}
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => openAuth("login")}
+                  className="h-8 px-2.5 text-xs gap-1.5 text-muted-foreground hover:text-foreground hidden sm:flex">
+                  <LogIn className="h-3.5 w-3.5" />
+                  {t("Sign In", "登录")}
+                </Button>
+                <Button size="sm" onClick={() => openAuth("register")}
+                  className="h-8 px-3 text-xs hidden sm:flex">
+                  {t("Register", "注册")}
+                </Button>
+                {/* mobile fallback */}
+                <Button variant="ghost" size="icon" className="h-8 w-8 sm:hidden" onClick={() => openAuth("login")}>
+                  <LogIn className="h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
         </header>
 
-        {/* Page Content */}
+        {/* Page */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto bg-background">
           {children}
         </main>
