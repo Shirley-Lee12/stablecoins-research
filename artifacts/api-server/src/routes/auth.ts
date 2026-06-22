@@ -8,8 +8,8 @@ import crypto from "node:crypto";
 const router = Router();
 
 function getSecret() {
-  const s = process.env["SESSION_SECRET"];
-  if (!s) throw new Error("SESSION_SECRET not set");
+  const s = process.env["JWT_SECRET"] || process.env["SESSION_SECRET"];
+  if (!s) throw new Error("JWT_SECRET not set");
   return new TextEncoder().encode(s);
 }
 

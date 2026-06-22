@@ -19,7 +19,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+// In production (Vercel), VITE_API_BASE_URL points to the Render backend.
+// In development (Replit), it's not set, so we use the current BASE_URL.
+const BASE = (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, '');
 
 async function apiPost(path: string, body: unknown, token?: string | null) {
   const res = await fetch(`${BASE}/api${path}`, {

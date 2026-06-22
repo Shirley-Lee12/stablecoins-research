@@ -25,7 +25,15 @@ app.use(
     },
   }),
 );
-app.use(cors());
+// Restrict CORS in production. Allow the frontend origin set in CORS_ORIGIN.
+const corsOrigin = process.env["CORS_ORIGIN"];
+app.use(
+  cors({
+    origin: corsOrigin ? [corsOrigin] : true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
