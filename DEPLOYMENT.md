@@ -1,6 +1,6 @@
 # ZIBS Stablecoin Research Hub — Deployment Guide
 
-> This guide is written for deploying the codebase from Replit to your own infrastructure.
+> This guide covers deploying the codebase from Replit to your own infrastructure: Vercel (frontend), Render (backend), and Neon/Supabase (database).
 
 ## Project Structure
 
@@ -25,6 +25,8 @@ zibs-stablecoin-research-hub/
 | Backend (Express) | `artifacts/api-server/` | Render / Zeabur |
 | Database (PostgreSQL) | `lib/db/` | Neon / Supabase |
 
+---
+
 ## Part 1: Export the Code from Replit
 
 ### Option A: Download ZIP
@@ -39,11 +41,13 @@ zibs-stablecoin-research-hub/
 After downloading, remove these files/folders — they are not needed for production:
 
 ```bash
-rm -rf .local/           # Replit skill files
-rm -rf .replit/           # Replit config
-rm -rf .upm/              # Replit package manager
+rm -rf .local/              # Replit skill files
+rm -rf .replit/              # Replit config
+rm -rf .upm/                 # Replit package manager
 rm artifacts/mockup-sandbox/ # design sandbox (not needed for prod)
 ```
+
+---
 
 ## Part 2: Set Up Your PostgreSQL Database
 
@@ -63,9 +67,9 @@ rm artifacts/mockup-sandbox/ # design sandbox (not needed for prod)
    postgresql://postgres.xxx:password@aws-0-us-east-1.pooler.supabase.com:5432/postgres
    ```
 
-### Migrate the Database Schema
+### Run Drizzle Migrations (Standard Workflow)
 
-Install dependencies and push the schema:
+This project uses **Drizzle Kit's standard generate + migrate** workflow (not `push`).
 
 ```bash
 # Install Node.js 24+ and pnpm
@@ -74,13 +78,19 @@ npm install -g pnpm
 # Install all dependencies
 pnpm install
 
-# Push the schema to your new database
-# Set the DATABASE_URL first:
+# Set the DATABASE_URL
 export DATABASE_URL="postgresql://...your-neon-or-supabase-url..."
 
-# Push schema
-pnpm --filter @workspace/db run push
+# Step 1: Generate migration files (creates SQL in lib/db/drizzle/)
+pnpm --filter @workspace/db run generate
+
+# Step 2: Apply migrations to the database
+pnpm --filter @workspace/db run migrate
 ```
+
+> **What this does**: `generate` creates SQL files (e.g., `0000_xxx.sql`) in `lib/db/drizzle/` based on schema changes. `migrate` runs those SQL files against your database. This is the production-safe way to manage schema changes.
+
+### Schema Files Created
 
 This creates all tables:
 - `resources`
@@ -90,28 +100,58 @@ This creates all tables:
 - `users`
 - `password_reset_tokens`
 
+### Future Schema Changes
+
+Whenever you modify `lib/db/src/schema/*.ts`, always run the same two commands:
+
+```bash
+pnpm --filter @workspace/db run generate
+pnpm --filter @workspace/db run migrate
+```
+
+> **Never** use `push` in production — it silently drops data. `generate` + `migrate` is the only safe approach.
+
+---
+
 ## Part 3: Deploy the Backend (Render)
 
 ### 1. Create a Render account
 Go to [render.com](https://render.com) and sign up.
 
 ### 2. Create a new Web Service
-- **Build Command**: `pnpm install && pnpm --filter @workspace/api-server run build`
-- **Start Command**: `pnpm --filter @workspace/api-server run start`
-- **Runtime**: Node.js
+Import your GitHub repo (or upload manually). Configure:
 
-### 3. Environment Variables
+| Setting | Value |
+|---------|-------|
+| **Runtime** | Node.js |
+| **Build Command** | `pnpm --filter @workspace/api-server run build` |
+| **Start Command** | `pnpm --filter @workspace/api-server run start` |
+
+### 3. Enable pnpm on Render
+
+Instead of adding `npm install -g pnpm` to the Build Command, add this **Environment Variable** in Render Dashboard → Environment:
+
+| Key | Value |
+|-----|-------|
+| `PNPM_VERSION` | `9.0.0` |
+
+> Render's modern build system detects `pnpm-lock.yaml` and this `PNPM_VERSION` variable, then automatically switches to high-speed pnpm mode without any manual installation.
+
+### 4. Environment Variables
+
 Set these in Render Dashboard → Environment:
 
 | Variable | Value | Required |
 |----------|-------|----------|
 | `DATABASE_URL` | Your Neon/Supabase connection string | Yes |
-| `SESSION_SECRET` | A strong random string (e.g., `openssl rand -base64 64`) | Yes |
+| `JWT_SECRET` | A strong random string (e.g., `openssl rand -base64 64`) | Yes |
 | `NODE_ENV` | `production` | Yes |
 | `PORT` | `10000` (or any port Render assigns) | Yes |
 | `CORS_ORIGIN` | Your Vercel frontend URL (e.g., `https://zibs-research.vercel.app`) | Yes |
 
-### 4. CORS Configuration
+> **Note**: The auth system uses **JWT (JSON Web Tokens)**, not session cookies. The `JWT_SECRET` is used to sign/verify tokens. This is intentional and avoids all cross-domain cookie issues.
+
+### 5. CORS Configuration
 
 The backend currently uses `app.use(cors())` (open to all). For production, **restrict it**.
 
@@ -123,30 +163,21 @@ import cors from "cors";
 // Replace the open CORS with:
 app.use(cors({
   origin: process.env.CORS_ORIGIN || "https://your-frontend.vercel.app",
-  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 ```
 
-### 5. Root `package.json` — Add Build Scripts
+> **Important**: Do NOT set `credentials: true` here. The auth system uses **JWT Bearer tokens** sent in the `Authorization` header, not cookies. Cross-domain cookie problems don't apply because there are no cookies involved.
 
-Render needs a root `package.json` that knows how to build the workspace. Add to the root `package.json`:
+### 6. Root `.nvmrc` (recommended)
 
-```json
-{
-  "scripts": {
-    "build": "pnpm run build --recursive",
-    "build:api-server": "pnpm --filter @workspace/api-server run build"
-  }
-}
-```
-
-### 6. Root `.nvmrc` (optional but recommended)
 Create a `.nvmrc` file in the project root:
 ```
 24
 ```
+
+---
 
 ## Part 4: Deploy the Frontend (Vercel)
 
@@ -159,16 +190,14 @@ Go to [vercel.com](https://vercel.com) and sign up.
 
 ### 3. Configure Vercel Settings
 
-In the Vercel project settings:
-
 | Setting | Value |
 |---------|-------|
 | **Framework Preset** | Vite |
-| **Build Command** | `pnpm install && pnpm --filter @workspace/stablecoin-hub run build` |
+| **Build Command** | `pnpm --filter @workspace/stablecoin-hub run build` |
 | **Output Directory** | `artifacts/stablecoin-hub/dist/public` |
-| **Root Directory** | `artifacts/stablecoin-hub` (or leave as root) |
+| **Root Directory** | `artifacts/stablecoin-hub` (or leave as project root) |
 
-> **Important**: If you set Root Directory to `artifacts/stablecoin-hub`, Vercel will run the build command from that folder. If Root Directory is the project root, Vercel will run the build from there.
+> **Note**: If you set Root Directory to `artifacts/stablecoin-hub`, Vercel will run the build command from that folder. If Root Directory is the project root, Vercel will run from the project root. Both work — just be consistent.
 
 ### 4. Environment Variables
 
@@ -176,31 +205,33 @@ Add these to Vercel Settings → Environment Variables:
 
 | Variable | Value | Target |
 |----------|-------|--------|
-| `VITE_API_BASE_URL` | Your Render backend URL (e.g., `https://zibs-api.onrender.com/api`) | Production |
+| `VITE_API_BASE_URL` | Your Render backend URL (e.g., `https://zibs-api.onrender.com`) | Production |
 | `VITE_API_BASE_URL` | Your Render backend URL | Preview |
 
-### 5. Update the Frontend to Use the Remote API
+> `VITE_` prefix is required for Vite to expose the env var to the frontend code.
 
-Currently the frontend uses `import.meta.env.BASE_URL` (which is a Replit path). For Vercel, you need to change the API client base URL.
+### 5. Initialize the API Base URL
 
-**Option A: Set the API base URL at runtime (recommended)**
+The frontend needs to know where the backend API is. The best approach is to call `setBaseUrl()` before the app mounts.
 
-In `artifacts/stablecoin-hub/src/main.tsx` (or `App.tsx`), initialize the API client with the remote URL:
+**In `artifacts/stablecoin-hub/src/main.tsx`**:
 
 ```typescript
+import { createRoot } from "react-dom/client";
 import { setBaseUrl } from "@workspace/api-client-react";
+import App from "./App";
+import "./index.css";
 
-// Before any API calls, set the remote backend URL
+// Set the backend API URL
 setBaseUrl(import.meta.env.VITE_API_BASE_URL || "https://your-api.onrender.com");
+
+createRoot(document.getElementById("root")!).render(<App />);
 ```
 
-This is the cleanest approach — the `api-client-react` package already has a `setBaseUrl()` function.
-
-**Option B: Modify the auth-context**
-
-In `artifacts/stablecoin-hub/src/lib/auth-context.tsx`, change the `BASE` constant:
+**Also update `auth-context.tsx`** (the auth endpoints use direct fetch, not the generated client):
 
 ```typescript
+// In artifacts/stablecoin-hub/src/lib/auth-context.tsx
 // Replace this:
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -208,9 +239,9 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 const BASE = (import.meta.env.VITE_API_BASE_URL || "https://your-api.onrender.com").replace(/\/$/, '');
 ```
 
-### 6. Add `vercel.json` (optional)
+### 6. Add `vercel.json` for SPA Routing
 
-Create `artifacts/stablecoin-hub/vercel.json` to handle SPA routing:
+Create `artifacts/stablecoin-hub/vercel.json`:
 
 ```json
 {
@@ -223,11 +254,11 @@ Create `artifacts/stablecoin-hub/vercel.json` to handle SPA routing:
 }
 ```
 
-## Part 5: Python Backend Engine (Future)
+---
 
-You mentioned a **Python/FastAPI backend** for the **literature extraction engine**. This is not currently in the codebase. Here's the recommended approach:
+## Part 5: Python Backend Engine (Literature Extractor)
 
-### Architecture
+You mentioned a **Python/FastAPI backend** for the **literature extraction engine**. This is not currently in the codebase. Here's the recommended architecture:
 
 ```
 Frontend (React) → Node API (Express) → Python FastAPI (extractor)
@@ -287,6 +318,8 @@ router.post("/extract", async (req, res) => {
 });
 ```
 
+---
+
 ## Part 6: Environment Variables Summary
 
 ### Backend (Render)
@@ -295,8 +328,8 @@ router.post("/extract", async (req, res) => {
 # Database
 DATABASE_URL=postgresql://user:pass@ep-xxx.neon.tech/dbname?sslmode=require
 
-# Auth
-SESSION_SECRET=your-super-strong-random-secret
+# Auth — JWT signing key
+JWT_SECRET=your-super-strong-random-secret
 
 # Server
 PORT=10000
@@ -307,6 +340,9 @@ CORS_ORIGIN=https://your-frontend.vercel.app
 
 # Python Extractor (optional)
 PYTHON_API_URL=https://your-python-api.onrender.com
+
+# pnpm (render auto-detects)
+PNPM_VERSION=9.0.0
 ```
 
 ### Frontend (Vercel)
@@ -316,7 +352,7 @@ PYTHON_API_URL=https://your-python-api.onrender.com
 VITE_API_BASE_URL=https://your-api.onrender.com
 ```
 
-> **Note**: `VITE_` prefix is required for Vite to expose the env var to the frontend code.
+---
 
 ## Part 7: Build & Deploy Checklist
 
@@ -325,17 +361,18 @@ VITE_API_BASE_URL=https://your-api.onrender.com
 - [ ] Export code from Replit
 - [ ] Remove `.local/`, `.replit/`, `.upm/` folders
 - [ ] Create Neon/Supabase database
-- [ ] Push schema with `pnpm --filter @workspace/db run push`
-- [ ] Set `SESSION_SECRET` (generate a strong random string)
+- [ ] Run `generate` + `migrate` to create tables
+- [ ] Set `JWT_SECRET` (generate a strong random string)
 - [ ] Set `CORS_ORIGIN` to match Vercel domain
-- [ ] Update `VITE_API_BASE_URL` in Vercel
-- [ ] Call `setBaseUrl()` in frontend code
+- [ ] Set `VITE_API_BASE_URL` in Vercel
+- [ ] Call `setBaseUrl()` in `main.tsx`
+- [ ] Update `auth-context.tsx` BASE constant
 
 ### Backend Deploy
 
-- [ ] Add root `package.json` with build scripts
+- [ ] Set `PNPM_VERSION=9.0.0` in Render Environment
 - [ ] Create `.nvmrc` with `24`
-- [ ] Deploy to Render with build/start commands
+- [ ] Deploy to Render
 - [ ] Verify API health: `GET /api/healthz`
 - [ ] Test auth: `POST /api/auth/register`, `POST /api/auth/login`
 
@@ -347,19 +384,13 @@ VITE_API_BASE_URL=https://your-api.onrender.com
 - [ ] Add `vercel.json` for SPA routing
 - [ ] Deploy and test
 
+---
+
 ## Part 8: Common Issues
 
 ### Issue: `pnpm install` fails on Render
 
-**Fix**: Render uses npm by default. Tell it to use pnpm:
-- In the service settings, set **Build Command** to:
-  ```bash
-  npm install -g pnpm && pnpm install --frozen-lockfile && pnpm --filter @workspace/api-server run build
-  ```
-
-### Issue: `PORT` not found
-
-**Fix**: Render sets the `PORT` env var automatically. If you hardcoded a port in the code, remove it. The Express server should read `process.env.PORT`.
+**Fix**: Do not add `npm install -g pnpm` to the Build Command. Instead, add the environment variable `PNPM_VERSION=9.0.0`. Render will auto-detect `pnpm-lock.yaml` and switch to pnpm.
 
 ### Issue: Database SSL error
 
@@ -369,6 +400,12 @@ VITE_API_BASE_URL=https://your-api.onrender.com
 
 **Fix**: Make sure the `CORS_ORIGIN` on the backend matches the exact Vercel domain (including `https://`).
 
+### Issue: Auth works on login but fails on refresh (if using session cookies)
+
+**Fix**: This project uses **JWT Bearer tokens**, not session cookies. The token is stored in `localStorage` on the frontend and sent in every request header as `Authorization: Bearer <token>`. No cookie configuration is needed. If you see this issue, it means the frontend is not sending the `Authorization` header — check `auth-context.tsx`.
+
+---
+
 ## Quick Reference: Key Files
 
 | File | Purpose |
@@ -376,12 +413,8 @@ VITE_API_BASE_URL=https://your-api.onrender.com
 | `artifacts/api-server/src/app.ts` | Express app setup (CORS, middleware) |
 | `artifacts/api-server/src/routes/index.ts` | Route registration |
 | `artifacts/api-server/src/routes/auth.ts` | Auth endpoints (JWT, bcrypt) |
-| `artifacts/stablecoin-hub/src/main.tsx` | Frontend entry point (call `setBaseUrl` here) |
+| `artifacts/stablecoin-hub/src/main.tsx` | Frontend entry point (set `setBaseUrl` here) |
 | `artifacts/stablecoin-hub/src/lib/auth-context.tsx` | Auth state management (needs API URL fix) |
 | `lib/db/src/schema/index.ts` | All database tables |
 | `lib/api-client-react/src/custom-fetch.ts` | API client with `setBaseUrl()` |
 | `pnpm-workspace.yaml` | Workspace package definitions |
-
----
-
-**Questions?** The most common gotchas are: (1) `VITE_API_BASE_URL` not being set, (2) `CORS_ORIGIN` not matching the frontend domain, and (3) forgetting to call `setBaseUrl()` before the app mounts.
