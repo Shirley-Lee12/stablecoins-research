@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "cYUT4yf2WQGaHPQMbCVGQ"
+uri = "file://DEPLOYMENT.md"
+type = "text"
+title = "Deployment Guide: ZIBS Stablecoin Research Hub"
