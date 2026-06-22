@@ -7,7 +7,7 @@ import { AuthDialog } from "@/components/auth-dialog";
 import { Button } from "@/components/ui/button";
 import {
   BarChart, BookOpen, Globe, LayoutDashboard,
-  LineChart, Menu, Users, X, Sun, Moon, Home, Database,
+  LineChart, Menu, X, Sun, Moon, Home, Database,
   Microscope, LogOut, LogIn
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,6 @@ const navItems = [
   { href: "/about-stablecoins", labelEn: "About Stablecoins", labelZh: "关于稳定币", icon: BookOpen },
   { href: "/research", labelEn: "Our Research", labelZh: "我们的研究", icon: Microscope },
   { href: "/academic-resources", labelEn: "Resources", labelZh: "资源库", icon: Database },
-  { href: "/experts", labelEn: "Experts & Scholars", labelZh: "专家学者", icon: Users },
   { href: "/regulatory", labelEn: "Regulatory Status", labelZh: "监管现状", icon: Globe },
   { href: "/quantitative", labelEn: "Quantitative Indicators", labelZh: "量化指标", icon: BarChart },
   { href: "/market-data", labelEn: "Market Data", labelZh: "市场数据", icon: LineChart },
@@ -77,7 +76,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             const isActive =
               (item.href === "/" && location === "/") ||
               (item.href !== "/" && (location === item.href || location.startsWith(item.href + "/"))) ||
-              (item.href === "/experts" && location.startsWith("/authors/"));
+              false;
             return (
               <Link key={item.href} href={item.href} onClick={() => window.innerWidth < 1024 && setIsSidebarOpen(false)}>
                 <div className={cn(

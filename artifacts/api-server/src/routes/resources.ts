@@ -1,31 +1,62 @@
 import { Router } from "express";
 import { db, resourcesTable } from "@workspace/db";
-import { eq, desc, ilike, or, sql } from "drizzle-orm";
+import { eq, desc, ilike, or, sql, and } from "drizzle-orm";
 
 const router = Router();
 
+/**
+ * GET /api/resources
+ * Query params:
+ *   source_type  — exact enum match (Paper | Report | Gov Document | News)
+ *   tags         — comma-separated OR repeated: ?tags=A&tags=B or ?tags=A,B
+ *                  returns rows that contain ALL supplied tags
+ *   search       — case-insensitive substring match on title + abstract + authors
+ */
 router.get("/resources", async (req, res) => {
   try {
-    const { source_type, tag, search } = req.query as Record<string, string>;
+    const { source_type, search } = req.query as Record<string, string>;
 
-    let query = db.select().from(resourcesTable).$dynamic();
+    // Normalise tags: accept both ?tags=A,B and ?tags=A&tags=B
+    const rawTags = req.query["tags"];
+    const tagList: string[] = [];
+    if (rawTags) {
+      const arr = Array.isArray(rawTags) ? rawTags : [rawTags];
+      arr.forEach((t) => {
+        if (typeof t === "string") {
+          t.split(",").forEach((s) => { const v = s.trim(); if (v) tagList.push(v); });
+        }
+      });
+    }
+
+    const conditions = [];
 
     if (source_type) {
-      query = query.where(eq(resourcesTable.sourceType, source_type as any));
+      conditions.push(eq(resourcesTable.sourceType, source_type as any));
     }
-    if (tag) {
-      query = query.where(sql`${tag} = ANY(${resourcesTable.tags})`);
+
+    // Each tag must be present in the tags array column
+    for (const tag of tagList) {
+      conditions.push(sql`${tag} = ANY(${resourcesTable.tags})`);
     }
+
     if (search) {
-      query = query.where(
+      const like = `%${search}%`;
+      conditions.push(
         or(
-          ilike(resourcesTable.title, `%${search}%`),
-          ilike(resourcesTable.abstract, `%${search}%`),
+          ilike(resourcesTable.title, like),
+          ilike(resourcesTable.abstract, like),
+          sql`EXISTS (SELECT 1 FROM unnest(${resourcesTable.authors}) a WHERE a ILIKE ${like})`,
+          sql`EXISTS (SELECT 1 FROM unnest(${resourcesTable.tags}) t WHERE t ILIKE ${like})`,
         ),
       );
     }
 
-    const rows = await query.orderBy(desc(resourcesTable.createdAt));
+    const rows = await db
+      .select()
+      .from(resourcesTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(resourcesTable.createdAt));
+
     res.json(rows);
   } catch (err) {
     req.log.error(err);
@@ -33,6 +64,7 @@ router.get("/resources", async (req, res) => {
   }
 });
 
+/** GET /api/resources/:id */
 router.get("/resources/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -49,6 +81,10 @@ router.get("/resources/:id", async (req, res) => {
   }
 });
 
+/**
+ * POST /api/resources
+ * Body: { title, authors?, sourceType?, url?, doi?, abstract?, tags? }
+ */
 router.post("/resources", async (req, res) => {
   try {
     const { title, authors, sourceType, url, doi, abstract, tags } = req.body;
@@ -74,6 +110,7 @@ router.post("/resources", async (req, res) => {
   }
 });
 
+/** PATCH /api/resources/:id */
 router.patch("/resources/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -99,6 +136,7 @@ router.patch("/resources/:id", async (req, res) => {
   }
 });
 
+/** DELETE /api/resources/:id */
 router.delete("/resources/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
