@@ -13,7 +13,7 @@ function getSecret() {
   return new TextEncoder().encode(s);
 }
 
-async function signToken(payload: { userId: number; email: string; name: string }) {
+async function signToken(payload: { userId: number; email: string; name: string; role: string }) {
   return new SignJWT(payload as Record<string, unknown>)
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("30d")
@@ -23,7 +23,7 @@ async function signToken(payload: { userId: number; email: string; name: string 
 
 async function verifyToken(token: string) {
   const { payload } = await jwtVerify(token, getSecret());
-  return payload as { userId: number; email: string; name: string };
+  return payload as { userId: number; email: string; name: string; role: string };
 }
 
 export async function requireAuth(req: any, res: any, next: any) {
@@ -40,6 +40,26 @@ export async function requireAuth(req: any, res: any, next: any) {
   } catch {
     res.status(401).json({ error: "Invalid or expired token" });
   }
+}
+
+/** Optional auth — attaches req.user if token present, never 401s */
+export async function optionalAuth(req: any, _res: any, next: any) {
+  try {
+    const auth = req.headers["authorization"];
+    if (auth?.startsWith("Bearer ")) {
+      const payload = await verifyToken(auth.slice(7));
+      req.user = payload;
+    }
+  } catch { /* ignore */ }
+  next();
+}
+
+export function requireAdmin(req: any, res: any, next: any) {
+  if (req.user?.role !== "admin") {
+    res.status(403).json({ error: "Admin access required" });
+    return;
+  }
+  next();
 }
 
 router.post("/auth/register", async (req, res): Promise<void> => {
@@ -65,10 +85,10 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       email: email.toLowerCase(),
       name,
       passwordHash,
-    }).returning({ id: usersTable.id, email: usersTable.email, name: usersTable.name });
+    }).returning({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role });
 
-    const token = await signToken({ userId: user.id, email: user.email, name: user.name });
-    res.status(201).json({ token, user: { id: user.id, email: user.email, name: user.name } });
+    const token = await signToken({ userId: user.id, email: user.email, name: user.name, role: user.role });
+    res.status(201).json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to register" });
@@ -95,8 +115,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
       return;
     }
 
-    const token = await signToken({ userId: user.id, email: user.email, name: user.name });
-    res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
+    const token = await signToken({ userId: user.id, email: user.email, name: user.name, role: user.role });
+    res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to login" });
@@ -106,7 +126,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
 router.get("/auth/me", requireAuth, async (req: any, res): Promise<void> => {
   try {
     const [user] = await db
-      .select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, createdAt: usersTable.createdAt })
+      .select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, createdAt: usersTable.createdAt })
       .from(usersTable)
       .where(eq(usersTable.id, req.user.userId));
 
@@ -137,13 +157,9 @@ router.post("/auth/forgot-password", async (req, res): Promise<void> => {
 
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
-
     await db.insert(passwordResetTokensTable).values({ userId: user.id, token, expiresAt });
 
-    res.json({
-      message: "Password reset link generated.",
-      resetToken: token,
-    });
+    res.json({ message: "Password reset link generated.", resetToken: token });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to process request" });
@@ -165,13 +181,11 @@ router.post("/auth/reset-password", async (req, res): Promise<void> => {
     const [resetRow] = await db
       .select()
       .from(passwordResetTokensTable)
-      .where(
-        and(
-          eq(passwordResetTokensTable.token, token),
-          eq(passwordResetTokensTable.used, false),
-          gt(passwordResetTokensTable.expiresAt, new Date())
-        )
-      );
+      .where(and(
+        eq(passwordResetTokensTable.token, token),
+        eq(passwordResetTokensTable.used, false),
+        gt(passwordResetTokensTable.expiresAt, new Date()),
+      ));
 
     if (!resetRow) {
       res.status(400).json({ error: "Invalid or expired reset token" });

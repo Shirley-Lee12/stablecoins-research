@@ -4,6 +4,7 @@ export interface AuthUser {
   id: number;
   email: string;
   name: string;
+  role: 'user' | 'admin';
 }
 
 interface AuthContextType {
@@ -19,8 +20,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// In production (Vercel), VITE_API_BASE_URL points to the Render backend.
-// In development (Replit), it's not set, so we use the current BASE_URL.
 const BASE = (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, '');
 
 async function apiPost(path: string, body: unknown, token?: string | null) {
@@ -47,8 +46,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storedUser = localStorage.getItem('auth-user');
     if (storedToken && storedUser) {
       try {
+        const parsed = JSON.parse(storedUser) as AuthUser;
+        // Back-fill role for tokens issued before the role field existed
+        if (!parsed.role) parsed.role = 'user';
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        setUser(parsed);
       } catch {}
     }
     setIsLoading(false);

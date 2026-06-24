@@ -1,6 +1,7 @@
-import { pgTable, text, serial, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { usersTable } from "./users";
 
 export const sourceTypeEnum = pgEnum("source_type", [
   "Paper",
@@ -8,6 +9,12 @@ export const sourceTypeEnum = pgEnum("source_type", [
   "Gov Document",
   "News",
   "Experts & Scholars",
+]);
+
+export const resourceStatusEnum = pgEnum("resource_status", [
+  "pending",
+  "approved",
+  "rejected",
 ]);
 
 export const resourcesTable = pgTable("resources", {
@@ -19,6 +26,8 @@ export const resourcesTable = pgTable("resources", {
   doi: text("doi"),
   abstract: text("abstract"),
   tags: text("tags").array().notNull().default([]),
+  status: resourceStatusEnum("status").notNull().default("pending"),
+  createdBy: integer("created_by").references(() => usersTable.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
