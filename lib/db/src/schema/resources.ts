@@ -7,6 +7,7 @@ export const sourceTypeEnum = pgEnum("source_type", [
   "Report",
   "Gov Document",
   "News",
+  "Experts & Scholars",
 ]);
 
 export const resourcesTable = pgTable("resources", {

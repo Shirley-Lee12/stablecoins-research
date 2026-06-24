@@ -131,9 +131,12 @@ JWT secret: reads `JWT_SECRET` env, falls back to `SESSION_SECRET`.
 |--------|------|---------------|
 | GET | `/api/resources` | `source_type`, `tags` (array or comma-separated), `search` |
 | GET | `/api/resources/:id` | — |
+| POST | `/api/resources/import` | `{ url: string, source_type?: string }` — calls Gemini, returns parsed metadata (does NOT save) |
 | POST | `/api/resources` | `{ title, authors?, sourceType?, url?, doi?, abstract?, tags? }` |
 | PATCH | `/api/resources/:id` | any subset of above fields |
 | DELETE | `/api/resources/:id` | — |
+
+> **Import flow:** `POST /api/resources/import` fetches the URL, passes page text to `gemini-2.5-flash` with `responseMimeType: "application/json"`, and returns `{ title, authors, abstract, tags, sourceType, url }`. The frontend shows these in an editable modal; the user confirms before `POST /api/resources` actually writes to Supabase. Requires `GOOGLE_API_KEY` secret.
 
 ### Our Research (`our_research.ts`)
 | Method | Path | Params / Body |
@@ -228,6 +231,7 @@ pnpm --filter @workspace/api-spec run codegen
 |----------|-----------|---------|
 | `DATABASE_URL` | Replit Secret | Supabase PostgreSQL connection string |
 | `SESSION_SECRET` | Replit Secret | JWT signing (production: set `JWT_SECRET` instead) |
+| `GOOGLE_API_KEY` | Replit Secret | Google Gemini API key for `/api/resources/import` |
 | `CORS_ORIGIN` | Render env | Allowed frontend origin in production |
 | `VITE_API_BASE_URL` | Vercel env | Backend URL for production frontend |
 | `PNPM_VERSION` | Render env | Set to `9.0.0` so Render auto-detects pnpm |
@@ -241,5 +245,5 @@ pnpm --filter @workspace/api-spec run codegen
 3. **No gold color** — primary palette is ocean blue only.
 4. **No emojis in UI** — unless the user explicitly requests.
 5. **JWT, not session cookies** — do not add `credentials: true` to CORS; do not use `cookie-session`.
-6. **`source_type` enum values** are `Paper`, `Report`, `Gov Document`, `News` — use exactly these strings.
+6. **`source_type` enum values** are `Paper`, `Report`, `Gov Document`, `News`, `Experts & Scholars` — use exactly these strings.
 7. **Mock data fallback** — `academic-resources.tsx` shows 6 hardcoded items when the API returns an empty array; this is intentional.

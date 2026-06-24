@@ -1,3 +1,4 @@
 - [Auth system](auth-system.md) — JWT+bcrypt custom auth; users/reset_tokens tables in DB; SESSION_SECRET env var required.
 - [DB composite lib rebuild](db-lib-rebuild.md) — after adding new tables to lib/db schema, must run `pnpm run typecheck:libs` before API server typecheck or exports won't resolve.
 - [Theme system](theme-system.md) — ThemeProvider in stablecoin-hub; adds/removes `dark` class on `<html>`; persists to localStorage; CSS vars split into :root and .dark blocks.
+- [Gemini import route](gemini-import.md) — POST /api/resources/import uses @google/generative-ai with GOOGLE_API_KEY; fetch page → Gemini JSON extraction → frontend editable modal → POST /api/resources saves.
