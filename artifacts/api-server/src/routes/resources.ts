@@ -88,6 +88,7 @@ router.get("/resources", optionalAuth, async (req: any, res) => {
 router.get("/resources/:id", optionalAuth, async (req: any, res) => {
   try {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid resource id" }); return; }
     const [row] = await db.select().from(resourcesTable).where(eq(resourcesTable.id, id)).limit(1);
     if (!row) { res.status(404).json({ error: "Not found" }); return; }
 

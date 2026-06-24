@@ -19,6 +19,20 @@ import Regulatory from "@/pages/regulatory";
 import MarketData from "@/pages/market-data";
 import Quantitative from "@/pages/quantitative";
 import ResetPassword from "@/pages/reset-password";
+import AdminCenter from "@/pages/admin-center";
+import {
+  AboutHistory,
+  AboutTypes,
+  AboutApplications,
+  AboutRegulatoryEvolution,
+  QuantDimensionA,
+  QuantDimensionB,
+  MarketPriceTracking,
+  MarketTradingVolume,
+  ProfilePage,
+  ChangePasswordPage,
+  MyContributionsPage,
+} from "@/pages/placeholder";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +40,7 @@ function Router() {
   return (
     <Layout>
       <Switch>
+        {/* Core pages */}
         <Route path="/" component={HomeOverview} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/about-stablecoins" component={About} />
@@ -37,6 +52,27 @@ function Router() {
         <Route path="/market-data" component={MarketData} />
         <Route path="/quantitative" component={Quantitative} />
         <Route path="/reset-password" component={ResetPassword} />
+        <Route path="/admin" component={AdminCenter} />
+
+        {/* About Stablecoins sub-pages */}
+        <Route path="/about-stablecoins/history" component={AboutHistory} />
+        <Route path="/about-stablecoins/types" component={AboutTypes} />
+        <Route path="/about-stablecoins/applications" component={AboutApplications} />
+        <Route path="/about-stablecoins/regulatory-evolution" component={AboutRegulatoryEvolution} />
+
+        {/* Quantitative sub-pages */}
+        <Route path="/quantitative/dimension-a" component={QuantDimensionA} />
+        <Route path="/quantitative/dimension-b" component={QuantDimensionB} />
+
+        {/* Market Data sub-pages */}
+        <Route path="/market-data/price-tracking" component={MarketPriceTracking} />
+        <Route path="/market-data/trading-volume" component={MarketTradingVolume} />
+
+        {/* User account pages */}
+        <Route path="/profile" component={ProfilePage} />
+        <Route path="/change-password" component={ChangePasswordPage} />
+        <Route path="/my-contributions" component={MyContributionsPage} />
+
         <Route component={NotFound} />
       </Switch>
     </Layout>

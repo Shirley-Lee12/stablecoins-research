@@ -150,70 +150,70 @@
 }
 
 /* ============================================================
-   DARK MODE — deep ocean night
+   DARK MODE — deep ocean night (high-contrast revision)
    ============================================================ */
 .dark {
-  --button-outline: rgba(255,255,255,.09);
-  --badge-outline: rgba(255,255,255,.04);
-  --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255,255,255,.03);
-  --elevate-2: rgba(255,255,255,.07);
+  --button-outline: rgba(255,255,255,.10);
+  --badge-outline: rgba(255,255,255,.05);
+  --opaque-button-border-intensity: 10;
+  --elevate-1: rgba(255,255,255,.04);
+  --elevate-2: rgba(255,255,255,.08);
 
-  /* Backgrounds */
-  --background: 220 50% 7%;        /* #070F1C — deepest ocean floor */
-  --foreground: 210 30% 92%;
+  /* Backgrounds — deeper, richer navy */
+  --background: 222 55% 6%;        /* #080E1D — near-black ocean */
+  --foreground: 210 40% 96%;       /* bright off-white — high contrast */
 
-  /* Cards */
-  --card: 220 42% 11%;
-  --card-foreground: 210 30% 92%;
-  --card-border: 220 35% 17%;
+  /* Cards — slightly lifted from background */
+  --card: 220 48% 10%;
+  --card-foreground: 210 38% 95%;
+  --card-border: 220 40% 16%;
 
   /* Popover */
-  --popover: 220 42% 10%;
-  --popover-foreground: 210 30% 92%;
-  --popover-border: 220 35% 17%;
+  --popover: 220 48% 9%;
+  --popover-foreground: 210 38% 95%;
+  --popover-border: 220 40% 16%;
 
-  /* Primary — ocean blue in dark (was navy, now bright blue) */
-  --primary: 200 80% 55%;          /* bright ocean blue */
-  --primary-foreground: 220 50% 7%;
+  /* Primary — vivid ocean blue */
+  --primary: 200 82% 58%;          /* #1AADDB — vibrant sky-ocean */
+  --primary-foreground: 222 55% 6%;
 
   /* Secondary */
-  --secondary: 220 38% 20%;
-  --secondary-foreground: 210 30% 88%;
+  --secondary: 220 42% 18%;
+  --secondary-foreground: 210 36% 92%;
 
-  /* Muted */
-  --muted: 220 35% 16%;
-  --muted-foreground: 210 18% 56%;
+  /* Muted — clearly visible but de-emphasised */
+  --muted: 220 38% 14%;
+  --muted-foreground: 210 24% 68%;  /* raised from 56% → 68% for readability */
 
   /* Accent */
-  --accent: 220 35% 18%;
-  --accent-foreground: 210 30% 92%;
+  --accent: 220 38% 16%;
+  --accent-foreground: 210 38% 95%;
 
   /* Destructive */
-  --destructive: 0 60% 40%;
-  --destructive-foreground: 0 0% 98%;
+  --destructive: 0 65% 48%;
+  --destructive-foreground: 0 0% 100%;
 
-  /* Borders */
-  --border: 220 35% 18%;
-  --input: 220 35% 18%;
-  --ring: 200 80% 55%;
+  /* Borders — slightly visible against dark bg */
+  --border: 220 38% 20%;
+  --input: 220 38% 20%;
+  --ring: 200 82% 58%;
 
-  /* Sidebar */
-  --sidebar: 220 55% 5%;
-  --sidebar-foreground: 210 22% 80%;
-  --sidebar-border: 220 42% 10%;
-  --sidebar-primary: 200 72% 28%;  /* deep ocean sidebar band */
-  --sidebar-primary-foreground: 210 30% 95%;
-  --sidebar-accent: 220 42% 13%;
-  --sidebar-accent-foreground: 210 25% 90%;
-  --sidebar-ring: 200 80% 55%;
+  /* Sidebar — deepest layer */
+  --sidebar: 222 60% 4%;
+  --sidebar-foreground: 210 28% 85%;  /* was 80% → 85% */
+  --sidebar-border: 220 48% 9%;
+  --sidebar-primary: 200 75% 30%;
+  --sidebar-primary-foreground: 210 38% 97%;
+  --sidebar-accent: 220 45% 12%;
+  --sidebar-accent-foreground: 210 32% 93%;  /* was 90% → 93% */
+  --sidebar-ring: 200 82% 58%;
 
-  /* Charts */
-  --chart-1: 200 80% 55%;
-  --chart-2: 217 65% 62%;
-  --chart-3: 185 75% 52%;
-  --chart-4: 230 65% 65%;
-  --chart-5: 160 70% 48%;
+  /* Charts — vivid ocean palette */
+  --chart-1: 200 82% 58%;
+  --chart-2: 217 68% 65%;
+  --chart-3: 185 78% 55%;
+  --chart-4: 230 68% 68%;
+  --chart-5: 160 72% 52%;
 }
 
 @layer base {
