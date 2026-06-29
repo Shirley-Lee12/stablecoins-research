@@ -7,14 +7,24 @@ export interface AuthUser {
   role: 'user' | 'admin';
 }
 
+export class VerificationRequiredError extends Error {
+  email: string;
+  constructor(email: string) {
+    super('Please verify your email before signing in');
+    this.email = email;
+  }
+}
+
 interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, name: string, password: string) => Promise<void>;
+  register: (email: string, name: string, password: string) => Promise<{ email: string; message: string }>;
+  verifyEmail: (email: string, code: string) => Promise<void>;
+  resendVerification: (email: string) => Promise<{ message: string }>;
   logout: () => void;
-  forgotPassword: (email: string) => Promise<{ resetToken?: string; message: string }>;
+  forgotPassword: (email: string) => Promise<{ message: string }>;
   resetPassword: (token: string, password: string) => Promise<void>;
 }
 
@@ -32,7 +42,12 @@ async function apiPost(path: string, body: unknown, token?: string | null) {
     body: JSON.stringify(body),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Request failed');
+  if (!res.ok) {
+    if (res.status === 403 && data.requiresVerification) {
+      throw new VerificationRequiredError(data.email);
+    }
+    throw new Error(data.error || 'Request failed');
+  }
   return data;
 }
 
@@ -70,7 +85,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = useCallback(async (email: string, name: string, password: string) => {
     const data = await apiPost('/auth/register', { email, name, password });
+    return { email: data.email as string, message: data.message as string };
+  }, []);
+
+  const verifyEmail = useCallback(async (email: string, code: string) => {
+    const data = await apiPost('/auth/verify-email', { email, code });
     persist(data.token, data.user);
+  }, []);
+
+  const resendVerification = useCallback(async (email: string) => {
+    return apiPost('/auth/resend-verification', { email });
   }, []);
 
   const logout = useCallback(() => {
@@ -89,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout, forgotPassword, resetPassword }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, register, verifyEmail, resendVerification, logout, forgotPassword, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );

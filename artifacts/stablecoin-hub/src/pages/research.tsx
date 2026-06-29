@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/lib/language-context";
-import { useListResearchPapers, useCreateResearchPaper, useDeleteResearchPaper, getListResearchPapersQueryKey } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -29,15 +27,72 @@ const formSchema = z.object({
   keywords: z.string().optional(),
 });
 
+interface OurResearchRow {
+  id: number;
+  title: string;
+  fileUrl?: string | null;
+  abstract?: string | null;
+  keyInnovations?: string[];
+  tags?: string[];
+  uploadedAt?: string;
+}
+
+interface DisplayPaper {
+  id: number;
+  title: string;
+  abstract?: string | null;
+  pdf_url?: string | null;
+  key_innovations?: string[];
+  keywords?: string[];
+  authors?: string[];
+  published_date?: string | null;
+}
+
+function apiBase() {
+  return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
+}
+
+function mapRow(row: OurResearchRow): DisplayPaper {
+  return {
+    id: row.id,
+    title: row.title,
+    abstract: row.abstract,
+    pdf_url: row.fileUrl,
+    key_innovations: Array.isArray(row.keyInnovations) ? row.keyInnovations : [],
+    keywords: Array.isArray(row.tags) ? row.tags : [],
+    published_date: row.uploadedAt ?? null,
+  };
+}
+
 export default function Research() {
   const { t, language } = useLanguage();
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { data: papers, isLoading } = useListResearchPapers();
-  const createPaper = useCreateResearchPaper();
-  const deletePaper = useDeleteResearchPaper();
-
+  const [papers, setPapers] = useState<DisplayPaper[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const loadPapers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${apiBase()}/api/our-research`);
+      if (!res.ok) {
+        setPapers([]);
+        return;
+      }
+      const data = await res.json();
+      const rows: OurResearchRow[] = Array.isArray(data) ? data : [];
+      setPapers(rows.map(mapRow));
+    } catch {
+      setPapers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPapers();
+  }, [loadPapers]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,50 +110,62 @@ export default function Research() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    createPaper.mutate({
-      data: {
-        title: values.title,
-        title_zh: values.title_zh,
-        abstract: values.abstract,
-        abstract_zh: values.abstract_zh,
-        authors: values.authors.split(",").map(a => a.trim()).filter(Boolean),
-        key_innovations: values.key_innovations ? values.key_innovations.split(";").map(i => i.trim()).filter(Boolean) : [],
-        key_innovations_zh: values.key_innovations_zh ? values.key_innovations_zh.split(";").map(i => i.trim()).filter(Boolean) : [],
-        published_date: values.published_date,
-        pdf_url: values.pdf_url,
-        keywords: values.keywords ? values.keywords.split(",").map(k => k.trim()).filter(Boolean) : [],
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsSaving(true);
+    try {
+      const res = await fetch(`${apiBase()}/api/our-research`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: values.title,
+          abstract: values.abstract,
+          fileUrl: values.pdf_url || null,
+          keyInnovations: values.key_innovations
+            ? values.key_innovations.split(";").map((i) => i.trim()).filter(Boolean)
+            : [],
+          tags: values.keywords
+            ? values.keywords.split(",").map((k) => k.trim()).filter(Boolean)
+            : [],
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to create");
       }
-    }, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListResearchPapersQueryKey() });
-        setIsDialogOpen(false);
-        form.reset();
-        toast({
-          title: t("Success", "成功"),
-          description: t("Research paper added successfully.", "研究论文添加成功。"),
-        });
-      },
-      onError: (error) => {
-        toast({
-          title: t("Error", "错误"),
-          description: t("Failed to add research paper.", "添加研究论文失败。"),
-          variant: "destructive",
-        });
-      }
-    });
+      await loadPapers();
+      setIsDialogOpen(false);
+      form.reset();
+      toast({
+        title: t("Success", "成功"),
+        description: t("Research paper added successfully.", "研究论文添加成功。"),
+      });
+    } catch {
+      toast({
+        title: t("Error", "错误"),
+        description: t("Failed to add research paper.", "添加研究论文失败。"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm(t("Are you sure you want to delete this paper?", "您确定要删除这篇论文吗？"))) {
-      deletePaper.mutate({ id }, {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListResearchPapersQueryKey() });
-          toast({
-            title: t("Success", "成功"),
-            description: t("Research paper deleted successfully.", "研究论文删除成功。"),
-          });
-        }
+  const handleDelete = async (id: number) => {
+    if (!confirm(t("Are you sure you want to delete this paper?", "您确定要删除这篇论文吗？"))) {
+      return;
+    }
+    try {
+      const res = await fetch(`${apiBase()}/api/our-research/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      await loadPapers();
+      toast({
+        title: t("Success", "成功"),
+        description: t("Research paper deleted successfully.", "研究论文删除成功。"),
+      });
+    } catch {
+      toast({
+        title: t("Error", "错误"),
+        description: t("Failed to delete research paper.", "删除研究论文失败。"),
+        variant: "destructive",
       });
     }
   };
@@ -112,12 +179,12 @@ export default function Research() {
           </h2>
           <p className="mt-2 text-muted-foreground max-w-3xl">
             {t(
-              "Original research, whitepapers, and academic publications by the ZIBS Stablecoins Research Hub.", 
-              "浙江大学ZIBS稳定币研究中心的原创研究、白皮书和学术出版物。"
+              "Original research, whitepapers, and academic publications by the ZIBS Stablecoins Research Hub.",
+              "浙江大学ZIBS稳定币研究中心的原创研究、白皮书和学术出版物。",
             )}
           </p>
         </div>
-        
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -159,7 +226,7 @@ export default function Research() {
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={form.control}
                   name="authors"
@@ -275,8 +342,8 @@ export default function Research() {
                   )}
                 />
 
-                <Button type="submit" disabled={createPaper.isPending} className="w-full">
-                  {createPaper.isPending ? t("Saving...", "保存中...") : t("Save Paper", "保存论文")}
+                <Button type="submit" disabled={isSaving} className="w-full">
+                  {isSaving ? t("Saving...", "保存中...") : t("Save Paper", "保存论文")}
                 </Button>
               </form>
             </Form>
@@ -298,13 +365,11 @@ export default function Research() {
               </CardContent>
             </Card>
           ))
-        ) : papers?.length ? (
+        ) : papers.length > 0 ? (
           papers.map((paper) => {
-            const title = language === 'zh' && paper.title_zh ? paper.title_zh : paper.title;
-            const abstract = language === 'zh' && paper.abstract_zh ? paper.abstract_zh : paper.abstract;
-            const innovations = language === 'zh' && paper.key_innovations_zh && paper.key_innovations_zh.length > 0 
-              ? paper.key_innovations_zh 
-              : paper.key_innovations;
+            const title = paper.title;
+            const abstract = paper.abstract;
+            const innovations = paper.key_innovations ?? [];
 
             return (
               <Card key={paper.id} className="shadow-sm border-primary/10 hover-elevate transition-all duration-300">
@@ -346,8 +411,8 @@ export default function Research() {
                       {abstract}
                     </div>
                   )}
-                  
-                  {innovations && innovations.length > 0 && (
+
+                  {innovations.length > 0 && (
                     <div className="bg-muted/30 rounded-lg p-4 mt-4 border border-border/50">
                       <h4 className="text-sm font-semibold flex items-center gap-2 mb-3 text-primary">
                         <Lightbulb className="h-4 w-4" />

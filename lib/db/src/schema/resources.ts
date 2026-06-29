@@ -29,6 +29,9 @@ export const resourcesTable = pgTable("resources", {
   status: resourceStatusEnum("status").notNull().default("pending"),
   createdBy: integer("created_by").references(() => usersTable.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  // The document's own publication date (e.g. "2021" or "2021-07-20"), distinct from createdAt
+  // (when it was added to this library). Free-text since precision varies by source.
+  publishedDate: text("published_date"),
 });
 
 export const insertResourceSchema = createInsertSchema(resourcesTable).omit({

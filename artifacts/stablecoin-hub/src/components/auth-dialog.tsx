@@ -1,13 +1,17 @@
 import React, { useState } from "react";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth, VerificationRequiredError } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, Eye, EyeOff, AlertCircle, CheckCircle2, Mail } from "lucide-react";
 
-type View = "login" | "register" | "forgot" | "reset-success";
+type View = "login" | "register" | "verify" | "forgot" | "forgot-sent";
+
+function isValidPassword(password: string): boolean {
+  return password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password);
+}
 
 interface AuthDialogProps {
   open: boolean;
@@ -17,22 +21,23 @@ interface AuthDialogProps {
 
 export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDialogProps) {
   const { t } = useLanguage();
-  const { login, register, forgotPassword } = useAuth();
+  const { login, register, verifyEmail, resendVerification, forgotPassword } = useAuth();
   const [view, setView] = useState<View>(initialView);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [resetInfo, setResetInfo] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
-  const [form, setForm] = useState({ email: "", name: "", password: "", confirmPassword: "" });
+  const [form, setForm] = useState({ email: "", name: "", password: "", confirmPassword: "", code: "" });
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
 
-  const reset = () => { setError(null); setForm({ email: "", name: "", password: "", confirmPassword: "" }); };
+  const reset = () => { setError(null); setResendMessage(null); setForm({ email: "", name: "", password: "", confirmPassword: "", code: "" }); };
   const switchTo = (v: View) => { reset(); setView(v); };
 
   const handleClose = (open: boolean) => {
-    if (!open) { reset(); setView("login"); setResetInfo(null); }
+    if (!open) { reset(); setView("login"); setPendingEmail(""); }
     onOpenChange(open);
   };
 
@@ -44,7 +49,13 @@ export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDi
       await login(form.email, form.password);
       handleClose(false);
     } catch (err: any) {
-      setError(err.message);
+      if (err instanceof VerificationRequiredError) {
+        setPendingEmail(err.email);
+        setForm(f => ({ ...f, email: err.email }));
+        setView("verify");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -57,14 +68,46 @@ export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDi
       setError(t("Passwords do not match.", "两次输入的密码不一致。"));
       return;
     }
-    if (form.password.length < 8) {
-      setError(t("Password must be at least 8 characters.", "密码至少需要8个字符。"));
+    if (!isValidPassword(form.password)) {
+      setError(t(
+        "Password must be at least 8 characters and include both an uppercase and a lowercase letter.",
+        "密码至少需要8个字符，且必须包含至少一个大写字母和一个小写字母。",
+      ));
       return;
     }
     setIsLoading(true);
     try {
-      await register(form.email, form.name, form.password);
+      const result = await register(form.email, form.name, form.password);
+      setPendingEmail(result.email);
+      setView("verify");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+    try {
+      await verifyEmail(pendingEmail, form.code);
       handleClose(false);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setError(null);
+    setResendMessage(null);
+    setIsLoading(true);
+    try {
+      const result = await resendVerification(pendingEmail);
+      setResendMessage(result.message);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -77,9 +120,8 @@ export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDi
     setError(null);
     setIsLoading(true);
     try {
-      const result = await forgotPassword(form.email);
-      setResetInfo(result.resetToken ?? null);
-      setView("reset-success");
+      await forgotPassword(form.email);
+      setView("forgot-sent");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -147,7 +189,7 @@ export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDi
               <div className="space-y-2">
                 <Label htmlFor="reg-password">{t("Password", "密码")}</Label>
                 <div className="relative">
-                  <Input id="reg-password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder={t("Min. 8 characters", "至少8个字符")} value={form.password} onChange={update("password")} required className="pr-10" />
+                  <Input id="reg-password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder={t("Min. 8 chars, upper + lower", "至少8位，含大小写字母")} value={form.password} onChange={update("password")} required className="pr-10" />
                   <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -165,6 +207,42 @@ export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDi
                 {t("Already have an account?", "已有账号？")}{" "}
                 <button type="button" onClick={() => switchTo("login")} className="text-primary font-medium hover:underline">
                   {t("Sign In", "登录")}
+                </button>
+              </p>
+            </form>
+          </>
+        )}
+
+        {view === "verify" && (
+          <>
+            <DialogHeader>
+              <Mail className="h-8 w-8 text-primary mb-1" />
+              <DialogTitle className="font-serif text-xl">{t("Verify Your Email", "验证邮箱")}</DialogTitle>
+              <DialogDescription>
+                {t(
+                  `We sent a 6-digit code to ${pendingEmail}. Enter it below to continue.`,
+                  `我们已向 ${pendingEmail} 发送了一个6位验证码，请在下方输入以继续。`,
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleVerify} className="space-y-4 mt-2">
+              <div className="space-y-2">
+                <Label htmlFor="verify-code">{t("Verification Code", "验证码")}</Label>
+                <Input
+                  id="verify-code" type="text" inputMode="numeric" maxLength={6}
+                  placeholder="123456" value={form.code} onChange={update("code")}
+                  className="text-center text-lg tracking-[0.3em] font-mono" required
+                />
+              </div>
+              {error && <div className="flex items-center gap-2 text-sm text-destructive"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div>}
+              {resendMessage && <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400"><CheckCircle2 className="h-4 w-4 shrink-0" />{resendMessage}</div>}
+              <Button type="submit" className="w-full" disabled={isLoading || form.code.length !== 6}>
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("Verify & Continue", "验证并继续")}
+              </Button>
+              <p className="text-center text-sm text-muted-foreground">
+                {t("Didn't get a code?", "没收到验证码？")}{" "}
+                <button type="button" onClick={handleResend} disabled={isLoading} className="text-primary font-medium hover:underline disabled:opacity-50">
+                  {t("Resend", "重新发送")}
                 </button>
               </p>
             </form>
@@ -195,25 +273,21 @@ export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDi
           </>
         )}
 
-        {view === "reset-success" && (
+        {view === "forgot-sent" && (
           <>
             <DialogHeader>
-              <DialogTitle className="font-serif text-xl">{t("Reset Link Generated", "重置链接已生成")}</DialogTitle>
+              <DialogTitle className="font-serif text-xl">{t("Check Your Email", "请查看邮箱")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-2">
               <div className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-950/20 rounded-md border border-green-200 dark:border-green-800">
                 <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
                 <p className="text-sm text-green-800 dark:text-green-300">
-                  {t("A reset token has been generated for this account.", "已为此账号生成重置令牌。")}
+                  {t(
+                    "If an account exists for this email, a password reset link has been sent. The link expires in 1 hour.",
+                    "如果该邮箱已注册，重置密码的链接已发送至您的邮箱。链接1小时内有效。",
+                  )}
                 </p>
               </div>
-              {resetInfo && (
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">{t("Reset Token (share securely):", "重置令牌（请安全分享）：")}</Label>
-                  <div className="font-mono text-xs bg-muted rounded p-2 break-all select-all">{resetInfo}</div>
-                  <p className="text-xs text-muted-foreground">{t("This token expires in 1 hour. Use it at /reset-password?token=...", "此令牌1小时后过期。使用 /reset-password?token=... 重置密码。")}</p>
-                </div>
-              )}
               <Button className="w-full" onClick={() => handleClose(false)}>{t("Done", "完成")}</Button>
             </div>
           </>

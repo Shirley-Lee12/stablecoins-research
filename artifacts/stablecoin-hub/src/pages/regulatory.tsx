@@ -1,16 +1,6 @@
 import React, { useState } from "react";
 import { useLanguage } from "@/lib/language-context";
-import { 
-  useGetRegulatoryTimeline, 
-  useGetRegulatoryCountryStats, 
-  useListRegulatoryEntries,
-  useCreateRegulatoryEntry,
-  getListRegulatoryEntriesQueryKey,
-  getGetRegulatoryTimelineQueryKey,
-  getGetRegulatoryCountryStatsQueryKey
-} from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -21,7 +11,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Globe, Plus, Building2, MapPin, ExternalLink, Scale, Scale3d } from "lucide-react";
+import { Globe, Plus, Building2, MapPin, ExternalLink, Scale } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const entrySchema = z.object({
@@ -37,24 +27,34 @@ const entrySchema = z.object({
   category: z.string().optional(),
 });
 
+interface RegulatoryEntry {
+  id: string;
+  country: string;
+  region?: string;
+  authority?: string;
+  title: string;
+  title_zh?: string;
+  summary?: string;
+  summary_zh?: string;
+  document_url?: string;
+  effective_date: string;
+  category?: string;
+}
+
 export default function Regulatory() {
   const { t, language } = useLanguage();
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-  
+
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  // Queries
-  const { data: timeline, isLoading: timelineLoading } = useGetRegulatoryTimeline({ lang: language });
-  const { data: countryStats, isLoading: statsLoading } = useGetRegulatoryCountryStats();
-  const entriesParams = { country: selectedCountry || undefined, lang: language };
-  const { data: entries, isLoading: entriesLoading } = useListRegulatoryEntries(
-    entriesParams,
-    { query: { enabled: !!selectedCountry, queryKey: getListRegulatoryEntriesQueryKey(entriesParams) } }
-  );
-
-  const createEntry = useCreateRegulatoryEntry();
+  // Regulatory API is not implemented yet — use stable empty data instead of missing hooks.
+  const timeline: { year: number; entries: RegulatoryEntry[] }[] = [];
+  const countryStats: { country: string; count: number }[] = [];
+  const entries: RegulatoryEntry[] = [];
+  const timelineLoading = false;
+  const statsLoading = false;
+  const entriesLoading = false;
 
   const form = useForm<z.infer<typeof entrySchema>>({
     resolver: zodResolver(entrySchema),
@@ -72,28 +72,14 @@ export default function Regulatory() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof entrySchema>) => {
-    createEntry.mutate({
-      data: values
-    }, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetRegulatoryTimelineQueryKey() });
-        queryClient.invalidateQueries({ queryKey: getGetRegulatoryCountryStatsQueryKey() });
-        queryClient.invalidateQueries({ queryKey: getListRegulatoryEntriesQueryKey() });
-        setIsAddDialogOpen(false);
-        form.reset();
-        toast({
-          title: t("Success", "成功"),
-          description: t("Regulatory entry added.", "监管条目添加成功。"),
-        });
-      },
-      onError: () => {
-        toast({
-          title: t("Error", "错误"),
-          description: t("Failed to add entry.", "添加条目失败。"),
-          variant: "destructive",
-        });
-      }
+  const onSubmit = (_values: z.infer<typeof entrySchema>) => {
+    toast({
+      title: t("Unavailable", "暂不可用"),
+      description: t(
+        "Regulatory entries cannot be saved yet. The backend API for this section is not available.",
+        "监管条目暂无法保存，后端接口尚未上线。",
+      ),
+      variant: "destructive",
     });
   };
 
@@ -168,8 +154,8 @@ export default function Regulatory() {
                   <FormItem><FormLabel>{t("Official Document URL", "官方文件链接")}</FormLabel><FormControl><Input type="url" placeholder="https://..." {...field} /></FormControl><FormMessage/></FormItem>
                 )}/>
 
-                <Button type="submit" disabled={createEntry.isPending} className="w-full">
-                  {createEntry.isPending ? t("Saving...", "保存中...") : t("Save Entry", "保存条目")}
+                <Button type="submit" className="w-full">
+                  {t("Save Entry", "保存条目")}
                 </Button>
               </form>
             </Form>

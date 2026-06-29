@@ -4,8 +4,8 @@ import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Shield, Users, CheckSquare, FileText,
-  Clock, Check, X, Loader2, ChevronRight,
+  Shield, Users, CheckSquare, FileText, Settings as SettingsIcon,
+  Clock, Check, X, Loader2, ChevronRight, Eye, EyeOff,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -24,12 +24,14 @@ function apiBase() {
 }
 
 // ── User Management Panel ─────────────────────────────────────────────────────
-function UserManagementPanel({ token, language }: { token: string; language: string }) {
+function UserManagementPanel({ token, language, currentUserId }: { token: string; language: string; currentUserId?: number }) {
   const zh = language === "zh";
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
-  useEffect(() => {
+  const loadUsers = () => {
+    setLoading(true);
     fetch(`${apiBase()}/api/admin/users`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -37,7 +39,27 @@ function UserManagementPanel({ token, language }: { token: string; language: str
       .then(setUsers)
       .catch(() => setUsers([]))
       .finally(() => setLoading(false));
-  }, [token]);
+  };
+
+  useEffect(loadUsers, [token]);
+
+  async function toggleRole(u: UserRow) {
+    const nextRole = u.role === "admin" ? "user" : "admin";
+    setUpdatingId(u.id);
+    try {
+      const res = await fetch(`${apiBase()}/api/admin/users/${u.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ role: nextRole }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setUsers((prev) => prev.map((x) => (x.id === u.id ? updated : x)));
+      }
+    } finally {
+      setUpdatingId(null);
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -59,7 +81,7 @@ function UserManagementPanel({ token, language }: { token: string; language: str
         <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
           <Users className="h-10 w-10 text-muted-foreground/30" />
           <p className="text-sm text-muted-foreground">
-            {zh ? "暂无用户数据（用户管理 API 待实现）" : "No user data (User management API pending)"}
+            {zh ? "暂无用户数据" : "No users found"}
           </p>
         </div>
       ) : (
@@ -71,6 +93,7 @@ function UserManagementPanel({ token, language }: { token: string; language: str
                 <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{zh ? "邮箱" : "Email"}</th>
                 <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{zh ? "角色" : "Role"}</th>
                 <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{zh ? "注册时间" : "Joined"}</th>
+                <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">{zh ? "操作" : "Action"}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -90,21 +113,187 @@ function UserManagementPanel({ token, language }: { token: string; language: str
                   <td className="px-4 py-3 text-xs text-muted-foreground">
                     {new Date(u.createdAt).toLocaleDateString(zh ? "zh-CN" : "en-US", { year: "numeric", month: "short", day: "numeric" })}
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => toggleRole(u)}
+                      disabled={updatingId === u.id || u.id === currentUserId}
+                      title={u.id === currentUserId ? (zh ? "不能修改自己的角色" : "You cannot change your own role") : undefined}
+                      className="text-xs px-2.5 py-1 rounded-md border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {updatingId === u.id
+                        ? <Loader2 className="h-3 w-3 animate-spin inline" />
+                        : u.role === "admin"
+                          ? (zh ? "降为普通用户" : "Demote to User")
+                          : (zh ? "升为管理员" : "Promote to Admin")}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+    </div>
+  );
+}
 
-      <div className="rounded-xl border border-border border-dashed p-6 text-center space-y-2">
-        <Shield className="h-8 w-8 text-muted-foreground/30 mx-auto" />
-        <p className="text-sm font-medium text-muted-foreground">
-          {zh ? "角色提升功能即将上线" : "Role promotion coming soon"}
+// ── Settings Panel ────────────────────────────────────────────────────────────
+interface SettingsData {
+  SMTP_HOST?: string; SMTP_PORT?: string; SMTP_USER?: string;
+  SMTP_PASS?: boolean; SMTP_FROM?: string; GOOGLE_API_KEY?: boolean;
+}
+
+function SettingsPanel({ token, language }: { token: string; language: string }) {
+  const zh = language === "zh";
+  const [settings, setSettings] = useState<SettingsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [showSecrets, setShowSecrets] = useState(false);
+
+  const [form, setForm] = useState({ smtpHost: "", smtpPort: "", smtpUser: "", smtpFrom: "", smtpPass: "", googleApiKey: "" });
+
+  const load = () => {
+    setLoading(true);
+    fetch(`${apiBase()}/api/admin/settings`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: SettingsData | null) => {
+        setSettings(data);
+        if (data) {
+          setForm((f) => ({
+            ...f,
+            smtpHost: data.SMTP_HOST ?? "",
+            smtpPort: data.SMTP_PORT ?? "",
+            smtpUser: data.SMTP_USER ?? "",
+            smtpFrom: data.SMTP_FROM ?? "",
+          }));
+        }
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(load, [token]);
+
+  async function handleSave() {
+    setSaving(true);
+    setMessage(null);
+    try {
+      const body: Record<string, string> = {
+        SMTP_HOST: form.smtpHost, SMTP_PORT: form.smtpPort, SMTP_USER: form.smtpUser, SMTP_FROM: form.smtpFrom,
+      };
+      if (form.smtpPass.trim()) body.SMTP_PASS = form.smtpPass.trim();
+      if (form.googleApiKey.trim()) body.GOOGLE_API_KEY = form.googleApiKey.trim();
+
+      const res = await fetch(`${apiBase()}/api/admin/settings`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setSettings(updated);
+        setForm((f) => ({ ...f, smtpPass: "", googleApiKey: "" }));
+        setMessage(zh ? "已保存" : "Saved");
+      } else {
+        setMessage(zh ? "保存失败" : "Failed to save");
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16 gap-2 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin" />
+        <span className="text-sm">{zh ? "加载中…" : "Loading…"}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-xl">
+      <div>
+        <h2 className="text-base font-semibold">{zh ? "系统配置" : "System Settings"}</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {zh ? "邮件发送与 AI 服务密钥。数据库连接地址不在此处管理，需在服务器环境变量中修改。"
+              : "Email sending and AI service keys. The database connection string is not managed here — change it via server environment variables."}
         </p>
-        <p className="text-xs text-muted-foreground">
-          {zh ? "将在此处管理用户角色（admin / user）" : "Manage user roles (admin / user) from this panel"}
-        </p>
+      </div>
+
+      <div className="rounded-xl border border-border p-5 space-y-4">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
+          <SettingsIcon className="h-4 w-4 text-primary" />
+          {zh ? "邮件发送（SMTP）" : "Email Sending (SMTP)"}
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">SMTP Host</label>
+            <input value={form.smtpHost} onChange={(e) => setForm((f) => ({ ...f, smtpHost: e.target.value }))}
+              placeholder="smtp.163.com"
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">SMTP Port</label>
+            <input value={form.smtpPort} onChange={(e) => setForm((f) => ({ ...f, smtpPort: e.target.value }))}
+              placeholder="465"
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发件邮箱" : "Sender Email"}</label>
+          <input value={form.smtpUser} onChange={(e) => setForm((f) => ({ ...f, smtpUser: e.target.value, smtpFrom: e.target.value }))}
+            placeholder="sc_zibs2026@163.com"
+            className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            {zh ? "授权码" : "Auth Code / Password"}
+            {settings?.SMTP_PASS && <span className="ml-2 text-emerald-600 dark:text-emerald-400 font-normal">{zh ? "（已设置）" : "(set)"}</span>}
+          </label>
+          <div className="relative">
+            <input
+              type={showSecrets ? "text" : "password"}
+              value={form.smtpPass} onChange={(e) => setForm((f) => ({ ...f, smtpPass: e.target.value }))}
+              placeholder={settings?.SMTP_PASS ? (zh ? "留空则不修改" : "Leave blank to keep current") : (zh ? "输入授权码" : "Enter auth code")}
+              className="w-full px-3 py-1.5 pr-10 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <button type="button" onClick={() => setShowSecrets((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              {showSecrets ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border p-5 space-y-4">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
+          <SettingsIcon className="h-4 w-4 text-primary" />
+          {zh ? "AI 服务（Gemini）" : "AI Service (Gemini)"}
+        </h3>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Google API Key
+            {settings?.GOOGLE_API_KEY && <span className="ml-2 text-emerald-600 dark:text-emerald-400 font-normal">{zh ? "（已设置）" : "(set)"}</span>}
+          </label>
+          <div className="relative">
+            <input
+              type={showSecrets ? "text" : "password"}
+              value={form.googleApiKey} onChange={(e) => setForm((f) => ({ ...f, googleApiKey: e.target.value }))}
+              placeholder={settings?.GOOGLE_API_KEY ? (zh ? "留空则不修改" : "Leave blank to keep current") : (zh ? "输入 API Key" : "Enter API key")}
+              className="w-full px-3 py-1.5 pr-10 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <button type="button" onClick={() => setShowSecrets((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              {showSecrets ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button onClick={handleSave} disabled={saving}
+          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+          {zh ? "保存配置" : "Save Settings"}
+        </button>
+        {message && <span className="text-sm text-muted-foreground">{message}</span>}
       </div>
     </div>
   );
@@ -312,10 +501,14 @@ export default function AdminCenter() {
             <FileText className="h-3.5 w-3.5" />
             {zh ? "内容管理" : "Content CMS"}
           </TabsTrigger>
+          <TabsTrigger value="settings" className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm">
+            <SettingsIcon className="h-3.5 w-3.5" />
+            {zh ? "系统配置" : "Settings"}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-6">
-          <UserManagementPanel token={token!} language={language} />
+          <UserManagementPanel token={token!} language={language} currentUserId={user?.id} />
         </TabsContent>
 
         <TabsContent value="approvals" className="mt-6">
@@ -324,6 +517,10 @@ export default function AdminCenter() {
 
         <TabsContent value="cms" className="mt-6">
           <ContentCMSPanel language={language} />
+        </TabsContent>
+
+        <TabsContent value="settings" className="mt-6">
+          <SettingsPanel token={token!} language={language} />
         </TabsContent>
       </Tabs>
     </div>

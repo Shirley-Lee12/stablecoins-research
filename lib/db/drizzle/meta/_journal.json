@@ -8,6 +8,34 @@
       "when": 1782095927655,
       "tag": "0000_wakeful_warhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782609899713,
+      "tag": "0001_bouncy_winter_soldier",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782713110284,
+      "tag": "0002_minor_rockslide",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782716255263,
+      "tag": "0003_lowly_ultragirl",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782728154029,
+      "tag": "0004_mysterious_glorian",
+      "breakpoints": true
     }
   ]
 }

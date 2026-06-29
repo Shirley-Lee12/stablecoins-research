@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db, ourResearchTable } from "@workspace/db";
 import { eq, desc, ilike, sql } from "drizzle-orm";
+import { requireAdmin, requireAuth } from "./auth";
 
 const router = Router();
 
@@ -41,7 +42,7 @@ router.get("/our-research/:id", async (req, res) => {
   }
 });
 
-router.post("/our-research", async (req, res) => {
+router.post("/our-research", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { title, fileUrl, abstract, keyInnovations, tags } = req.body;
     if (!title) { res.status(400).json({ error: "title is required" }); return; }
@@ -64,7 +65,7 @@ router.post("/our-research", async (req, res) => {
   }
 });
 
-router.delete("/our-research/:id", async (req, res) => {
+router.delete("/our-research/:id", requireAuth, requireAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     await db.delete(ourResearchTable).where(eq(ourResearchTable.id, id));

@@ -8,6 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
+function isValidPassword(password: string): boolean {
+  return password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password);
+}
+
 export default function ResetPassword() {
   const { t } = useLanguage();
   const { resetPassword } = useAuth();
@@ -29,8 +33,11 @@ export default function ResetPassword() {
       setError(t("Passwords do not match.", "两次输入的密码不一致。"));
       return;
     }
-    if (password.length < 8) {
-      setError(t("Password must be at least 8 characters.", "密码至少需要8个字符。"));
+    if (!isValidPassword(password)) {
+      setError(t(
+        "Password must be at least 8 characters and include both an uppercase and a lowercase letter.",
+        "密码至少需要8个字符，且必须包含至少一个大写字母和一个小写字母。",
+      ));
       return;
     }
     setIsLoading(true);
@@ -87,7 +94,7 @@ export default function ResetPassword() {
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder={t("Min. 8 characters", "至少8个字符")}
+                  placeholder={t("Min. 8 chars, upper + lower", "至少8位，含大小写字母")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required

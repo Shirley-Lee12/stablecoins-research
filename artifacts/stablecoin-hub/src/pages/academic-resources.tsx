@@ -22,6 +22,7 @@ interface Resource {
   doi: string | null;
   abstract: string | null;
   tags: string[];
+  publishedDate: string | null;
   status: ResourceStatus;
   createdBy: number | null;
   createdAt: string;
@@ -29,6 +30,9 @@ interface Resource {
 
 interface ImportedItem {
   url: string;
+  fileName?: string;
+  doi?: string | null;
+  publishedDate?: string | null;
   title: string;
   authors: string[];
   abstract: string;
@@ -40,59 +44,24 @@ interface ImportedItem {
   selected: boolean;
 }
 
-// ── Mock data ─────────────────────────────────────────────────────────────────
-const MOCK_RESOURCES: Resource[] = [
-  {
-    id: 1, title: "Stablecoins: Growth Potential and Impact on Banking",
-    authors: ["International Monetary Fund", "Tobias Adrian"],
-    sourceType: "Report", url: "https://www.imf.org", doi: null,
-    abstract: "Stablecoins could challenge existing monetary systems. Their success will depend on trust, regulation, and widespread adoption.",
-    tags: ["Monetary Policy", "Financial Stability", "IMF", "Regulation"],
-    status: "approved", createdBy: null, createdAt: "2024-11-01T00:00:00Z",
-  },
-  {
-    id: 2, title: "Stablecoin Runs and the Centralization of Arbitrage",
-    authors: ["Gary B. Gorton", "Jeffery Zhang"], sourceType: "Paper",
-    url: null, doi: "10.2139/ssrn.3888752",
-    abstract: "We analyze the stability of stablecoins by studying historical run episodes.",
-    tags: ["Run Risk", "Algorithmic", "Regulation", "SSRN"],
-    status: "approved", createdBy: null, createdAt: "2024-09-15T00:00:00Z",
-  },
-  {
-    id: 3, title: "Responsible Financial Innovation Act — Stablecoin Provisions",
-    authors: ["U.S. Senate Banking Committee"], sourceType: "Gov Document",
-    url: "https://www.banking.senate.gov/", doi: null,
-    abstract: "The RFIA establishes a comprehensive framework for digital asset regulation.",
-    tags: ["U.S. Regulation", "RFIA", "Payment Stablecoin", "Licensing"],
-    status: "approved", createdBy: null, createdAt: "2024-07-20T00:00:00Z",
-  },
-  {
-    id: 4, title: "Circle Unveils USDC Cross-Chain Transfer Protocol",
-    authors: ["Circle Internet Financial"], sourceType: "News",
-    url: "https://www.circle.com/blog", doi: null,
-    abstract: "Circle has launched a cross-chain transfer protocol enabling USDC to move natively across multiple chains.",
-    tags: ["USDC", "Cross-Chain", "DeFi", "Circle"],
-    status: "approved", createdBy: null, createdAt: "2024-12-05T00:00:00Z",
-  },
-  {
-    id: 5, title: "The Economics of Stablecoins: Price Stabilization Mechanisms",
-    authors: ["Ye Li", "Simon Mayer"], sourceType: "Paper",
-    url: null, doi: "10.1093/rfs/hhad012",
-    abstract: "We develop a model comparing collateralized and algorithmic stablecoins.",
-    tags: ["Price Stability", "Collateral", "Algorithmic", "Economic Theory"],
-    status: "approved", createdBy: null, createdAt: "2024-06-10T00:00:00Z",
-  },
-  {
-    id: 6, title: "MiCA Regulation: Comprehensive Framework for Crypto-Asset Markets",
-    authors: ["European Parliament", "European Council"], sourceType: "Gov Document",
-    url: "https://eur-lex.europa.eu", doi: null,
-    abstract: "MiCA provides a comprehensive EU regulatory framework for asset-referenced tokens.",
-    tags: ["EU", "MiCA", "Regulation", "E-Money Token", "ART"],
-    status: "approved", createdBy: null, createdAt: "2024-05-01T00:00:00Z",
-  },
+// ── Constants ─────────────────────────────────────────────────────────────────
+// Closed tag vocabulary — research themes, not named entities. Keep in sync with
+// STABLECOIN_TAGS in artifacts/api-server/src/routes/resources.ts.
+const STABLECOIN_TAGS = [
+  "Regulation & Policy",
+  "Financial Stability & Run Risk",
+  "Monetary Policy",
+  "CBDC",
+  "DeFi & Crypto Markets",
+  "Algorithmic Design & Pegging",
+  "Reserves & Collateral",
+  "Cross-Border Payments",
+  "Consumer Protection",
+  "Market Adoption",
+  "Systemic Risk",
+  "Technology & Infrastructure",
 ];
 
-// ── Constants ─────────────────────────────────────────────────────────────────
 const FILTER_TYPES: { value: FilterType; labelEn: string; labelZh: string; icon: React.ElementType }[] = [
   { value: "All",              labelEn: "All Types",          labelZh: "全部类型", icon: BookOpen  },
   { value: "Paper",            labelEn: "Paper",              labelZh: "学术论文", icon: FileText  },
@@ -124,20 +93,21 @@ function apiBase() {
 // ── Resource Card ─────────────────────────────────────────────────────────────
 function ResourceCard({
   r, language, currentUserId, isAdmin,
-  onApprove, onReject, onEdit,
+  onApprove, onReject, onEdit, onOpenDetail,
 }: {
   r: Resource; language: string;
   currentUserId?: number; isAdmin?: boolean;
   onApprove?: (id: number) => void;
   onReject?: (id: number) => void;
   onEdit?: (r: Resource) => void;
+  onOpenDetail?: (r: Resource) => void;
 }) {
   const Icon  = BADGE_ICONS[r.sourceType] ?? FileText;
   const color = BADGE_COLORS[r.sourceType] ?? BADGE_COLORS["Paper"];
   const href  = r.url ?? (r.doi ? `https://doi.org/${r.doi}` : null);
-  const date  = new Date(r.createdAt).toLocaleDateString(
-    language === "zh" ? "zh-CN" : "en-US", { year: "numeric", month: "short" },
-  );
+  // Prefer the document's own publication year; fall back to when it was added to this library.
+  const date  = r.publishedDate?.match(/^\d{4}/)?.[0]
+    ?? new Date(r.createdAt).toLocaleDateString(language === "zh" ? "zh-CN" : "en-US", { year: "numeric", month: "short" });
   const canEdit = isAdmin || (currentUserId != null && r.createdBy === currentUserId);
   const isPending = r.status === "pending";
   const isRejected = r.status === "rejected";
@@ -176,11 +146,23 @@ function ResourceCard({
           </div>
         </div>
 
-        <h3 className="text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-3">
+        <h3
+          onClick={() => onOpenDetail?.(r)}
+          className="text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-3 cursor-pointer"
+        >
           {r.title}
         </h3>
         {r.authors.length > 0 && (
-          <p className="text-xs text-muted-foreground line-clamp-1 font-medium">{r.authors.join("; ")}</p>
+          <p className="text-xs text-muted-foreground line-clamp-1 font-medium">
+            {r.authors.map((a, i) => (
+              <React.Fragment key={a}>
+                {i > 0 && "; "}
+                <Link href={`/authors/${encodeURIComponent(a)}`} onClick={(e) => e.stopPropagation()}>
+                  <span className="hover:text-primary hover:underline cursor-pointer">{a}</span>
+                </Link>
+              </React.Fragment>
+            ))}
+          </p>
         )}
         {r.abstract && (
           <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 flex-1">{r.abstract}</p>
@@ -234,6 +216,80 @@ function ResourceCard({
   );
 }
 
+// ── Resource Detail Modal ───────────────────────────────────────────────────────
+function ResourceDetailModal({ resource, language, onClose }: { resource: Resource; language: string; onClose: () => void }) {
+  const zh = language === "zh";
+  const Icon  = BADGE_ICONS[resource.sourceType] ?? FileText;
+  const color = BADGE_COLORS[resource.sourceType] ?? BADGE_COLORS["Paper"];
+  const href  = resource.url ?? (resource.doi ? `https://doi.org/${resource.doi}` : null);
+  const date  = resource.publishedDate
+    || new Date(resource.createdAt).toLocaleDateString(zh ? "zh-CN" : "en-US", { year: "numeric", month: "long", day: "numeric" });
+  const dateLabel = resource.publishedDate ? (zh ? "发表于" : "Published") : (zh ? "添加于" : "Added");
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+          <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border ${color}`}>
+            <Icon className="h-3 w-3" />{resource.sourceType}
+          </span>
+          <button onClick={onClose} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="p-6 space-y-4 overflow-y-auto">
+          <h2 className="text-lg font-serif font-bold text-foreground leading-snug">{resource.title}</h2>
+
+          {resource.authors.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {resource.authors.map((a, i) => (
+                <React.Fragment key={a}>
+                  {i > 0 && "; "}
+                  <Link href={`/authors/${encodeURIComponent(a)}`}>
+                    <span className="font-medium text-foreground hover:text-primary hover:underline cursor-pointer">{a}</span>
+                  </Link>
+                </React.Fragment>
+              ))}
+            </p>
+          )}
+
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Clock className="h-3 w-3" />{dateLabel}: {date}
+          </p>
+
+          {resource.abstract && (
+            <div className="space-y-1">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</h3>
+              <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{resource.abstract}</p>
+            </div>
+          )}
+
+          {resource.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {resource.tags.map((tag) => (
+                <span key={tag} className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60">{tag}</span>
+              ))}
+            </div>
+          )}
+
+          {(href || resource.doi) && (
+            <div className="pt-2 border-t border-border space-y-1">
+              {href && (
+                <a href={href} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+                  {zh ? "查看原文" : "View Source"}<ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
+              {resource.doi && <p className="text-xs text-muted-foreground">DOI: {resource.doi}</p>}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Expert Redirect Panel ─────────────────────────────────────────────────────
 function ExpertPanel({ language }: { language: string }) {
   return (
@@ -258,38 +314,174 @@ function ExpertPanel({ language }: { language: string }) {
 }
 
 // ── Tag chip editor (shared between Import and Edit modals) ───────────────────
+const TAG_LABELS_ZH: Record<string, string> = {
+  "Regulation & Policy": "监管与政策",
+  "Financial Stability & Run Risk": "金融稳定与挤兑风险",
+  "Monetary Policy": "货币政策",
+  "CBDC": "央行数字货币",
+  "DeFi & Crypto Markets": "DeFi与加密市场",
+  "Algorithmic Design & Pegging": "算法设计与锚定机制",
+  "Reserves & Collateral": "储备与抵押",
+  "Cross-Border Payments": "跨境支付",
+  "Consumer Protection": "消费者保护",
+  "Market Adoption": "市场采用",
+  "Systemic Risk": "系统性风险",
+  "Technology & Infrastructure": "技术与基础设施",
+};
+
+const MAX_TAXONOMY_TAGS = 3;
+const MAX_CUSTOM_TAGS = 1;
+
+// Mostly-closed vocabulary: up to MAX_TAXONOMY_TAGS from the fixed research-direction list
+// (keeps the library-wide tag cloud usable), plus one optional free-form tag for paper-specific
+// detail (e.g. a named stablecoin or jurisdiction) that the preset list doesn't capture.
 function TagEditor({ tags, onChange, language }: { tags: string[]; onChange: (t: string[]) => void; language: string }) {
-  const [newTag, setNewTag] = useState("");
-  function add(raw: string) {
-    const t = raw.trim();
-    if (t && !tags.includes(t)) onChange([...tags, t]);
-    setNewTag("");
+  const zh = language === "zh";
+  const [customInput, setCustomInput] = useState("");
+
+  const taxonomyTags = tags.filter((t) => STABLECOIN_TAGS.includes(t));
+  const customTags = tags.filter((t) => !STABLECOIN_TAGS.includes(t));
+
+  function toggle(tag: string) {
+    if (tags.includes(tag)) onChange(tags.filter((x) => x !== tag));
+    else if (taxonomyTags.length < MAX_TAXONOMY_TAGS) onChange([...tags, tag]);
   }
+  function addCustom(raw: string) {
+    const t = raw.trim();
+    if (t && customTags.length < MAX_CUSTOM_TAGS && !tags.includes(t)) onChange([...tags, t]);
+    setCustomInput("");
+  }
+  function removeCustom(tag: string) {
+    onChange(tags.filter((x) => x !== tag));
+  }
+
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-        {language === "zh" ? "标签" : "Tags"}
+        {zh ? `研究方向标签（最多选 ${MAX_TAXONOMY_TAGS} 个）` : `Research Tags (up to ${MAX_TAXONOMY_TAGS})`}
+      </label>
+      <div className="flex flex-wrap gap-1.5">
+        {STABLECOIN_TAGS.map((tag) => {
+          const selected = tags.includes(tag);
+          const disabled = !selected && taxonomyTags.length >= MAX_TAXONOMY_TAGS;
+          return (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => toggle(tag)}
+              disabled={disabled}
+              className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                selected
+                  ? "bg-primary/10 text-primary border-primary/30"
+                  : disabled
+                    ? "bg-muted/40 text-muted-foreground/50 border-border cursor-not-allowed"
+                    : "bg-background text-muted-foreground border-border hover:border-primary/40"
+              }`}
+            >
+              {selected && <Check className="h-2.5 w-2.5" />}
+              {zh ? (TAG_LABELS_ZH[tag] ?? tag) : tag}
+            </button>
+          );
+        })}
+      </div>
+
+      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide block pt-1">
+        {zh ? `补充标签（可选，最多 ${MAX_CUSTOM_TAGS} 个）` : `Additional Tag (optional, up to ${MAX_CUSTOM_TAGS})`}
+      </label>
+      <div className="flex flex-wrap gap-1.5 items-center">
+        {customTags.map((tag) => (
+          <span key={tag} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-secondary/10 text-secondary-foreground border border-secondary/30">
+            {tag}
+            <button type="button" onClick={() => removeCustom(tag)} className="hover:text-red-500 transition-colors">
+              <X className="h-2.5 w-2.5" />
+            </button>
+          </span>
+        ))}
+        {customTags.length < MAX_CUSTOM_TAGS && (
+          <input
+            value={customInput}
+            onChange={(e) => setCustomInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addCustom(customInput); } }}
+            placeholder={zh ? "例如：USDC，新加坡…" : "e.g. USDC, Singapore…"}
+            className="flex-1 min-w-[140px] px-3 py-1 text-xs rounded-full border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Author picker (autocomplete existing authors, or create new on the fly) ───
+interface AuthorSuggestion { name: string; institutionName: string | null }
+
+function AuthorPicker({ authors, onChange, language }: { authors: string[]; onChange: (a: string[]) => void; language: string }) {
+  const zh = language === "zh";
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<AuthorSuggestion[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!query.trim()) { setSuggestions([]); return; }
+    const handle = setTimeout(() => {
+      fetch(`${apiBase()}/api/authors?search=${encodeURIComponent(query.trim())}`)
+        .then((r) => (r.ok ? r.json() : []))
+        .then((data: AuthorSuggestion[]) => setSuggestions(Array.isArray(data) ? data : []))
+        .catch(() => setSuggestions([]));
+    }, 250);
+    return () => clearTimeout(handle);
+  }, [query]);
+
+  function add(name: string) {
+    const t = name.trim();
+    if (t && !authors.includes(t)) onChange([...authors, t]);
+    setQuery("");
+    setSuggestions([]);
+    setIsOpen(false);
+  }
+
+  const unmatched = suggestions.filter((s) => !authors.includes(s.name));
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        {zh ? "作者" : "Authors"}
       </label>
       <div className="flex flex-wrap gap-1.5 min-h-[2rem]">
-        {tags.map((tag) => (
-          <span key={tag} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-            {tag}
-            <button onClick={() => onChange(tags.filter((x) => x !== tag))} className="hover:text-red-500 transition-colors">
+        {authors.map((name) => (
+          <span key={name} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+            {name}
+            <button onClick={() => onChange(authors.filter((x) => x !== name))} className="hover:text-red-500 transition-colors">
               <X className="h-2.5 w-2.5" />
             </button>
           </span>
         ))}
       </div>
-      <div className="flex gap-1.5">
-        <input value={newTag} onChange={(e) => setNewTag(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(newTag); } }}
-          placeholder={language === "zh" ? "输入新标签，回车添加" : "New tag, press Enter"}
-          className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+      <div className="relative">
+        <input
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setIsOpen(true); }}
+          onFocus={() => setIsOpen(true)}
+          onBlur={() => setTimeout(() => setIsOpen(false), 150)}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(query); } }}
+          placeholder={zh ? "搜索现有作者，或输入新作者后回车" : "Search existing authors, or type a new name and press Enter"}
+          className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
         />
-        <button onClick={() => add(newTag)} disabled={!newTag.trim()}
-          className="px-3 py-1.5 text-xs rounded-lg border border-border bg-muted hover:bg-muted/80 disabled:opacity-40 transition-colors">
-          <Plus className="h-3.5 w-3.5" />
-        </button>
+        {isOpen && query.trim() && (
+          <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-card shadow-lg overflow-hidden">
+            {unmatched.length > 0 && unmatched.map((s) => (
+              <button key={s.name} onClick={() => add(s.name)}
+                className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between gap-2">
+                <span className="font-medium text-foreground">{s.name}</span>
+                {s.institutionName && <span className="text-muted-foreground truncate">{s.institutionName}</span>}
+              </button>
+            ))}
+            <button onClick={() => add(query)}
+              className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors text-primary border-t border-border">
+              <Plus className="inline h-3 w-3 mr-1" />
+              {zh ? `创建新作者 "${query.trim()}"` : `Create new author "${query.trim()}"`}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -302,9 +494,12 @@ function EditModal({ resource, token, language, onClose, onSaved }: {
 }) {
   const zh = language === "zh";
   const [title,    setTitle]    = useState(resource.title);
-  const [authors,  setAuthors]  = useState(resource.authors.join(", "));
+  const [authors,  setAuthors]  = useState(resource.authors);
+  const [url,      setUrl]      = useState(resource.url ?? "");
+  const [doi,      setDoi]      = useState(resource.doi ?? "");
   const [abstract, setAbstract] = useState(resource.abstract ?? "");
   const [tags,     setTags]     = useState(resource.tags);
+  const [publishedDate, setPublishedDate] = useState(resource.publishedDate ?? "");
   const [sourceType, setSourceType] = useState<SourceType>(resource.sourceType);
   const [saving,   setSaving]   = useState(false);
   const [error,    setError]    = useState("");
@@ -317,8 +512,10 @@ function EditModal({ resource, token, language, onClose, onSaved }: {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           title: title.trim(), sourceType,
-          authors: authors.split(",").map((a) => a.trim()).filter(Boolean),
+          authors,
+          url: url.trim() || null, doi: doi.trim() || null,
           abstract: abstract.trim(), tags,
+          publishedDate: publishedDate.trim() || null,
         }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); setSaving(false); return; }
@@ -352,10 +549,23 @@ function EditModal({ resource, token, language, onClose, onSaved }: {
             <input value={title} onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
+          <AuthorPicker authors={authors} onChange={setAuthors} language={language} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL</label>
+              <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..."
+                className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DOI</label>
+              <input value={doi} onChange={(e) => setDoi(e.target.value)} placeholder="10.xxxx/xxxxx"
+                className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+            </div>
+          </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "作者（逗号分隔）" : "Authors"}</label>
-            <input value={authors} onChange={(e) => setAuthors(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发表日期" : "Published Date"}</label>
+            <input value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)} placeholder="2021 or 2021-07-20"
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
@@ -380,38 +590,187 @@ function EditModal({ resource, token, language, onClose, onSaved }: {
   );
 }
 
+// ── Create Modal (Method A — manual entry) ─────────────────────────────────────
+function CreateModal({ token, language, isAdmin, onClose, onSaved }: {
+  token: string; language: string; isAdmin: boolean; onClose: () => void; onSaved: () => void;
+}) {
+  const zh = language === "zh";
+  const [title,      setTitle]      = useState("");
+  const [authors,    setAuthors]    = useState<string[]>([]);
+  const [url,        setUrl]        = useState("");
+  const [doi,        setDoi]        = useState("");
+  const [abstract,   setAbstract]   = useState("");
+  const [tags,       setTags]       = useState<string[]>([]);
+  const [publishedDate, setPublishedDate] = useState("");
+  const [sourceType, setSourceType] = useState<SourceType>("Paper");
+  const [saving,     setSaving]     = useState(false);
+  const [error,      setError]      = useState("");
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const res = await fetch(`${apiBase()}/api/resources`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          title: title.trim(), sourceType, authors,
+          url: url.trim() || null, doi: doi.trim() || null,
+          abstract: abstract.trim() || null, tags,
+          publishedDate: publishedDate.trim() || null,
+        }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        if (res.status === 409 && d.error === "duplicate") {
+          setError(zh ? `文献库中已存在同名或同 DOI 的资源："${d.existing?.title}"` : `A resource with this title or DOI already exists: "${d.existing?.title}"`);
+        } else {
+          setError(d.error ?? "Failed");
+        }
+        setSaving(false);
+        return;
+      }
+      onSaved(); onClose();
+    } catch { setError(zh ? "网络请求失败" : "Network error"); setSaving(false); }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Plus className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold">{zh ? "手动添加文献" : "Add Resource Manually"}</h2>
+          </div>
+          <button onClick={onClose} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+          {!isAdmin && (
+            <div className="flex items-start gap-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
+              <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              {zh ? "提交后将进入待审核状态，需管理员审核通过后才会公开显示。" : "This submission will enter Pending Review until an administrator approves it."}
+            </div>
+          )}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型" : "Type"}</label>
+            <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
+              {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "标题" : "Title"}</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          </div>
+          <AuthorPicker authors={authors} onChange={setAuthors} language={language} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL</label>
+              <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..."
+                className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DOI</label>
+              <input value={doi} onChange={(e) => setDoi(e.target.value)} placeholder="10.xxxx/xxxxx"
+                className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发表日期" : "Published Date"}</label>
+            <input value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)} placeholder="2021 or 2021-07-20"
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
+            <textarea value={abstract} onChange={(e) => setAbstract(e.target.value)} rows={4}
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+          </div>
+          <TagEditor tags={tags} onChange={setTags} language={language} />
+          {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+          <div className="flex justify-end gap-2 pt-1">
+            <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+              {zh ? "取消" : "Cancel"}
+            </button>
+            <button onClick={handleSave} disabled={saving || !title.trim()}
+              className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+              {zh ? "提交" : "Submit"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Single Import Modal ───────────────────────────────────────────────────────
-type SingleStep = "input" | "parsing" | "review" | "saving" | "done" | "error";
+type SingleStep = "input" | "uploading" | "parsing" | "review" | "saving" | "done" | "error";
+type ImportMethod = "url" | "pdf";
 
 function SingleImportModal({ token, language, onClose, onSaved }: {
   token: string; language: string; onClose: () => void; onSaved: () => void;
 }) {
   const zh = language === "zh";
+  const [method,     setMethod]     = useState<ImportMethod>("url");
   const [step,       setStep]       = useState<SingleStep>("input");
   const [url,        setUrl]        = useState("");
+  const [file,       setFile]       = useState<File | null>(null);
   const [sourceType, setSourceType] = useState<SourceType>("Paper");
   const [errorMsg,   setErrorMsg]   = useState("");
   const [title,      setTitle]      = useState("");
-  const [authors,    setAuthors]    = useState("");
+  const [authors,    setAuthors]    = useState<string[]>([]);
+  const [doi,        setDoi]        = useState("");
+  const [resolvedUrl, setResolvedUrl] = useState("");
   const [abstract,   setAbstract]   = useState("");
   const [tags,       setTags]       = useState<string[]>([]);
+  const [publishedDate, setPublishedDate] = useState("");
 
   async function handleParse() {
-    if (!url.startsWith("http")) { setErrorMsg(zh ? "请输入有效 URL" : "Enter a valid URL"); return; }
-    setErrorMsg(""); setStep("parsing");
-    try {
-      const res = await fetch(`${apiBase()}/api/resources/import`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ url, source_type: sourceType }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setErrorMsg(data.error ?? "Parsing failed"); setStep("error"); return; }
-      setTitle(data.title); setAuthors(data.authors.join(", "));
-      setAbstract(data.abstract); setTags(data.tags);
-      if (data.sourceType) setSourceType(data.sourceType as SourceType);
-      setStep("review");
-    } catch { setErrorMsg(zh ? "网络请求失败" : "Network error"); setStep("error"); }
+    setErrorMsg("");
+    if (method === "url") {
+      if (!url.startsWith("http")) { setErrorMsg(zh ? "请输入有效 URL" : "Enter a valid URL"); return; }
+      setStep("parsing");
+      try {
+        const res = await fetch(`${apiBase()}/api/resources/import`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ url, source_type: sourceType }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setErrorMsg(data.error ?? "Parsing failed"); setStep("error"); return; }
+        setTitle(data.title); setAuthors(data.authors);
+        setAbstract(data.abstract); setTags(data.tags);
+        setDoi(data.doi ?? ""); setResolvedUrl(data.url ?? url);
+        setPublishedDate(data.publishedDate ?? "");
+        if (data.sourceType) setSourceType(data.sourceType as SourceType);
+        setStep("review");
+      } catch { setErrorMsg(zh ? "网络请求失败" : "Network error"); setStep("error"); }
+    } else {
+      if (!file) { setErrorMsg(zh ? "请选择 PDF 文件" : "Choose a PDF file"); return; }
+      setStep("uploading");
+      try {
+        const form = new FormData();
+        form.append("file", file);
+        form.append("source_type", sourceType);
+        setStep("parsing");
+        const res = await fetch(`${apiBase()}/api/resources/import/pdf`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: form,
+        });
+        const data = await res.json();
+        if (!res.ok) { setErrorMsg(data.error ?? "Parsing failed"); setStep("error"); return; }
+        setTitle(data.title); setAuthors(data.authors);
+        setAbstract(data.abstract); setTags(data.tags);
+        setDoi(data.doi ?? ""); setResolvedUrl(data.url ?? "");
+        setPublishedDate(data.publishedDate ?? "");
+        if (data.sourceType) setSourceType(data.sourceType as SourceType);
+        setStep("review");
+      } catch { setErrorMsg(zh ? "网络请求失败" : "Network error"); setStep("error"); }
+    }
   }
 
   async function handleSave() {
@@ -421,12 +780,23 @@ function SingleImportModal({ token, language, onClose, onSaved }: {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          title: title.trim(), sourceType, url,
-          authors: authors.split(",").map((a) => a.trim()).filter(Boolean),
+          title: title.trim(), sourceType,
+          url: resolvedUrl.trim() || null, doi: doi.trim() || null,
+          authors,
           abstract: abstract.trim(), tags,
+          publishedDate: publishedDate.trim() || null,
         }),
       });
-      if (!res.ok) { const d = await res.json(); setErrorMsg(d.error ?? "Save failed"); setStep("error"); return; }
+      if (!res.ok) {
+        const d = await res.json();
+        if (res.status === 409 && d.error === "duplicate") {
+          setErrorMsg(zh ? `文献库中已存在同名或同 DOI 的资源："${d.existing?.title}"` : `A resource with this title or DOI already exists: "${d.existing?.title}"`);
+        } else {
+          setErrorMsg(d.error ?? "Save failed");
+        }
+        setStep("error");
+        return;
+      }
       setStep("done");
       setTimeout(() => { onSaved(); onClose(); }, 1000);
     } catch { setErrorMsg(zh ? "网络请求失败" : "Network error"); setStep("error"); }
@@ -449,6 +819,16 @@ function SingleImportModal({ token, language, onClose, onSaved }: {
           {(step === "input" || step === "error") && (
             <>
               <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button onClick={() => setMethod("url")}
+                    className={`text-xs px-2 py-1.5 rounded-lg border transition-colors text-center font-medium ${method === "url" ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40"}`}>
+                    {zh ? "DOI / URL" : "DOI / URL"}
+                  </button>
+                  <button onClick={() => setMethod("pdf")}
+                    className={`text-xs px-2 py-1.5 rounded-lg border transition-colors text-center font-medium ${method === "pdf" ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40"}`}>
+                    {zh ? "PDF 文件" : "PDF File"}
+                  </button>
+                </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型" : "Type"}</label>
                   <div className="grid grid-cols-3 gap-1.5">
@@ -460,13 +840,23 @@ function SingleImportModal({ token, language, onClose, onSaved }: {
                     ))}
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "文献 URL" : "Source URL"}</label>
-                  <input type="url" value={url} onChange={(e) => setUrl(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleParse()}
-                    placeholder="https://..."
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
-                </div>
+                {method === "url" ? (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "文献 URL 或 DOI 链接" : "Source URL or DOI link"}</label>
+                    <input type="url" value={url} onChange={(e) => setUrl(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleParse()}
+                      placeholder="https://..."
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "选择 PDF 文件" : "Choose PDF file"}</label>
+                    <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                      className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer" />
+                    {file && <p className="text-xs text-muted-foreground">{file.name} · {(file.size / 1024 / 1024).toFixed(1)} MB</p>}
+                    <p className="text-xs text-muted-foreground">{zh ? "最大 15MB；扫描版 PDF 也支持自动识别。" : "Max 15MB. Scanned/image PDFs are read automatically."}</p>
+                  </div>
+                )}
                 {errorMsg && (
                   <div className="flex items-start gap-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
                     <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />{errorMsg}
@@ -475,18 +865,24 @@ function SingleImportModal({ token, language, onClose, onSaved }: {
               </div>
               <div className="flex justify-end gap-2">
                 <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">{zh ? "取消" : "Cancel"}</button>
-                <button onClick={handleParse} disabled={!url}
+                <button onClick={handleParse} disabled={method === "url" ? !url : !file}
                   className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
                   <Upload className="h-3.5 w-3.5" />{zh ? "AI 解析" : "Parse with AI"}
                 </button>
               </div>
             </>
           )}
+          {step === "uploading" && (
+            <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
+              <Loader2 className="h-8 w-8 text-primary animate-spin" />
+              <p className="text-sm font-medium">{zh ? "正在上传文件…" : "Uploading file…"}</p>
+            </div>
+          )}
           {step === "parsing" && (
             <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
               <Loader2 className="h-8 w-8 text-primary animate-spin" />
               <p className="text-sm font-medium">{zh ? "AI 正在解析文献元数据…" : "AI is parsing the document…"}</p>
-              <p className="text-xs text-muted-foreground">{zh ? "通常需要 5–15 秒" : "Usually 5–15 seconds"}</p>
+              <p className="text-xs text-muted-foreground">{zh ? "通常需要 5–20 秒" : "Usually 5–20 seconds"}</p>
             </div>
           )}
           {step === "review" && (
@@ -505,10 +901,23 @@ function SingleImportModal({ token, language, onClose, onSaved }: {
                   <input value={title} onChange={(e) => setTitle(e.target.value)}
                     className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
                 </div>
+                <AuthorPicker authors={authors} onChange={setAuthors} language={language} />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL</label>
+                    <input value={resolvedUrl} onChange={(e) => setResolvedUrl(e.target.value)} placeholder="https://..."
+                      className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DOI</label>
+                    <input value={doi} onChange={(e) => setDoi(e.target.value)} placeholder="10.xxxx/xxxxx"
+                      className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+                  </div>
+                </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "作者（逗号分隔）" : "Authors"}</label>
-                  <input value={authors} onChange={(e) => setAuthors(e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发表日期" : "Published Date"}</label>
+                  <input value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)} placeholder="2021 or 2021-07-20"
+                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
@@ -553,29 +962,17 @@ function BatchImportModal({ token, language, onClose, onSaved }: {
 }) {
   const zh = language === "zh";
   type BatchStep = "input" | "parsing" | "review" | "saving" | "done";
+  const [method,     setMethod]     = useState<ImportMethod>("url");
   const [step,       setStep]       = useState<BatchStep>("input");
   const [urlsText,   setUrlsText]   = useState("");
+  const [files,      setFiles]      = useState<File[]>([]);
   const [sourceType, setSourceType] = useState<SourceType>("Paper");
   const [items,      setItems]      = useState<ImportedItem[]>([]);
   const [savedCount, setSavedCount] = useState(0);
+  const [duplicateTitles, setDuplicateTitles] = useState<string[]>([]);
   const esRef = useRef<boolean>(false);
 
-  async function handleParse() {
-    const raw = urlsText.split(/[\n,]+/).map((u) => u.trim()).filter((u) => u.startsWith("http"));
-    if (raw.length === 0) return;
-    const deduped = [...new Set(raw)].slice(0, 20);
-
-    setItems(deduped.map((url) => ({ url, title: "", authors: [], abstract: "", tags: [], sourceType, status: "parsing" as const, selected: false })));
-    setStep("parsing");
-    esRef.current = true;
-
-    // Use SSE batch endpoint
-    const res = await fetch(`${apiBase()}/api/resources/import/batch`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ urls: deduped, source_type: sourceType }),
-    });
-
+  async function consumeStream(res: Response) {
     const reader = res.body!.getReader();
     const decoder = new TextDecoder();
     let buf = "";
@@ -610,6 +1007,39 @@ function BatchImportModal({ token, language, onClose, onSaved }: {
     }
   }
 
+  async function handleParse() {
+    esRef.current = true;
+    if (method === "url") {
+      const raw = urlsText.split(/[\n,]+/).map((u) => u.trim()).filter((u) => u.startsWith("http"));
+      if (raw.length === 0) return;
+      const deduped = [...new Set(raw)].slice(0, 20);
+
+      setItems(deduped.map((url) => ({ url, title: "", authors: [], abstract: "", tags: [], sourceType, status: "parsing" as const, selected: false })));
+      setStep("parsing");
+
+      const res = await fetch(`${apiBase()}/api/resources/import/batch`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ urls: deduped, source_type: sourceType }),
+      });
+      await consumeStream(res);
+    } else {
+      if (files.length === 0) return;
+      setItems(files.map((f) => ({ url: "", fileName: f.name, title: "", authors: [], abstract: "", tags: [], sourceType, status: "parsing" as const, selected: false })));
+      setStep("parsing");
+
+      const form = new FormData();
+      files.forEach((f) => form.append("files", f));
+      form.append("source_type", sourceType);
+      const res = await fetch(`${apiBase()}/api/resources/import/pdf/batch`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      await consumeStream(res);
+    }
+  }
+
   function toggleItem(idx: number) {
     setItems((prev) => prev.map((it, i) => i === idx ? { ...it, selected: !it.selected } : it));
   }
@@ -622,22 +1052,30 @@ function BatchImportModal({ token, language, onClose, onSaved }: {
     if (toSave.length === 0) return;
     setStep("saving");
     let saved = 0;
+    const duplicates: string[] = [];
     for (const it of toSave) {
       try {
-        await fetch(`${apiBase()}/api/resources`, {
+        const res = await fetch(`${apiBase()}/api/resources`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({
-            title: it.title, sourceType: it.sourceType, url: it.url,
+            title: it.title, sourceType: it.sourceType, url: it.url || null, doi: it.doi || null,
             authors: it.authors, abstract: it.abstract, tags: it.tags,
+            publishedDate: it.publishedDate || null,
           }),
         });
-        saved++;
+        if (res.ok) {
+          saved++;
+        } else if (res.status === 409) {
+          duplicates.push(it.title);
+        }
       } catch { /* continue */ }
     }
     setSavedCount(saved);
+    setDuplicateTitles(duplicates);
     setStep("done");
-    setTimeout(() => { onSaved(); onClose(); }, 1500);
+    onSaved();
+    if (duplicates.length === 0) setTimeout(onClose, 1500);
   }
 
   const doneItems = items.filter((it) => it.status === "done");
@@ -661,9 +1099,22 @@ function BatchImportModal({ token, language, onClose, onSaved }: {
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {step === "input" && (
             <>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button onClick={() => setMethod("url")}
+                  className={`text-xs px-2 py-1.5 rounded-lg border transition-colors text-center font-medium ${method === "url" ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40"}`}>
+                  {zh ? "多个 URL" : "Multiple URLs"}
+                </button>
+                <button onClick={() => setMethod("pdf")}
+                  className={`text-xs px-2 py-1.5 rounded-lg border transition-colors text-center font-medium ${method === "pdf" ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40"}`}>
+                  {zh ? "多个 PDF" : "Multiple PDFs"}
+                </button>
+              </div>
               <p className="text-xs text-muted-foreground">
-                {zh ? "每行或逗号分隔粘贴多个 URL（最多 20 条），AI 将并行解析所有文献元数据。"
-                  : "Paste multiple URLs (one per line or comma-separated, max 20). AI will parse all in parallel."}
+                {method === "url"
+                  ? (zh ? "每行或逗号分隔粘贴多个 URL（最多 20 条），AI 将逐条解析所有文献元数据。"
+                        : "Paste multiple URLs (one per line or comma-separated, max 20). AI will parse each one.")
+                  : (zh ? "选择最多 20 个 PDF 文件（每个最大 15MB），AI 将逐个解析元数据。"
+                        : "Choose up to 20 PDF files (max 15MB each). AI will parse each one.")}
               </p>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型（统一）" : "Default Source Type"}</label>
@@ -676,19 +1127,33 @@ function BatchImportModal({ token, language, onClose, onSaved }: {
                   ))}
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URLs</label>
-                <textarea value={urlsText} onChange={(e) => setUrlsText(e.target.value)} rows={8}
-                  placeholder={zh ? "https://example.com/paper1\nhttps://example.com/paper2\n..." : "https://example.com/paper1\nhttps://example.com/paper2\n..."}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none font-mono placeholder:text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">
-                  {urlsText.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length} {zh ? "条有效 URL" : "valid URLs"}
-                </p>
-              </div>
+              {method === "url" ? (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URLs</label>
+                  <textarea value={urlsText} onChange={(e) => setUrlsText(e.target.value)} rows={8}
+                    placeholder={zh ? "https://example.com/paper1\nhttps://example.com/paper2\n..." : "https://example.com/paper1\nhttps://example.com/paper2\n..."}
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none font-mono placeholder:text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    {urlsText.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length} {zh ? "条有效 URL" : "valid URLs"}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "选择 PDF 文件（可多选）" : "Choose PDF files (multiple)"}</label>
+                  <input type="file" accept="application/pdf" multiple
+                    onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 20))}
+                    className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer" />
+                  <p className="text-xs text-muted-foreground">
+                    {files.length} {zh ? "个文件已选择" : "files selected"}
+                  </p>
+                </div>
+              )}
               <div className="flex justify-end gap-2">
                 <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">{zh ? "取消" : "Cancel"}</button>
                 <button onClick={handleParse}
-                  disabled={urlsText.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length === 0}
+                  disabled={method === "url"
+                    ? urlsText.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length === 0
+                    : files.length === 0}
                   className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
                   <Upload className="h-3.5 w-3.5" />{zh ? "开始批量解析" : "Start Parsing"}
                 </button>
@@ -699,14 +1164,26 @@ function BatchImportModal({ token, language, onClose, onSaved }: {
           {(step === "parsing" || step === "review") && (
             <>
               <div className="space-y-2">
-                {step === "parsing" && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                    {zh ? "AI 正在逐条解析，请稍候…" : "AI parsing each URL, please wait…"}
-                  </div>
-                )}
+                {step === "parsing" && (() => {
+                  const processed = items.filter((it) => it.status !== "parsing").length;
+                  const pct = items.length > 0 ? Math.round((processed / items.length) * 100) : 0;
+                  return (
+                    <div className="space-y-1.5 mb-2">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                          {zh ? `正在处理（${processed}/${items.length}）…` : `Processing (${processed}/${items.length})…`}
+                        </span>
+                        <span>{pct}%</span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                        <div className="h-full bg-primary transition-all duration-300" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })()}
                 {items.map((it, idx) => (
-                  <div key={it.url} className={`rounded-lg border p-3 space-y-2 transition-colors ${
+                  <div key={it.fileName ?? it.url} className={`rounded-lg border p-3 space-y-2 transition-colors ${
                     it.status === "error" ? "border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20" :
                     it.selected ? "border-primary/40 bg-primary/5" : "border-border"
                   }`}>
@@ -716,7 +1193,7 @@ function BatchImportModal({ token, language, onClose, onSaved }: {
                         {it.status === "done"    && <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />}
                         {it.status === "error"   && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
                         <span className="text-xs font-medium truncate text-foreground">
-                          {it.status === "done" ? it.title || it.url : it.url}
+                          {it.status === "done" ? it.title || it.fileName || it.url : (it.fileName ?? it.url)}
                         </span>
                       </div>
                       {it.status === "done" && (
@@ -780,6 +1257,16 @@ function BatchImportModal({ token, language, onClose, onSaved }: {
               <p className="text-sm font-medium">
                 {zh ? `已提交 ${savedCount} 篇文献` : `${savedCount} resource${savedCount !== 1 ? "s" : ""} submitted`}
               </p>
+              {duplicateTitles.length > 0 && (
+                <div className="max-w-sm space-y-1.5">
+                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                    {zh ? `${duplicateTitles.length} 篇已存在于文献库，未重复添加：` : `${duplicateTitles.length} already in the library, skipped:`}
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-0.5">
+                    {duplicateTitles.map((t) => <li key={t} className="truncate">· {t}</li>)}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -799,8 +1286,9 @@ export default function AcademicResources() {
   const [selectedTags,  setSelectedTags]  = useState<Set<string>>(new Set());
   const [apiResources,  setApiResources]  = useState<Resource[] | null>(null);
   const [isLoading,     setIsLoading]     = useState(true);
-  const [importMode,    setImportMode]    = useState<"none" | "single" | "batch">("none");
+  const [importMode,    setImportMode]    = useState<"none" | "create" | "single" | "batch">("none");
   const [editResource,  setEditResource]  = useState<Resource | null>(null);
+  const [detailResource, setDetailResource] = useState<Resource | null>(null);
   const [adminView,     setAdminView]     = useState(false);
   const [pendingCount,  setPendingCount]  = useState(0);
 
@@ -813,14 +1301,18 @@ export default function AcademicResources() {
     fetch(`${apiBase()}/api/resources`, { headers })
       .then((r) => r.json())
       .then((data: Resource[]) => {
-        if (!Array.isArray(data)) { setApiResources(null); return; }
+        if (!Array.isArray(data)) { setApiResources([]); return; }
         if (isAdmin) setPendingCount(data.filter((r: Resource) => r.status === "pending").length);
-        // Fall back to mock data only when unauthenticated AND DB is empty
-        setApiResources(!user && data.length === 0 ? null : data);
+        setApiResources(data);
+        const wantedId = new URLSearchParams(window.location.search).get("id");
+        if (wantedId) {
+          const match = data.find((r) => String(r.id) === wantedId);
+          if (match) setDetailResource(match);
+        }
       })
-      .catch(() => setApiResources(null))
+      .catch(() => setApiResources([]))
       .finally(() => setIsLoading(false));
-  }, [token, isAdmin, user]);
+  }, [token, isAdmin]);
 
   useEffect(() => { fetchResources(); }, [fetchResources]);
 
@@ -842,8 +1334,7 @@ export default function AcademicResources() {
     fetchResources();
   }
 
-  const resources = apiResources ?? MOCK_RESOURCES;
-  const usingMock = apiResources === null && !isLoading;
+  const resources = apiResources ?? [];
 
   const allTags = useMemo(
     () => Array.from(new Set(resources.filter((r) => r.status === "approved").flatMap((r) => r.tags))).sort(),
@@ -899,6 +1390,10 @@ export default function AcademicResources() {
           </div>
           {user && (
             <div className="flex items-center gap-2 shrink-0 flex-wrap">
+              <button onClick={() => setImportMode("create")}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors">
+                <Plus className="h-4 w-4" />{zh ? "手动添加" : "Add Manually"}
+              </button>
               <button onClick={() => setImportMode("single")}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors">
                 <Upload className="h-4 w-4" />{zh ? "导入文献" : "Import"}
@@ -925,11 +1420,6 @@ export default function AcademicResources() {
           </button>
         )}
 
-        {usingMock && (
-          <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-1.5 inline-block">
-            {t("Showing sample data — connect the database to display live content.", "当前显示示例数据，连接数据库后将展示真实内容。")}
-          </p>
-        )}
       </div>
 
       {/* ── Search ── */}
@@ -1021,6 +1511,7 @@ export default function AcademicResources() {
                       onApprove={isAdmin ? handleApprove : undefined}
                       onReject={isAdmin ? handleReject : undefined}
                       onEdit={setEditResource}
+                      onOpenDetail={setDetailResource}
                     />
                   ))}
                 </div>
@@ -1031,6 +1522,9 @@ export default function AcademicResources() {
       </div>
 
       {/* ── Modals ── */}
+      {importMode === "create" && token && (
+        <CreateModal token={token} language={language} isAdmin={isAdmin} onClose={() => setImportMode("none")} onSaved={fetchResources} />
+      )}
       {importMode === "single" && token && (
         <SingleImportModal token={token} language={language} onClose={() => setImportMode("none")} onSaved={fetchResources} />
       )}
@@ -1039,6 +1533,9 @@ export default function AcademicResources() {
       )}
       {editResource && token && (
         <EditModal resource={editResource} token={token} language={language} onClose={() => setEditResource(null)} onSaved={fetchResources} />
+      )}
+      {detailResource && (
+        <ResourceDetailModal resource={detailResource} language={language} onClose={() => setDetailResource(null)} />
       )}
     </div>
   );
