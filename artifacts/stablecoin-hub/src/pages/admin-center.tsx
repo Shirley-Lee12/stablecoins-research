@@ -140,7 +140,7 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
 // ── Settings Panel ────────────────────────────────────────────────────────────
 interface SettingsData {
   SMTP_HOST?: string; SMTP_PORT?: string; SMTP_USER?: string;
-  SMTP_PASS?: boolean; SMTP_FROM?: string; GOOGLE_API_KEY?: boolean;
+  SMTP_PASS?: boolean; SMTP_FROM?: string; LLM_API_KEY?: boolean;
 }
 
 function SettingsPanel({ token, language }: { token: string; language: string }) {
@@ -182,7 +182,7 @@ function SettingsPanel({ token, language }: { token: string; language: string })
         SMTP_HOST: form.smtpHost, SMTP_PORT: form.smtpPort, SMTP_USER: form.smtpUser, SMTP_FROM: form.smtpFrom,
       };
       if (form.smtpPass.trim()) body.SMTP_PASS = form.smtpPass.trim();
-      if (form.googleApiKey.trim()) body.GOOGLE_API_KEY = form.googleApiKey.trim();
+      if (form.googleApiKey.trim()) body.LLM_API_KEY = form.googleApiKey.trim();
 
       const res = await fetch(`${apiBase()}/api/admin/settings`, {
         method: "PATCH",
@@ -272,13 +272,13 @@ function SettingsPanel({ token, language }: { token: string; language: string })
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             Google API Key
-            {settings?.GOOGLE_API_KEY && <span className="ml-2 text-emerald-600 dark:text-emerald-400 font-normal">{zh ? "（已设置）" : "(set)"}</span>}
+            {settings?.LLM_API_KEY && <span className="ml-2 text-emerald-600 dark:text-emerald-400 font-normal">{zh ? "（已设置）" : "(set)"}</span>}
           </label>
           <div className="relative">
             <input
               type={showSecrets ? "text" : "password"}
               value={form.googleApiKey} onChange={(e) => setForm((f) => ({ ...f, googleApiKey: e.target.value }))}
-              placeholder={settings?.GOOGLE_API_KEY ? (zh ? "留空则不修改" : "Leave blank to keep current") : (zh ? "输入 API Key" : "Enter API key")}
+              placeholder={settings?.LLM_API_KEY ? (zh ? "留空则不修改" : "Leave blank to keep current") : (zh ? "输入 API Key" : "Enter API key")}
               className="w-full px-3 py-1.5 pr-10 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <button type="button" onClick={() => setShowSecrets((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               {showSecrets ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}

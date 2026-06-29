@@ -75,6 +75,6 @@ scripts/            工具脚本
 |---|---|
 | `DATABASE_URL` | Supabase PostgreSQL 连接串 |
 | `SESSION_SECRET` / `JWT_SECRET` | JWT 签名密钥（服务端优先读 `JWT_SECRET`，否则回退 `SESSION_SECRET`） |
-| `GOOGLE_API_KEY` | `/api/resources/import` 用的 Gemini API key |
+| `LLM_API_KEY` | `/api/resources/import` 用的 Gemini API key |
 | `CORS_ORIGIN` | 生产环境允许的前端来源（Render） |
 | `VITE_API_BASE_URL` | 生产环境前端访问后端的地址（Vercel → Render） |

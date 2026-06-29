@@ -61,8 +61,8 @@ function stripJatsTags(abstract: unknown): string {
 
 // ── Gemini client ─────────────────────────────────────────────────────────────
 async function getGemini() {
-  const key = await getSetting("GOOGLE_API_KEY");
-  if (!key) throw new Error("GOOGLE_API_KEY is not set");
+  const key = await getSetting("LLM_API_KEY");
+  if (!key) throw new Error("LLM_API_KEY is not set");
   return new GoogleGenerativeAI(key);
 }
 
@@ -456,8 +456,8 @@ Respond with ONLY the JSON object, no markdown fences, no extra text.`;
     });
   } catch (err: any) {
     req.log.error(err);
-    if (err.message?.includes("GOOGLE_API_KEY")) {
-      res.status(503).json({ error: "AI service not configured — GOOGLE_API_KEY missing" });
+    if (err.message?.includes("LLM_API_KEY")) {
+      res.status(503).json({ error: "AI service not configured — LLM_API_KEY missing" });
     } else {
       res.status(500).json({ error: "Import failed", detail: err.message });
     }
@@ -600,8 +600,8 @@ router.post("/resources/import/pdf", requireAuth, handleUpload(pdfUpload.single(
     });
   } catch (err: any) {
     req.log.error(err);
-    if (err.message?.includes("GOOGLE_API_KEY")) {
-      res.status(503).json({ error: "AI service not configured — GOOGLE_API_KEY missing" });
+    if (err.message?.includes("LLM_API_KEY")) {
+      res.status(503).json({ error: "AI service not configured — LLM_API_KEY missing" });
     } else {
       res.status(500).json({ error: "PDF import failed", detail: err.message });
     }

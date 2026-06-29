@@ -2,7 +2,7 @@ import { db, appSettingsTable } from "@workspace/db";
 import { eq, inArray } from "drizzle-orm";
 
 /** Admin-editable settings keys. DB value wins; falls back to the matching env var. */
-export const SETTINGS_KEYS = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM", "GOOGLE_API_KEY"] as const;
+export const SETTINGS_KEYS = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM", "LLM_API_KEY"] as const;
 export type SettingsKey = (typeof SETTINGS_KEYS)[number];
 
 export async function getSetting(key: SettingsKey): Promise<string | undefined> {

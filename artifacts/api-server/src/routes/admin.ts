@@ -6,7 +6,7 @@ import { SETTINGS_KEYS, getAllSettings, setSetting, type SettingsKey } from "../
 
 const router = Router();
 
-const SECRET_KEYS: SettingsKey[] = ["SMTP_PASS", "GOOGLE_API_KEY"];
+const SECRET_KEYS: SettingsKey[] = ["SMTP_PASS", "LLM_API_KEY"];
 
 /** GET /api/admin/settings — admin only. Secret values are never returned in plaintext, only whether they're set. */
 router.get("/admin/settings", requireAuth, requireAdmin, async (req, res) => {
