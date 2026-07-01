@@ -1,6 +1,7 @@
 import { searchCrossref } from "./crossref";
 import { searchOpenAlex } from "./openalex";
 import { searchSemanticScholar } from "./semanticscholar";
+import { resolveDoi } from "./doi";
 import { unpaywall } from "./unpaywall";
 import { generateJsonWithSearch } from "../llm";
 import { titleOverlapScore, authorOverlapCount, surnameOf } from "./matching";
@@ -10,6 +11,13 @@ export interface ResolveLinkInput {
   title: string;
   authors: string[];
   year: number | null;
+  /**
+   * Optional — pass this when extraction already found a DOI printed on the document. resolveLink
+   * then verifies it directly via resolveDoi() (DOI content negotiation), which is exact, instead
+   * of running it through the same title-similarity waterfall as DOI-unknown inputs. Only falls
+   * back to that waterfall if there's no DOI here, or the DOI fails to resolve (e.g. typo'd).
+   */
+  doi?: string | null;
 }
 
 export interface ResolveLinkResult {
@@ -58,6 +66,32 @@ async function searchAcademicSources(query: string): Promise<ScholarResult[]> {
   return [...cr, ...oa, ...ss];
 }
 
+/** Builds the final result from a confirmed ScholarResult match, filling in an OA fulltext link via Unpaywall when the match itself didn't already have one. Shared by the DOI-first path and the title-search waterfall below. */
+async function buildResultFromMatch(input: ResolveLinkInput, match: ScholarResult): Promise<ResolveLinkResult> {
+  let fulltextUrl = match.fulltextUrl;
+  let accessStatus = match.accessStatus;
+  if (!fulltextUrl && match.doi) {
+    const oa = await unpaywall(match.doi);
+    if (oa) {
+      fulltextUrl = oa.fulltextUrl;
+      accessStatus = oa.accessStatus;
+    }
+  }
+  return {
+    found: true,
+    foundInScholarlyDb: true,
+    title: match.title || input.title,
+    authors: match.authors.length > 0 ? match.authors : input.authors,
+    year: match.year ?? input.year,
+    doi: match.doi,
+    canonicalUrl: match.canonicalUrl,
+    fulltextUrl,
+    accessStatus,
+    venue: match.venue,
+    sourceTypeHint: null,
+  };
+}
+
 interface WebFallbackResult {
   url: string;
   title: string | null;
@@ -97,12 +131,18 @@ Only set "url" to null if you genuinely could not find anything matching this ti
 }
 
 /**
- * Multi-source waterfall (Crossref -> OpenAlex -> Semantic Scholar) with a confidence check
+ * DOI-first when one is already known (exact, via resolveDoi's content negotiation), otherwise a
+ * multi-source waterfall (Crossref -> OpenAlex -> Semantic Scholar) with a confidence check
  * (title overlap + author surname overlap + year proximity) to avoid attaching the wrong paper's
  * link. Falls back to a grounded web search only when no academic index has a confident match
  * (e.g. news/opinion pieces that Crossref/OpenAlex never index).
  */
 export async function resolveLink(input: ResolveLinkInput): Promise<ResolveLinkResult> {
+  if (input.doi) {
+    const resolved = await resolveDoi(input.doi);
+    if (resolved) return buildResultFromMatch(input, resolved);
+  }
+
   const cleanedTitle = cleanTitle(input.title);
 
   let candidates = await searchAcademicSources(cleanedTitle);
@@ -117,30 +157,7 @@ export async function resolveLink(input: ResolveLinkInput): Promise<ResolveLinkR
     match = candidates.find((c) => isConfidentMatch(input, c));
   }
 
-  if (match) {
-    let fulltextUrl = match.fulltextUrl;
-    let accessStatus = match.accessStatus;
-    if (!fulltextUrl && match.doi) {
-      const oa = await unpaywall(match.doi);
-      if (oa) {
-        fulltextUrl = oa.fulltextUrl;
-        accessStatus = oa.accessStatus;
-      }
-    }
-    return {
-      found: true,
-      foundInScholarlyDb: true,
-      title: match.title || input.title,
-      authors: match.authors.length > 0 ? match.authors : input.authors,
-      year: match.year ?? input.year,
-      doi: match.doi,
-      canonicalUrl: match.canonicalUrl,
-      fulltextUrl,
-      accessStatus,
-      venue: match.venue,
-      sourceTypeHint: null,
-    };
-  }
+  if (match) return buildResultFromMatch(input, match);
 
   const webResult = await generalWebSearch(cleanedTitle, input.authors);
   if (webResult) {

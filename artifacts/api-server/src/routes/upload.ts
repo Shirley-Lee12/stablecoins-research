@@ -141,7 +141,7 @@ async function enrichTags(computed: ComputedTags): Promise<TagSummary[]> {
  */
 async function runAutoPipeline(rawText: string, sourceTypeHint: string, vocab: TagVocabulary): Promise<PipelineResult> {
   const extracted = await extractFromText(rawText, sourceTypeHint);
-  const linked = await resolveLink({ title: extracted.title, authors: extracted.authors, year: extracted.year });
+  const linked = await resolveLink({ title: extracted.title, authors: extracted.authors, year: extracted.year, doi: extracted.doi });
 
   const draft: PipelineDraft = {
     title: linked.found ? linked.title : extracted.title,
