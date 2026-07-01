@@ -2,47 +2,39 @@ import { Router } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./auth";
-import { SETTINGS_KEYS, getAllSettings, setSetting, type SettingsKey } from "../lib/settings";
+import { env } from "../config";
 
 const router = Router();
 
-const SECRET_KEYS: SettingsKey[] = ["SMTP_PASS", "LLM_API_KEY"];
+/** Shows only that a secret is set, plus its last 4 characters — never the full value. */
+function maskSecret(value: string): string {
+  return value.length <= 4 ? "••••" : `••••${value.slice(-4)}`;
+}
 
-/** GET /api/admin/settings — admin only. Secret values are never returned in plaintext, only whether they're set. */
-router.get("/admin/settings", requireAuth, requireAdmin, async (req, res) => {
-  try {
-    const all = await getAllSettings();
-    const result: Record<string, string | boolean | undefined> = {};
-    for (const key of SETTINGS_KEYS) {
-      result[key] = SECRET_KEYS.includes(key) ? Boolean(all[key]) : all[key];
-    }
-    res.json(result);
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Failed to fetch settings" });
-  }
-});
-
-/** PATCH /api/admin/settings — admin only. Body: partial { [SettingsKey]: string }. Blank values are ignored (keeps existing). */
-router.patch("/admin/settings", requireAuth, requireAdmin, async (req, res) => {
-  try {
-    const body = req.body as Record<string, unknown>;
-    for (const key of SETTINGS_KEYS) {
-      const value = body[key];
-      if (typeof value === "string" && value.trim()) {
-        await setSetting(key, value.trim());
-      }
-    }
-    const all = await getAllSettings();
-    const result: Record<string, string | boolean | undefined> = {};
-    for (const key of SETTINGS_KEYS) {
-      result[key] = SECRET_KEYS.includes(key) ? Boolean(all[key]) : all[key];
-    }
-    res.json(result);
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Failed to update settings" });
-  }
+/**
+ * GET /api/admin/settings/status — admin only, read-only.
+ * All configuration lives in server environment variables (.env) — this endpoint only
+ * surfaces what's currently loaded so admins can verify it without server access.
+ * Secrets are masked; nothing here is ever editable through the API.
+ */
+router.get("/admin/settings/status", requireAuth, requireAdmin, (_req, res) => {
+  res.json({
+    database: { configured: true },
+    auth: { jwtSecret: maskSecret(env.JWT_SECRET) },
+    llm: {
+      provider: env.LLM_PROVIDER,
+      model: env.LLM_MODEL,
+      apiKey: maskSecret(env.LLM_API_KEY),
+    },
+    email: {
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      user: env.SMTP_USER,
+      from: env.SMTP_FROM,
+      password: maskSecret(env.SMTP_PASS),
+    },
+    frontendUrl: env.FRONTEND_URL,
+  });
 });
 
 /** GET /api/admin/users — admin only. Never returns passwordHash. */

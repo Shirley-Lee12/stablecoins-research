@@ -5,6 +5,7 @@ import { db, usersTable, passwordResetTokensTable, emailVerificationCodesTable }
 import { eq, and, gt } from "drizzle-orm";
 import crypto from "node:crypto";
 import { sendVerificationCodeEmail, sendPasswordResetEmail } from "../lib/mailer";
+import { env } from "../config";
 
 const router = Router();
 
@@ -13,9 +14,7 @@ function generateSixDigitCode(): string {
 }
 
 function getSecret() {
-  const s = process.env["JWT_SECRET"] || process.env["SESSION_SECRET"];
-  if (!s) throw new Error("JWT_SECRET not set");
-  return new TextEncoder().encode(s);
+  return new TextEncoder().encode(env.JWT_SECRET);
 }
 
 /** Min 8 chars, at least one uppercase and one lowercase letter. */
@@ -25,7 +24,7 @@ function isValidPassword(password: string): boolean {
 
 /** Emails in ADMIN_BOOTSTRAP_EMAILS (comma-separated) get role='admin' on first registration. */
 function isBootstrapAdminEmail(email: string): boolean {
-  const list = (process.env["ADMIN_BOOTSTRAP_EMAILS"] || "")
+  const list = env.ADMIN_BOOTSTRAP_EMAILS
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
@@ -265,7 +264,7 @@ router.post("/auth/forgot-password", async (req, res): Promise<void> => {
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
     await db.insert(passwordResetTokensTable).values({ userId: user.id, token, expiresAt });
 
-    const frontendBase = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "");
+    const frontendBase = env.FRONTEND_URL.replace(/\/$/, "");
     await sendPasswordResetEmail(email.toLowerCase(), `${frontendBase}/reset-password?token=${token}`);
 
     res.json({ message: "If this email exists, a reset link has been sent." });

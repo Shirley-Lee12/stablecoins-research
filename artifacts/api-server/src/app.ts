@@ -3,6 +3,7 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { env } from "./config";
 
 const app: Express = express();
 
@@ -26,10 +27,9 @@ app.use(
   }),
 );
 // Restrict CORS in production. Allow the frontend origin set in CORS_ORIGIN.
-const corsOrigin = process.env["CORS_ORIGIN"];
 app.use(
   cors({
-    origin: corsOrigin ? [corsOrigin] : true,
+    origin: env.CORS_ORIGIN ? [env.CORS_ORIGIN] : true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),

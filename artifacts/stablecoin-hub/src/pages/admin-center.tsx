@@ -5,7 +5,7 @@ import { useLanguage } from "@/lib/language-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Shield, Users, CheckSquare, FileText, Settings as SettingsIcon,
-  Clock, Check, X, Loader2, ChevronRight, Eye, EyeOff,
+  Clock, Check, X, Loader2, ChevronRight, Database, Mail, Sparkles,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -137,70 +137,36 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
   );
 }
 
-// ── Settings Panel ────────────────────────────────────────────────────────────
-interface SettingsData {
-  SMTP_HOST?: string; SMTP_PORT?: string; SMTP_USER?: string;
-  SMTP_PASS?: boolean; SMTP_FROM?: string; LLM_API_KEY?: boolean;
+// ── Settings Panel (read-only — all configuration lives in server .env) ───────
+interface SettingsStatus {
+  database: { configured: boolean };
+  auth: { jwtSecret: string };
+  llm: { provider: string; model: string; apiKey: string };
+  email: { host: string; port: number; user: string; from: string; password: string };
+  frontendUrl: string;
+}
+
+function StatusRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-1.5">
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
+      <span className="text-sm font-mono text-foreground truncate max-w-[60%] text-right">{value}</span>
+    </div>
+  );
 }
 
 function SettingsPanel({ token, language }: { token: string; language: string }) {
   const zh = language === "zh";
-  const [settings, setSettings] = useState<SettingsData | null>(null);
+  const [status, setStatus] = useState<SettingsStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [showSecrets, setShowSecrets] = useState(false);
 
-  const [form, setForm] = useState({ smtpHost: "", smtpPort: "", smtpUser: "", smtpFrom: "", smtpPass: "", googleApiKey: "" });
-
-  const load = () => {
+  useEffect(() => {
     setLoading(true);
-    fetch(`${apiBase()}/api/admin/settings`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${apiBase()}/api/admin/settings/status`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: SettingsData | null) => {
-        setSettings(data);
-        if (data) {
-          setForm((f) => ({
-            ...f,
-            smtpHost: data.SMTP_HOST ?? "",
-            smtpPort: data.SMTP_PORT ?? "",
-            smtpUser: data.SMTP_USER ?? "",
-            smtpFrom: data.SMTP_FROM ?? "",
-          }));
-        }
-      })
+      .then(setStatus)
       .finally(() => setLoading(false));
-  };
-
-  useEffect(load, [token]);
-
-  async function handleSave() {
-    setSaving(true);
-    setMessage(null);
-    try {
-      const body: Record<string, string> = {
-        SMTP_HOST: form.smtpHost, SMTP_PORT: form.smtpPort, SMTP_USER: form.smtpUser, SMTP_FROM: form.smtpFrom,
-      };
-      if (form.smtpPass.trim()) body.SMTP_PASS = form.smtpPass.trim();
-      if (form.googleApiKey.trim()) body.LLM_API_KEY = form.googleApiKey.trim();
-
-      const res = await fetch(`${apiBase()}/api/admin/settings`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setSettings(updated);
-        setForm((f) => ({ ...f, smtpPass: "", googleApiKey: "" }));
-        setMessage(zh ? "已保存" : "Saved");
-      } else {
-        setMessage(zh ? "保存失败" : "Failed to save");
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
+  }, [token]);
 
   if (loading) {
     return (
@@ -211,89 +177,62 @@ function SettingsPanel({ token, language }: { token: string; language: string })
     );
   }
 
+  if (!status) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+        <SettingsIcon className="h-10 w-10 text-muted-foreground/30" />
+        <p className="text-sm text-muted-foreground">{zh ? "无法加载配置状态" : "Failed to load configuration status"}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-xl">
       <div>
-        <h2 className="text-base font-semibold">{zh ? "系统配置" : "System Settings"}</h2>
+        <h2 className="text-base font-semibold">{zh ? "系统配置状态" : "System Configuration Status"}</h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {zh ? "邮件发送与 AI 服务密钥。数据库连接地址不在此处管理，需在服务器环境变量中修改。"
-              : "Email sending and AI service keys. The database connection string is not managed here — change it via server environment variables."}
+          {zh ? "所有配置项均通过服务器环境变量（.env）管理，此处仅供只读查看，无法在线修改。"
+              : "All configuration is managed via server environment variables (.env). This view is read-only and cannot be edited here."}
         </p>
       </div>
 
-      <div className="rounded-xl border border-border p-5 space-y-4">
-        <h3 className="text-sm font-semibold flex items-center gap-2">
-          <SettingsIcon className="h-4 w-4 text-primary" />
+      <div className="rounded-xl border border-border p-5 space-y-1">
+        <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
+          <Database className="h-4 w-4 text-primary" />
+          {zh ? "数据库" : "Database"}
+        </h3>
+        <StatusRow label={zh ? "连接状态" : "Connection"} value={status.database.configured ? (zh ? "已连接" : "Connected") : (zh ? "未连接" : "Not connected")} />
+      </div>
+
+      <div className="rounded-xl border border-border p-5 space-y-1">
+        <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
+          <Mail className="h-4 w-4 text-primary" />
           {zh ? "邮件发送（SMTP）" : "Email Sending (SMTP)"}
         </h3>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">SMTP Host</label>
-            <input value={form.smtpHost} onChange={(e) => setForm((f) => ({ ...f, smtpHost: e.target.value }))}
-              placeholder="smtp.163.com"
-              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">SMTP Port</label>
-            <input value={form.smtpPort} onChange={(e) => setForm((f) => ({ ...f, smtpPort: e.target.value }))}
-              placeholder="465"
-              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-          </div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发件邮箱" : "Sender Email"}</label>
-          <input value={form.smtpUser} onChange={(e) => setForm((f) => ({ ...f, smtpUser: e.target.value, smtpFrom: e.target.value }))}
-            placeholder="sc_zibs2026@163.com"
-            className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            {zh ? "授权码" : "Auth Code / Password"}
-            {settings?.SMTP_PASS && <span className="ml-2 text-emerald-600 dark:text-emerald-400 font-normal">{zh ? "（已设置）" : "(set)"}</span>}
-          </label>
-          <div className="relative">
-            <input
-              type={showSecrets ? "text" : "password"}
-              value={form.smtpPass} onChange={(e) => setForm((f) => ({ ...f, smtpPass: e.target.value }))}
-              placeholder={settings?.SMTP_PASS ? (zh ? "留空则不修改" : "Leave blank to keep current") : (zh ? "输入授权码" : "Enter auth code")}
-              className="w-full px-3 py-1.5 pr-10 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <button type="button" onClick={() => setShowSecrets((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-              {showSecrets ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
-          </div>
-        </div>
+        <StatusRow label="Host" value={status.email.host} />
+        <StatusRow label="Port" value={String(status.email.port)} />
+        <StatusRow label={zh ? "发件邮箱" : "Sender Email"} value={status.email.user} />
+        <StatusRow label="From" value={status.email.from} />
+        <StatusRow label={zh ? "授权码" : "Auth Code / Password"} value={status.email.password} />
       </div>
 
-      <div className="rounded-xl border border-border p-5 space-y-4">
-        <h3 className="text-sm font-semibold flex items-center gap-2">
-          <SettingsIcon className="h-4 w-4 text-primary" />
-          {zh ? "AI 服务（Gemini）" : "AI Service (Gemini)"}
+      <div className="rounded-xl border border-border p-5 space-y-1">
+        <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          {zh ? "AI 服务" : "AI Service"}
         </h3>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Google API Key
-            {settings?.LLM_API_KEY && <span className="ml-2 text-emerald-600 dark:text-emerald-400 font-normal">{zh ? "（已设置）" : "(set)"}</span>}
-          </label>
-          <div className="relative">
-            <input
-              type={showSecrets ? "text" : "password"}
-              value={form.googleApiKey} onChange={(e) => setForm((f) => ({ ...f, googleApiKey: e.target.value }))}
-              placeholder={settings?.LLM_API_KEY ? (zh ? "留空则不修改" : "Leave blank to keep current") : (zh ? "输入 API Key" : "Enter API key")}
-              className="w-full px-3 py-1.5 pr-10 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <button type="button" onClick={() => setShowSecrets((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-              {showSecrets ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
-          </div>
-        </div>
+        <StatusRow label={zh ? "提供商" : "Provider"} value={status.llm.provider} />
+        <StatusRow label={zh ? "模型" : "Model"} value={status.llm.model} />
+        <StatusRow label="API Key" value={status.llm.apiKey} />
       </div>
 
-      <div className="flex items-center gap-3">
-        <button onClick={handleSave} disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
-          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-          {zh ? "保存配置" : "Save Settings"}
-        </button>
-        {message && <span className="text-sm text-muted-foreground">{message}</span>}
+      <div className="rounded-xl border border-border p-5 space-y-1">
+        <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
+          <Shield className="h-4 w-4 text-primary" />
+          {zh ? "鉴权" : "Auth"}
+        </h3>
+        <StatusRow label="JWT Secret" value={status.auth.jwtSecret} />
+        <StatusRow label="Frontend URL" value={status.frontendUrl} />
       </div>
     </div>
   );

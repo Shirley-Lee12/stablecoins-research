@@ -2,10 +2,9 @@ import { Router } from "express";
 import multer from "multer";
 import { db, resourcesTable } from "@workspace/db";
 import { eq, desc, ilike, or, sql, and } from "drizzle-orm";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { requireAuth, optionalAuth, requireAdmin } from "./auth";
 import { syncResourceAuthors } from "./authors";
-import { getSetting } from "../lib/settings";
+import { generateJson, generateJsonFromPdf } from "../lib/llm";
 
 const router = Router();
 
@@ -59,13 +58,6 @@ function stripJatsTags(abstract: unknown): string {
   return abstract.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-// ── Gemini client ─────────────────────────────────────────────────────────────
-async function getGemini() {
-  const key = await getSetting("LLM_API_KEY");
-  if (!key) throw new Error("LLM_API_KEY is not set");
-  return new GoogleGenerativeAI(key);
-}
-
 // ── PDF upload (memory only — the binary is never persisted to disk or DB) ────
 const pdfUpload = multer({
   storage: multer.memoryStorage(),
@@ -88,12 +80,6 @@ function handleUpload(mw: any) {
 
 /** Sends a PDF directly to Gemini (native multimodal document understanding — handles scanned/image PDFs too). */
 async function extractMetadataFromPdf(buffer: Buffer, sourceTypeHint: string) {
-  const gemini = await getGemini();
-  const model = gemini.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    generationConfig: { responseMimeType: "application/json", maxOutputTokens: 4096 },
-  });
-
   const prompt = `You are an academic librarian assistant. Read the attached PDF document (use OCR if it is a scanned image) and extract structured bibliographic metadata.
 
 Source type hint: ${sourceTypeHint}
@@ -109,11 +95,7 @@ ${TAG_PROMPT_BLOCK}
 
 Respond with ONLY the JSON object, no markdown fences, no extra text.`;
 
-  const result = await model.generateContent([
-    { inlineData: { mimeType: "application/pdf", data: buffer.toString("base64") } },
-    { text: prompt },
-  ]);
-  const raw = result.response.text().trim();
+  const raw = await generateJsonFromPdf(buffer, prompt);
 
   let parsed: any;
   try {
@@ -423,14 +405,7 @@ ${TAG_PROMPT_BLOCK}
 
 Respond with ONLY the JSON object, no markdown fences, no extra text.`;
 
-      const gemini = await getGemini();
-      const model = gemini.getGenerativeModel({
-        model: "gemini-2.5-flash",
-        generationConfig: { responseMimeType: "application/json", maxOutputTokens: 4096 },
-      });
-
-      const result = await model.generateContent(prompt);
-      const raw = result.response.text().trim();
+      const raw = await generateJson(prompt, 4096);
       try {
         const parsed = JSON.parse(raw);
         geminiTitle      = typeof parsed.title === "string"    ? parsed.title    : "";
@@ -456,11 +431,7 @@ Respond with ONLY the JSON object, no markdown fences, no extra text.`;
     });
   } catch (err: any) {
     req.log.error(err);
-    if (err.message?.includes("LLM_API_KEY")) {
-      res.status(503).json({ error: "AI service not configured — LLM_API_KEY missing" });
-    } else {
-      res.status(500).json({ error: "Import failed", detail: err.message });
-    }
+    res.status(500).json({ error: "Import failed", detail: err.message });
   }
 });
 
@@ -487,11 +458,6 @@ router.post("/resources/import/batch", requireAuth, async (req: any, res) => {
   const send = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
   const VALID_TYPES = ["Paper", "Report", "Gov Document", "News", "Experts & Scholars"];
-  const gemini = await getGemini();
-  const model = gemini.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    generationConfig: { responseMimeType: "application/json", maxOutputTokens: 4096 },
-  });
 
   for (let i = 0; i < urls.length; i++) {
     const url = urls[i];
@@ -537,8 +503,7 @@ router.post("/resources/import/batch", requireAuth, async (req: any, res) => {
 
       if (!fetchBlocked) {
         const prompt = `Extract bibliographic metadata from this page. URL: ${url}\nSource type hint: ${sourceTypeHint}\nPage content: ${pageText}\n\nReturn JSON with: title (string), authors (string[]), abstract (string — copy the page's own "Abstract" section verbatim if present, do not paraphrase; only write a 2-3 sentence summary if no abstract section exists), tags (string[] — pick 2-3 categories matching the document's core research focus from this list: ${JSON.stringify(STABLECOIN_TAGS)}; optionally add ONE more specific keyword not on the list if it adds real specificity), sourceType (one of: Paper|Report|Gov Document|News|Experts & Scholars), publishedDate (string or null — the document's publication date if shown, e.g. "2021-07-20" or "2021")`;
-        const result = await model.generateContent(prompt);
-        const raw = result.response.text().trim();
+        const raw = await generateJson(prompt, 4096);
         const parsed = JSON.parse(raw);
         geminiTitle      = typeof parsed.title === "string"    ? parsed.title    : "";
         geminiAuthors    = Array.isArray(parsed.authors)       ? parsed.authors  : [];
@@ -600,11 +565,7 @@ router.post("/resources/import/pdf", requireAuth, handleUpload(pdfUpload.single(
     });
   } catch (err: any) {
     req.log.error(err);
-    if (err.message?.includes("LLM_API_KEY")) {
-      res.status(503).json({ error: "AI service not configured — LLM_API_KEY missing" });
-    } else {
-      res.status(500).json({ error: "PDF import failed", detail: err.message });
-    }
+    res.status(500).json({ error: "PDF import failed", detail: err.message });
   }
 });
 

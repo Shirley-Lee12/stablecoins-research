@@ -1,30 +1,16 @@
 import nodemailer from "nodemailer";
 import { logger } from "./logger";
-import { getSetting } from "./settings";
+import { env } from "../config";
 
-/** Builds a fresh transporter each call (cheap, no network I/O) so admin-updated settings take effect immediately. */
-async function getTransporter() {
-  const host = await getSetting("SMTP_HOST");
-  const port = Number((await getSetting("SMTP_PORT")) ?? 465);
-  const user = await getSetting("SMTP_USER");
-  const pass = await getSetting("SMTP_PASS");
-
-  if (!host || !user || !pass) {
-    throw new Error("SMTP is not configured — set SMTP_HOST, SMTP_USER, and SMTP_PASS");
-  }
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-  });
-}
+const transporter = nodemailer.createTransport({
+  host: env.SMTP_HOST,
+  port: env.SMTP_PORT,
+  secure: env.SMTP_PORT === 465,
+  auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
+});
 
 export async function sendMail(to: string, subject: string, html: string) {
-  const transporter = await getTransporter();
-  const from = (await getSetting("SMTP_FROM")) || (await getSetting("SMTP_USER"));
-  await transporter.sendMail({ from, to, subject, html });
+  await transporter.sendMail({ from: env.SMTP_FROM, to, subject, html });
 }
 
 export async function sendVerificationCodeEmail(to: string, code: string) {
