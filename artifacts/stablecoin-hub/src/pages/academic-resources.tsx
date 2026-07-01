@@ -10,7 +10,7 @@ import {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type SourceType = "Paper" | "Report" | "Gov Document" | "News" | "Experts & Scholars";
-type ResourceStatus = "pending" | "approved" | "rejected";
+type ResourceStatus = "pending" | "approved" | "rejected" | "needs_review" | "failed";
 type FilterType = SourceType | "Expert" | "All";
 
 interface Resource {
@@ -22,26 +22,12 @@ interface Resource {
   doi: string | null;
   abstract: string | null;
   tags: string[];
+  /** New facet-based tags (tags/resource_tags), distinct from the legacy free-text `tags` array above. Declared with `TagSummary` further down (shared with the Upload Center). */
+  facetedTags?: TagSummary[];
   publishedDate: string | null;
   status: ResourceStatus;
   createdBy: number | null;
   createdAt: string;
-}
-
-interface ImportedItem {
-  url: string;
-  fileName?: string;
-  doi?: string | null;
-  publishedDate?: string | null;
-  title: string;
-  authors: string[];
-  abstract: string;
-  tags: string[];
-  sourceType: string;
-  // per-item UI state
-  status: "parsing" | "done" | "error";
-  error?: string;
-  selected: boolean;
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -93,7 +79,7 @@ function apiBase() {
 // ── Resource Card ─────────────────────────────────────────────────────────────
 function ResourceCard({
   r, language, currentUserId, isAdmin,
-  onApprove, onReject, onEdit, onOpenDetail,
+  onApprove, onReject, onEdit, onOpenDetail, onFacetTagClick,
 }: {
   r: Resource; language: string;
   currentUserId?: number; isAdmin?: boolean;
@@ -101,6 +87,7 @@ function ResourceCard({
   onReject?: (id: number) => void;
   onEdit?: (r: Resource) => void;
   onOpenDetail?: (r: Resource) => void;
+  onFacetTagClick?: (slug: string) => void;
 }) {
   const Icon  = BADGE_ICONS[r.sourceType] ?? FileText;
   const color = BADGE_COLORS[r.sourceType] ?? BADGE_COLORS["Paper"];
@@ -167,7 +154,17 @@ function ResourceCard({
         {r.abstract && (
           <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 flex-1">{r.abstract}</p>
         )}
-        {r.tags.length > 0 && (
+        {r.facetedTags && r.facetedTags.length > 0 ? (
+          <div className="flex flex-wrap gap-1 pt-1">
+            {r.facetedTags.slice(0, 4).map((t) => (
+              <button key={t.id} onClick={(e) => { e.stopPropagation(); onFacetTagClick?.(t.slug); }}
+                className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60 hover:border-primary/50 hover:text-foreground transition-colors">
+                {language === "zh" ? t.nameZh : t.nameEn}
+              </button>
+            ))}
+            {r.facetedTags.length > 4 && <span className="text-xs px-2 py-0.5 text-muted-foreground">+{r.facetedTags.length - 4}</span>}
+          </div>
+        ) : r.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 pt-1">
             {r.tags.slice(0, 4).map((tag) => (
               <span key={tag} className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60">{tag}</span>
@@ -217,7 +214,7 @@ function ResourceCard({
 }
 
 // ── Resource Detail Modal ───────────────────────────────────────────────────────
-function ResourceDetailModal({ resource, language, onClose }: { resource: Resource; language: string; onClose: () => void }) {
+function ResourceDetailModal({ resource, language, onClose, onFacetTagClick }: { resource: Resource; language: string; onClose: () => void; onFacetTagClick?: (slug: string) => void }) {
   const zh = language === "zh";
   const Icon  = BADGE_ICONS[resource.sourceType] ?? FileText;
   const color = BADGE_COLORS[resource.sourceType] ?? BADGE_COLORS["Paper"];
@@ -265,7 +262,9 @@ function ResourceDetailModal({ resource, language, onClose }: { resource: Resour
             </div>
           )}
 
-          {resource.tags.length > 0 && (
+          {resource.facetedTags && resource.facetedTags.length > 0 ? (
+            <TagSummaryList tags={resource.facetedTags} language={language} onTagClick={onFacetTagClick} />
+          ) : resource.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {resource.tags.map((tag) => (
                 <span key={tag} className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60">{tag}</span>
@@ -590,497 +589,586 @@ function EditModal({ resource, token, language, onClose, onSaved }: {
   );
 }
 
-// ── Create Modal (Method A — manual entry) ─────────────────────────────────────
-function CreateModal({ token, language, isAdmin, onClose, onSaved }: {
-  token: string; language: string; isAdmin: boolean; onClose: () => void; onSaved: () => void;
+// ── Upload Center shared types (mirror artifacts/api-server/src/routes/upload.ts) ─
+interface DraftData {
+  title: string; authors: string[]; year: number | null; abstract: string;
+  doi: string | null; url: string | null; sourceType: string;
+}
+interface TagSummary {
+  id: number; slug: string; nameEn: string; nameZh: string;
+  facet: "theme" | "jurisdiction" | "asset"; status: "active" | "candidate";
+}
+interface FieldCheck { field: string; status: "✅" | "⚠️" | "❌"; detail: string }
+interface VerifyReport { checks: FieldCheck[]; hasFailure: boolean; hasWarning: boolean }
+interface PipelineResultLike { draft: DraftData; tags: TagSummary[]; report: VerifyReport; foundInScholarlyDb: boolean }
+interface UploadJob {
+  id: number; type: "pdf" | "url"; status: "queued" | "processing" | "ready_for_review" | "failed";
+  input: { fileName?: string; url?: string; sourceTypeHint: string };
+  result: PipelineResultLike | null; error: string | null; createdAt: string;
+}
+
+const FACET_LABELS: Record<TagSummary["facet"], { en: string; zh: string }> = {
+  theme: { en: "Theme", zh: "主题" },
+  jurisdiction: { en: "Jurisdiction", zh: "辖区" },
+  asset: { en: "Asset", zh: "币种" },
+};
+const CHECK_FIELD_LABELS: Record<string, { en: string; zh: string }> = {
+  title: { en: "Title", zh: "标题" }, doi: { en: "DOI", zh: "DOI" }, url: { en: "URL", zh: "链接" },
+  authors: { en: "Authors", zh: "作者" }, year: { en: "Year", zh: "年份" }, abstract: { en: "Abstract", zh: "摘要" },
+};
+
+// ── Tag summary display (read-only — the new facet-based tag system, separate from the legacy STABLECOIN_TAGS free-text array TagEditor edits) ──
+function TagSummaryList({ tags, language, onTagClick }: { tags: TagSummary[]; language: string; onTagClick?: (slug: string) => void }) {
+  const zh = language === "zh";
+  if (tags.length === 0) return <p className="text-xs text-muted-foreground">{zh ? "未匹配到标签" : "No tags matched"}</p>;
+  const byFacet: Partial<Record<TagSummary["facet"], TagSummary[]>> = {};
+  for (const t of tags) (byFacet[t.facet] ??= []).push(t);
+  return (
+    <div className="space-y-1.5">
+      {(["theme", "jurisdiction", "asset"] as const).filter((f) => byFacet[f]?.length).map((facet) => (
+        <div key={facet} className="flex flex-wrap items-start gap-1.5">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide w-20 shrink-0 pt-0.5">
+            {zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {byFacet[facet]!.map((t) => {
+              const className = `inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                t.status === "candidate"
+                  ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800"
+                  : "bg-primary/10 text-primary border-primary/20"
+              } ${onTagClick ? "hover:bg-primary/20 cursor-pointer" : ""}`;
+              const content = <>{zh ? t.nameZh : t.nameEn}{t.status === "candidate" && <span className="opacity-70">{zh ? "（候选）" : "(candidate)"}</span>}</>;
+              return onTagClick ? (
+                <button key={t.id} onClick={() => onTagClick(t.slug)} className={className}>{content}</button>
+              ) : (
+                <span key={t.id} className={className}>{content}</span>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function VerifyReportList({ report, language }: { report: VerifyReport; language: string }) {
+  const zh = language === "zh";
+  return (
+    <div className="space-y-1">
+      {report.checks.map((c) => (
+        <div key={c.field} className="flex items-start gap-2 text-xs">
+          <span className="shrink-0">{c.status}</span>
+          <span className="font-medium text-foreground shrink-0 w-14">{zh ? (CHECK_FIELD_LABELS[c.field]?.zh ?? c.field) : (CHECK_FIELD_LABELS[c.field]?.en ?? c.field)}</span>
+          <span className="text-muted-foreground">{c.detail}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Shared editable review/confirm step — used by all three upload tabs ───────
+function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm, onCancel, onBack }: {
+  draft: DraftData; tags: TagSummary[]; report: VerifyReport; language: string; saving: boolean;
+  onChange: (d: DraftData) => void; onConfirm: () => void; onCancel: () => void; onBack?: () => void;
 }) {
   const zh = language === "zh";
-  const [title,      setTitle]      = useState("");
-  const [authors,    setAuthors]    = useState<string[]>([]);
-  const [url,        setUrl]        = useState("");
-  const [doi,        setDoi]        = useState("");
-  const [abstract,   setAbstract]   = useState("");
-  const [tags,       setTags]       = useState<string[]>([]);
-  const [publishedDate, setPublishedDate] = useState("");
-  const [sourceType, setSourceType] = useState<SourceType>("Paper");
-  const [saving,     setSaving]     = useState(false);
-  const [error,      setError]      = useState("");
+  return (
+    <div className="space-y-4">
+      {report.hasFailure && (
+        <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-300">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+          {zh ? "缺少必填信息（标题/作者/年份），提交后会标记为失败，建议先补全。" : "Missing required fields (title/authors/year) — submitting will mark this as failed. Fill them in first."}
+        </div>
+      )}
+      {!report.hasFailure && report.hasWarning && (
+        <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-300">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+          {zh ? "存在待核实项，提交后将进入待审核队列。" : "Some fields need verification — this will go to the review queue."}
+        </div>
+      )}
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型" : "Type"}</label>
+        <select value={draft.sourceType} onChange={(e) => onChange({ ...draft, sourceType: e.target.value })}
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
+          {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "标题" : "Title"}</label>
+        <input value={draft.title} onChange={(e) => onChange({ ...draft, title: e.target.value })}
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+      </div>
+      <AuthorPicker authors={draft.authors} onChange={(a) => onChange({ ...draft, authors: a })} language={language} />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "年份" : "Year"}</label>
+          <input type="number" value={draft.year ?? ""} onChange={(e) => onChange({ ...draft, year: e.target.value ? Number(e.target.value) : null })}
+            className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DOI</label>
+          <input value={draft.doi ?? ""} onChange={(e) => onChange({ ...draft, doi: e.target.value || null })} placeholder="10.xxxx/xxxxx"
+            className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+        </div>
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL</label>
+        <input value={draft.url ?? ""} onChange={(e) => onChange({ ...draft, url: e.target.value || null })} placeholder="https://..."
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
+        <textarea value={draft.abstract} onChange={(e) => onChange({ ...draft, abstract: e.target.value })} rows={4}
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "自动匹配的标签" : "Auto-matched tags"}</label>
+        <TagSummaryList tags={tags} language={language} />
+      </div>
+      <div className="space-y-1.5 rounded-lg border border-border p-3 bg-muted/20">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "核对报告" : "Verification Report"}</p>
+        <VerifyReportList report={report} language={language} />
+      </div>
+      <div className="flex justify-between gap-2 pt-1">
+        {onBack ? (
+          <button onClick={onBack} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+            {zh ? "返回" : "Back"}
+          </button>
+        ) : (
+          <button onClick={onCancel} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+            {zh ? "取消" : "Cancel"}
+          </button>
+        )}
+        <button onClick={onConfirm} disabled={saving || !draft.title.trim()}
+          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+          {zh ? "确认入库" : "Confirm & Save"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
-  async function handleSave() {
-    setSaving(true);
+// ── Manual tab (synchronous) ────────────────────────────────────────────────────
+function ManualTab({ token, language, onClose, onSaved }: { token: string; language: string; onClose: () => void; onSaved: () => void }) {
+  const zh = language === "zh";
+  const [step, setStep] = useState<"input" | "checking" | "review" | "saving">("input");
+  const [title, setTitle] = useState("");
+  const [authors, setAuthors] = useState<string[]>([]);
+  const [year, setYear] = useState<number | null>(null);
+  const [abstract, setAbstract] = useState("");
+  const [url, setUrl] = useState("");
+  const [doi, setDoi] = useState("");
+  const [sourceType, setSourceType] = useState<SourceType>("Paper");
+  const [draft, setDraft] = useState<DraftData | null>(null);
+  const [tags, setTags] = useState<TagSummary[]>([]);
+  const [report, setReport] = useState<VerifyReport | null>(null);
+  const [error, setError] = useState("");
+
+  async function handleCheck() {
+    setStep("checking"); setError("");
     try {
-      const res = await fetch(`${apiBase()}/api/resources`, {
+      const res = await fetch(`${apiBase()}/api/resources/upload/manual`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          title: title.trim(), sourceType, authors,
-          url: url.trim() || null, doi: doi.trim() || null,
-          abstract: abstract.trim() || null, tags,
-          publishedDate: publishedDate.trim() || null,
-        }),
+        body: JSON.stringify({ title: title.trim(), authors, year, abstract: abstract.trim(), url: url.trim() || undefined, doi: doi.trim() || undefined, sourceType }),
       });
-      if (!res.ok) {
-        const d = await res.json();
-        if (res.status === 409 && d.error === "duplicate") {
-          setError(zh ? `文献库中已存在同名或同 DOI 的资源："${d.existing?.title}"` : `A resource with this title or DOI already exists: "${d.existing?.title}"`);
-        } else {
-          setError(d.error ?? "Failed");
-        }
-        setSaving(false);
-        return;
-      }
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Failed"); setStep("input"); return; }
+      setDraft(data.draft); setTags(data.tags); setReport(data.report); setStep("review");
+    } catch { setError(zh ? "网络请求失败" : "Network error"); setStep("input"); }
+  }
+
+  async function handleConfirm() {
+    if (!draft) return;
+    setStep("saving"); setError("");
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/upload/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ...draft, tagIds: tags.map((t) => t.id) }),
+      });
+      if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); setStep("review"); return; }
       onSaved(); onClose();
-    } catch { setError(zh ? "网络请求失败" : "Network error"); setSaving(false); }
+    } catch { setError(zh ? "网络请求失败" : "Network error"); setStep("review"); }
+  }
+
+  if ((step === "review" || step === "saving") && draft && report) {
+    return (
+      <div className="space-y-2">
+        {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+        <ReviewForm draft={draft} tags={tags} report={report} language={language} saving={step === "saving"}
+          onChange={setDraft} onConfirm={handleConfirm} onCancel={onClose} onBack={() => setStep("input")} />
+      </div>
+    );
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Plus className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold">{zh ? "手动添加文献" : "Add Resource Manually"}</h2>
-          </div>
-          <button onClick={onClose} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted">
-            <X className="h-4 w-4" />
-          </button>
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型" : "Type"}</label>
+        <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
+          {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "标题" : "Title"} *</label>
+        <input value={title} onChange={(e) => setTitle(e.target.value)}
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+      </div>
+      <AuthorPicker authors={authors} onChange={setAuthors} language={language} />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "年份" : "Year"}</label>
+          <input type="number" value={year ?? ""} onChange={(e) => setYear(e.target.value ? Number(e.target.value) : null)}
+            className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
-        <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-          {!isAdmin && (
-            <div className="flex items-start gap-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
-              <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-              {zh ? "提交后将进入待审核状态，需管理员审核通过后才会公开显示。" : "This submission will enter Pending Review until an administrator approves it."}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DOI</label>
+          <input value={doi} onChange={(e) => setDoi(e.target.value)} placeholder="10.xxxx/xxxxx"
+            className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+        </div>
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL</label>
+        <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..."
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
+        <textarea value={abstract} onChange={(e) => setAbstract(e.target.value)} rows={4}
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+      </div>
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      <div className="flex justify-end gap-2 pt-1">
+        <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+          {zh ? "取消" : "Cancel"}
+        </button>
+        <button onClick={handleCheck} disabled={step === "checking" || !title.trim()}
+          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+          {step === "checking" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+          {zh ? "核对并预览" : "Check & Preview"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Job queue panel (shared by the URL-batch and PDF tabs — both are async/upload_jobs-backed) ──
+function JobQueuePanel({ token, language, type, onSaved }: { token: string; language: string; type: "pdf" | "url"; onSaved: () => void }) {
+  const zh = language === "zh";
+  const [jobs, setJobs] = useState<UploadJob[]>([]);
+  const [reviewingId, setReviewingId] = useState<number | null>(null);
+  const [reviewDraft, setReviewDraft] = useState<DraftData | null>(null);
+  const [reviewTags, setReviewTags] = useState<TagSummary[]>([]);
+  const [confirming, setConfirming] = useState(false);
+
+  const fetchJobs = useCallback(() => {
+    fetch(`${apiBase()}/api/resources/upload/jobs`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: UploadJob[]) => setJobs(Array.isArray(data) ? data.filter((j) => j.type === type) : []))
+      .catch(() => {});
+  }, [token, type]);
+
+  useEffect(() => {
+    fetchJobs();
+    const interval = setInterval(fetchJobs, 3000);
+    return () => clearInterval(interval);
+  }, [fetchJobs]);
+
+  function openReview(job: UploadJob) {
+    if (!job.result) return;
+    setReviewingId(job.id);
+    setReviewDraft(job.result.draft);
+    setReviewTags(job.result.tags);
+  }
+
+  async function handleConfirmReview() {
+    if (reviewingId == null || !reviewDraft) return;
+    setConfirming(true);
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/upload/jobs/${reviewingId}/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ...reviewDraft, tagIds: reviewTags.map((t) => t.id) }),
+      });
+      if (res.ok) { setReviewingId(null); onSaved(); fetchJobs(); }
+    } finally {
+      setConfirming(false);
+    }
+  }
+
+  async function handleDiscard(id: number) {
+    await fetch(`${apiBase()}/api/resources/upload/jobs/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    fetchJobs();
+  }
+
+  const reviewingJob = jobs.find((j) => j.id === reviewingId);
+  if (reviewingJob && reviewDraft) {
+    const report = reviewingJob.result?.report ?? { checks: [], hasFailure: false, hasWarning: false };
+    return (
+      <ReviewForm draft={reviewDraft} tags={reviewTags} report={report} language={language} saving={confirming}
+        onChange={setReviewDraft} onConfirm={handleConfirmReview} onCancel={() => setReviewingId(null)} onBack={() => setReviewingId(null)} />
+    );
+  }
+
+  if (jobs.length === 0) return null;
+
+  return (
+    <div className="space-y-2 pt-3 border-t border-border">
+      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? "处理队列" : "Queue"}</p>
+      <div className="space-y-1.5">
+        {jobs.map((job) => {
+          const label = job.type === "pdf" ? (job.input?.fileName ?? `#${job.id}`) : (job.input?.url ?? `#${job.id}`);
+          return (
+            <div key={job.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-border bg-card text-xs">
+              <div className="flex items-center gap-2 min-w-0">
+                {job.status === "queued" && <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                {job.status === "processing" && <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />}
+                {job.status === "ready_for_review" && <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />}
+                {job.status === "failed" && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+                <span className="truncate text-foreground">{job.result?.draft?.title || label}</span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {job.status === "ready_for_review" && (
+                  <button onClick={() => openReview(job)} className="px-2.5 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                    {zh ? "核对" : "Review"}
+                  </button>
+                )}
+                {job.status === "failed" && <span className="text-red-600 dark:text-red-400 max-w-[160px] truncate" title={job.error ?? ""}>{job.error}</span>}
+                <button onClick={() => handleDiscard(job.id)} className="text-muted-foreground hover:text-red-500 transition-colors">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
-          )}
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── DOI/URL tab — single entry is synchronous, batch is async (upload_jobs-backed) ──
+function UrlTab({ token, language, onClose, onSaved }: { token: string; language: string; onClose: () => void; onSaved: () => void }) {
+  const zh = language === "zh";
+  const [mode, setMode] = useState<"single" | "batch">("single");
+  const [sourceType, setSourceType] = useState<SourceType>("Paper");
+
+  // single (synchronous)
+  const [singleUrl, setSingleUrl] = useState("");
+  const [step, setStep] = useState<"input" | "parsing" | "review" | "saving">("input");
+  const [draft, setDraft] = useState<DraftData | null>(null);
+  const [tags, setTags] = useState<TagSummary[]>([]);
+  const [report, setReport] = useState<VerifyReport | null>(null);
+  const [error, setError] = useState("");
+
+  // batch (async/jobs)
+  const [batchText, setBatchText] = useState("");
+  const [submittingBatch, setSubmittingBatch] = useState(false);
+
+  async function handleParseSingle() {
+    if (!singleUrl.trim()) return;
+    setStep("parsing"); setError("");
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/upload/url`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ url: singleUrl.trim(), sourceType }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Failed"); setStep("input"); return; }
+      setDraft(data.draft); setTags(data.tags); setReport(data.report); setStep("review");
+    } catch { setError(zh ? "网络请求失败" : "Network error"); setStep("input"); }
+  }
+
+  async function handleConfirmSingle() {
+    if (!draft) return;
+    setStep("saving"); setError("");
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/upload/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ...draft, tagIds: tags.map((t) => t.id) }),
+      });
+      if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); setStep("review"); return; }
+      onSaved(); onClose();
+    } catch { setError(zh ? "网络请求失败" : "Network error"); setStep("review"); }
+  }
+
+  async function handleSubmitBatch() {
+    const urls = [...new Set(batchText.split("\n").map((u) => u.trim()).filter((u) => u.startsWith("http")))].slice(0, 20);
+    if (urls.length === 0) return;
+    setSubmittingBatch(true);
+    try {
+      await fetch(`${apiBase()}/api/resources/upload/jobs/url-batch`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ urls, sourceType }),
+      });
+      setBatchText("");
+    } finally {
+      setSubmittingBatch(false);
+    }
+  }
+
+  if ((step === "review" || step === "saving") && draft && report) {
+    return (
+      <div className="space-y-2">
+        {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+        <ReviewForm draft={draft} tags={tags} report={report} language={language} saving={step === "saving"}
+          onChange={setDraft} onConfirm={handleConfirmSingle} onCancel={onClose} onBack={() => setStep("input")} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="inline-flex rounded-lg border border-border p-0.5 bg-muted/30">
+        <button onClick={() => setMode("single")}
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${mode === "single" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}>
+          {zh ? "单条（同步）" : "Single (sync)"}
+        </button>
+        <button onClick={() => setMode("batch")}
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${mode === "batch" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}>
+          {zh ? "批量（后台队列）" : "Batch (background queue)"}
+        </button>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型提示" : "Type hint"}</label>
+        <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
+          {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </div>
+
+      {mode === "single" ? (
+        <>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型" : "Type"}</label>
-            <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
-              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
-              {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "标题" : "Title"}</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-          </div>
-          <AuthorPicker authors={authors} onChange={setAuthors} language={language} />
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL</label>
-              <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..."
-                className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DOI</label>
-              <input value={doi} onChange={(e) => setDoi(e.target.value)} placeholder="10.xxxx/xxxxx"
-                className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
-            </div>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发表日期" : "Published Date"}</label>
-            <input value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)} placeholder="2021 or 2021-07-20"
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL / DOI</label>
+            <input value={singleUrl} onChange={(e) => setSingleUrl(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleParseSingle()}
+              placeholder="https://doi.org/10.xxxx/xxxxx"
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
           </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
-            <textarea value={abstract} onChange={(e) => setAbstract(e.target.value)} rows={4}
-              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
-          </div>
-          <TagEditor tags={tags} onChange={setTags} language={language} />
           {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
-          <div className="flex justify-end gap-2 pt-1">
+          <div className="flex justify-end gap-2">
             <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
               {zh ? "取消" : "Cancel"}
             </button>
-            <button onClick={handleSave} disabled={saving || !title.trim()}
+            <button onClick={handleParseSingle} disabled={step === "parsing" || !singleUrl.trim()}
               className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
-              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-              {zh ? "提交" : "Submit"}
+              {step === "parsing" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
+              {zh ? "解析" : "Parse"}
             </button>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Single Import Modal ───────────────────────────────────────────────────────
-type SingleStep = "input" | "uploading" | "parsing" | "review" | "saving" | "done" | "error";
-type ImportMethod = "url" | "pdf";
-
-function SingleImportModal({ token, language, onClose, onSaved }: {
-  token: string; language: string; onClose: () => void; onSaved: () => void;
-}) {
-  const zh = language === "zh";
-  const [method,     setMethod]     = useState<ImportMethod>("url");
-  const [step,       setStep]       = useState<SingleStep>("input");
-  const [url,        setUrl]        = useState("");
-  const [file,       setFile]       = useState<File | null>(null);
-  const [sourceType, setSourceType] = useState<SourceType>("Paper");
-  const [errorMsg,   setErrorMsg]   = useState("");
-  const [title,      setTitle]      = useState("");
-  const [authors,    setAuthors]    = useState<string[]>([]);
-  const [doi,        setDoi]        = useState("");
-  const [resolvedUrl, setResolvedUrl] = useState("");
-  const [abstract,   setAbstract]   = useState("");
-  const [tags,       setTags]       = useState<string[]>([]);
-  const [publishedDate, setPublishedDate] = useState("");
-
-  async function handleParse() {
-    setErrorMsg("");
-    if (method === "url") {
-      if (!url.startsWith("http")) { setErrorMsg(zh ? "请输入有效 URL" : "Enter a valid URL"); return; }
-      setStep("parsing");
-      try {
-        const res = await fetch(`${apiBase()}/api/resources/import`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ url, source_type: sourceType }),
-        });
-        const data = await res.json();
-        if (!res.ok) { setErrorMsg(data.error ?? "Parsing failed"); setStep("error"); return; }
-        setTitle(data.title); setAuthors(data.authors);
-        setAbstract(data.abstract); setTags(data.tags);
-        setDoi(data.doi ?? ""); setResolvedUrl(data.url ?? url);
-        setPublishedDate(data.publishedDate ?? "");
-        if (data.sourceType) setSourceType(data.sourceType as SourceType);
-        setStep("review");
-      } catch { setErrorMsg(zh ? "网络请求失败" : "Network error"); setStep("error"); }
-    } else {
-      if (!file) { setErrorMsg(zh ? "请选择 PDF 文件" : "Choose a PDF file"); return; }
-      setStep("uploading");
-      try {
-        const form = new FormData();
-        form.append("file", file);
-        form.append("source_type", sourceType);
-        setStep("parsing");
-        const res = await fetch(`${apiBase()}/api/resources/import/pdf`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: form,
-        });
-        const data = await res.json();
-        if (!res.ok) { setErrorMsg(data.error ?? "Parsing failed"); setStep("error"); return; }
-        setTitle(data.title); setAuthors(data.authors);
-        setAbstract(data.abstract); setTags(data.tags);
-        setDoi(data.doi ?? ""); setResolvedUrl(data.url ?? "");
-        setPublishedDate(data.publishedDate ?? "");
-        if (data.sourceType) setSourceType(data.sourceType as SourceType);
-        setStep("review");
-      } catch { setErrorMsg(zh ? "网络请求失败" : "Network error"); setStep("error"); }
-    }
-  }
-
-  async function handleSave() {
-    setStep("saving");
-    try {
-      const res = await fetch(`${apiBase()}/api/resources`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          title: title.trim(), sourceType,
-          url: resolvedUrl.trim() || null, doi: doi.trim() || null,
-          authors,
-          abstract: abstract.trim(), tags,
-          publishedDate: publishedDate.trim() || null,
-        }),
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        if (res.status === 409 && d.error === "duplicate") {
-          setErrorMsg(zh ? `文献库中已存在同名或同 DOI 的资源："${d.existing?.title}"` : `A resource with this title or DOI already exists: "${d.existing?.title}"`);
-        } else {
-          setErrorMsg(d.error ?? "Save failed");
-        }
-        setStep("error");
-        return;
-      }
-      setStep("done");
-      setTimeout(() => { onSaved(); onClose(); }, 1000);
-    } catch { setErrorMsg(zh ? "网络请求失败" : "Network error"); setStep("error"); }
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Upload className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold">{zh ? "智能导入文献" : "Import Resource"}</h2>
+        </>
+      ) : (
+        <>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "URL 列表（每行一个，最多 20 条）" : "URLs (one per line, up to 20)"}</label>
+            <textarea value={batchText} onChange={(e) => setBatchText(e.target.value)} rows={6}
+              placeholder={"https://...\nhttps://..."}
+              className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none font-mono placeholder:text-muted-foreground" />
           </div>
-          <button onClick={onClose} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
-          {(step === "input" || step === "error") && (
-            <>
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-1.5">
-                  <button onClick={() => setMethod("url")}
-                    className={`text-xs px-2 py-1.5 rounded-lg border transition-colors text-center font-medium ${method === "url" ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40"}`}>
-                    {zh ? "DOI / URL" : "DOI / URL"}
-                  </button>
-                  <button onClick={() => setMethod("pdf")}
-                    className={`text-xs px-2 py-1.5 rounded-lg border transition-colors text-center font-medium ${method === "pdf" ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40"}`}>
-                    {zh ? "PDF 文件" : "PDF File"}
-                  </button>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型" : "Type"}</label>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {SOURCE_TYPE_OPTIONS.map((opt) => (
-                      <button key={opt} onClick={() => setSourceType(opt)}
-                        className={`text-xs px-2 py-1.5 rounded-lg border transition-colors text-center ${sourceType === opt ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40"}`}>
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                {method === "url" ? (
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "文献 URL 或 DOI 链接" : "Source URL or DOI link"}</label>
-                    <input type="url" value={url} onChange={(e) => setUrl(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleParse()}
-                      placeholder="https://..."
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
-                  </div>
-                ) : (
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "选择 PDF 文件" : "Choose PDF file"}</label>
-                    <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                      className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer" />
-                    {file && <p className="text-xs text-muted-foreground">{file.name} · {(file.size / 1024 / 1024).toFixed(1)} MB</p>}
-                    <p className="text-xs text-muted-foreground">{zh ? "最大 15MB；扫描版 PDF 也支持自动识别。" : "Max 15MB. Scanned/image PDFs are read automatically."}</p>
-                  </div>
-                )}
-                {errorMsg && (
-                  <div className="flex items-start gap-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />{errorMsg}
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-end gap-2">
-                <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">{zh ? "取消" : "Cancel"}</button>
-                <button onClick={handleParse} disabled={method === "url" ? !url : !file}
-                  className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
-                  <Upload className="h-3.5 w-3.5" />{zh ? "AI 解析" : "Parse with AI"}
-                </button>
-              </div>
-            </>
-          )}
-          {step === "uploading" && (
-            <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
-              <Loader2 className="h-8 w-8 text-primary animate-spin" />
-              <p className="text-sm font-medium">{zh ? "正在上传文件…" : "Uploading file…"}</p>
-            </div>
-          )}
-          {step === "parsing" && (
-            <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
-              <Loader2 className="h-8 w-8 text-primary animate-spin" />
-              <p className="text-sm font-medium">{zh ? "AI 正在解析文献元数据…" : "AI is parsing the document…"}</p>
-              <p className="text-xs text-muted-foreground">{zh ? "通常需要 5–20 秒" : "Usually 5–20 seconds"}</p>
-            </div>
-          )}
-          {step === "review" && (
-            <>
-              <p className="text-xs text-muted-foreground">{zh ? "AI 已提取以下信息，可编辑后确认入库。" : "AI extracted the following. Edit as needed, then confirm."}</p>
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型" : "Type"}</label>
-                  <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
-                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
-                    {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "标题" : "Title"}</label>
-                  <input value={title} onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-                </div>
-                <AuthorPicker authors={authors} onChange={setAuthors} language={language} />
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL</label>
-                    <input value={resolvedUrl} onChange={(e) => setResolvedUrl(e.target.value)} placeholder="https://..."
-                      className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DOI</label>
-                    <input value={doi} onChange={(e) => setDoi(e.target.value)} placeholder="10.xxxx/xxxxx"
-                      className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发表日期" : "Published Date"}</label>
-                  <input value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)} placeholder="2021 or 2021-07-20"
-                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
-                  <textarea value={abstract} onChange={(e) => setAbstract(e.target.value)} rows={3}
-                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
-                </div>
-                <TagEditor tags={tags} onChange={setTags} language={language} />
-              </div>
-              <div className="flex justify-between gap-2 pt-1">
-                <button onClick={() => { setStep("input"); setErrorMsg(""); }}
-                  className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">{zh ? "重新输入" : "Back"}</button>
-                <button onClick={handleSave} disabled={!title.trim()}
-                  className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
-                  <Check className="h-3.5 w-3.5" />{zh ? "确认入库" : "Confirm & Save"}
-                </button>
-              </div>
-            </>
-          )}
-          {(step === "saving") && (
-            <div className="flex flex-col items-center justify-center py-10 gap-3">
-              <Loader2 className="h-8 w-8 text-primary animate-spin" />
-              <p className="text-sm text-muted-foreground">{zh ? "正在保存…" : "Saving…"}</p>
-            </div>
-          )}
-          {step === "done" && (
-            <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
-              <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center">
-                <Check className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <p className="text-sm font-medium">{zh ? "文献已提交审核" : "Resource submitted for review"}</p>
-            </div>
-          )}
-        </div>
-      </div>
+          <p className="text-xs text-muted-foreground">
+            {zh ? "提交后将在后台逐条处理，可关闭此窗口，稍后在下方队列中查看进度与核对。" : "Submitted URLs process in the background — you can close this dialog and check progress in the queue below later."}
+          </p>
+          <div className="flex justify-end gap-2">
+            <button onClick={handleSubmitBatch} disabled={submittingBatch || !batchText.trim()}
+              className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+              {submittingBatch ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <List className="h-3.5 w-3.5" />}
+              {zh ? "提交到队列" : "Submit to Queue"}
+            </button>
+          </div>
+          <JobQueuePanel token={token} language={language} type="url" onSaved={onSaved} />
+        </>
+      )}
     </div>
   );
 }
 
-// ── Batch Import Modal ────────────────────────────────────────────────────────
-function BatchImportModal({ token, language, onClose, onSaved }: {
-  token: string; language: string; onClose: () => void; onSaved: () => void;
-}) {
+// ── PDF tab — always async (upload_jobs-backed), even for a single file ────────
+function PdfTab({ token, language, onSaved }: { token: string; language: string; onSaved: () => void }) {
   const zh = language === "zh";
-  type BatchStep = "input" | "parsing" | "review" | "saving" | "done";
-  const [method,     setMethod]     = useState<ImportMethod>("url");
-  const [step,       setStep]       = useState<BatchStep>("input");
-  const [urlsText,   setUrlsText]   = useState("");
-  const [files,      setFiles]      = useState<File[]>([]);
   const [sourceType, setSourceType] = useState<SourceType>("Paper");
-  const [items,      setItems]      = useState<ImportedItem[]>([]);
-  const [savedCount, setSavedCount] = useState(0);
-  const [duplicateTitles, setDuplicateTitles] = useState<string[]>([]);
-  const esRef = useRef<boolean>(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  async function consumeStream(res: Response) {
-    const reader = res.body!.getReader();
-    const decoder = new TextDecoder();
-    let buf = "";
-
-    while (esRef.current) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buf += decoder.decode(value, { stream: true });
-      const lines = buf.split("\n\n");
-      buf = lines.pop() ?? "";
-      for (const line of lines) {
-        const dataLine = line.split("\n").find((l) => l.startsWith("data:"));
-        if (!dataLine) continue;
-        try {
-          const event = JSON.parse(dataLine.slice(5));
-          if (event.done) { setStep("review"); break; }
-          if (event.index != null) {
-            setItems((prev) => {
-              const next = [...prev];
-              const it = next[event.index];
-              if (!it) return next;
-              if (event.status === "done" && event.data) {
-                next[event.index] = { ...it, ...event.data, status: "done", selected: true };
-              } else if (event.status === "error") {
-                next[event.index] = { ...it, status: "error", error: event.error };
-              }
-              return next;
-            });
-          }
-        } catch { /* ignore parse error */ }
-      }
-    }
-  }
-
-  async function handleParse() {
-    esRef.current = true;
-    if (method === "url") {
-      const raw = urlsText.split(/[\n,]+/).map((u) => u.trim()).filter((u) => u.startsWith("http"));
-      if (raw.length === 0) return;
-      const deduped = [...new Set(raw)].slice(0, 20);
-
-      setItems(deduped.map((url) => ({ url, title: "", authors: [], abstract: "", tags: [], sourceType, status: "parsing" as const, selected: false })));
-      setStep("parsing");
-
-      const res = await fetch(`${apiBase()}/api/resources/import/batch`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ urls: deduped, source_type: sourceType }),
-      });
-      await consumeStream(res);
-    } else {
-      if (files.length === 0) return;
-      setItems(files.map((f) => ({ url: "", fileName: f.name, title: "", authors: [], abstract: "", tags: [], sourceType, status: "parsing" as const, selected: false })));
-      setStep("parsing");
-
+  async function handleSubmit() {
+    if (files.length === 0) return;
+    setSubmitting(true); setError("");
+    try {
       const form = new FormData();
       files.forEach((f) => form.append("files", f));
-      form.append("source_type", sourceType);
-      const res = await fetch(`${apiBase()}/api/resources/import/pdf/batch`, {
+      form.append("sourceType", sourceType);
+      const res = await fetch(`${apiBase()}/api/resources/upload/jobs/pdf`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: form,
       });
-      await consumeStream(res);
+      if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); return; }
+      setFiles([]);
+      if (inputRef.current) inputRef.current.value = "";
+    } catch {
+      setError(zh ? "网络请求失败" : "Network error");
+    } finally {
+      setSubmitting(false);
     }
   }
 
-  function toggleItem(idx: number) {
-    setItems((prev) => prev.map((it, i) => i === idx ? { ...it, selected: !it.selected } : it));
-  }
-  function updateItemTags(idx: number, tags: string[]) {
-    setItems((prev) => prev.map((it, i) => i === idx ? { ...it, tags } : it));
-  }
+  return (
+    <div className="space-y-5">
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型提示" : "Type hint"}</label>
+        <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
+          {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "PDF 文件（可多选，单个最大 15MB，最多 20 个）" : "PDF files (multi-select, 15MB max each, up to 20)"}</label>
+        <input ref={inputRef} type="file" accept="application/pdf" multiple
+          onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 20))}
+          className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer" />
+        {files.length > 0 && (
+          <ul className="text-xs text-muted-foreground space-y-0.5 pt-1">
+            {files.map((f) => <li key={f.name}>· {f.name}</li>)}
+          </ul>
+        )}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {zh ? "上传后将在后台逐个处理（先尝试本地文字提取，扫描件 OCR 暂未启用），可关闭此窗口，稍后在下方队列中查看进度与核对。"
+            : "Uploaded files process in the background (text extraction first; OCR for scanned PDFs isn't enabled yet) — you can close this dialog and check progress in the queue below later."}
+      </p>
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      <div className="flex justify-end gap-2">
+        <button onClick={handleSubmit} disabled={submitting || files.length === 0}
+          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+          {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+          {zh ? "提交到队列" : "Submit to Queue"}
+        </button>
+      </div>
+      <JobQueuePanel token={token} language={language} type="pdf" onSaved={onSaved} />
+    </div>
+  );
+}
 
-  async function handleSaveSelected() {
-    const toSave = items.filter((it) => it.status === "done" && it.selected);
-    if (toSave.length === 0) return;
-    setStep("saving");
-    let saved = 0;
-    const duplicates: string[] = [];
-    for (const it of toSave) {
-      try {
-        const res = await fetch(`${apiBase()}/api/resources`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            title: it.title, sourceType: it.sourceType, url: it.url || null, doi: it.doi || null,
-            authors: it.authors, abstract: it.abstract, tags: it.tags,
-            publishedDate: it.publishedDate || null,
-          }),
-        });
-        if (res.ok) {
-          saved++;
-        } else if (res.status === 409) {
-          duplicates.push(it.title);
-        }
-      } catch { /* continue */ }
-    }
-    setSavedCount(saved);
-    setDuplicateTitles(duplicates);
-    setStep("done");
-    onSaved();
-    if (duplicates.length === 0) setTimeout(onClose, 1500);
-  }
+// ── Upload Center — three tabs: Manual (sync) / DOI·URL (sync single + async batch) / PDF (async) ──
+function UploadCenterModal({ token, language, onClose, onSaved }: {
+  token: string; language: string; isAdmin: boolean; onClose: () => void; onSaved: () => void;
+}) {
+  const zh = language === "zh";
+  const [tab, setTab] = useState<"manual" | "url" | "pdf">("manual");
 
-  const doneItems = items.filter((it) => it.status === "done");
-  const errorItems = items.filter((it) => it.status === "error");
-  const selectedCount = items.filter((it) => it.selected).length;
+  const TABS = [
+    { key: "manual" as const, labelEn: "Manual", labelZh: "手动填写" },
+    { key: "url" as const, labelEn: "DOI / URL", labelZh: "DOI·URL" },
+    { key: "pdf" as const, labelEn: "PDF", labelZh: "PDF" },
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
@@ -1088,187 +1176,29 @@ function BatchImportModal({ token, language, onClose, onSaved }: {
       <div className="w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
-            <List className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold">{zh ? "批量导入文献" : "Batch Import"}</h2>
+            <Upload className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold">{zh ? "上传文献" : "Upload Resource"}</h2>
           </div>
           <button onClick={onClose} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {step === "input" && (
-            <>
-              <div className="grid grid-cols-2 gap-1.5">
-                <button onClick={() => setMethod("url")}
-                  className={`text-xs px-2 py-1.5 rounded-lg border transition-colors text-center font-medium ${method === "url" ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40"}`}>
-                  {zh ? "多个 URL" : "Multiple URLs"}
-                </button>
-                <button onClick={() => setMethod("pdf")}
-                  className={`text-xs px-2 py-1.5 rounded-lg border transition-colors text-center font-medium ${method === "pdf" ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40"}`}>
-                  {zh ? "多个 PDF" : "Multiple PDFs"}
-                </button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {method === "url"
-                  ? (zh ? "每行或逗号分隔粘贴多个 URL（最多 20 条），AI 将逐条解析所有文献元数据。"
-                        : "Paste multiple URLs (one per line or comma-separated, max 20). AI will parse each one.")
-                  : (zh ? "选择最多 20 个 PDF 文件（每个最大 15MB），AI 将逐个解析元数据。"
-                        : "Choose up to 20 PDF files (max 15MB each). AI will parse each one.")}
-              </p>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型（统一）" : "Default Source Type"}</label>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {SOURCE_TYPE_OPTIONS.map((opt) => (
-                    <button key={opt} onClick={() => setSourceType(opt)}
-                      className={`text-xs px-2 py-1.5 rounded-lg border transition-colors text-center ${sourceType === opt ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40"}`}>
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {method === "url" ? (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URLs</label>
-                  <textarea value={urlsText} onChange={(e) => setUrlsText(e.target.value)} rows={8}
-                    placeholder={zh ? "https://example.com/paper1\nhttps://example.com/paper2\n..." : "https://example.com/paper1\nhttps://example.com/paper2\n..."}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none font-mono placeholder:text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground">
-                    {urlsText.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length} {zh ? "条有效 URL" : "valid URLs"}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "选择 PDF 文件（可多选）" : "Choose PDF files (multiple)"}</label>
-                  <input type="file" accept="application/pdf" multiple
-                    onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 20))}
-                    className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer" />
-                  <p className="text-xs text-muted-foreground">
-                    {files.length} {zh ? "个文件已选择" : "files selected"}
-                  </p>
-                </div>
-              )}
-              <div className="flex justify-end gap-2">
-                <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">{zh ? "取消" : "Cancel"}</button>
-                <button onClick={handleParse}
-                  disabled={method === "url"
-                    ? urlsText.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length === 0
-                    : files.length === 0}
-                  className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
-                  <Upload className="h-3.5 w-3.5" />{zh ? "开始批量解析" : "Start Parsing"}
-                </button>
-              </div>
-            </>
-          )}
+        <div className="flex border-b border-border px-6 shrink-0">
+          {TABS.map((t) => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                tab === t.key ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}>
+              {zh ? t.labelZh : t.labelEn}
+            </button>
+          ))}
+        </div>
 
-          {(step === "parsing" || step === "review") && (
-            <>
-              <div className="space-y-2">
-                {step === "parsing" && (() => {
-                  const processed = items.filter((it) => it.status !== "parsing").length;
-                  const pct = items.length > 0 ? Math.round((processed / items.length) * 100) : 0;
-                  return (
-                    <div className="space-y-1.5 mb-2">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span className="flex items-center gap-2">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                          {zh ? `正在处理（${processed}/${items.length}）…` : `Processing (${processed}/${items.length})…`}
-                        </span>
-                        <span>{pct}%</span>
-                      </div>
-                      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                        <div className="h-full bg-primary transition-all duration-300" style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  );
-                })()}
-                {items.map((it, idx) => (
-                  <div key={it.fileName ?? it.url} className={`rounded-lg border p-3 space-y-2 transition-colors ${
-                    it.status === "error" ? "border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20" :
-                    it.selected ? "border-primary/40 bg-primary/5" : "border-border"
-                  }`}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        {it.status === "parsing" && <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />}
-                        {it.status === "done"    && <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />}
-                        {it.status === "error"   && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
-                        <span className="text-xs font-medium truncate text-foreground">
-                          {it.status === "done" ? it.title || it.fileName || it.url : (it.fileName ?? it.url)}
-                        </span>
-                      </div>
-                      {it.status === "done" && (
-                        <button onClick={() => toggleItem(idx)}
-                          className={`shrink-0 text-xs px-2 py-0.5 rounded-full border transition-colors ${
-                            it.selected ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary/50"
-                          }`}>
-                          {it.selected ? (zh ? "已选" : "Selected") : (zh ? "选择" : "Select")}
-                        </button>
-                      )}
-                    </div>
-                    {it.status === "done" && it.selected && (
-                      <div className="pl-5">
-                        <div className="flex flex-wrap gap-1.5 items-center">
-                          <span className="text-xs text-muted-foreground">{zh ? "标签：" : "Tags:"}</span>
-                          {it.tags.map((tag) => (
-                            <span key={tag} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                              {tag}
-                              <button onClick={() => updateItemTags(idx, it.tags.filter((t) => t !== tag))} className="hover:text-red-500">
-                                <X className="h-2 w-2" />
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {it.status === "error" && (
-                      <p className="pl-5 text-xs text-red-600 dark:text-red-400">{it.error ?? "Failed"}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {step === "review" && (
-                <div className="flex items-center justify-between pt-2 border-t border-border">
-                  <p className="text-xs text-muted-foreground">
-                    {doneItems.length} {zh ? "条解析成功" : "parsed"}{errorItems.length > 0 && `，${errorItems.length} ${zh ? "条失败" : " failed"}`}
-                  </p>
-                  <button onClick={handleSaveSelected} disabled={selectedCount === 0}
-                    className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
-                    <Check className="h-3.5 w-3.5" />
-                    {zh ? `确认入库 (${selectedCount})` : `Save ${selectedCount} Selected`}
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-
-          {step === "saving" && (
-            <div className="flex flex-col items-center justify-center py-10 gap-3">
-              <Loader2 className="h-8 w-8 text-primary animate-spin" />
-              <p className="text-sm text-muted-foreground">{zh ? "正在批量保存…" : "Saving…"}</p>
-            </div>
-          )}
-
-          {step === "done" && (
-            <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
-              <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center">
-                <Check className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <p className="text-sm font-medium">
-                {zh ? `已提交 ${savedCount} 篇文献` : `${savedCount} resource${savedCount !== 1 ? "s" : ""} submitted`}
-              </p>
-              {duplicateTitles.length > 0 && (
-                <div className="max-w-sm space-y-1.5">
-                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                    {zh ? `${duplicateTitles.length} 篇已存在于文献库，未重复添加：` : `${duplicateTitles.length} already in the library, skipped:`}
-                  </p>
-                  <ul className="text-xs text-muted-foreground space-y-0.5">
-                    {duplicateTitles.map((t) => <li key={t} className="truncate">· {t}</li>)}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
+        <div className="p-6 overflow-y-auto">
+          {tab === "manual" && <ManualTab token={token} language={language} onClose={onClose} onSaved={onSaved} />}
+          {tab === "url" && <UrlTab token={token} language={language} onClose={onClose} onSaved={onSaved} />}
+          {tab === "pdf" && <PdfTab token={token} language={language} onSaved={onSaved} />}
         </div>
       </div>
     </div>
@@ -1284,15 +1214,34 @@ export default function AcademicResources() {
   const [searchQuery,   setSearchQuery]   = useState("");
   const [selectedType,  setSelectedType]  = useState<FilterType>("All");
   const [selectedTags,  setSelectedTags]  = useState<Set<string>>(new Set());
+  const [selectedFacetTag, setSelectedFacetTag] = useState<string | null>(() => new URLSearchParams(window.location.search).get("tag"));
+  const [facetTagVocab, setFacetTagVocab] = useState<TagSummary[]>([]);
   const [apiResources,  setApiResources]  = useState<Resource[] | null>(null);
   const [isLoading,     setIsLoading]     = useState(true);
-  const [importMode,    setImportMode]    = useState<"none" | "create" | "single" | "batch">("none");
+  const [uploadCenterOpen, setUploadCenterOpen] = useState(false);
   const [editResource,  setEditResource]  = useState<Resource | null>(null);
   const [detailResource, setDetailResource] = useState<Resource | null>(null);
   const [adminView,     setAdminView]     = useState(false);
   const [pendingCount,  setPendingCount]  = useState(0);
 
   const isAdmin = user?.role === "admin";
+
+  useEffect(() => {
+    fetch(`${apiBase()}/api/tags`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: TagSummary[]) => setFacetTagVocab(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  function handleFacetTagClick(slug: string) {
+    setSelectedFacetTag((prev) => {
+      const next = prev === slug ? null : slug;
+      const url = new URL(window.location.href);
+      if (next) url.searchParams.set("tag", next); else url.searchParams.delete("tag");
+      window.history.pushState({}, "", url);
+      return next;
+    });
+  }
 
   const fetchResources = useCallback(() => {
     setIsLoading(true);
@@ -1355,18 +1304,19 @@ export default function AcademicResources() {
       if (!adminView && r.status === "rejected") return false; // hide rejected from normal view unless owner/admin
       const matchType = selectedType === "All" || r.sourceType === selectedType;
       const matchTags = selectedTags.size === 0 || [...selectedTags].every((t) => r.tags.includes(t));
+      const matchFacetTag = !selectedFacetTag || (r.facetedTags ?? []).some((t) => t.slug === selectedFacetTag);
       const q = searchQuery.toLowerCase().trim();
       const matchSearch =
         !q || r.title.toLowerCase().includes(q) ||
         (r.abstract ?? "").toLowerCase().includes(q) ||
         r.authors.some((a) => a.toLowerCase().includes(q)) ||
         r.tags.some((tg) => tg.toLowerCase().includes(q));
-      return matchType && matchTags && matchSearch;
+      return matchType && matchTags && matchFacetTag && matchSearch;
     });
-  }, [resources, searchQuery, selectedType, selectedTags, adminView, pendingResources]);
+  }, [resources, searchQuery, selectedType, selectedTags, selectedFacetTag, adminView, pendingResources]);
 
   const showExperts = selectedType === "Expert";
-  const hasActiveFilters = selectedType !== "All" || selectedTags.size > 0 || searchQuery;
+  const hasActiveFilters = selectedType !== "All" || selectedTags.size > 0 || !!selectedFacetTag || searchQuery;
 
   return (
     <div className="max-w-screen-xl mx-auto space-y-6">
@@ -1390,17 +1340,9 @@ export default function AcademicResources() {
           </div>
           {user && (
             <div className="flex items-center gap-2 shrink-0 flex-wrap">
-              <button onClick={() => setImportMode("create")}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors">
-                <Plus className="h-4 w-4" />{zh ? "手动添加" : "Add Manually"}
-              </button>
-              <button onClick={() => setImportMode("single")}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors">
-                <Upload className="h-4 w-4" />{zh ? "导入文献" : "Import"}
-              </button>
-              <button onClick={() => setImportMode("batch")}
+              <button onClick={() => setUploadCenterOpen(true)}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-                <List className="h-4 w-4" />{zh ? "批量导入" : "Batch Import"}
+                <Upload className="h-4 w-4" />{zh ? "上传文献" : "Upload"}
               </button>
             </div>
           )}
@@ -1451,10 +1393,41 @@ export default function AcademicResources() {
                 ))}
               </div>
             </div>
-            {!showExperts && (
+            {!showExperts && facetTagVocab.length > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between px-1">
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t("Filter by Tags", "按标签筛选")}</p>
+                  {selectedFacetTag && (
+                    <button onClick={() => handleFacetTagClick(selectedFacetTag)} className="text-xs text-primary hover:underline">{t("Clear", "清除")}</button>
+                  )}
+                </div>
+                <div className="space-y-2.5">
+                  {(["theme", "jurisdiction", "asset"] as const).map((facet) => {
+                    const tagsInFacet = facetTagVocab.filter((t) => t.facet === facet);
+                    if (tagsInFacet.length === 0) return null;
+                    return (
+                      <div key={facet} className="space-y-1">
+                        <p className="text-xs text-muted-foreground/70 px-1">{zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {tagsInFacet.map((tg) => (
+                            <button key={tg.id} onClick={() => handleFacetTagClick(tg.slug)}
+                              className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                                selectedFacetTag === tg.slug ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
+                              }`}>
+                              <Tag className="h-2.5 w-2.5" />{zh ? tg.nameZh : tg.nameEn}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {!showExperts && allTags.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? "旧版自由标签" : "Legacy Tags"}</p>
                   {selectedTags.size > 0 && (
                     <button onClick={() => setSelectedTags(new Set())} className="text-xs text-primary hover:underline">{t("Clear", "清除")}</button>
                   )}
@@ -1491,7 +1464,7 @@ export default function AcademicResources() {
                   </p>
                 )}
                 {!adminView && hasActiveFilters && (
-                  <button onClick={() => { setSelectedType("All"); setSelectedTags(new Set()); setSearchQuery(""); }}
+                  <button onClick={() => { setSelectedType("All"); setSelectedTags(new Set()); setSearchQuery(""); if (selectedFacetTag) handleFacetTagClick(selectedFacetTag); }}
                     className="text-xs text-primary hover:underline">{t("Reset filters", "重置筛选")}</button>
                 )}
               </div>
@@ -1512,6 +1485,7 @@ export default function AcademicResources() {
                       onReject={isAdmin ? handleReject : undefined}
                       onEdit={setEditResource}
                       onOpenDetail={setDetailResource}
+                      onFacetTagClick={handleFacetTagClick}
                     />
                   ))}
                 </div>
@@ -1522,20 +1496,15 @@ export default function AcademicResources() {
       </div>
 
       {/* ── Modals ── */}
-      {importMode === "create" && token && (
-        <CreateModal token={token} language={language} isAdmin={isAdmin} onClose={() => setImportMode("none")} onSaved={fetchResources} />
-      )}
-      {importMode === "single" && token && (
-        <SingleImportModal token={token} language={language} onClose={() => setImportMode("none")} onSaved={fetchResources} />
-      )}
-      {importMode === "batch" && token && (
-        <BatchImportModal token={token} language={language} onClose={() => setImportMode("none")} onSaved={fetchResources} />
+      {uploadCenterOpen && token && (
+        <UploadCenterModal token={token} language={language} isAdmin={isAdmin} onClose={() => setUploadCenterOpen(false)} onSaved={fetchResources} />
       )}
       {editResource && token && (
         <EditModal resource={editResource} token={token} language={language} onClose={() => setEditResource(null)} onSaved={fetchResources} />
       )}
       {detailResource && (
-        <ResourceDetailModal resource={detailResource} language={language} onClose={() => setDetailResource(null)} />
+        <ResourceDetailModal resource={detailResource} language={language} onClose={() => setDetailResource(null)}
+          onFacetTagClick={(slug) => { handleFacetTagClick(slug); setDetailResource(null); }} />
       )}
     </div>
   );
