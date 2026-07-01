@@ -17,6 +17,7 @@ import {
   User, BookOpen, ExternalLink, Link as LinkIcon,
   Calendar, ArrowLeft, Building2, Pencil,
 } from "lucide-react";
+import { sourceTypeLabel } from "@/lib/source-types";
 
 interface ApiResource {
   id: number;
@@ -48,11 +49,13 @@ const editFormSchema = z.object({
 });
 
 const TYPE_COLORS: Record<string, string> = {
-  Paper: "bg-blue-50 text-blue-700 border-blue-100",
-  Report: "bg-emerald-50 text-emerald-700 border-emerald-100",
-  News: "bg-amber-50 text-amber-700 border-amber-100",
-  "Gov Document": "bg-purple-50 text-purple-700 border-purple-100",
-  "Experts & Scholars": "bg-rose-50 text-rose-700 border-rose-100",
+  journal_article: "bg-blue-50 text-blue-700 border-blue-100",
+  working_paper: "bg-cyan-50 text-cyan-700 border-cyan-100",
+  conference_paper: "bg-purple-50 text-purple-700 border-purple-100",
+  thesis: "bg-indigo-50 text-indigo-700 border-indigo-100",
+  report: "bg-emerald-50 text-emerald-700 border-emerald-100",
+  gov_document: "bg-violet-50 text-violet-700 border-violet-100",
+  news: "bg-amber-50 text-amber-700 border-amber-100",
 };
 
 function apiBase() {
@@ -60,7 +63,7 @@ function apiBase() {
 }
 
 export default function AuthorPage({ params }: { params: { name: string } }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user, token } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -329,7 +332,7 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                       <div className="space-y-1 flex-1">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
                           <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${TYPE_COLORS[resource.sourceType ?? ""] ?? "bg-muted text-muted-foreground"}`}>
-                            {resource.sourceType ?? "Resource"}
+                            {resource.sourceType ? sourceTypeLabel(resource.sourceType, language === "zh") : "Resource"}
                           </span>
                           {resource.createdAt && (
                             <span className="text-xs text-muted-foreground flex items-center">

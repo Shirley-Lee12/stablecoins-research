@@ -1,0 +1,1 @@
+ALTER TABLE "upload_jobs" ADD COLUMN "batch_id" uuid;

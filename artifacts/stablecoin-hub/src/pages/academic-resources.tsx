@@ -2,14 +2,15 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import { Link } from "wouter";
 import { useLanguage } from "@/lib/language-context";
 import { useAuth } from "@/lib/auth-context";
+import { SOURCE_TYPES, sourceTypeLabel, type SourceType } from "@/lib/source-types";
 import {
-  Search, ExternalLink, FileText, BookOpen, Building2, Newspaper,
+  Search, ExternalLink, FileText, BookOpen, Newspaper,
   Tag, Users, ChevronRight, Loader2, Plus, X, Upload, AlertCircle,
   Check, ShieldCheck, Clock, XCircle, Pencil, List, LayoutGrid,
+  Presentation, GraduationCap, ScrollText, Landmark,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type SourceType = "Paper" | "Report" | "Gov Document" | "News" | "Experts & Scholars";
 type ResourceStatus = "pending" | "approved" | "rejected" | "needs_review" | "failed";
 type FilterType = SourceType | "Expert" | "All";
 
@@ -28,6 +29,16 @@ interface Resource {
   status: ResourceStatus;
   createdBy: number | null;
   createdAt: string;
+  rejectionReasonId: number | null;
+  rejectionNote: string | null;
+  reviewedAt: string | null;
+}
+
+interface RejectionReason {
+  id: number;
+  slug: string;
+  nameZh: string;
+  nameEn: string;
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -48,29 +59,34 @@ const STABLECOIN_TAGS = [
   "Technology & Infrastructure",
 ];
 
+const SOURCE_TYPE_ICONS: Record<SourceType, React.ElementType> = {
+  journal_article: FileText,
+  working_paper: BookOpen,
+  conference_paper: Presentation,
+  thesis: GraduationCap,
+  report: ScrollText,
+  gov_document: Landmark,
+  news: Newspaper,
+};
+
+const SOURCE_TYPE_COLORS: Record<SourceType, string> = {
+  journal_article: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
+  working_paper: "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-800",
+  conference_paper: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
+  thesis: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800",
+  report: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
+  gov_document: "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800",
+  news: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+};
+
 const FILTER_TYPES: { value: FilterType; labelEn: string; labelZh: string; icon: React.ElementType }[] = [
-  { value: "All",              labelEn: "All Types",          labelZh: "全部类型", icon: BookOpen  },
-  { value: "Paper",            labelEn: "Paper",              labelZh: "学术论文", icon: FileText  },
-  { value: "Report",           labelEn: "Report",             labelZh: "行业报告", icon: BookOpen  },
-  { value: "Gov Document",     labelEn: "Gov Document",       labelZh: "监管法案", icon: Building2 },
-  { value: "News",             labelEn: "News",               labelZh: "行业资讯", icon: Newspaper },
-  { value: "Expert",           labelEn: "Experts & Scholars", labelZh: "专家学者", icon: Users     },
+  { value: "All", labelEn: "All Types", labelZh: "全部类型", icon: BookOpen },
+  ...SOURCE_TYPES.map((t) => ({ value: t.value, labelEn: t.nameEn, labelZh: t.nameZh, icon: SOURCE_TYPE_ICONS[t.value] })),
+  { value: "Expert", labelEn: "Experts & Scholars", labelZh: "专家学者", icon: Users },
 ];
 
-const SOURCE_TYPE_OPTIONS: SourceType[] = ["Paper", "Report", "Gov Document", "News", "Experts & Scholars"];
-
-const BADGE_COLORS: Record<SourceType, string> = {
-  Paper:                "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
-  Report:               "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
-  "Gov Document":       "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800",
-  News:                 "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
-  "Experts & Scholars": "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800",
-};
-
-const BADGE_ICONS: Record<SourceType, React.ElementType> = {
-  Paper: FileText, Report: BookOpen, "Gov Document": Building2,
-  News: Newspaper, "Experts & Scholars": Users,
-};
+const BADGE_COLORS = SOURCE_TYPE_COLORS;
+const BADGE_ICONS = SOURCE_TYPE_ICONS;
 
 function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
@@ -78,35 +94,41 @@ function apiBase() {
 
 // ── Resource Card ─────────────────────────────────────────────────────────────
 function ResourceCard({
-  r, language, currentUserId, isAdmin,
+  r, language, currentUserId, isAdmin, rejectionReasons,
   onApprove, onReject, onEdit, onOpenDetail, onFacetTagClick,
 }: {
   r: Resource; language: string;
-  currentUserId?: number; isAdmin?: boolean;
+  currentUserId?: number; isAdmin?: boolean; rejectionReasons?: RejectionReason[];
   onApprove?: (id: number) => void;
-  onReject?: (id: number) => void;
+  onReject?: (r: Resource) => void;
   onEdit?: (r: Resource) => void;
   onOpenDetail?: (r: Resource) => void;
   onFacetTagClick?: (slug: string) => void;
 }) {
   const Icon  = BADGE_ICONS[r.sourceType] ?? FileText;
-  const color = BADGE_COLORS[r.sourceType] ?? BADGE_COLORS["Paper"];
+  const color = BADGE_COLORS[r.sourceType] ?? BADGE_COLORS["journal_article"];
   const href  = r.url ?? (r.doi ? `https://doi.org/${r.doi}` : null);
   // Prefer the document's own publication year; fall back to when it was added to this library.
   const date  = r.publishedDate?.match(/^\d{4}/)?.[0]
     ?? new Date(r.createdAt).toLocaleDateString(language === "zh" ? "zh-CN" : "en-US", { year: "numeric", month: "short" });
   const canEdit = isAdmin || (currentUserId != null && r.createdBy === currentUserId);
   const isPending = r.status === "pending";
+  const isNeedsReview = r.status === "needs_review";
   const isRejected = r.status === "rejected";
+  // Only meaningful for needs_review — inferred straight from the resource's own url/doi (no
+  // separate stored flag needed) so the admin queue can spot "just needs a link" at a glance
+  // (docs/planning/12 §1).
+  const missingLink = isNeedsReview && !r.url && !r.doi;
+  const rejectionReason = r.rejectionReasonId != null ? rejectionReasons?.find((x) => x.id === r.rejectionReasonId) : undefined;
 
   return (
     <div className={`group flex flex-col bg-card border rounded-xl overflow-hidden transition-all duration-200 ${
-      isPending ? "border-amber-300 dark:border-amber-700" :
+      isPending || isNeedsReview ? "border-amber-300 dark:border-amber-700" :
       isRejected ? "border-red-300 dark:border-red-800 opacity-70" :
       "border-border hover:border-primary/40 hover:shadow-md"
     }`}>
       <div className={`h-0.5 w-full bg-gradient-to-r ${
-        isPending ? "from-amber-400 to-amber-200" :
+        isPending || isNeedsReview ? "from-amber-400 to-amber-200" :
         isRejected ? "from-red-400 to-red-200" :
         "from-primary/70 to-primary/10"
       }`} />
@@ -114,13 +136,19 @@ function ResourceCard({
       <div className="flex flex-col flex-1 p-5 gap-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border ${color}`}>
-            <Icon className="h-3 w-3" />{r.sourceType}
+            <Icon className="h-3 w-3" />{sourceTypeLabel(r.sourceType, language === "zh")}
           </span>
           <div className="flex items-center gap-1.5">
             {isPending && (
               <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700">
                 <Clock className="h-3 w-3" />
                 {language === "zh" ? "待审核" : "Pending"}
+              </span>
+            )}
+            {isNeedsReview && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700">
+                <AlertCircle className="h-3 w-3" />
+                {missingLink ? (language === "zh" ? "待审核·缺链接" : "Needs review · no link") : (language === "zh" ? "待审核" : "Needs review")}
               </span>
             )}
             {isRejected && (
@@ -153,6 +181,13 @@ function ResourceCard({
         )}
         {r.abstract && (
           <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 flex-1">{r.abstract}</p>
+        )}
+        {isRejected && canEdit && (
+          <div className="text-xs px-2.5 py-1.5 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300">
+            <span className="font-medium">{language === "zh" ? "拒绝理由：" : "Rejected: "}</span>
+            {rejectionReason ? (language === "zh" ? rejectionReason.nameZh : rejectionReason.nameEn) : (language === "zh" ? "未说明" : "Not specified")}
+            {r.rejectionNote && <span className="block mt-0.5 text-red-600/80 dark:text-red-400/80">{r.rejectionNote}</span>}
+          </div>
         )}
         {r.facetedTags && r.facetedTags.length > 0 ? (
           <div className="flex flex-wrap gap-1 pt-1">
@@ -193,15 +228,15 @@ function ResourceCard({
               {language === "zh" ? "编辑" : "Edit"}
             </button>
           )}
-          {onApprove && isPending && (
+          {onApprove && (isPending || isNeedsReview) && (
             <button onClick={() => onApprove(r.id)}
               className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 transition-colors">
               <Check className="h-3 w-3" />
               {language === "zh" ? "通过" : "Approve"}
             </button>
           )}
-          {onReject && isPending && (
-            <button onClick={() => onReject(r.id)}
+          {onReject && (isPending || isNeedsReview) && (
+            <button onClick={() => onReject(r)}
               className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800 transition-colors">
               <XCircle className="h-3 w-3" />
               {language === "zh" ? "驳回" : "Reject"}
@@ -217,7 +252,7 @@ function ResourceCard({
 function ResourceDetailModal({ resource, language, onClose, onFacetTagClick }: { resource: Resource; language: string; onClose: () => void; onFacetTagClick?: (slug: string) => void }) {
   const zh = language === "zh";
   const Icon  = BADGE_ICONS[resource.sourceType] ?? FileText;
-  const color = BADGE_COLORS[resource.sourceType] ?? BADGE_COLORS["Paper"];
+  const color = BADGE_COLORS[resource.sourceType] ?? BADGE_COLORS["journal_article"];
   const href  = resource.url ?? (resource.doi ? `https://doi.org/${resource.doi}` : null);
   const date  = resource.publishedDate
     || new Date(resource.createdAt).toLocaleDateString(zh ? "zh-CN" : "en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -229,7 +264,7 @@ function ResourceDetailModal({ resource, language, onClose, onFacetTagClick }: {
       <div className="w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border ${color}`}>
-            <Icon className="h-3 w-3" />{resource.sourceType}
+            <Icon className="h-3 w-3" />{sourceTypeLabel(resource.sourceType, zh)}
           </span>
           <button onClick={onClose} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted">
             <X className="h-4 w-4" />
@@ -283,6 +318,70 @@ function ResourceDetailModal({ resource, language, onClose, onFacetTagClick }: {
               {resource.doi && <p className="text-xs text-muted-foreground">DOI: {resource.doi}</p>}
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Reject Dialog — admin picks a controlled reason (required) + optional free-text note ──────
+function RejectDialog({ resource, reasons, language, onClose, onSubmit }: {
+  resource: Resource; reasons: RejectionReason[]; language: string;
+  onClose: () => void; onSubmit: (reasonId: number, note: string) => Promise<void>;
+}) {
+  const zh = language === "zh";
+  const [reasonId, setReasonId] = useState<number | "">("");
+  const [note, setNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit() {
+    if (reasonId === "") { setError(zh ? "请选择拒绝理由" : "Please select a reason"); return; }
+    setSubmitting(true); setError("");
+    try {
+      await onSubmit(reasonId, note.trim());
+    } catch {
+      setError(zh ? "提交失败" : "Failed to submit");
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2 className="text-sm font-semibold">{zh ? "驳回文献" : "Reject Resource"}</h2>
+          <button onClick={onClose} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="p-6 space-y-4">
+          <p className="text-sm text-foreground line-clamp-2">{resource.title}</p>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "拒绝理由" : "Reason"} *</label>
+            <select value={reasonId} onChange={(e) => setReasonId(e.target.value ? Number(e.target.value) : "")}
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
+              <option value="">{zh ? "请选择…" : "Select…"}</option>
+              {reasons.map((r) => <option key={r.id} value={r.id}>{zh ? r.nameZh : r.nameEn}</option>)}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "补充说明（可选）" : "Note (optional)"}</label>
+            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3}
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+          </div>
+          {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+          <div className="flex justify-end gap-2 pt-1">
+            <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+              {zh ? "取消" : "Cancel"}
+            </button>
+            <button onClick={handleSubmit} disabled={submitting || reasonId === ""}
+              className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+              {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />}
+              {zh ? "确认驳回" : "Confirm Reject"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -540,7 +639,7 @@ function EditModal({ resource, token, language, onClose, onSaved }: {
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型" : "Type"}</label>
             <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
-              {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+              {SOURCE_TYPES.map((o) => <option key={o.value} value={o.value}>{zh ? o.nameZh : o.nameEn}</option>)}
             </select>
           </div>
           <div className="space-y-1">
@@ -600,9 +699,9 @@ interface TagSummary {
 }
 interface FieldCheck { field: string; status: "✅" | "⚠️" | "❌"; detail: string }
 interface VerifyReport { checks: FieldCheck[]; hasFailure: boolean; hasWarning: boolean }
-interface PipelineResultLike { draft: DraftData; tags: TagSummary[]; report: VerifyReport; foundInScholarlyDb: boolean }
+interface PipelineResultLike { draft: DraftData; tags: TagSummary[]; report: VerifyReport; foundInScholarlyDb: boolean; missingRequired: string[] }
 interface UploadJob {
-  id: number; type: "pdf" | "url"; status: "queued" | "processing" | "ready_for_review" | "failed";
+  id: number; batchId: string | null; type: "pdf" | "url"; status: "queued" | "processing" | "ready_for_review" | "failed";
   input: { fileName?: string; url?: string; sourceTypeHint: string };
   result: PipelineResultLike | null; error: string | null; createdAt: string;
 }
@@ -667,11 +766,14 @@ function VerifyReportList({ report, language }: { report: VerifyReport; language
 }
 
 // ── Shared editable review/confirm step — used by all three upload tabs ───────
-function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm, onCancel, onBack }: {
+function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm, onCancel, onBack, missingRequired }: {
   draft: DraftData; tags: TagSummary[]; report: VerifyReport; language: string; saving: boolean;
   onChange: (d: DraftData) => void; onConfirm: () => void; onCancel: () => void; onBack?: () => void;
+  /** Structured "which of title/authors/year/url_doi are absent" (docs/planning/12 §1) — informational, doesn't disable Confirm here (the server decides whether it's actually enforced for this entry kind). */
+  missingRequired?: string[];
 }) {
   const zh = language === "zh";
+  const missingUrlDoi = missingRequired?.includes("url_doi") ?? false;
   return (
     <div className="space-y-4">
       {report.hasFailure && (
@@ -690,7 +792,7 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型" : "Type"}</label>
         <select value={draft.sourceType} onChange={(e) => onChange({ ...draft, sourceType: e.target.value })}
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
-          {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+          {SOURCE_TYPES.map((o) => <option key={o.value} value={o.value}>{zh ? o.nameZh : o.nameEn}</option>)}
         </select>
       </div>
       <div className="space-y-1">
@@ -715,6 +817,11 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL</label>
         <input value={draft.url ?? ""} onChange={(e) => onChange({ ...draft, url: e.target.value || null })} placeholder="https://..."
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+        {missingUrlDoi && (
+          <p className="text-xs text-amber-600 dark:text-amber-400">
+            {zh ? "未找到 URL/DOI —— 若这是手填或 DOI/URL 导入将无法提交，PDF/批量导入可以补上后再入库审核" : "No URL/DOI found — manual/DOI-URL entries can't submit without one; PDF/batch entries can still go to needs_review and be filled in later"}
+          </p>
+        )}
       </div>
       <div className="space-y-1">
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
@@ -759,10 +866,11 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
   const [abstract, setAbstract] = useState("");
   const [url, setUrl] = useState("");
   const [doi, setDoi] = useState("");
-  const [sourceType, setSourceType] = useState<SourceType>("Paper");
+  const [sourceType, setSourceType] = useState<SourceType>("journal_article");
   const [draft, setDraft] = useState<DraftData | null>(null);
   const [tags, setTags] = useState<TagSummary[]>([]);
   const [report, setReport] = useState<VerifyReport | null>(null);
+  const [missingRequired, setMissingRequired] = useState<string[]>([]);
   const [error, setError] = useState("");
 
   async function handleCheck() {
@@ -775,7 +883,7 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Failed"); setStep("input"); return; }
-      setDraft(data.draft); setTags(data.tags); setReport(data.report); setStep("review");
+      setDraft(data.draft); setTags(data.tags); setReport(data.report); setMissingRequired(data.missingRequired ?? []); setStep("review");
     } catch { setError(zh ? "网络请求失败" : "Network error"); setStep("input"); }
   }
 
@@ -797,7 +905,7 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
     return (
       <div className="space-y-2">
         {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
-        <ReviewForm draft={draft} tags={tags} report={report} language={language} saving={step === "saving"}
+        <ReviewForm draft={draft} tags={tags} report={report} language={language} saving={step === "saving"} missingRequired={missingRequired}
           onChange={setDraft} onConfirm={handleConfirm} onCancel={onClose} onBack={() => setStep("input")} />
       </div>
     );
@@ -809,7 +917,7 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型" : "Type"}</label>
         <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
-          {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+          {SOURCE_TYPES.map((o) => <option key={o.value} value={o.value}>{zh ? o.nameZh : o.nameEn}</option>)}
         </select>
       </div>
       <div className="space-y-1">
@@ -831,9 +939,12 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
         </div>
       </div>
       <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL</label>
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL {!doi.trim() && "*"}</label>
         <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..."
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+        {!url.trim() && !doi.trim() && (
+          <p className="text-xs text-muted-foreground">{zh ? "URL 或 DOI 至少填一项" : "At least one of URL or DOI is required"}</p>
+        )}
       </div>
       <div className="space-y-1">
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
@@ -845,7 +956,7 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
         <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
           {zh ? "取消" : "Cancel"}
         </button>
-        <button onClick={handleCheck} disabled={step === "checking" || !title.trim()}
+        <button onClick={handleCheck} disabled={step === "checking" || !title.trim() || (!url.trim() && !doi.trim())}
           className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
           {step === "checking" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
           {zh ? "核对并预览" : "Check & Preview"}
@@ -909,42 +1020,64 @@ function JobQueuePanel({ token, language, type, onSaved }: { token: string; lang
     const report = reviewingJob.result?.report ?? { checks: [], hasFailure: false, hasWarning: false };
     return (
       <ReviewForm draft={reviewDraft} tags={reviewTags} report={report} language={language} saving={confirming}
+        missingRequired={reviewingJob.result?.missingRequired ?? []}
         onChange={setReviewDraft} onConfirm={handleConfirmReview} onCancel={() => setReviewingId(null)} onBack={() => setReviewingId(null)} />
     );
   }
 
   if (jobs.length === 0) return null;
 
+  // Group by batchId (jobs from the same submission share one) so a multi-file/multi-URL
+  // submission shows one "N/total done" progress line, surviving a closed/refreshed tab since
+  // it's server data, not anything kept in page memory. Jobs without a batchId (shouldn't happen
+  // going forward, but tolerate stale rows) each get their own solo group.
+  const batches = new Map<string, UploadJob[]>();
+  for (const job of jobs) {
+    const key = job.batchId ?? `solo-${job.id}`;
+    if (!batches.has(key)) batches.set(key, []);
+    batches.get(key)!.push(job);
+  }
+
   return (
-    <div className="space-y-2 pt-3 border-t border-border">
+    <div className="space-y-3 pt-3 border-t border-border">
       <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? "处理队列" : "Queue"}</p>
-      <div className="space-y-1.5">
-        {jobs.map((job) => {
-          const label = job.type === "pdf" ? (job.input?.fileName ?? `#${job.id}`) : (job.input?.url ?? `#${job.id}`);
-          return (
-            <div key={job.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-border bg-card text-xs">
-              <div className="flex items-center gap-2 min-w-0">
-                {job.status === "queued" && <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-                {job.status === "processing" && <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />}
-                {job.status === "ready_for_review" && <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />}
-                {job.status === "failed" && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
-                <span className="truncate text-foreground">{job.result?.draft?.title || label}</span>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {job.status === "ready_for_review" && (
-                  <button onClick={() => openReview(job)} className="px-2.5 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                    {zh ? "核对" : "Review"}
-                  </button>
-                )}
-                {job.status === "failed" && <span className="text-red-600 dark:text-red-400 max-w-[160px] truncate" title={job.error ?? ""}>{job.error}</span>}
-                <button onClick={() => handleDiscard(job.id)} className="text-muted-foreground hover:text-red-500 transition-colors">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {[...batches.values()].map((batchJobs) => {
+        const doneCount = batchJobs.filter((j) => j.status === "ready_for_review" || j.status === "failed").length;
+        return (
+          <div key={batchJobs[0].batchId ?? batchJobs[0].id} className="space-y-1.5">
+            {batchJobs.length > 1 && (
+              <p className="text-xs text-muted-foreground px-0.5">
+                {zh ? `批次进度：${doneCount}/${batchJobs.length}` : `Batch progress: ${doneCount}/${batchJobs.length}`}
+              </p>
+            )}
+            {batchJobs.map((job) => {
+              const label = job.type === "pdf" ? (job.input?.fileName ?? `#${job.id}`) : (job.input?.url ?? `#${job.id}`);
+              return (
+                <div key={job.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-border bg-card text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {job.status === "queued" && <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                    {job.status === "processing" && <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />}
+                    {job.status === "ready_for_review" && <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />}
+                    {job.status === "failed" && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+                    <span className="truncate text-foreground">{job.result?.draft?.title || label}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {job.status === "ready_for_review" && (
+                      <button onClick={() => openReview(job)} className="px-2.5 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                        {zh ? "核对" : "Review"}
+                      </button>
+                    )}
+                    {job.status === "failed" && <span className="text-red-600 dark:text-red-400 max-w-[160px] truncate" title={job.error ?? ""}>{job.error}</span>}
+                    <button onClick={() => handleDiscard(job.id)} className="text-muted-foreground hover:text-red-500 transition-colors">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -953,7 +1086,7 @@ function JobQueuePanel({ token, language, type, onSaved }: { token: string; lang
 function UrlTab({ token, language, onClose, onSaved }: { token: string; language: string; onClose: () => void; onSaved: () => void }) {
   const zh = language === "zh";
   const [mode, setMode] = useState<"single" | "batch">("single");
-  const [sourceType, setSourceType] = useState<SourceType>("Paper");
+  const [sourceType, setSourceType] = useState<SourceType>("journal_article");
 
   // single (synchronous)
   const [singleUrl, setSingleUrl] = useState("");
@@ -961,6 +1094,7 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
   const [draft, setDraft] = useState<DraftData | null>(null);
   const [tags, setTags] = useState<TagSummary[]>([]);
   const [report, setReport] = useState<VerifyReport | null>(null);
+  const [missingRequired, setMissingRequired] = useState<string[]>([]);
   const [error, setError] = useState("");
 
   // batch (async/jobs)
@@ -978,7 +1112,7 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Failed"); setStep("input"); return; }
-      setDraft(data.draft); setTags(data.tags); setReport(data.report); setStep("review");
+      setDraft(data.draft); setTags(data.tags); setReport(data.report); setMissingRequired(data.missingRequired ?? []); setStep("review");
     } catch { setError(zh ? "网络请求失败" : "Network error"); setStep("input"); }
   }
 
@@ -1016,7 +1150,7 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
     return (
       <div className="space-y-2">
         {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
-        <ReviewForm draft={draft} tags={tags} report={report} language={language} saving={step === "saving"}
+        <ReviewForm draft={draft} tags={tags} report={report} language={language} saving={step === "saving"} missingRequired={missingRequired}
           onChange={setDraft} onConfirm={handleConfirmSingle} onCancel={onClose} onBack={() => setStep("input")} />
       </div>
     );
@@ -1039,7 +1173,7 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型提示" : "Type hint"}</label>
         <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
-          {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+          {SOURCE_TYPES.map((o) => <option key={o.value} value={o.value}>{zh ? o.nameZh : o.nameEn}</option>)}
         </select>
       </div>
 
@@ -1092,7 +1226,7 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
 // ── PDF tab — always async (upload_jobs-backed), even for a single file ────────
 function PdfTab({ token, language, onSaved }: { token: string; language: string; onSaved: () => void }) {
   const zh = language === "zh";
-  const [sourceType, setSourceType] = useState<SourceType>("Paper");
+  const [sourceType, setSourceType] = useState<SourceType>("journal_article");
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -1126,7 +1260,7 @@ function PdfTab({ token, language, onSaved }: { token: string; language: string;
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型提示" : "Type hint"}</label>
         <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
-          {SOURCE_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+          {SOURCE_TYPES.map((o) => <option key={o.value} value={o.value}>{zh ? o.nameZh : o.nameEn}</option>)}
         </select>
       </div>
       <div className="space-y-1">
@@ -1223,6 +1357,8 @@ export default function AcademicResources() {
   const [detailResource, setDetailResource] = useState<Resource | null>(null);
   const [adminView,     setAdminView]     = useState(false);
   const [pendingCount,  setPendingCount]  = useState(0);
+  const [rejectionReasons, setRejectionReasons] = useState<RejectionReason[]>([]);
+  const [rejectingResource, setRejectingResource] = useState<Resource | null>(null);
 
   const isAdmin = user?.role === "admin";
 
@@ -1230,6 +1366,12 @@ export default function AcademicResources() {
     fetch(`${apiBase()}/api/tags`)
       .then((r) => (r.ok ? r.json() : []))
       .then((data: TagSummary[]) => setFacetTagVocab(Array.isArray(data) ? data : []))
+      .catch(() => {});
+    // Fetched unconditionally (not just for admins) — an owner viewing their own rejected
+    // resource needs this to resolve rejectionReasonId into a readable name (docs/planning/12 §2.4).
+    fetch(`${apiBase()}/api/rejection-reasons`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: RejectionReason[]) => setRejectionReasons(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, []);
 
@@ -1251,7 +1393,7 @@ export default function AcademicResources() {
       .then((r) => r.json())
       .then((data: Resource[]) => {
         if (!Array.isArray(data)) { setApiResources([]); return; }
-        if (isAdmin) setPendingCount(data.filter((r: Resource) => r.status === "pending").length);
+        if (isAdmin) setPendingCount(data.filter((r: Resource) => r.status === "pending" || r.status === "needs_review").length);
         setApiResources(data);
         const wantedId = new URLSearchParams(window.location.search).get("id");
         if (wantedId) {
@@ -1266,20 +1408,23 @@ export default function AcademicResources() {
   useEffect(() => { fetchResources(); }, [fetchResources]);
 
   async function handleApprove(id: number) {
-    await fetch(`${apiBase()}/api/resources/${id}/approve`, {
+    await fetch(`${apiBase()}/api/admin/resources/${id}/review`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token!}` },
-      body: JSON.stringify({ status: "approved" }),
+      body: JSON.stringify({ action: "approve" }),
     });
     fetchResources();
   }
 
-  async function handleReject(id: number) {
-    await fetch(`${apiBase()}/api/resources/${id}/approve`, {
+  async function submitReject(reasonId: number, note: string) {
+    if (!rejectingResource) return;
+    const res = await fetch(`${apiBase()}/api/admin/resources/${rejectingResource.id}/review`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token!}` },
-      body: JSON.stringify({ status: "rejected" }),
+      body: JSON.stringify({ action: "reject", rejectionReasonId: reasonId, rejectionNote: note || undefined }),
     });
+    if (!res.ok) throw new Error("Reject failed");
+    setRejectingResource(null);
     fetchResources();
   }
 
@@ -1293,8 +1438,8 @@ export default function AcademicResources() {
   const toggleTag = (tag: string) =>
     setSelectedTags((prev) => { const n = new Set(prev); n.has(tag) ? n.delete(tag) : n.add(tag); return n; });
 
-  // Admin approval center: only pending items
-  const pendingResources = useMemo(() => resources.filter((r) => r.status === "pending"), [resources]);
+  // Admin approval center: pending + needs_review (docs/planning/12 §2.1 — both are reviewable)
+  const pendingResources = useMemo(() => resources.filter((r) => r.status === "pending" || r.status === "needs_review"), [resources]);
 
   // Normal filtered list
   const filtered = useMemo(() => {
@@ -1480,9 +1625,9 @@ export default function AcademicResources() {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {filtered.map((r) => (
                     <ResourceCard key={r.id} r={r} language={language}
-                      currentUserId={user?.id} isAdmin={isAdmin}
+                      currentUserId={user?.id} isAdmin={isAdmin} rejectionReasons={rejectionReasons}
                       onApprove={isAdmin ? handleApprove : undefined}
-                      onReject={isAdmin ? handleReject : undefined}
+                      onReject={isAdmin ? setRejectingResource : undefined}
                       onEdit={setEditResource}
                       onOpenDetail={setDetailResource}
                       onFacetTagClick={handleFacetTagClick}
@@ -1505,6 +1650,10 @@ export default function AcademicResources() {
       {detailResource && (
         <ResourceDetailModal resource={detailResource} language={language} onClose={() => setDetailResource(null)}
           onFacetTagClick={(slug) => { handleFacetTagClick(slug); setDetailResource(null); }} />
+      )}
+      {rejectingResource && (
+        <RejectDialog resource={rejectingResource} reasons={rejectionReasons} language={language}
+          onClose={() => setRejectingResource(null)} onSubmit={submitReject} />
       )}
     </div>
   );

@@ -44,7 +44,7 @@ async function attachFacetedTags<T extends { id: number }>(rows: T[]): Promise<(
   return rows.map((r) => ({ ...r, facetedTags: byResource.get(r.id) ?? [] }));
 }
 
-const VALID_SOURCE_TYPES = ["Paper", "Report", "Gov Document", "News", "Experts & Scholars"];
+const VALID_SOURCE_TYPES = ["journal_article", "working_paper", "conference_paper", "thesis", "report", "gov_document", "news"];
 
 // Closed tag vocabulary — research themes, not named entities (e.g. not "USDC" or "IMF").
 // Keep in sync with STABLECOIN_TAGS in academic-resources.tsx.
@@ -122,10 +122,13 @@ Source type hint: ${sourceTypeHint}
 
 Return a JSON object with exactly these fields:
 - "title": string — the document's full title
-- "authors": string[] — list of author names (empty array if none found)
+- "authors": string[] — list of author names. If no individual person is named as author (common for
+  laws, regulations, and government/institutional publications), use the issuing body's name instead
+  (e.g. "European Parliament", "United States Congress", "HKMA") — do not return an empty array just
+  because no individual person is credited.
 - "abstract": string — if the document has its own "Abstract" section, copy it verbatim (do not paraphrase or shorten it); only if no abstract section exists, write a concise 2–4 sentence summary instead
 ${TAG_PROMPT_BLOCK}
-- "sourceType": one of exactly: "Paper", "Report", "Gov Document", "News", "Experts & Scholars"
+- "sourceType": one of exactly: "journal_article", "working_paper", "conference_paper", "thesis", "report", "gov_document", "news"
 - "doi": string or null — the document's DOI if printed on it, else null
 - "publishedDate": string or null — the publication/posted date printed on the document (e.g. "2021-07-20" or just "2021"), else null
 
@@ -159,8 +162,9 @@ function extractDoi(input: string): string | null {
 }
 
 function crossrefTypeToSourceType(type: string | undefined, sourceTypeHint: string): string {
-  if (type === "journal-article" || type === "posted-content" || type === "dataset" || type === "preprint") return "Paper";
-  if (type === "report") return "Report";
+  if (type === "journal-article") return "journal_article";
+  if (type === "posted-content" || type === "preprint") return "working_paper";
+  if (type === "report") return "report";
   return sourceTypeHint;
 }
 
@@ -379,8 +383,8 @@ router.post("/resources/import", requireAuth, async (req: any, res) => {
       return;
     }
 
-    const sourceTypeHint = source_type ?? "Paper";
-    const VALID_TYPES = ["Paper", "Report", "Gov Document", "News", "Experts & Scholars"];
+    const sourceTypeHint = source_type ?? "journal_article";
+    const VALID_TYPES = ["journal_article", "working_paper", "conference_paper", "thesis", "report", "gov_document", "news"];
 
     // DOI links (SSRN, Elsevier, etc.) are frequently blocked from scraping by the publisher.
     // Crossref's public API gives structured title/authors directly from the DOI — no scraping needed.
@@ -441,10 +445,13 @@ ${pageText}
 
 Return a JSON object with exactly these fields:
 - "title": string — the document's full title
-- "authors": string[] — list of author names (empty array if none found)
+- "authors": string[] — list of author names. If no individual person is named as author (common for
+  laws, regulations, and government/institutional publications), use the issuing body's name instead
+  (e.g. "European Parliament", "United States Congress", "HKMA") — do not return an empty array just
+  because no individual person is credited.
 - "abstract": string — if the page shows the document's own "Abstract" section, copy it verbatim (do not paraphrase or shorten it); only if no abstract section exists, write a concise 2–4 sentence summary instead
 ${TAG_PROMPT_BLOCK}
-- "sourceType": one of exactly: "Paper", "Report", "Gov Document", "News", "Experts & Scholars"
+- "sourceType": one of exactly: "journal_article", "working_paper", "conference_paper", "thesis", "report", "gov_document", "news"
 - "publishedDate": string or null — the document's publication date if shown on the page (e.g. "2021-07-20" or just "2021"), else null
 
 Respond with ONLY the JSON object, no markdown fences, no extra text.`;
@@ -501,12 +508,12 @@ router.post("/resources/import/batch", requireAuth, async (req: any, res) => {
 
   const send = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
-  const VALID_TYPES = ["Paper", "Report", "Gov Document", "News", "Experts & Scholars"];
+  const VALID_TYPES = ["journal_article", "working_paper", "conference_paper", "thesis", "report", "gov_document", "news"];
 
   for (let i = 0; i < urls.length; i++) {
     const url = urls[i];
     send({ index: i, url, status: "parsing" });
-    const sourceTypeHint = source_type ?? "Paper";
+    const sourceTypeHint = source_type ?? "journal_article";
 
     try {
       const doi = extractDoi(url);
@@ -546,7 +553,7 @@ router.post("/resources/import/batch", requireAuth, async (req: any, res) => {
       let geminiPublishedDate: string | null = null;
 
       if (!fetchBlocked) {
-        const prompt = `Extract bibliographic metadata from this page. URL: ${url}\nSource type hint: ${sourceTypeHint}\nPage content: ${pageText}\n\nReturn JSON with: title (string), authors (string[]), abstract (string — copy the page's own "Abstract" section verbatim if present, do not paraphrase; only write a 2-3 sentence summary if no abstract section exists), tags (string[] — pick 2-3 categories matching the document's core research focus from this list: ${JSON.stringify(STABLECOIN_TAGS)}; optionally add ONE more specific keyword not on the list if it adds real specificity), sourceType (one of: Paper|Report|Gov Document|News|Experts & Scholars), publishedDate (string or null — the document's publication date if shown, e.g. "2021-07-20" or "2021")`;
+        const prompt = `Extract bibliographic metadata from this page. URL: ${url}\nSource type hint: ${sourceTypeHint}\nPage content: ${pageText}\n\nReturn JSON with: title (string), authors (string[] — if no individual person is named as author, use the issuing body's name instead, e.g. "European Parliament" or "HKMA"; do not return an empty array just because no individual person is credited), abstract (string — copy the page's own "Abstract" section verbatim if present, do not paraphrase; only write a 2-3 sentence summary if no abstract section exists), tags (string[] — pick 2-3 categories matching the document's core research focus from this list: ${JSON.stringify(STABLECOIN_TAGS)}; optionally add ONE more specific keyword not on the list if it adds real specificity), sourceType (one of: journal_article|working_paper|conference_paper|thesis|report|gov_document|news), publishedDate (string or null — the document's publication date if shown, e.g. "2021-07-20" or "2021")`;
         const raw = await generateJson(prompt, 4096);
         const parsed = JSON.parse(raw);
         geminiTitle      = typeof parsed.title === "string"    ? parsed.title    : "";
@@ -593,7 +600,7 @@ router.post("/resources/import/batch", requireAuth, async (req: any, res) => {
 router.post("/resources/import/pdf", requireAuth, handleUpload(pdfUpload.single("file")), async (req: any, res) => {
   try {
     if (!req.file) { res.status(400).json({ error: "A PDF file is required" }); return; }
-    const sourceTypeHint = (req.body.source_type as string) ?? "Paper";
+    const sourceTypeHint = (req.body.source_type as string) ?? "journal_article";
 
     const parsed = await extractMetadataFromPdf(req.file.buffer, sourceTypeHint);
     // No DOI printed on the document — try a title search as a best-effort fallback so we can
@@ -621,7 +628,7 @@ router.post("/resources/import/pdf", requireAuth, handleUpload(pdfUpload.single(
 router.post("/resources/import/pdf/batch", requireAuth, handleUpload(pdfUpload.array("files", 20)), async (req: any, res) => {
   const files = req.files as Express.Multer.File[] | undefined;
   if (!files || files.length === 0) { res.status(400).json({ error: "At least one PDF file is required" }); return; }
-  const sourceTypeHint = (req.body.source_type as string) ?? "Paper";
+  const sourceTypeHint = (req.body.source_type as string) ?? "journal_article";
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
@@ -693,7 +700,7 @@ router.post("/resources", requireAuth, async (req: any, res) => {
       .values({
         title,
         authors:       authors       ?? [],
-        sourceType:    sourceType    ?? "Paper",
+        sourceType:    sourceType    ?? "journal_article",
         url:           url           ?? null,
         doi:           doi           ?? null,
         abstract:      abstract      ?? null,

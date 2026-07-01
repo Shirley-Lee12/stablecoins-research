@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, pgEnum, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, pgEnum, integer, jsonb, uuid } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const uploadJobTypeEnum = pgEnum("upload_job_type", ["pdf", "url"]);
@@ -13,6 +13,10 @@ export const uploadJobStatusEnum = pgEnum("upload_job_status", ["queued", "proce
  */
 export const uploadJobsTable = pgTable("upload_jobs", {
   id: serial("id").primaryKey(),
+  // Shared by every job created from the same batch submission (null for none, since a batch of
+  // one is still possible) — lets the frontend resume "which jobs were in my last batch" from the
+  // server after closing the tab, instead of relying on jobIds kept only in page memory.
+  batchId: uuid("batch_id"),
   type: uploadJobTypeEnum("type").notNull(),
   status: uploadJobStatusEnum("status").notNull().default("queued"),
   // Original input, e.g. { fileName, sourceTypeHint } or { url, sourceTypeHint }. PDF bytes are

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
+import { randomUUID } from "node:crypto";
 import { db, resourcesTable, uploadJobsTable, resourceTagsTable, tagsTable } from "@workspace/db";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { requireAuth } from "./auth";
@@ -13,7 +14,7 @@ import { determineResourceStatus, missingHardRequiredFields } from "../lib/resou
 
 const router = Router();
 
-const VALID_SOURCE_TYPES = ["Paper", "Report", "Gov Document", "News", "Experts & Scholars"];
+const VALID_SOURCE_TYPES = ["journal_article", "working_paper", "conference_paper", "thesis", "report", "gov_document", "news"];
 
 // ── PDF upload (memory only — the binary is never persisted to disk or DB, mirrors /import/pdf) ──
 const pdfUpload = multer({
@@ -56,11 +57,14 @@ ${text.slice(0, 8000)}
 
 Return a JSON object with exactly these fields:
 - "title": string — the document's full title
-- "authors": string[] — list of author full names (empty array if none found)
+- "authors": string[] — list of author full names. If no individual person is named as author (common
+  for laws, regulations, and government/institutional publications), use the issuing body's name
+  instead (e.g. "European Parliament", "United States Congress", "HKMA") — do not return an empty
+  array just because no individual person is credited.
 - "year": number | null — the publication year if shown
 - "abstract": string — if the text has its own "Abstract" section, copy it verbatim; otherwise write a concise 2-4 sentence summary
 - "doi": string | null — the document's DOI if printed in the text, else null
-- "sourceType": one of exactly: "Paper", "Report", "Gov Document", "News", "Experts & Scholars"
+- "sourceType": one of exactly: "journal_article", "working_paper", "conference_paper", "thesis", "report", "gov_document", "news"
 
 Respond with ONLY the JSON object, no markdown fences, no extra text.`;
   const raw = await generateJson(prompt, 2048);
@@ -136,6 +140,13 @@ export interface PipelineResult {
   tags: TagSummary[];
   report: VerifyReport;
   foundInScholarlyDb: boolean;
+  /**
+   * Informational only (never blocks this preview response) — which of title/authors/year/url_doi
+   * are absent, always computed as if URL/DOI were required. Lets the confirm dialog and admin
+   * queue flag "missing a link" specifically (docs/planning/12 §1) instead of a generic warning;
+   * whether that's actually enforced at confirm time depends on the entry kind (see persistConfirmedDraft).
+   */
+  missingRequired: string[];
 }
 
 /** Resolves computed tag ids into displayable {slug, nameEn, nameZh, facet} rows for the confirm dialog. */
@@ -173,8 +184,12 @@ async function runAutoPipeline(rawText: string, sourceTypeHint: string, vocab: T
   const tagIds = await computeTagsForText([draft.title, draft.abstract].filter(Boolean).join("\n\n"), vocab);
   const tags = await enrichTags(tagIds);
   const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
+  const missingRequired = missingHardRequiredFields(
+    { title: draft.title, authors: draft.authors, year: draft.year, url: draft.url, doi: draft.doi },
+    { requireUrlOrDoi: true },
+  );
 
-  return { draft, tagIds, tags, report, foundInScholarlyDb: linked.foundInScholarlyDb };
+  return { draft, tagIds, tags, report, foundInScholarlyDb: linked.foundInScholarlyDb, missingRequired };
 }
 
 /**
@@ -195,13 +210,18 @@ router.post("/resources/upload/manual", requireAuth, async (req: any, res) => {
     const report = await verifyResource({
       title, authors: authors ?? [], year: year ?? null, doi: doi ?? null, url: url ?? null, abstract: abstract ?? null,
     });
+    const missingRequired = missingHardRequiredFields(
+      { title, authors: authors ?? [], year: year ?? null, url: url ?? null, doi: doi ?? null },
+      { requireUrlOrDoi: true },
+    );
 
     res.json({
-      draft: { title, authors: authors ?? [], year: year ?? null, abstract: abstract ?? "", doi: doi ?? null, url: url ?? null, sourceType: sourceType ?? "Paper" },
+      draft: { title, authors: authors ?? [], year: year ?? null, abstract: abstract ?? "", doi: doi ?? null, url: url ?? null, sourceType: sourceType ?? "journal_article" },
       tagIds,
       tags,
       report,
       foundInScholarlyDb: false,
+      missingRequired,
     });
   } catch (err: any) {
     req.log.error(err);
@@ -226,7 +246,7 @@ router.post("/resources/upload/url", requireAuth, async (req: any, res) => {
     }
 
     const vocab = await loadTagVocabulary();
-    const result = await runAutoPipeline(pageText, sourceType ?? "Paper", vocab);
+    const result = await runAutoPipeline(pageText, sourceType ?? "journal_article", vocab);
     if (!result.draft.url) result.draft.url = url;
     res.json(result);
   } catch (err: any) {
@@ -257,14 +277,15 @@ async function processJob(jobId: number, rawText: string, sourceTypeHint: string
 router.post("/resources/upload/jobs/pdf", requireAuth, handleUpload(pdfUpload.array("files", 20)), async (req: any, res) => {
   const files = req.files as Express.Multer.File[] | undefined;
   if (!files || files.length === 0) { res.status(400).json({ error: "At least one PDF file is required" }); return; }
-  const sourceTypeHint = (req.body.sourceType as string) ?? "Paper";
+  const sourceTypeHint = (req.body.sourceType as string) ?? "journal_article";
+  const batchId = randomUUID();
 
   const jobs = await db
     .insert(uploadJobsTable)
-    .values(files.map((f) => ({ type: "pdf" as const, status: "queued" as const, input: { fileName: f.originalname, sourceTypeHint }, createdBy: req.user.userId })))
+    .values(files.map((f) => ({ batchId, type: "pdf" as const, status: "queued" as const, input: { fileName: f.originalname, sourceTypeHint }, createdBy: req.user.userId })))
     .returning({ id: uploadJobsTable.id });
 
-  res.status(202).json({ jobIds: jobs.map((j) => j.id) });
+  res.status(202).json({ batchId, jobIds: jobs.map((j) => j.id) });
 
   const vocab = await loadTagVocabulary();
   for (let i = 0; i < files.length; i++) {
@@ -289,14 +310,15 @@ router.post("/resources/upload/jobs/url-batch", requireAuth, async (req: any, re
   const { urls, sourceType } = req.body as { urls?: string[]; sourceType?: string };
   if (!Array.isArray(urls) || urls.length === 0) { res.status(400).json({ error: "urls array is required" }); return; }
   if (urls.length > 20) { res.status(400).json({ error: "Maximum 20 URLs per batch" }); return; }
-  const sourceTypeHint = sourceType ?? "Paper";
+  const sourceTypeHint = sourceType ?? "journal_article";
+  const batchId = randomUUID();
 
   const jobs = await db
     .insert(uploadJobsTable)
-    .values(urls.map((url) => ({ type: "url" as const, status: "queued" as const, input: { url, sourceTypeHint }, createdBy: req.user.userId })))
+    .values(urls.map((url) => ({ batchId, type: "url" as const, status: "queued" as const, input: { url, sourceTypeHint }, createdBy: req.user.userId })))
     .returning({ id: uploadJobsTable.id });
 
-  res.status(202).json({ jobIds: jobs.map((j) => j.id) });
+  res.status(202).json({ batchId, jobIds: jobs.map((j) => j.id) });
 
   const vocab = await loadTagVocabulary();
   for (let i = 0; i < urls.length; i++) {
@@ -313,10 +335,18 @@ router.post("/resources/upload/jobs/url-batch", requireAuth, async (req: any, re
   }
 });
 
-/** GET /api/resources/upload/jobs — must be logged in. Lists the current user's own jobs, newest first. */
+/**
+ * GET /api/resources/upload/jobs — must be logged in. Lists the current user's own jobs, newest
+ * first. Optional ?batchId= narrows to one batch — this is how the frontend resumes progress for
+ * a specific submission after a closed/refreshed tab, instead of relying on jobIds kept only in
+ * page memory.
+ */
 router.get("/resources/upload/jobs", requireAuth, async (req: any, res) => {
   try {
-    const rows = await db.select().from(uploadJobsTable).where(eq(uploadJobsTable.createdBy, req.user.userId)).orderBy(desc(uploadJobsTable.createdAt));
+    const batchId = req.query.batchId as string | undefined;
+    const conditions = [eq(uploadJobsTable.createdBy, req.user.userId)];
+    if (batchId) conditions.push(eq(uploadJobsTable.batchId, batchId));
+    const rows = await db.select().from(uploadJobsTable).where(and(...conditions)).orderBy(desc(uploadJobsTable.createdAt));
     res.json(rows);
   } catch (err) {
     req.log.error(err);
@@ -358,17 +388,23 @@ class MissingRequiredFieldsError extends Error {
 /**
  * Shared persist step for both confirm routes below — this is the explicit user confirmation the
  * two-step AI-import rule requires. Rejects outright (throws, no insert at all) if a hard-required
- * field (title, >=1 author, year) is missing — resources.status is never 'failed'; that state
- * belongs to upload_jobs.
+ * field is missing — resources.status is never 'failed'; that state belongs to upload_jobs.
+ *
+ * requireUrlOrDoi distinguishes entry kind (docs/planning/12 §1): true for manual entry and DOI/URL
+ * import (the link was supplied directly, so a gap is real), false for PDF import (the link comes
+ * from an automated lookup that can legitimately turn up nothing — that routes to needs_review via
+ * determineResourceStatus's verify-report check instead of blocking the confirm).
  */
-async function persistConfirmedDraft(input: ConfirmInput, userId: number, isAdmin: boolean) {
+async function persistConfirmedDraft(input: ConfirmInput, userId: number, isAdmin: boolean, requireUrlOrDoi: boolean) {
   const authors = input.authors ?? [];
   const year = input.year ?? null;
+  const url = input.url ?? null;
+  const doi = input.doi ?? null;
 
-  const missing = missingHardRequiredFields({ title: input.title, authors, year });
+  const missing = missingHardRequiredFields({ title: input.title, authors, year, url, doi }, { requireUrlOrDoi });
   if (missing.length > 0) throw new MissingRequiredFieldsError(missing);
 
-  const report = await verifyResource({ title: input.title, authors, year, doi: input.doi ?? null, url: input.url ?? null, abstract: input.abstract ?? null });
+  const report = await verifyResource({ title: input.title, authors, year, doi, url, abstract: input.abstract ?? null });
   const status = determineResourceStatus(report, isAdmin);
 
   const [inserted] = await db
@@ -376,9 +412,9 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, isAdmi
     .values({
       title: input.title,
       authors,
-      sourceType: (VALID_SOURCE_TYPES.includes(input.sourceType) ? input.sourceType : "Paper") as any,
-      url: input.url ?? null,
-      doi: input.doi ?? null,
+      sourceType: (VALID_SOURCE_TYPES.includes(input.sourceType) ? input.sourceType : "journal_article") as any,
+      url,
+      doi,
       abstract: input.abstract ?? null,
       // Six-elements "year" — resources has no dedicated year column, so it goes in the free-text
       // publishedDate the legacy import routes already use (which also stores full dates like
@@ -412,13 +448,14 @@ function handleConfirmError(err: any, req: any, res: any) {
  * POST /api/resources/upload/confirm — must be logged in.
  * Body: the (possibly user-edited) final draft + tag ids, from the synchronous manual/single-URL
  * preview (POST /upload/manual or /upload/url). No upload_jobs row involved — this is the
- * confirm step for the in-memory pipeline.
+ * confirm step for the in-memory pipeline. Both entries this route serves (manual, single URL/DOI)
+ * require a URL or DOI (docs/planning/12 §1).
  */
 router.post("/resources/upload/confirm", requireAuth, async (req: any, res) => {
   try {
     const input = req.body as ConfirmInput;
     if (!input.title) { res.status(400).json({ error: "title is required" }); return; }
-    const inserted = await persistConfirmedDraft(input, req.user.userId, req.user.role === "admin");
+    const inserted = await persistConfirmedDraft(input, req.user.userId, req.user.role === "admin", true);
     res.status(201).json(inserted);
   } catch (err: any) {
     handleConfirmError(err, req, res);
@@ -428,7 +465,9 @@ router.post("/resources/upload/confirm", requireAuth, async (req: any, res) => {
 /**
  * POST /api/resources/upload/jobs/:id/confirm — must be logged in, owner only.
  * Body: the (possibly user-edited) final draft + tag ids. Persists the real resources row here —
- * this is the explicit user confirmation the two-step AI-import rule requires.
+ * this is the explicit user confirmation the two-step AI-import rule requires. This route serves
+ * both PDF and URL-batch jobs; only the latter requires a URL/DOI (docs/planning/12 §1) — a PDF
+ * whose link resolveLink couldn't find is expected to reach needs_review, not get rejected.
  */
 router.post("/resources/upload/jobs/:id/confirm", requireAuth, async (req: any, res) => {
   try {
@@ -440,7 +479,7 @@ router.post("/resources/upload/jobs/:id/confirm", requireAuth, async (req: any, 
     const input = req.body as ConfirmInput;
     if (!input.title) { res.status(400).json({ error: "title is required" }); return; }
 
-    const inserted = await persistConfirmedDraft(input, req.user.userId, req.user.role === "admin");
+    const inserted = await persistConfirmedDraft(input, req.user.userId, req.user.role === "admin", job.type === "url");
     await db.delete(uploadJobsTable).where(eq(uploadJobsTable.id, id));
     res.status(201).json(inserted);
   } catch (err: any) {

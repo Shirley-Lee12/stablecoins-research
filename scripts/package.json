@@ -6,6 +6,7 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "seed-tags": "tsx ./src/seed-tags.ts",
+    "seed-rejection-reasons": "tsx ./src/seed-rejection-reasons.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

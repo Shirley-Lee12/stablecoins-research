@@ -2,13 +2,19 @@ import { pgTable, text, serial, timestamp, pgEnum, integer } from "drizzle-orm/p
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
+import { rejectionReasonsTable } from "./rejectionReasons";
 
+// Language-independent slugs (see docs/planning/08-sourceType最终枚举.md) — the frontend maps
+// each slug to nameZh/nameEn for display. "Experts & Scholars" was removed: experts are their own
+// module (authors), not a resource source type.
 export const sourceTypeEnum = pgEnum("source_type", [
-  "Paper",
-  "Report",
-  "Gov Document",
-  "News",
-  "Experts & Scholars",
+  "journal_article",
+  "working_paper",
+  "conference_paper",
+  "thesis",
+  "report",
+  "gov_document",
+  "news",
 ]);
 
 export const resourceStatusEnum = pgEnum("resource_status", [
@@ -29,7 +35,7 @@ export const resourcesTable = pgTable("resources", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   authors: text("authors").array().notNull().default([]),
-  sourceType: sourceTypeEnum("source_type").notNull().default("Paper"),
+  sourceType: sourceTypeEnum("source_type").notNull().default("journal_article"),
   url: text("url"),
   doi: text("doi"),
   abstract: text("abstract"),
@@ -40,6 +46,13 @@ export const resourcesTable = pgTable("resources", {
   // The document's own publication date (e.g. "2021" or "2021-07-20"), distinct from createdAt
   // (when it was added to this library). Free-text since precision varies by source.
   publishedDate: text("published_date"),
+  // Review trail (docs/planning/12) — only set when an admin acts via PATCH /admin/resources/:id/review.
+  // Rejecting doesn't delete the row: the reason/note stay attached so the original uploader can see
+  // why, and so a future "edit and resubmit" flow has something to show.
+  rejectionReasonId: integer("rejection_reason_id").references(() => rejectionReasonsTable.id, { onDelete: "set null" }),
+  rejectionNote: text("rejection_note"),
+  reviewedBy: integer("reviewed_by").references(() => usersTable.id, { onDelete: "set null" }),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
 });
 
 export const insertResourceSchema = createInsertSchema(resourcesTable).omit({

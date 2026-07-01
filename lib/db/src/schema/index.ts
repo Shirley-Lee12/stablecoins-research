@@ -4,3 +4,4 @@ export * from "./users";
 export * from "./authors";
 export * from "./tags";
 export * from "./upload_jobs";
+export * from "./rejectionReasons";
