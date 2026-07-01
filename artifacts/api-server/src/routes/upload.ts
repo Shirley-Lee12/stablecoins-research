@@ -9,7 +9,7 @@ import { resolveLink } from "../lib/scholar";
 import { extractPdfText } from "../lib/pdfExtract";
 import { loadTagVocabulary, computeTagsForText, type TagVocabulary, type ComputedTags } from "../lib/tagging";
 import { verifyResource, type VerifyReport } from "../lib/verify";
-import { determineResourceStatus } from "../lib/resourceStatus";
+import { determineResourceStatus, missingHardRequiredFields } from "../lib/resourceStatus";
 
 const router = Router();
 
@@ -348,20 +348,42 @@ interface ConfirmInput {
   tagIds?: number[];
 }
 
-/** Shared persist step for both confirm routes below — this is the explicit user confirmation the two-step AI-import rule requires. */
+/** Thrown by persistConfirmedDraft() when a hard-required field is missing — callers turn this into a 400, not a 500. */
+class MissingRequiredFieldsError extends Error {
+  constructor(public readonly missingFields: string[]) {
+    super(`Missing required field(s): ${missingFields.join(", ")}`);
+  }
+}
+
+/**
+ * Shared persist step for both confirm routes below — this is the explicit user confirmation the
+ * two-step AI-import rule requires. Rejects outright (throws, no insert at all) if a hard-required
+ * field (title, >=1 author, year) is missing — resources.status is never 'failed'; that state
+ * belongs to upload_jobs.
+ */
 async function persistConfirmedDraft(input: ConfirmInput, userId: number, isAdmin: boolean) {
-  const report = await verifyResource({ title: input.title, authors: input.authors ?? [], year: input.year ?? null, doi: input.doi ?? null, url: input.url ?? null, abstract: input.abstract ?? null });
-  const status = determineResourceStatus(report, { title: input.title, authors: input.authors ?? [], year: input.year ?? null }, isAdmin);
+  const authors = input.authors ?? [];
+  const year = input.year ?? null;
+
+  const missing = missingHardRequiredFields({ title: input.title, authors, year });
+  if (missing.length > 0) throw new MissingRequiredFieldsError(missing);
+
+  const report = await verifyResource({ title: input.title, authors, year, doi: input.doi ?? null, url: input.url ?? null, abstract: input.abstract ?? null });
+  const status = determineResourceStatus(report, isAdmin);
 
   const [inserted] = await db
     .insert(resourcesTable)
     .values({
       title: input.title,
-      authors: input.authors ?? [],
+      authors,
       sourceType: (VALID_SOURCE_TYPES.includes(input.sourceType) ? input.sourceType : "Paper") as any,
       url: input.url ?? null,
       doi: input.doi ?? null,
       abstract: input.abstract ?? null,
+      // Six-elements "year" — resources has no dedicated year column, so it goes in the free-text
+      // publishedDate the legacy import routes already use (which also stores full dates like
+      // "2021-07-20"; here we only ever have a bare year).
+      publishedDate: year !== null ? String(year) : null,
       status: status as any,
       createdBy: userId,
     })
@@ -374,6 +396,16 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, isAdmi
   }
 
   return inserted;
+}
+
+/** Shared error handling for both confirm routes below — a missing hard-required field is a 400 (caller's fault), anything else is a 500. */
+function handleConfirmError(err: any, req: any, res: any) {
+  if (err instanceof MissingRequiredFieldsError) {
+    res.status(400).json({ error: err.message, missingFields: err.missingFields });
+    return;
+  }
+  req.log.error(err);
+  res.status(500).json({ error: "Failed to confirm upload", detail: err.message });
 }
 
 /**
@@ -389,8 +421,7 @@ router.post("/resources/upload/confirm", requireAuth, async (req: any, res) => {
     const inserted = await persistConfirmedDraft(input, req.user.userId, req.user.role === "admin");
     res.status(201).json(inserted);
   } catch (err: any) {
-    req.log.error(err);
-    res.status(500).json({ error: "Failed to confirm upload", detail: err.message });
+    handleConfirmError(err, req, res);
   }
 });
 
@@ -413,8 +444,7 @@ router.post("/resources/upload/jobs/:id/confirm", requireAuth, async (req: any, 
     await db.delete(uploadJobsTable).where(eq(uploadJobsTable.id, id));
     res.status(201).json(inserted);
   } catch (err: any) {
-    req.log.error(err);
-    res.status(500).json({ error: "Failed to confirm upload", detail: err.message });
+    handleConfirmError(err, req, res);
   }
 });
 

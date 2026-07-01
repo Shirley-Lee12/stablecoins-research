@@ -18,7 +18,10 @@ export const resourceStatusEnum = pgEnum("resource_status", [
   // Added for the upload pipeline (U.5): verification found issues or incomplete required fields —
   // routed to the admin review queue instead of being silently dropped.
   "needs_review",
-  // Added for the upload pipeline (U.5): extraction itself failed (e.g. unreadable PDF/no OCR fallback yet).
+  // Defined here but the app never actually assigns it: completeness failures (missing title/
+  // author/year) are now rejected outright at confirm time (see missingHardRequiredFields() in
+  // lib/resourceStatus.ts) instead of being persisted with this status. "failed" belongs to
+  // upload_jobs.status — that's the one place extraction-level failures live.
   "failed",
 ]);
 

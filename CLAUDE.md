@@ -70,7 +70,7 @@ pnpm --filter @workspace/db run push       # 仅本地开发，需要 TTY
 ## 数据库设计原则
 
 - `resources.source_type` 枚举值必须精确使用：`Paper`、`Report`、`Gov Document`、`News`、`Experts & Scholars`（含空格、大小写）。
-- `resources.status`（`pending`/`approved`/`rejected`）是内容审核工作流的核心字段，不是普通状态位——改动相关逻辑前必须确认不会破坏审核语义，详见 [`docs/requirements.md`](./docs/requirements.md) 和 [`docs/api-design.md`](./docs/api-design.md)。
+- `resources.status` 枚举有 5 个值：`pending`/`approved`/`rejected`（早期审核工作流三态）+ `needs_review`/`failed`（上传管线 U.5 后补的两态）。是内容审核工作流的核心字段，不是普通状态位——改动相关逻辑前必须确认不会破坏审核语义，详见 [`docs/requirements.md`](./docs/requirements.md) 和 [`docs/api-design.md`](./docs/api-design.md)。**`failed` 目前应用代码从不会真正赋给任何一行**——硬性必填字段（标题/作者/年份）缺失时，`persistConfirmedDraft()` 会直接拒绝这次确认（400），不会插入一条 `status='failed'` 的资源；`failed` 只属于 `upload_jobs.status`，枚举里保留这个值只是历史遗留，不代表会被用到。
 - Schema 变更标准流程：编辑 schema 文件 → 在 `lib/db/src/schema/index.ts` 重新导出 → `typecheck:libs` → api-server `typecheck` → `generate`/`migrate`。
 
 ## 测试要求

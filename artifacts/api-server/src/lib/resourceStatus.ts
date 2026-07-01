@@ -1,21 +1,36 @@
 import type { VerifyReport } from "./verify";
 
-export type DeterminedStatus = "pending" | "approved" | "needs_review" | "failed";
+export type DeterminedStatus = "pending" | "approved" | "needs_review";
+
+export interface HardRequiredInput {
+  title: string;
+  authors: string[];
+  year: number | null;
+}
 
 /**
- * Maps a verify report + completeness check to a final resources.status. Two-tier completeness:
- * hard-required fields (title, >=1 author, year) missing blocks entirely (failed) — everything
- * else (abstract, direct URL, verify warnings) still gets in, just routed to needs_review instead
- * of being silently dropped. Extraction-level failures (e.g. unreadable PDF) are a separate, earlier
- * failure point in the upload pipeline and never reach this function at all.
+ * Hard-required completeness check (title, >=1 author, year) — separate from determineResourceStatus
+ * so the caller can reject the confirmation outright (no resources row at all) when something's
+ * missing, instead of inserting one with a "failed" status. `resources.status` should never be
+ * 'failed' — that state belongs to upload_jobs (extraction-level failures, a separate earlier point
+ * in the pipeline that never reaches this far). Returns the list of missing field names; empty
+ * means everything required is present.
  */
-export function determineResourceStatus(
-  report: VerifyReport,
-  input: { title: string; authors: string[]; year: number | null },
-  isAdmin: boolean,
-): DeterminedStatus {
-  const hasHardRequiredFields = input.title.trim().length > 0 && input.authors.length > 0 && input.year !== null;
-  if (!hasHardRequiredFields) return "failed";
+export function missingHardRequiredFields(input: HardRequiredInput): string[] {
+  const missing: string[] = [];
+  if (!input.title.trim()) missing.push("title");
+  if (input.authors.length === 0) missing.push("authors");
+  if (input.year === null) missing.push("year");
+  return missing;
+}
+
+/**
+ * Maps a verify report to a final resources.status, once the caller has already confirmed all
+ * hard-required fields are present (see missingHardRequiredFields). Anything the verify report
+ * flagged (missing abstract/URL, cross-check mismatches) still gets in, just routed to
+ * needs_review instead of being silently dropped.
+ */
+export function determineResourceStatus(report: VerifyReport, isAdmin: boolean): DeterminedStatus {
   if (report.hasFailure || report.hasWarning) return "needs_review";
   return isAdmin ? "approved" : "pending";
 }
