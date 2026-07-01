@@ -15,6 +15,11 @@ export const resourceStatusEnum = pgEnum("resource_status", [
   "pending",
   "approved",
   "rejected",
+  // Added for the upload pipeline (U.5): verification found issues or incomplete required fields —
+  // routed to the admin review queue instead of being silently dropped.
+  "needs_review",
+  // Added for the upload pipeline (U.5): extraction itself failed (e.g. unreadable PDF/no OCR fallback yet).
+  "failed",
 ]);
 
 export const resourcesTable = pgTable("resources", {

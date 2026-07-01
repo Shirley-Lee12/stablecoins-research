@@ -3,6 +3,7 @@ import { db, usersTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./auth";
 import { env } from "../config";
+import { retagResources } from "../lib/tagging";
 
 const router = Router();
 
@@ -35,6 +36,27 @@ router.get("/admin/settings/status", requireAuth, requireAdmin, (_req, res) => {
     },
     frontendUrl: env.FRONTEND_URL,
   });
+});
+
+/**
+ * POST /api/admin/tags/retag — admin only.
+ * Body (optional): { resourceIds?: number[] } — omit to rerun against the whole library.
+ * Rebuilds auto-generated tag links from the current tag vocabulary; manual links are untouched.
+ * Synchronous — for a large library this can take a while (one LLM call pair per resource).
+ */
+router.post("/admin/tags/retag", requireAuth, requireAdmin, async (req: any, res) => {
+  try {
+    const { resourceIds } = req.body as { resourceIds?: number[] };
+    if (resourceIds !== undefined && (!Array.isArray(resourceIds) || resourceIds.some((id) => typeof id !== "number"))) {
+      res.status(400).json({ error: "resourceIds must be an array of numbers if provided" });
+      return;
+    }
+    const summary = await retagResources(resourceIds);
+    res.json(summary);
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Retag failed" });
+  }
 });
 
 /** GET /api/admin/users — admin only. Never returns passwordHash. */

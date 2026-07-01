@@ -1,12 +1,48 @@
 import { Router } from "express";
 import multer from "multer";
-import { db, resourcesTable } from "@workspace/db";
-import { eq, desc, ilike, or, sql, and } from "drizzle-orm";
+import { db, resourcesTable, resourceTagsTable, tagsTable } from "@workspace/db";
+import { eq, desc, ilike, or, sql, and, inArray } from "drizzle-orm";
 import { requireAuth, optionalAuth, requireAdmin } from "./auth";
 import { syncResourceAuthors } from "./authors";
 import { generateJson, generateJsonFromPdf } from "../lib/llm";
 
 const router = Router();
+
+interface FacetedTag {
+  id: number;
+  slug: string;
+  nameEn: string;
+  nameZh: string;
+  facet: "theme" | "jurisdiction" | "asset";
+  status: "active" | "candidate";
+}
+
+/** Attaches each resource's structured tags (new tags/resource_tags system) alongside the legacy resources.tags text[] array. */
+async function attachFacetedTags<T extends { id: number }>(rows: T[]): Promise<(T & { facetedTags: FacetedTag[] })[]> {
+  if (rows.length === 0) return rows as (T & { facetedTags: FacetedTag[] })[];
+  const ids = rows.map((r) => r.id);
+  const linked = await db
+    .select({
+      resourceId: resourceTagsTable.resourceId,
+      id: tagsTable.id,
+      slug: tagsTable.slug,
+      nameEn: tagsTable.nameEn,
+      nameZh: tagsTable.nameZh,
+      facet: tagsTable.facet,
+      status: tagsTable.status,
+    })
+    .from(resourceTagsTable)
+    .innerJoin(tagsTable, eq(resourceTagsTable.tagId, tagsTable.id))
+    .where(inArray(resourceTagsTable.resourceId, ids));
+
+  const byResource = new Map<number, FacetedTag[]>();
+  for (const { resourceId, ...tag } of linked) {
+    if (!byResource.has(resourceId)) byResource.set(resourceId, []);
+    byResource.get(resourceId)!.push(tag as FacetedTag);
+  }
+
+  return rows.map((r) => ({ ...r, facetedTags: byResource.get(r.id) ?? [] }));
+}
 
 const VALID_SOURCE_TYPES = ["Paper", "Report", "Gov Document", "News", "Experts & Scholars"];
 
@@ -248,7 +284,7 @@ router.get("/resources", optionalAuth, async (req: any, res) => {
     } else {
       // Admin: optional status filter
       const statusFilter = req.query["status"] as string | undefined;
-      if (statusFilter && ["pending", "approved", "rejected"].includes(statusFilter)) {
+      if (statusFilter && ["pending", "approved", "rejected", "needs_review", "failed"].includes(statusFilter)) {
         conditions.push(eq(resourcesTable.status, statusFilter as any));
       }
     }
@@ -256,6 +292,14 @@ router.get("/resources", optionalAuth, async (req: any, res) => {
     // ── Domain filters ──
     if (source_type) conditions.push(eq(resourcesTable.sourceType, source_type as any));
     for (const tag of tagList) conditions.push(sql`${tag} = ANY(${resourcesTable.tags})` as any);
+    // New facet-based tag system (separate from the legacy resources.tags text[] filter above).
+    const facetTagSlug = req.query["facetTag"] as string | undefined;
+    if (facetTagSlug) {
+      conditions.push(sql`EXISTS (
+        SELECT 1 FROM resource_tags rt JOIN tags t ON t.id = rt.tag_id
+        WHERE rt.resource_id = ${resourcesTable.id} AND t.slug = ${facetTagSlug}
+      )` as any);
+    }
     if (search) {
       const like = `%${search}%`;
       conditions.push(
@@ -274,7 +318,7 @@ router.get("/resources", optionalAuth, async (req: any, res) => {
       .where(conditions.length > 0 ? and(...(conditions as any[])) : undefined)
       .orderBy(desc(resourcesTable.createdAt));
 
-    res.json(rows);
+    res.json(await attachFacetedTags(rows));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch resources" });
@@ -316,7 +360,7 @@ router.get("/resources/:id", optionalAuth, async (req: any, res) => {
       }
     }
 
-    res.json(row);
+    res.json((await attachFacetedTags([row]))[0]);
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch resource" });
