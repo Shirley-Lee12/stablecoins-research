@@ -1224,6 +1224,8 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
 }
 
 // ── PDF tab — always async (upload_jobs-backed), even for a single file ────────
+const PDF_MAX_SIZE_MB = 50;
+
 function PdfTab({ token, language, onSaved }: { token: string; language: string; onSaved: () => void }) {
   const zh = language === "zh";
   const [sourceType, setSourceType] = useState<SourceType>("journal_article");
@@ -1231,6 +1233,17 @@ function PdfTab({ token, language, onSaved }: { token: string; language: string;
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  /** Rejects oversized files at selection time (matches the server's PDF_MAX_SIZE_MB) instead of letting the user wait through an upload that's guaranteed to fail. */
+  function handleFilesSelected(selected: File[]) {
+    const withinLimit = selected.filter((f) => f.size <= PDF_MAX_SIZE_MB * 1024 * 1024).slice(0, 20);
+    const tooLarge = selected.filter((f) => f.size > PDF_MAX_SIZE_MB * 1024 * 1024);
+    setFiles(withinLimit);
+    setError(tooLarge.length > 0
+      ? (zh ? `文件过大，单个文件上限 ${PDF_MAX_SIZE_MB}MB：${tooLarge.map((f) => f.name).join("、")}`
+            : `File too large — the limit is ${PDF_MAX_SIZE_MB}MB per PDF: ${tooLarge.map((f) => f.name).join(", ")}`)
+      : "");
+  }
 
   async function handleSubmit() {
     if (files.length === 0) return;
@@ -1264,9 +1277,9 @@ function PdfTab({ token, language, onSaved }: { token: string; language: string;
         </select>
       </div>
       <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "PDF 文件（可多选，单个最大 15MB，最多 20 个）" : "PDF files (multi-select, 15MB max each, up to 20)"}</label>
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? `PDF 文件（可多选，单个最大 ${PDF_MAX_SIZE_MB}MB，最多 20 个）` : `PDF files (multi-select, ${PDF_MAX_SIZE_MB}MB max each, up to 20)`}</label>
         <input ref={inputRef} type="file" accept="application/pdf" multiple
-          onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 20))}
+          onChange={(e) => handleFilesSelected(Array.from(e.target.files ?? []))}
           className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer" />
         {files.length > 0 && (
           <ul className="text-xs text-muted-foreground space-y-0.5 pt-1">

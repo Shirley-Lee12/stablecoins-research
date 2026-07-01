@@ -95,9 +95,10 @@ function stripJatsTags(abstract: unknown): string {
 }
 
 // ── PDF upload (memory only — the binary is never persisted to disk or DB) ────
+const PDF_MAX_SIZE_MB = 50;
 const pdfUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB per file
+  limits: { fileSize: PDF_MAX_SIZE_MB * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype === "application/pdf") cb(null, true);
     else cb(new Error("Only PDF files are supported"));
@@ -108,7 +109,11 @@ const pdfUpload = multer({
 function handleUpload(mw: any) {
   return (req: any, res: any, next: any) => {
     mw(req, res, (err: any) => {
-      if (err) { res.status(400).json({ error: err.message || "Upload failed" }); return; }
+      if (err) {
+        const message = err.code === "LIMIT_FILE_SIZE" ? `File too large — the limit is ${PDF_MAX_SIZE_MB}MB per PDF.` : (err.message || "Upload failed");
+        res.status(400).json({ error: message });
+        return;
+      }
       next();
     });
   };
