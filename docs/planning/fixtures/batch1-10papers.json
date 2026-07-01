@@ -1,0 +1,129 @@
+{
+  "_comment": "上传管线测试夹具。input = 进入管线时已知的信息(模拟 PDF/手填抽取后的状态);expected = 管线应得到的结果。无 DOI/URL 的条目(#5-8)用于测试 U.2 标题反查。expectedThemeTags/expectedAssetTags 是 retagResources() 的预期,采用'重合判定'而非精确相等:命中的标签应覆盖 primary,允许 ±1 偏差。",
+  "fixtures": [
+    {
+      "id": 1,
+      "input": { "title": "Systemic risk and stability in financial networks", "authors": ["Daron Acemoglu", "Asuman Ozdaglar", "Alireza Tahbaz-Salehi"], "year": 2015, "doi": "10.1257/aer.20130456", "url": null },
+      "path": "resolveDoi",
+      "expected": {
+        "doiResolves": true, "canonicalTitleMatches": true,
+        "sourceType": "Journal Paper", "venue": "American Economic Review",
+        "themeTags": ["systemic-contagion"], "assetTags": [],
+        "note": "基础金融网络论文,非稳定币专属。测试点:打标不应硬塞稳定币标签(阈值正常则只命中 systemic-contagion)。"
+      }
+    },
+    {
+      "id": 2,
+      "input": { "title": "Machine learning algorithms for DeFi risk assessment", "authors": ["O. Adebayo"], "year": 2025, "doi": "10.2139/ssrn.5171313", "url": null },
+      "path": "resolveDoi",
+      "expected": {
+        "doiResolves": true, "canonicalTitleMatches": true,
+        "sourceType": "Working Paper", "venue": "SSRN",
+        "themeTags": ["defi-lending"], "assetTags": [],
+        "note": "可能附带 smart-contract-security。primary 必须含 defi-lending。"
+      }
+    },
+    {
+      "id": 3,
+      "input": { "title": "Understanding stablecoins", "authors": ["Tobias Adrian", "Parma Bains", "Marc Bechara", "et al."], "year": 2025, "doi": "10.5089/9798229024075.087", "url": null },
+      "path": "resolveDoi",
+      "expected": {
+        "doiResolves": true, "canonicalTitleMatches": true,
+        "sourceType": "Report", "venue": "IMF",
+        "themeTags": ["fiat-collateralized", "peg-stability-depeg", "regulatory-frameworks", "reserve-quality-transparency"], "assetTags": [],
+        "note": "综述型,允许命中多个主题(最多 4)。测试点:四标签上限不被突破。"
+      }
+    },
+    {
+      "id": 4,
+      "input": { "title": "CoVaR", "authors": ["Tobias Adrian", "Markus K. Brunnermeier"], "year": 2016, "doi": "10.1257/aer.20120555", "url": null },
+      "path": "resolveDoi",
+      "expected": {
+        "doiResolves": true, "canonicalTitleMatches": true,
+        "sourceType": "Journal Paper", "venue": "American Economic Review",
+        "themeTags": ["systemic-contagion"], "assetTags": [],
+        "note": "极短标题('CoVaR')。测试点:短标题反查/核对不误判;非稳定币论文不被强塞标签。"
+      }
+    },
+    {
+      "id": 5,
+      "input": { "title": "Stablecoins and safe asset prices", "authors": ["Rashad Ahmed", "Iñaki Aldasoro"], "year": null, "doi": null, "url": null },
+      "path": "titleSearch",
+      "expected": {
+        "found": true,
+        "canonicalUrl": "https://www.bis.org/publ/work1270.htm",
+        "doi": "10.2139/ssrn.5242448",
+        "yearBackfilled": 2025,
+        "sourceType": "Working Paper", "venue": "BIS Working Papers No. 1270",
+        "themeTags": ["monetary-transmission", "market-data-supply", "reserve-quality-transparency"], "assetTags": ["usdt", "usdc"],
+        "note": "无链接、年份缺(n.d.)。测试点:标题反查命中 + 年份回填 + 资产实体匹配(USDT/USDC)。"
+      }
+    },
+    {
+      "id": 6,
+      "input": { "title": "Public information and stablecoin runs", "authors": ["Rashad Ahmed", "Iñaki Aldasoro", "Chanelle Duley"], "year": null, "doi": null, "url": null },
+      "path": "titleSearch",
+      "expected": {
+        "found": true,
+        "canonicalUrl": "https://www.bis.org/publ/work1164.htm",
+        "doi": "10.2139/ssrn.4554248",
+        "yearBackfilled": 2025,
+        "sourceType": "Working Paper", "venue": "BIS Working Papers No. 1164",
+        "themeTags": ["run-liquidity-risk", "reserve-quality-transparency", "disclosure-accounting", "peg-stability-depeg"], "assetTags": ["ust"],
+        "note": "与 #5 共享作者(Ahmed/Aldasoro)。测试点:作者实体去重(authors 表不应建重复作者);资产匹配 UST(Terra)。"
+      }
+    },
+    {
+      "id": 7,
+      "input": { "title": "The economics of central bank digital currency", "authors": ["Toni Ahnert", "Katrin Assenmacher", "Peter Hoffmann", "Agnese Leonello", "Cyril Monnet", "Davide Porcellacchia"], "year": null, "doi": null, "url": null },
+      "path": "titleSearch",
+      "expected": {
+        "found": true,
+        "canonicalUrl": "https://www.ecb.europa.eu/pub/pdf/scpwps/ecb.wp2713~91ddff9e7c.en.pdf",
+        "doi": "10.2139/ssrn.4192178",
+        "yearBackfilled": 2022,
+        "sourceType": "Working Paper", "venue": "ECB Working Paper No. 2713 (later IJCB 2024)",
+        "themeTags": ["cbdc", "bank-disintermediation", "monetary-transmission"], "assetTags": [],
+        "note": "同一论文有多个版本(ECB WP / CEPR / IJCB 期刊)。测试点:多版本时反查能给出一个稳定的规范链接,不报冲突。"
+      }
+    },
+    {
+      "id": 8,
+      "input": { "title": "The convergence of AI and stablecoins is creating smarter financial systems, by automating processes with tools like real-time smart contracts. Image: Getty images/iStockphoto", "authors": ["Jeremy Allaire"], "year": null, "doi": null, "url": null },
+      "path": "titleSearch",
+      "expected": {
+        "found": true,
+        "foundInScholarlyDb": false,
+        "canonicalUrl": "https://www.weforum.org/stories/2025/01/stablecoin-ai-business/",
+        "doi": null,
+        "accessStatus": "open_access",
+        "yearBackfilled": 2025,
+        "sourceType": "News",
+        "themeTags": ["payments-remittances", "programmability", "adoption-emerging-markets"], "assetTags": ["usdc"],
+        "note": "关键边界样本。(a) 标题被 PDF 图注污染('Image: Getty images...'),反查前必须清洗标题;(b) 非学术、Crossref/OpenAlex 查不到 → 不能直接判 not_found,要回退到普通网页检索拿 canonicalUrl;(c) 无 DOI → access_status=open_access、doi=null,不因缺 DOI 整条拒收;(d) sourceType 应判为 News/观点而非 Journal Paper。"
+      }
+    },
+    {
+      "id": 9,
+      "input": { "title": "Financial contagion", "authors": ["Franklin Allen", "Douglas Gale"], "year": 2000, "doi": "10.1086/262109", "url": null },
+      "path": "resolveDoi",
+      "expected": {
+        "doiResolves": true, "canonicalTitleMatches": true,
+        "sourceType": "Journal Paper", "venue": "Journal of Political Economy",
+        "themeTags": ["systemic-contagion"], "assetTags": [],
+        "note": "经典传染论文,非稳定币。与 #1 #4 一起测试'非稳定币文献不被误打稳定币标签'。"
+      }
+    },
+    {
+      "id": 10,
+      "input": { "title": "DeFi: Shadow banking 2.0?", "authors": ["Hilary J. Allen"], "year": 2022, "doi": "10.2139/ssrn.4038788", "url": null },
+      "path": "resolveDoi",
+      "expected": {
+        "doiResolves": true, "canonicalTitleMatches": true,
+        "sourceType": "Working Paper", "venue": "SSRN",
+        "themeTags": ["defi-lending", "bank-disintermediation", "regulatory-frameworks"], "assetTags": [],
+        "note": "primary 必须含 defi-lending;'影子银行'语义应能触及 bank-disintermediation。"
+      }
+    }
+  ]
+}

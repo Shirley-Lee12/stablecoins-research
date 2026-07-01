@@ -1,0 +1,83 @@
+{
+  "_comment": "第三批夹具,题录导入路径(知网 RefWorks/EndNote/NoteExpress/知网研学)。用用户提供的 9 条真实 CNKI 题录。input=题录原始字段;expected=解析后的标准结果 + 中文打标。sourceType 用 slug;tags 用重合判定(覆盖 primary,允许 ±1)。本批同时验证:四格式解析、多作者/机构作者拆分、CNKI DOI 不反查、缺摘要补全、中文摘要打标、非稳定币不被强塞标签。authorRaw 用 [{name,type}]。",
+  "_parser_coverage": "9 条在四种格式里内容相同。建议分配:RefWorks 测全部;另抽 B3-03 用 EndNote、B3-09 用 NoteExpress、B3-01 用知网研学,验证四个解析器对同一条产出一致。",
+  "fixtures": [
+    {
+      "id": "B3-01", "recordType": "Journal Article", "testFormat": "RefWorks/知网研学",
+      "input": { "A1": "谭学想;曹丽红", "T1": "加密数字货币的跨境贸易应用、风险与治理——以香港《稳定币条例》实施为例", "JF": "河北法学", "YR": 2026, "AB": "(有完整中文摘要)", "K1": "加密数字货币;稳定币;数字人民币;跨境贸易;稳定币条例", "DO": "10.16494/j.cnki.1002-3933.2026.08.006" },
+      "expected": { "authorRaw": [{"name": "谭学想", "type": "person"}, {"name": "曹丽红", "type": "person"}], "year": 2026, "sourceType": "journal_article", "abstractPresent": true, "doiReverseLookup": false,
+        "themeTags": ["regulatory-frameworks", "cross-border-coordination", "payments-remittances"], "jurisdictionTags": ["hong-kong", "china-mainland"], "assetTags": [],
+        "note": "标准条:2 个作者按分号拆分;CNKI DOI 当直达标识不反查;中文摘要+关键词驱动打标,辖区命中港/陆。" }
+    },
+    {
+      "id": "B3-02", "recordType": "Newspaper Article", "testFormat": "RefWorks",
+      "input": { "A1": "杜川", "T1": "香港金管局总裁余伟文回应：稳定币年内推出  理财通3.0持续磋商", "JF": "第一财经日报", "FD": "2026-06-10", "AB": null, "DO": "10.28207/n.cnki.ndycj.2026.002240" },
+      "expected": { "authorRaw": [{"name": "杜川", "type": "person"}], "year": 2026, "sourceType": "news", "abstractPresent": false,
+        "abstractBackfill": "报纸无摘要 → 第二层联网抓全文:抓到则提炼并标 generated_from_fulltext;抓不到留空+needs_review",
+        "themeTags": ["regulatory-frameworks", "licensing-supervision"], "jurisdictionTags": ["hong-kong"], "assetTags": [],
+        "note": "★缺摘要样本(报纸)。测试点:补全两层逻辑;sourceType=news;日期取 FD。" }
+    },
+    {
+      "id": "B3-03", "recordType": "Journal Article", "testFormat": "EndNote",
+      "input": { "authors": ["李施爱", "刘易澄", "耿浩然"], "T1": "监管新范式下中国民营企业参与稳定币应用的路径与保障机制研究", "JF": "现代商业", "YR": 2026, "AB": "(有完整中文摘要)", "DO": "10.14097/j.cnki.5392/2026.11.018" },
+      "expected": { "authorRaw": [{"name": "李施爱", "type": "person"}, {"name": "刘易澄", "type": "person"}, {"name": "耿浩然", "type": "person"}], "year": 2026, "sourceType": "journal_article", "abstractPresent": true,
+        "themeTags": ["regulatory-frameworks", "payments-remittances", "adoption-emerging-markets"], "jurisdictionTags": ["china-mainland"], "assetTags": [],
+        "note": "3 作者(EndNote 多行 %A,验证多行作者拆分)。" }
+    },
+    {
+      "id": "B3-04", "recordType": "Journal Article", "testFormat": "RefWorks",
+      "input": { "A1": "程雪军", "T1": "数字资产的创新监管体系重构", "JF": "财经科学", "YR": 2026, "AB": "(数字资产/沙盒监管/技术驱动监管,稳定币只是其一)", "DO": "10.27041/j.cnki.cjkx.2026.0014" },
+      "expected": { "authorRaw": [{"name": "程雪军", "type": "person"}], "year": 2026, "sourceType": "journal_article", "abstractPresent": true,
+        "themeTags": ["regulatory-frameworks", "cross-border-coordination", "licensing-supervision"], "jurisdictionTags": ["china-mainland"], "assetTags": [],
+        "note": "弱相关边界:主题是'数字资产'泛监管,稳定币只占一部分。测试点:打标聚焦监管类,不强行套稳定币机制类标签。" }
+    },
+    {
+      "id": "B3-05", "recordType": "Journal Article", "testFormat": "RefWorks",
+      "input": { "A1": null, "T1": "行业热搜", "JF": "中国银行业", "YR": 2026, "AB": "(金融支持乡村振兴,与稳定币无关)" },
+      "expected": { "authorRaw": [{"name": "中国银行业", "type": "organization"}], "year": 2026, "sourceType": "journal_article", "abstractPresent": true,
+        "themeTags": [], "jurisdictionTags": ["china-mainland"], "assetTags": [],
+        "note": "★双重边界:(1) 无个人作者 → 用 JF《中国银行业》作机构作者兜底(authorRaw type=organization),满足≥1作者;(2) 内容与稳定币无关 → themeTags 应为空,不被强塞任何稳定币标签。这是最重要的'不乱打标'测试。" }
+    },
+    {
+      "id": "B3-06", "recordType": "Newspaper Article", "testFormat": "RefWorks",
+      "input": { "A1": "廖蒙", "T1": "香港首批稳定币牌照落地  后续核发数量严控有限", "JF": "北京商报", "FD": "2026-04-13", "AB": null, "DO": "10.28036/n.cnki.nbjxd.2026.001020" },
+      "expected": { "authorRaw": [{"name": "廖蒙", "type": "person"}], "year": 2026, "sourceType": "news", "abstractPresent": false,
+        "abstractBackfill": "同 B3-02,报纸缺摘要走两层补全",
+        "themeTags": ["licensing-supervision", "regulatory-frameworks"], "jurisdictionTags": ["hong-kong"], "assetTags": [],
+        "note": "★缺摘要报纸 + 标题信息量足(香港稳定币牌照)→ 即使摘要补不全,靠标题/打标仍能入库标 needs_review。" }
+    },
+    {
+      "id": "B3-07", "recordType": "Conference Proceeding", "testFormat": "RefWorks",
+      "input": { "A1": "张文彪", "T1": "数字长臂管辖：美国域外虚拟货币执行的国际法困境与中国应对", "JF": "2026年社会学研讨会学科发展分论坛论文集（上册）", "YR": 2026, "AB": "(美国域外虚拟货币执行/没收/数字主权)", "K1": "域外虚拟货币执行;长臂管辖;数字主权;太子集团案;数字人民币", "DO": "10.26914/c.cnkihy.2026.017471" },
+      "expected": { "authorRaw": [{"name": "张文彪", "type": "person"}], "year": 2026, "sourceType": "conference_paper", "abstractPresent": true,
+        "themeTags": ["aml-cft", "cross-border-coordination", "capital-flows-sovereignty"], "jurisdictionTags": ["united-states", "china-mainland"], "assetTags": [],
+        "note": "会议论文(测 conference_paper 映射)。主题偏虚拟货币执法/主权,非稳定币机制;打标应落在监管/主权类。" }
+    },
+    {
+      "id": "B3-08", "recordType": "Conference Proceeding", "testFormat": "RefWorks",
+      "input": { "A1": "徐茂一", "T1": "稳定币的风险及规制路径研究", "JF": "2025数字化转型与社会治理现代化经验交流会论文集", "YR": 2025, "AB": "(以USDT、USDC为典型...风险与规制)", "K1": "稳定币;区块链;风险规制USDT", "DO": "10.26914/c.cnkihy.2025.073539" },
+      "expected": { "authorRaw": [{"name": "徐茂一", "type": "person"}], "year": 2025, "sourceType": "conference_paper", "abstractPresent": true,
+        "themeTags": ["systemic-contagion", "regulatory-frameworks", "smart-contract-security"], "jurisdictionTags": [], "assetTags": ["usdt", "usdc"],
+        "note": "★中文资产匹配:摘要明确出现 USDT、USDC → 命中 usdt/usdc。验证中文文本里的币种实体匹配。" }
+    },
+    {
+      "id": "B3-09", "recordType": "Dissertation/Thesis", "testFormat": "NoteExpress",
+      "input": { "A1": "孙啸天", "advisor": "张栋", "T1": "刑事涉案数字资产先行处置研究", "PB": "华东政法大学", "degree": "硕士", "YR": 2025, "AB": "(涉案数字资产先行处置;稳定币为三类之一;洗钱风险)", "DO": "10.27150/d.cnki.ghdzc.2025.000392" },
+      "expected": { "authorRaw": [{"name": "孙啸天", "type": "person"}], "year": 2025, "sourceType": "thesis", "abstractPresent": true,
+        "themeTags": ["aml-cft", "regulatory-frameworks"], "jurisdictionTags": ["china-mainland"], "assetTags": [],
+        "note": "★学位论文(测 thesis 映射 + NoteExpress 解析)。导师(A3/张栋)不应混入作者数组。主题偏刑事处置,稳定币是其一,打标不过度。" }
+    }
+  ],
+  "_assertions_summary": [
+    "四格式解析对同一条产出一致(B3-01 知网研学 / B3-03 EndNote / B3-09 NoteExpress 对照)",
+    "多作者拆分:分号(B3-01 谭学想2人 / B3-03 李施爱3人)、多行%A(B3-03)",
+    "机构作者兜底:B3-05 无个人作者 → JF 作 organization",
+    "类型映射:journal_article / news(报纸) / conference_paper / thesis 各命中",
+    "CNKI DOI 全部不走 resolveDoi、不误报 ❌",
+    "缺摘要(B3-02/06 报纸)走两层补全,补不到 needs_review 不拒收",
+    "中文打标命中:辖区(港/陆/美)、币种(B3-08 的 usdt/usdc)",
+    "不乱打标:B3-05(乡村振兴,无关)themeTags 为空;B3-04/07/09 弱相关只落监管类",
+    "导师不混入作者(B3-09 张栋)",
+    "编码:若题录为 GBK,验证编码兜底不乱码"
+  ]
+}

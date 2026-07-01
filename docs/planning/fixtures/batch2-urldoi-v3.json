@@ -1,0 +1,81 @@
+{
+  "_comment": "第二批夹具 v3(最终版,替换 v1/v2)。改动:sourceType 改为 slug(语言无关);智库报告并入 report(Coinbase B2-07 现为 report)。input=导入提供的 DOI/URL;expected=应得结果;tags 用重合判定(覆盖 primary,允许 ±1)。机构作者写入 authorRaw:[{name,type}]。",
+  "fixtures": [
+    {
+      "id": "B2-01", "path": "resolveDoi",
+      "input": { "doi": "10.48550/arXiv.1910.10098" },
+      "expected": { "title": "SoK: A Classification Framework for Stablecoin Designs", "sourceType": "working_paper", "venue": "arXiv", "themeTags": ["fiat-collateralized", "crypto-collateralized", "algorithmic"], "assetTags": [],
+        "note": "arXiv DOI(DataCite,非 Crossref)。测试点:能解析 10.48550/arXiv。" }
+    },
+    {
+      "id": "B2-02", "path": "resolveDoi",
+      "input": { "doi": "10.3386/w30796" },
+      "expected": { "title": "Leverage and Stablecoin Pegs", "authorRaw": [{"name": "Gary Gorton", "type": "person"}, {"name": "Elizabeth Klee", "type": "person"}, {"name": "Chase Ross", "type": "person"}, {"name": "Sharon Ross", "type": "person"}, {"name": "Alexandros Vardoulakis", "type": "person"}], "sourceType": "working_paper", "venue": "NBER", "themeTags": ["peg-stability-depeg", "collateral-risk"], "assetTags": [],
+        "note": "NBER DOI(10.3386)。常付费墙→access_status=publisher_paywalled。" }
+    },
+    {
+      "id": "B2-03", "path": "resolveDoi",
+      "input": { "doi": "10.59576/sr.1179" },
+      "expected": { "title": "Stablecoins vs. Tokenized Deposits: The Narrow Banking Debate Revisited", "authorRaw": [{"name": "Xinyu Huang", "type": "person"}, {"name": "Todd Keister", "type": "person"}], "year": 2026, "sourceType": "working_paper", "venue": "NY Fed Staff Reports", "themeTags": ["tokenized-deposits-mmf", "bank-disintermediation", "fiat-collateralized"], "assetTags": [],
+        "note": "美联储 staff report DOI(10.59576),非主流前缀也要能解析。" }
+    },
+    {
+      "id": "B2-04", "path": "resolveDoi",
+      "input": { "doi": "10.54254/2754-1169/2025.bl29417" },
+      "expected": { "title": "Stablecoin: Research on the value, regulatory challenges, and countermeasures", "authorRaw": [{"name": "J. Fu", "type": "person"}], "year": 2025, "sourceType": "conference_paper", "venue": "Advances in Economics Management and Political Sciences (EWA)", "themeTags": ["regulatory-frameworks", "consumer-protection"], "assetTags": [],
+        "note": "EWA 会议论文集(10.54254)→ conference_paper;来源层级低可作来源质量参考。" }
+    },
+    {
+      "id": "B2-05", "path": "url", "kind": "gov_document",
+      "input": { "url": "https://www.europarl.europa.eu/doceo/document/TA-9-2023-0117_EN.html" },
+      "expected": { "title": "Markets in Crypto-assets (MiCA)", "authorRaw": [{"name": "European Parliament", "type": "organization"}], "hasAbstract": false, "doi": null, "jurisdictionTags": ["european-union"], "sourceType": "gov_document", "themeTags": ["regulatory-frameworks", "licensing-supervision", "disclosure-accounting"], "assetTags": [],
+        "note": "★法规原文。机构作者→authorRaw(organization)满足≥1作者;无摘要不拒收标 needs_review;长文本不被强塞标签。" }
+    },
+    {
+      "id": "B2-06", "path": "url", "kind": "gov_document",
+      "input": { "url": "https://www.congress.gov/bill/119th-congress/house-bill/2392/text/ih" },
+      "expected": { "title": "H.R.2392 - STABLE Act of 2025", "authorRaw": [{"name": "United States Congress", "type": "organization"}], "doi": null, "jurisdictionTags": ["united-states"], "sourceType": "gov_document", "themeTags": ["regulatory-frameworks", "licensing-supervision"], "assetTags": [],
+        "note": "美国立法原文。同 MiCA。" }
+    },
+    {
+      "id": "B2-07", "path": "url", "kind": "industry_report",
+      "input": { "url": "https://assets.ctfassets.net/c5bd0wqjc7v0/6ZxyPKS945KFnSVH0vPEuW/e7fb242895b1919581993d18db876738/The_State_of_Crypto_-Corporate_Adoption-_Coinbase.pdf" },
+      "expected": { "title": "The State of Crypto: Corporate Adoption", "authorRaw": [{"name": "Coinbase Institute", "type": "organization"}], "doi": null, "sourceType": "report", "themeTags": ["adoption-emerging-markets", "payments-remittances"], "assetTags": ["usdc"],
+        "note": "★直链 PDF。测试点:URL 导入碰 PDF 直链应识别为 PDF 抽文字。sourceType 现为 report(智库报告已并入)。" }
+    },
+    {
+      "id": "B2-08", "path": "url", "kind": "industry_report",
+      "input": { "url": "https://corporate.worldpay.com/node/6961/pdf" },
+      "expected": { "title": "Worldpay Global Payments Report 2024", "authorRaw": [{"name": "Worldpay", "type": "organization"}], "doi": null, "sourceType": "report", "themeTags": ["payments-remittances", "market-data-supply"], "assetTags": [],
+        "note": "★直链 PDF(末尾 /pdf 无后缀)。靠 Content-Type 判断 PDF。" }
+    },
+    {
+      "id": "B2-09", "path": "url", "kind": "news",
+      "input": { "url": "https://www.stlouisfed.org/on-the-economy/2025/dec/regulated-payment-stablecoins-become-reality-us" },
+      "expected": { "title": "Regulated Payment Stablecoins Become a Reality in the U.S.", "authorRaw": [{"name": "James Fuchs", "type": "person"}], "doi": null, "jurisdictionTags": ["united-states"], "sourceType": "news", "themeTags": ["regulatory-frameworks", "payments-remittances"], "assetTags": [],
+        "note": "美联储博客短文→news,access_status=open_access。" }
+    },
+    {
+      "id": "B2-10", "path": "url", "kind": "questionable_source",
+      "input": { "url": "https://www.researchgate.net/publication/400718599_Regulatory_Frameworks_for_Global_Stablecoins" },
+      "expected": { "title": "Regulatory Frameworks for Global Stablecoins", "venue": "Journal of Artificial Intelligence General Science", "doi": null, "suspectLowQuality": true, "sourceType": "journal_article", "themeTags": ["regulatory-frameworks", "cross-border-coordination"], "assetTags": [],
+        "note": "★可疑来源(卷2期1标1–320页、AI 水刊、仅 ResearchGate)。测试点:标记存疑→needs_review。ResearchGate 常需登录可能抓不到。" }
+    },
+    {
+      "id": "B2-11", "path": "resolveDoi", "kind": "duplicate_conflict",
+      "input": { "doi": "10.1016/j.frl.2020.101431", "providedYear": 2021 },
+      "expected": { "title": "A crypto safe haven against Bitcoin", "authorRaw": [{"name": "Dirk G. Baur", "type": "person"}, {"name": "Lai T. Hoang", "type": "person"}], "canonicalYear": 2020, "sourceType": "journal_article", "venue": "Finance Research Letters", "themeTags": ["peg-stability-depeg"], "assetTags": [],
+        "note": "★跨文件年份冲突(文件1=2020、文件2=2021)。DOI 解析出权威年份2020,与提供2021不符→标 ⚠️。" }
+    },
+    {
+      "id": "B2-12", "path": "resolveDoi", "kind": "type_conflict",
+      "input": { "doi": "10.2139/ssrn.3711777" },
+      "expected": { "title": "DeFi and the Future of Finance", "authorRaw": [{"name": "Campbell R. Harvey", "type": "person"}, {"name": "Ashwin Ramachandran", "type": "person"}, {"name": "Joey Santoro", "type": "person"}], "sourceType": "working_paper", "venue": "SSRN", "alsoExistsAs": "书(Wiley, ISBN 9781119836025)", "themeTags": ["defi-lending"], "assetTags": [],
+        "note": "SSRN 工作论文版与 Wiley 书两形态→当两条独立资源,不强行合并。" }
+    }
+  ],
+  "_title_search_batch_deferred": {
+    "comment": "无 DOI/URL,标题反查路径(U.2),暂缓。",
+    "items": ["Bertsch (2023)", "BIS Project Agorá (2024)", "Reuter IMF (2025)", "HKMA Cap.656 (2024)", "HKMA smart contract audits (2025a)", "MAS SCS Framework (2023)", "SAL Prac (2024)", "The International Lawyer (2024)"]
+  }
+}
