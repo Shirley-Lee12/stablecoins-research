@@ -1,7 +1,9 @@
 import { pgTable, text, serial, timestamp, pgEnum, integer, jsonb, uuid } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
-export const uploadJobTypeEnum = pgEnum("upload_job_type", ["pdf", "url"]);
+// "citation" = the 4th entry point (docs/planning/06/14): one citation-export file (RefWorks/
+// EndNote/NoteExpress) fans out into one job per parsed record, sharing a batchId like PDF/url-batch.
+export const uploadJobTypeEnum = pgEnum("upload_job_type", ["pdf", "url", "citation"]);
 export const uploadJobStatusEnum = pgEnum("upload_job_status", ["queued", "processing", "ready_for_review", "failed"]);
 
 /**

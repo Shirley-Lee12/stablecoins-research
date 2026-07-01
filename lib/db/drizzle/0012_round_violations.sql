@@ -1,0 +1,1 @@
+ALTER TYPE "public"."upload_job_type" ADD VALUE 'citation';

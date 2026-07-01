@@ -113,3 +113,34 @@ export async function verifyResource(input: VerifyInput): Promise<VerifyReport> 
     hasWarning: checks.some((c) => c.status === "⚠️"),
   };
 }
+
+/**
+ * Completeness-only check for citation-import entries (docs/planning/06 §3, docs/planning/14 §2) —
+ * no network calls at all. CNKI's own metadata (including its DOI) is treated as authoritative
+ * since it comes from the database itself, not a user claim that needs cross-checking — resolveDoi/
+ * isUrlReachable would just be re-verifying CNKI against itself. Same VerifyReport shape as
+ * verifyResource() so determineResourceStatus() works unchanged on either.
+ */
+export function verifyCitationRecord(input: VerifyInput): VerifyReport {
+  const checks: FieldCheck[] = [
+    checkTitle(input),
+    input.authors.length > 0
+      ? { field: "authors", status: "✅", detail: "题录自带作者信息" }
+      : { field: "authors", status: "❌", detail: "未填写作者" },
+    input.year !== null
+      ? { field: "year", status: "✅", detail: "题录自带年份" }
+      : { field: "year", status: "⚠️", detail: "未填写年份" },
+    input.doi
+      ? { field: "doi", status: "✅", detail: "题录自带 DOI（来自 CNKI，不再反查）" }
+      : { field: "doi", status: "⚠️", detail: "题录未提供 DOI" },
+    input.url
+      ? { field: "url", status: "✅", detail: "题录自带直达链接（来自 CNKI，不再核对可达性）" }
+      : { field: "url", status: "⚠️", detail: "题录未提供直达链接" },
+    checkAbstract(input),
+  ];
+  return {
+    checks,
+    hasFailure: checks.some((c) => c.status === "❌"),
+    hasWarning: checks.some((c) => c.status === "⚠️"),
+  };
+}

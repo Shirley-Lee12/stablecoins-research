@@ -9,17 +9,19 @@ import { generateJson } from "../lib/llm";
 import { resolveLink } from "../lib/scholar";
 import { extractPdfText } from "../lib/pdfExtract";
 import { loadTagVocabulary, computeTagsForText, type TagVocabulary, type ComputedTags } from "../lib/tagging";
-import { verifyResource, type VerifyReport } from "../lib/verify";
+import { verifyResource, verifyCitationRecord, type VerifyReport } from "../lib/verify";
 import { determineResourceStatus, missingHardRequiredFields } from "../lib/resourceStatus";
+import { parseCitationFile, UnsupportedCitationFormatError, type CitationRecord } from "../lib/citation";
 
 const router = Router();
 
 const VALID_SOURCE_TYPES = ["journal_article", "working_paper", "conference_paper", "thesis", "report", "gov_document", "news"];
 
 // ── PDF upload (memory only — the binary is never persisted to disk or DB, mirrors /import/pdf) ──
+const PDF_MAX_SIZE_MB = 50;
 const pdfUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 15 * 1024 * 1024 },
+  limits: { fileSize: PDF_MAX_SIZE_MB * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype === "application/pdf") cb(null, true);
     else cb(new Error("Only PDF files are supported"));
@@ -29,7 +31,13 @@ const pdfUpload = multer({
 function handleUpload(mw: any) {
   return (req: any, res: any, next: any) => {
     mw(req, res, (err: any) => {
-      if (err) { res.status(400).json({ error: err.message || "Upload failed" }); return; }
+      if (err) {
+        // multer's own message for this case doesn't mention the actual limit — give the user a
+        // specific, actionable number instead of a generic "File too large".
+        const message = err.code === "LIMIT_FILE_SIZE" ? `File too large — the limit is ${PDF_MAX_SIZE_MB}MB per PDF.` : (err.message || "Upload failed");
+        res.status(400).json({ error: message });
+        return;
+      }
       next();
     });
   };
@@ -85,7 +93,7 @@ Respond with ONLY the JSON object, no markdown fences, no extra text.`;
  * mislabel it) and routes those through the same local text extraction PDF uploads use, instead of
  * running PDF bytes through the HTML tag-stripper, which would only produce binary garbage.
  */
-async function fetchPageText(url: string): Promise<string | null> {
+export async function fetchPageText(url: string): Promise<string | null> {
   try {
     const response = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; ZIBSBot/1.0)" },
@@ -335,6 +343,122 @@ router.post("/resources/upload/jobs/url-batch", requireAuth, async (req: any, re
   }
 });
 
+// ── Citation import (4th entry point: RefWorks/EndNote/NoteExpress exports — docs/planning/06/14) ──
+
+const citationUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+interface CitationJobResult {
+  draft: PipelineDraft;
+  tagIds: ComputedTags;
+  tags: TagSummary[];
+  report: VerifyReport;
+  missingRequired: string[];
+  /** Shown in the confirm dialog (docs/planning/06 §4) — "cnki" means the record came with its own abstract; "generated_from_fulltext" means tier-2 fetched the real article and an LLM summarized it; null means neither worked and it's genuinely missing. */
+  abstractSource: "cnki" | "generated_from_fulltext" | null;
+}
+
+/**
+ * Two-tier abstract backfill for citation records with no abstract of their own (mainly newspaper
+ * entries — docs/planning/06 §4). Tier 1 (using keywords instead of a missing abstract) happens
+ * naturally below since the tagging input already falls back to title+keywords. This is tier 2:
+ * only fires when there's no abstract AND a link to try; only ever summarizes text it actually
+ * fetched — never fabricates a summary from the title alone. Leaves it blank on any failure,
+ * routing to needs_review via the empty-abstract warning in verifyCitationRecord() rather than
+ * silently making something up.
+ */
+async function backfillAbstractFromFulltext(record: CitationRecord): Promise<{ abstract: string; abstractSource: "cnki" | "generated_from_fulltext" | null }> {
+  if (record.abstract) return { abstract: record.abstract, abstractSource: "cnki" };
+  if (!record.url) return { abstract: "", abstractSource: null };
+
+  const fullText = await fetchPageText(record.url);
+  if (!fullText) return { abstract: "", abstractSource: null };
+
+  try {
+    const prompt = `The following is the full text of a news article (in Chinese). Write a concise 2-4 sentence summary of it, in Chinese, based only on what's actually in the text below — do not add anything not present in it.
+
+Text:
+---
+${fullText.slice(0, 6000)}
+---
+
+Respond with ONLY a JSON object: { "abstract": string }`;
+    const raw = await generateJson(prompt, 512);
+    const parsed = JSON.parse(raw);
+    const abstract = typeof parsed.abstract === "string" ? parsed.abstract.trim() : "";
+    return abstract ? { abstract, abstractSource: "generated_from_fulltext" } : { abstract: "", abstractSource: null };
+  } catch {
+    return { abstract: "", abstractSource: null };
+  }
+}
+
+/** Shared per-record processing: tag + completeness-check a single parsed citation record. No resolveLink/network verification (docs/planning/06 §3 — CNKI's own metadata, including its DOI, is trusted as-is). */
+async function processCitationRecord(record: CitationRecord, vocab: TagVocabulary): Promise<CitationJobResult> {
+  const { abstract, abstractSource } = await backfillAbstractFromFulltext(record);
+
+  const draft: PipelineDraft = {
+    title: record.title, authors: record.authors, year: record.year, abstract,
+    doi: record.doi, url: record.url, sourceType: record.sourceType,
+  };
+
+  // Tier 1 (docs/planning/06 §4): tagging input falls back to title+keywords when there's still no
+  // abstract, instead of tagging on title alone.
+  const taggingText = [draft.title, draft.abstract || record.keywords.join(" ")].filter(Boolean).join("\n\n");
+  const tagIds = await computeTagsForText(taggingText, vocab);
+  const tags = await enrichTags(tagIds);
+  const report = verifyCitationRecord({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
+  const missingRequired = missingHardRequiredFields(
+    { title: draft.title, authors: draft.authors, year: draft.year, url: draft.url, doi: draft.doi },
+    { requireUrlOrDoi: true },
+  );
+
+  return { draft, tagIds, tags, report, missingRequired, abstractSource };
+}
+
+/**
+ * POST /api/resources/upload/jobs/citation — must be logged in.
+ * multipart/form-data, field "file" — one RefWorks/EndNote/NoteExpress export, auto-detected
+ * (docs/planning/06 §2). Fans out into one upload_jobs row per parsed record, sharing a batchId
+ * like the PDF/url-batch routes. 知网研学's own export format is encrypted and can't be parsed —
+ * rejected upfront with a clear message asking for one of the other three formats instead.
+ */
+router.post("/resources/upload/jobs/citation", requireAuth, handleUpload(citationUpload.single("file")), async (req: any, res) => {
+  if (!req.file) { res.status(400).json({ error: "A citation export file is required" }); return; }
+
+  let records: CitationRecord[];
+  try {
+    records = parseCitationFile(req.file.buffer).records;
+  } catch (err: any) {
+    if (err instanceof UnsupportedCitationFormatError) { res.status(400).json({ error: err.message }); return; }
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to parse citation file", detail: err.message });
+    return;
+  }
+  if (records.length === 0) { res.status(400).json({ error: "No citation records found in this file" }); return; }
+
+  const batchId = randomUUID();
+  const jobs = await db
+    .insert(uploadJobsTable)
+    .values(records.map(() => ({ batchId, type: "citation" as const, status: "queued" as const, input: { fileName: req.file.originalname }, createdBy: req.user.userId })))
+    .returning({ id: uploadJobsTable.id });
+
+  res.status(202).json({ batchId, jobIds: jobs.map((j) => j.id) });
+
+  const vocab = await loadTagVocabulary();
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    const jobId = jobs[i].id;
+    void (async () => {
+      try {
+        await db.update(uploadJobsTable).set({ status: "processing", updatedAt: new Date() }).where(eq(uploadJobsTable.id, jobId));
+        const result = await processCitationRecord(record, vocab);
+        await db.update(uploadJobsTable).set({ status: "ready_for_review", result, updatedAt: new Date() }).where(eq(uploadJobsTable.id, jobId));
+      } catch (err: any) {
+        await db.update(uploadJobsTable).set({ status: "failed", error: err.message ?? "Processing failed", updatedAt: new Date() }).where(eq(uploadJobsTable.id, jobId));
+      }
+    })();
+  }
+});
+
 /**
  * GET /api/resources/upload/jobs — must be logged in. Lists the current user's own jobs, newest
  * first. Optional ?batchId= narrows to one batch — this is how the frontend resumes progress for
@@ -394,8 +518,21 @@ class MissingRequiredFieldsError extends Error {
  * import (the link was supplied directly, so a gap is real), false for PDF import (the link comes
  * from an automated lookup that can legitimately turn up nothing — that routes to needs_review via
  * determineResourceStatus's verify-report check instead of blocking the confirm).
+ *
+ * skipNetworkVerification is for citation-import entries (docs/planning/14 §2): CNKI's own metadata
+ * is trusted as-is, so re-running the network-based verifyResource() here (DOI resolution + URL
+ * reachability) would just be re-verifying CNKI against itself — and does so badly, since CNKI's
+ * Chinese-journal DOIs mostly aren't in Crossref/OpenAlex and link.cnki.net blocks bot HEAD/GET
+ * requests, so every citation entry would spuriously fail verification and land in needs_review
+ * regardless of how complete the record actually is.
  */
-async function persistConfirmedDraft(input: ConfirmInput, userId: number, isAdmin: boolean, requireUrlOrDoi: boolean) {
+async function persistConfirmedDraft(
+  input: ConfirmInput,
+  userId: number,
+  isAdmin: boolean,
+  requireUrlOrDoi: boolean,
+  skipNetworkVerification: boolean = false,
+) {
   const authors = input.authors ?? [];
   const year = input.year ?? null;
   const url = input.url ?? null;
@@ -404,7 +541,8 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, isAdmi
   const missing = missingHardRequiredFields({ title: input.title, authors, year, url, doi }, { requireUrlOrDoi });
   if (missing.length > 0) throw new MissingRequiredFieldsError(missing);
 
-  const report = await verifyResource({ title: input.title, authors, year, doi, url, abstract: input.abstract ?? null });
+  const verifyInput = { title: input.title, authors, year, doi, url, abstract: input.abstract ?? null };
+  const report = skipNetworkVerification ? verifyCitationRecord(verifyInput) : await verifyResource(verifyInput);
   const status = determineResourceStatus(report, isAdmin);
 
   const [inserted] = await db
@@ -479,7 +617,13 @@ router.post("/resources/upload/jobs/:id/confirm", requireAuth, async (req: any, 
     const input = req.body as ConfirmInput;
     if (!input.title) { res.status(400).json({ error: "title is required" }); return; }
 
-    const inserted = await persistConfirmedDraft(input, req.user.userId, req.user.role === "admin", job.type === "url");
+    const inserted = await persistConfirmedDraft(
+      input,
+      req.user.userId,
+      req.user.role === "admin",
+      job.type === "url",
+      job.type === "citation",
+    );
     await db.delete(uploadJobsTable).where(eq(uploadJobsTable.id, id));
     res.status(201).json(inserted);
   } catch (err: any) {
