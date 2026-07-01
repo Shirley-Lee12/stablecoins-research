@@ -75,13 +75,27 @@ Respond with ONLY the JSON object, no markdown fences, no extra text.`;
   };
 }
 
-/** Fetches a URL's page text — mirrors the existing /api/resources/import fetch/strip pattern. */
+/**
+ * Fetches a URL's page text — mirrors the existing /api/resources/import fetch/strip pattern.
+ * Detects a direct PDF link via Content-Type (falling back to a ".pdf" URL check for servers that
+ * mislabel it) and routes those through the same local text extraction PDF uploads use, instead of
+ * running PDF bytes through the HTML tag-stripper, which would only produce binary garbage.
+ */
 async function fetchPageText(url: string): Promise<string | null> {
   try {
     const response = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; ZIBSBot/1.0)" },
       signal: AbortSignal.timeout(10_000),
     });
+    if (!response.ok) return null;
+
+    const contentType = response.headers.get("content-type") ?? "";
+    if (contentType.includes("application/pdf") || url.toLowerCase().endsWith(".pdf")) {
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const { text } = await extractPdfText(buffer);
+      return text.length >= 200 ? text.slice(0, 8000) : null;
+    }
+
     const html = await response.text();
     const text = html
       .replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -90,8 +104,7 @@ async function fetchPageText(url: string): Promise<string | null> {
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 8000);
-    if (!response.ok || text.length < 200) return null;
-    return text;
+    return text.length >= 200 ? text : null;
   } catch {
     return null;
   }
