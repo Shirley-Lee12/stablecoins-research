@@ -1,33 +1,40 @@
+import dns from "node:dns/promises";
+import nodemailer from "nodemailer";
 import { logger } from "./logger";
 import { env } from "../config";
 
-const RESEND_FROM_NAME = "ZIBS Stablecoin Hub";
-
 /**
- * Sends via Resend's HTTP API instead of SMTP — direct SMTP to 163.com kept failing from Render
- * (first an unreachable IPv6 address, then a silent connection timeout on IPv4 too, consistent
- * with 163/126's known practice of blocking or throttling mail submission from datacenter/cloud IP
- * ranges rather than an actual code bug). A plain fetch() call sidesteps that whole class of
- * problem — no SMTP socket, no per-provider IP reputation to fight.
+ * Back on SMTP again — Resend's shared test domain (onboarding@resend.dev) can only send to the
+ * account's own verified test addresses, not real users, so it never worked for production. Now
+ * pointed at Outlook/Microsoft 365 instead of 163.com.
+ *
+ * Kept the manual-IPv4-resolution approach from the 163.com attempt (dns.resolve4 + connecting to
+ * the raw IP with tls.servername for correct SNI/cert validation) even though Outlook's mail
+ * infrastructure is much less likely to have 163.com's specific problem (an unroutable-from-Render
+ * IPv6 address) — nodemailer 9.x resolves both A and AAAA records and picks randomly between them
+ * for the connection (confirmed by reading its source during the 163.com debugging), so this is
+ * cheap insurance against the same class of bug regardless of provider.
  */
-export async function sendMail(to: string, subject: string, html: string) {
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${env.RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: `${RESEND_FROM_NAME} <${env.RESEND_FROM_EMAIL}>`,
-      to,
-      subject,
-      html,
-    }),
-  });
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(`Resend API request failed (${res.status}): ${detail}`);
+async function createTransporter() {
+  let host: string = env.SMTP_HOST;
+  try {
+    const [ipv4] = await dns.resolve4(env.SMTP_HOST);
+    host = ipv4;
+  } catch (err) {
+    logger.warn({ err, host: env.SMTP_HOST }, "Could not resolve SMTP host to an IPv4 address, letting nodemailer resolve it itself");
   }
+  return nodemailer.createTransport({
+    host,
+    port: env.SMTP_PORT,
+    secure: env.SMTP_PORT === 465,
+    auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
+    tls: { servername: env.SMTP_HOST },
+  });
+}
+
+export async function sendMail(to: string, subject: string, html: string) {
+  const transporter = await createTransporter();
+  await transporter.sendMail({ from: env.SMTP_FROM, to, subject, html });
 }
 
 export async function sendVerificationCodeEmail(to: string, code: string) {
