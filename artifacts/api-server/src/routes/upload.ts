@@ -12,6 +12,8 @@ import { loadTagVocabulary, computeTagsForText, type TagVocabulary, type Compute
 import { verifyResource, verifyCitationRecord, type VerifyReport } from "../lib/verify";
 import { determineResourceStatus, missingHardRequiredFields } from "../lib/resourceStatus";
 import { parseCitationFile, UnsupportedCitationFormatError, type CitationRecord } from "../lib/citation";
+import { extractListFileText, UnsupportedListFormatError } from "../lib/unstructuredList/extractText";
+import { decomposeReferenceList } from "../lib/unstructuredList/decompose";
 
 const router = Router();
 
@@ -286,11 +288,12 @@ router.post("/resources/upload/jobs/pdf", requireAuth, handleUpload(pdfUpload.ar
   const files = req.files as Express.Multer.File[] | undefined;
   if (!files || files.length === 0) { res.status(400).json({ error: "At least one PDF file is required" }); return; }
   const sourceTypeHint = (req.body.sourceType as string) ?? "journal_article";
+  const folderImportId = (req.body.folderImportId as string) || null;
   const batchId = randomUUID();
 
   const jobs = await db
     .insert(uploadJobsTable)
-    .values(files.map((f) => ({ batchId, type: "pdf" as const, status: "queued" as const, input: { fileName: f.originalname, sourceTypeHint }, createdBy: req.user.userId })))
+    .values(files.map((f) => ({ batchId, folderImportId, type: "pdf" as const, status: "queued" as const, input: { fileName: f.originalname, sourceTypeHint }, createdBy: req.user.userId })))
     .returning({ id: uploadJobsTable.id });
 
   res.status(202).json({ batchId, jobIds: jobs.map((j) => j.id) });
@@ -315,7 +318,7 @@ router.post("/resources/upload/jobs/pdf", requireAuth, handleUpload(pdfUpload.ar
  * Body: { urls: string[], sourceType? } (max 20). Same resumable-job pattern as the PDF route.
  */
 router.post("/resources/upload/jobs/url-batch", requireAuth, async (req: any, res) => {
-  const { urls, sourceType } = req.body as { urls?: string[]; sourceType?: string };
+  const { urls, sourceType, folderImportId } = req.body as { urls?: string[]; sourceType?: string; folderImportId?: string };
   if (!Array.isArray(urls) || urls.length === 0) { res.status(400).json({ error: "urls array is required" }); return; }
   if (urls.length > 20) { res.status(400).json({ error: "Maximum 20 URLs per batch" }); return; }
   const sourceTypeHint = sourceType ?? "journal_article";
@@ -323,7 +326,7 @@ router.post("/resources/upload/jobs/url-batch", requireAuth, async (req: any, re
 
   const jobs = await db
     .insert(uploadJobsTable)
-    .values(urls.map((url) => ({ batchId, type: "url" as const, status: "queued" as const, input: { url, sourceTypeHint }, createdBy: req.user.userId })))
+    .values(urls.map((url) => ({ batchId, folderImportId: folderImportId || null, type: "url" as const, status: "queued" as const, input: { url, sourceTypeHint }, createdBy: req.user.userId })))
     .returning({ id: uploadJobsTable.id });
 
   res.status(202).json({ batchId, jobIds: jobs.map((j) => j.id) });
@@ -435,10 +438,11 @@ router.post("/resources/upload/jobs/citation", requireAuth, handleUpload(citatio
   }
   if (records.length === 0) { res.status(400).json({ error: "No citation records found in this file" }); return; }
 
+  const folderImportId = (req.body.folderImportId as string) || null;
   const batchId = randomUUID();
   const jobs = await db
     .insert(uploadJobsTable)
-    .values(records.map(() => ({ batchId, type: "citation" as const, status: "queued" as const, input: { fileName: req.file.originalname }, createdBy: req.user.userId })))
+    .values(records.map(() => ({ batchId, folderImportId, type: "citation" as const, status: "queued" as const, input: { fileName: req.file.originalname }, createdBy: req.user.userId })))
     .returning({ id: uploadJobsTable.id });
 
   res.status(202).json({ batchId, jobIds: jobs.map((j) => j.id) });
@@ -459,17 +463,116 @@ router.post("/resources/upload/jobs/citation", requireAuth, handleUpload(citatio
   }
 });
 
+// ── Unstructured reference-list sub-flow (docs/planning/14 §3.3) ────────────────────────────────
+
+const listUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+/**
+ * POST /api/resources/upload/jobs/unstructured-list/preview — must be logged in.
+ * multipart/form-data, field "file" — one .md/.docx (see extractText.ts for why .doc/.wps are
+ * rejected). Extracts text, runs the one-shot LLM decomposition, and returns the structured entries
+ * for the frontend to show in an editable confirm table. No DB writes at all — this is a preview,
+ * same tier as /upload/manual and /upload/url; nothing gets routed into a pipeline until the user
+ * confirms the table (docs/planning/14 §3.3 point 3 — this is the "AI parses, human confirms" rule
+ * applied to the new entry point, not an exception to it).
+ */
+router.post("/resources/upload/jobs/unstructured-list/preview", requireAuth, handleUpload(listUpload.single("file")), async (req: any, res) => {
+  if (!req.file) { res.status(400).json({ error: "A reference-list file is required" }); return; }
+  try {
+    const text = extractListFileText(req.file.buffer, req.file.originalname);
+    if (text.trim().length < 20) { res.status(422).json({ error: "This file has too little extractable text to parse" }); return; }
+    const entries = await decomposeReferenceList(text);
+    res.json({ fileName: req.file.originalname, entries });
+  } catch (err: any) {
+    if (err instanceof UnsupportedListFormatError) { res.status(400).json({ error: err.message }); return; }
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to parse reference-list file", detail: err.message });
+  }
+});
+
+/** Shared per-entry processing for title-only jobs: resolveLink()'s title-search path (no fetched page text to re-extract from — the six elements already came from the list decomposition), then tag + verify like every other entry point. */
+async function processTitleEntry(entry: { title: string; authors: string[]; year: number | null }, sourceTypeHint: string, vocab: TagVocabulary): Promise<PipelineResult> {
+  const linked = await resolveLink({ title: entry.title, authors: entry.authors, year: entry.year, doi: null });
+  const draft: PipelineDraft = {
+    title: linked.found ? linked.title : entry.title,
+    authors: linked.authors.length > 0 ? linked.authors : entry.authors,
+    year: linked.year ?? entry.year,
+    // No fetched page/PDF text exists for a title-search entry, so there's nothing to summarize an
+    // abstract from — leaving it blank (routes to needs_review via the empty-abstract warning)
+    // instead of fabricating one from the title, same rule as the citation entry's abstract backfill.
+    abstract: "",
+    doi: linked.doi,
+    url: linked.canonicalUrl ?? linked.fulltextUrl,
+    sourceType: sourceTypeHint,
+  };
+  const tagIds = await computeTagsForText(draft.title, vocab);
+  const tags = await enrichTags(tagIds);
+  const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
+  const missingRequired = missingHardRequiredFields(
+    { title: draft.title, authors: draft.authors, year: draft.year, url: draft.url, doi: draft.doi },
+    { requireUrlOrDoi: true },
+  );
+  return { draft, tagIds, tags, report, foundInScholarlyDb: linked.foundInScholarlyDb, missingRequired };
+}
+
+/**
+ * POST /api/resources/upload/jobs/title-batch — must be logged in.
+ * Body: { entries: {title, authors, year}[], sourceType?, folderImportId? } — the confirmed rows
+ * from the unstructured-list table that had no urlOrDoi (docs/planning/14 §3.3 point 4). Rows that
+ * DID have a urlOrDoi are routed through the existing /jobs/url-batch route unchanged, not this one.
+ */
+router.post("/resources/upload/jobs/title-batch", requireAuth, async (req: any, res) => {
+  const { entries, sourceType, folderImportId } = req.body as {
+    entries?: { title?: string; authors?: string[]; year?: number | null }[];
+    sourceType?: string;
+    folderImportId?: string;
+  };
+  if (!Array.isArray(entries) || entries.length === 0) { res.status(400).json({ error: "entries array is required" }); return; }
+  if (entries.length > 50) { res.status(400).json({ error: "Maximum 50 entries per batch" }); return; }
+  const cleaned = entries
+    .map((e) => ({ title: (e.title ?? "").trim(), authors: Array.isArray(e.authors) ? e.authors : [], year: e.year ?? null }))
+    .filter((e) => e.title.length > 0);
+  if (cleaned.length === 0) { res.status(400).json({ error: "No entries with a title" }); return; }
+  const sourceTypeHint = sourceType ?? "journal_article";
+  const batchId = randomUUID();
+
+  const jobs = await db
+    .insert(uploadJobsTable)
+    .values(cleaned.map((entry) => ({ batchId, folderImportId: folderImportId || null, type: "title" as const, status: "queued" as const, input: { title: entry.title, sourceTypeHint }, createdBy: req.user.userId })))
+    .returning({ id: uploadJobsTable.id });
+
+  res.status(202).json({ batchId, jobIds: jobs.map((j) => j.id) });
+
+  const vocab = await loadTagVocabulary();
+  for (let i = 0; i < cleaned.length; i++) {
+    const entry = cleaned[i];
+    const jobId = jobs[i].id;
+    void (async () => {
+      try {
+        await db.update(uploadJobsTable).set({ status: "processing", updatedAt: new Date() }).where(eq(uploadJobsTable.id, jobId));
+        const result = await processTitleEntry(entry, sourceTypeHint, vocab);
+        await db.update(uploadJobsTable).set({ status: "ready_for_review", result, updatedAt: new Date() }).where(eq(uploadJobsTable.id, jobId));
+      } catch (err: any) {
+        await db.update(uploadJobsTable).set({ status: "failed", error: err.message ?? "Processing failed", updatedAt: new Date() }).where(eq(uploadJobsTable.id, jobId));
+      }
+    })();
+  }
+});
+
 /**
  * GET /api/resources/upload/jobs — must be logged in. Lists the current user's own jobs, newest
- * first. Optional ?batchId= narrows to one batch — this is how the frontend resumes progress for
- * a specific submission after a closed/refreshed tab, instead of relying on jobIds kept only in
- * page memory.
+ * first. Optional ?batchId= narrows to one batch; optional ?folderImportId= narrows to every
+ * sub-batch spun up from one folder-import submission (docs/planning/14 §3.4) — this is how the
+ * frontend resumes a combined "this folder import" progress view for a specific submission after a
+ * closed/refreshed tab, instead of relying on ids kept only in page memory.
  */
 router.get("/resources/upload/jobs", requireAuth, async (req: any, res) => {
   try {
     const batchId = req.query.batchId as string | undefined;
+    const folderImportId = req.query.folderImportId as string | undefined;
     const conditions = [eq(uploadJobsTable.createdBy, req.user.userId)];
     if (batchId) conditions.push(eq(uploadJobsTable.batchId, batchId));
+    if (folderImportId) conditions.push(eq(uploadJobsTable.folderImportId, folderImportId));
     const rows = await db.select().from(uploadJobsTable).where(and(...conditions)).orderBy(desc(uploadJobsTable.createdAt));
     res.json(rows);
   } catch (err) {

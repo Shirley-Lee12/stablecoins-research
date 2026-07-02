@@ -700,9 +700,10 @@ interface TagSummary {
 interface FieldCheck { field: string; status: "✅" | "⚠️" | "❌"; detail: string }
 interface VerifyReport { checks: FieldCheck[]; hasFailure: boolean; hasWarning: boolean }
 interface PipelineResultLike { draft: DraftData; tags: TagSummary[]; report: VerifyReport; foundInScholarlyDb: boolean; missingRequired: string[] }
+type UploadJobType = "pdf" | "url" | "citation" | "title";
 interface UploadJob {
-  id: number; batchId: string | null; type: "pdf" | "url"; status: "queued" | "processing" | "ready_for_review" | "failed";
-  input: { fileName?: string; url?: string; sourceTypeHint: string };
+  id: number; batchId: string | null; folderImportId?: string | null; type: UploadJobType; status: "queued" | "processing" | "ready_for_review" | "failed";
+  input: { fileName?: string; url?: string; title?: string; sourceTypeHint?: string };
   result: PipelineResultLike | null; error: string | null; createdAt: string;
 }
 
@@ -966,8 +967,13 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
   );
 }
 
-// ── Job queue panel (shared by the URL-batch and PDF tabs — both are async/upload_jobs-backed) ──
-function JobQueuePanel({ token, language, type, onSaved }: { token: string; language: string; type: "pdf" | "url"; onSaved: () => void }) {
+// ── Job queue panel (shared by URL-batch/PDF/folder-import tabs — all are async/upload_jobs-backed) ──
+// Filters either by a single job `type` (existing per-entry tabs) or by `folderImportId` (folder
+// import's combined "this submission" progress view, docs/planning/14 §3.4) — exactly one of the
+// two should be passed.
+function JobQueuePanel({ token, language, type, folderImportId, onSaved }: {
+  token: string; language: string; type?: UploadJobType; folderImportId?: string; onSaved: () => void;
+}) {
   const zh = language === "zh";
   const [jobs, setJobs] = useState<UploadJob[]>([]);
   const [reviewingId, setReviewingId] = useState<number | null>(null);
@@ -976,11 +982,12 @@ function JobQueuePanel({ token, language, type, onSaved }: { token: string; lang
   const [confirming, setConfirming] = useState(false);
 
   const fetchJobs = useCallback(() => {
-    fetch(`${apiBase()}/api/resources/upload/jobs`, { headers: { Authorization: `Bearer ${token}` } })
+    const query = folderImportId ? `?folderImportId=${folderImportId}` : "";
+    fetch(`${apiBase()}/api/resources/upload/jobs${query}`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => (r.ok ? r.json() : []))
-      .then((data: UploadJob[]) => setJobs(Array.isArray(data) ? data.filter((j) => j.type === type) : []))
+      .then((data: UploadJob[]) => setJobs(Array.isArray(data) ? data.filter((j) => (type ? j.type === type : true)) : []))
       .catch(() => {});
-  }, [token, type]);
+  }, [token, type, folderImportId]);
 
   useEffect(() => {
     fetchJobs();
@@ -1051,7 +1058,7 @@ function JobQueuePanel({ token, language, type, onSaved }: { token: string; lang
               </p>
             )}
             {batchJobs.map((job) => {
-              const label = job.type === "pdf" ? (job.input?.fileName ?? `#${job.id}`) : (job.input?.url ?? `#${job.id}`);
+              const label = job.input?.fileName ?? job.input?.url ?? job.input?.title ?? `#${job.id}`;
               return (
                 <div key={job.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-border bg-card text-xs">
                   <div className="flex items-center gap-2 min-w-0">
@@ -1304,17 +1311,433 @@ function PdfTab({ token, language, onSaved }: { token: string; language: string;
   );
 }
 
+// ── Folder import tab (docs/planning/14 §3) ─────────────────────────────────────
+// select folder -> classify by extension -> (auto) decompose any unstructured reference-list files
+// -> file-level summary/confirm (§3.4, gate 1) -> entry-level editable table for decomposed rows
+// only (§3.3 point 3, gate 2) -> submit each bucket into its existing pipeline, all sharing one
+// folderImportId -> combined progress view.
+
+type FolderFileCategory = "pdf" | "citation" | "unstructured" | "ignored";
+interface ClassifiedFile { file: File; relativePath: string; category: FolderFileCategory }
+
+function classifyFolderFile(file: File): FolderFileCategory {
+  const name = file.name.toLowerCase();
+  const ext = name.includes(".") ? name.split(".").pop()! : "";
+  if (ext === "pdf") return "pdf";
+  if (["txt", "ent", "enw", "es6"].includes(ext)) return "citation";
+  if (["md", "docx", "doc", "wps"].includes(ext)) return "unstructured";
+  return "ignored";
+}
+
+interface UnstructuredEntry {
+  id: string;
+  title: string;
+  authorsText: string; // edited as a single "; "-joined string, split on submit
+  year: string; // edited as text, parsed on submit
+  urlOrDoi: string;
+  sourceFile: string;
+  included: boolean;
+}
+
+function FolderImportTab({ token, language, onSaved }: { token: string; language: string; onSaved: () => void }) {
+  const zh = language === "zh";
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [webkitdirSupported] = useState(() => "webkitdirectory" in document.createElement("input"));
+  const [stage, setStage] = useState<"select" | "extracting" | "summary" | "unstructuredReview" | "progress">("select");
+  const [sourceType, setSourceType] = useState<SourceType>("journal_article");
+  const [showStructureHint, setShowStructureHint] = useState(false);
+  const [classified, setClassified] = useState<ClassifiedFile[]>([]);
+  const [checked, setChecked] = useState<Set<number>>(new Set());
+  const [unstructuredEntries, setUnstructuredEntries] = useState<UnstructuredEntry[]>([]);
+  const [unstructuredErrors, setUnstructuredErrors] = useState<string[]>([]);
+  const [folderImportId, setFolderImportId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    // webkitdirectory/directory aren't in React's DOM attribute typings (non-standard but
+    // universally supported) — set them imperatively instead of fighting the JSX typing.
+    if (inputRef.current) {
+      inputRef.current.setAttribute("webkitdirectory", "");
+      inputRef.current.setAttribute("directory", "");
+    }
+  }, []);
+
+  async function handleFolderSelected(fileList: FileList | null) {
+    if (!fileList || fileList.length === 0) return;
+    setError("");
+    const files = Array.from(fileList).map((f) => ({
+      file: f,
+      relativePath: (f as File & { webkitRelativePath?: string }).webkitRelativePath || f.name,
+      category: classifyFolderFile(f),
+    }));
+    setClassified(files);
+    setChecked(new Set(files.map((_, i) => i).filter((i) => files[i].category !== "ignored")));
+
+    const unstructuredFiles = files.filter((f) => f.category === "unstructured");
+    if (unstructuredFiles.length === 0) {
+      setStage("summary");
+      return;
+    }
+
+    setStage("extracting");
+    const pooled: UnstructuredEntry[] = [];
+    const errors: string[] = [];
+    for (const f of unstructuredFiles) {
+      try {
+        const form = new FormData();
+        form.append("file", f.file);
+        const res = await fetch(`${apiBase()}/api/resources/upload/jobs/unstructured-list/preview`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: form,
+        });
+        const data = await res.json();
+        if (!res.ok) { errors.push(`${f.relativePath}: ${data.error ?? (zh ? "解析失败" : "failed")}`); continue; }
+        (data.entries ?? []).forEach((e: { title?: string; authors?: string[]; year?: number | null; urlOrDoi?: string | null }, idx: number) => {
+          pooled.push({
+            id: `${f.relativePath}-${idx}`,
+            title: e.title ?? "",
+            authorsText: Array.isArray(e.authors) ? e.authors.join("; ") : "",
+            year: e.year != null ? String(e.year) : "",
+            urlOrDoi: e.urlOrDoi ?? "",
+            sourceFile: f.relativePath,
+            included: true,
+          });
+        });
+      } catch {
+        errors.push(`${f.relativePath}: ${zh ? "网络请求失败" : "network error"}`);
+      }
+    }
+    setUnstructuredEntries(pooled);
+    setUnstructuredErrors(errors);
+    setStage("summary");
+  }
+
+  const counts = useMemo(() => {
+    const c = { pdf: 0, citation: 0, unstructured: 0, ignored: 0 };
+    for (const f of classified) c[f.category]++;
+    return c;
+  }, [classified]);
+
+  function toggleChecked(i: number) {
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i); else next.add(i);
+      return next;
+    });
+  }
+
+  function toggleCategoryAll(category: FolderFileCategory, on: boolean) {
+    setChecked((prev) => {
+      const next = new Set(prev);
+      classified.forEach((f, i) => { if (f.category === category) { if (on) next.add(i); else next.delete(i); } });
+      return next;
+    });
+  }
+
+  /** Bare DOI (e.g. "10.1016/j.frl.2020.101867") -> a fetchable URL, since the existing url-batch pipeline this reuses does fetch(url) and can't fetch a bare DOI string. Already a URL -> unchanged. */
+  function normalizeUrlOrDoi(value: string): string {
+    const v = value.trim();
+    if (!v) return v;
+    if (/^10\.\d{4,9}\//.test(v)) return `https://doi.org/${v}`;
+    return v;
+  }
+
+  async function handleConfirmSummary() {
+    setSubmitting(true);
+    setError("");
+    const newFolderImportId = crypto.randomUUID();
+    try {
+      const selectedFiles = classified.filter((_, i) => checked.has(i));
+      const pdfFiles = selectedFiles.filter((f) => f.category === "pdf");
+      const citationFiles = selectedFiles.filter((f) => f.category === "citation");
+      // Files whose parsed entries came from an unchecked-at-summary-stage source file are dropped
+      // from the pool here too — unchecking the file should un-pool its already-decomposed rows.
+      const includedSourceFiles = new Set(selectedFiles.filter((f) => f.category === "unstructured").map((f) => f.relativePath));
+      setUnstructuredEntries((prev) => prev.filter((e) => includedSourceFiles.has(e.sourceFile)));
+
+      if (pdfFiles.length > 0) {
+        const form = new FormData();
+        pdfFiles.forEach((f) => form.append("files", f.file));
+        form.append("sourceType", sourceType);
+        form.append("folderImportId", newFolderImportId);
+        await fetch(`${apiBase()}/api/resources/upload/jobs/pdf`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+      }
+      for (const f of citationFiles) {
+        const form = new FormData();
+        form.append("file", f.file);
+        form.append("folderImportId", newFolderImportId);
+        await fetch(`${apiBase()}/api/resources/upload/jobs/citation`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+      }
+
+      setFolderImportId(newFolderImportId);
+      const hasPooledEntries = unstructuredEntries.some((e) => includedSourceFiles.has(e.sourceFile));
+      setStage(hasPooledEntries ? "unstructuredReview" : "progress");
+    } catch {
+      setError(zh ? "网络请求失败" : "Network error");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function updateEntry(id: string, patch: Partial<UnstructuredEntry>) {
+    setUnstructuredEntries((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
+  }
+  function removeEntry(id: string) {
+    setUnstructuredEntries((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  async function handleConfirmUnstructured() {
+    if (!folderImportId) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      const included = unstructuredEntries.filter((e) => e.included && e.title.trim());
+      const withLink = included.filter((e) => e.urlOrDoi.trim());
+      const withoutLink = included.filter((e) => !e.urlOrDoi.trim());
+
+      if (withLink.length > 0) {
+        await fetch(`${apiBase()}/api/resources/upload/jobs/url-batch`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ urls: withLink.map((e) => normalizeUrlOrDoi(e.urlOrDoi)), sourceType, folderImportId }),
+        });
+      }
+      if (withoutLink.length > 0) {
+        await fetch(`${apiBase()}/api/resources/upload/jobs/title-batch`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            entries: withoutLink.map((e) => ({
+              title: e.title,
+              authors: e.authorsText.split(";").map((a) => a.trim()).filter(Boolean),
+              year: e.year.trim() ? Number(e.year.trim()) : null,
+            })),
+            sourceType,
+            folderImportId,
+          }),
+        });
+      }
+      setStage("progress");
+    } catch {
+      setError(zh ? "网络请求失败" : "Network error");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function resetAll() {
+    setStage("select"); setClassified([]); setChecked(new Set()); setUnstructuredEntries([]);
+    setUnstructuredErrors([]); setFolderImportId(null); setError("");
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
+  if (stage === "select") {
+    return (
+      <div className="space-y-5">
+        {!webkitdirSupported && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-1.5">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            {zh ? "你的浏览器不支持选择文件夹，请改用其他标签页的多选文件上传。" : "Your browser doesn't support folder selection — please use one of the other tabs' multi-file upload instead."}
+          </p>
+        )}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型提示" : "Type hint"}</label>
+          <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
+            className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
+            {SOURCE_TYPES.map((o) => <option key={o.value} value={o.value}>{zh ? o.nameZh : o.nameEn}</option>)}
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "选择文件夹" : "Select a folder"}</label>
+          <input ref={inputRef} type="file" multiple disabled={!webkitdirSupported}
+            onChange={(e) => handleFolderSelected(e.target.files)}
+            className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer disabled:opacity-50" />
+        </div>
+        <div>
+          <button onClick={() => setShowStructureHint((v) => !v)} className="text-xs text-primary hover:underline">
+            {zh ? (showStructureHint ? "收起推荐目录结构 ▲" : "查看推荐目录结构 ▼") : (showStructureHint ? "Hide recommended structure ▲" : "View recommended structure ▼")}
+          </button>
+          {showStructureHint && (
+            <pre className="mt-2 text-xs bg-muted/50 rounded-lg p-3 overflow-x-auto text-muted-foreground whitespace-pre">
+{`materials/
+├── reference-lists/
+│   ├── list.md
+│   └── references.docx
+├── pdfs/                    ← PDF files
+└── cnki-exports/            ← RefWorks / EndNote / NoteExpress / 知网研学
+    ├── xxx.txt
+    ├── xxx.ent / xxx.enw
+    └── xxx.es6`}
+            </pre>
+          )}
+          <p className="text-xs text-muted-foreground mt-1">
+            {zh ? "仅供参考，不强制——分类只看文件扩展名，全部堆在一层也能正确识别，子文件夹也会被递归扫描。"
+                : "Just a suggestion, not required — classification only looks at file extensions, so a flat folder works fine too, and subfolders are scanned recursively."}
+          </p>
+        </div>
+        {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      </div>
+    );
+  }
+
+  if (stage === "extracting") {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-10 text-sm text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+        {zh ? "正在解析参考文献列表文件…" : "Parsing reference-list files…"}
+      </div>
+    );
+  }
+
+  if (stage === "summary") {
+    const pooledCount = unstructuredEntries.length;
+    const categories: { key: FolderFileCategory; labelZh: string; labelEn: string }[] = [
+      { key: "pdf", labelZh: "PDF", labelEn: "PDF" },
+      { key: "citation", labelZh: "题录文件", labelEn: "Citation files" },
+      { key: "unstructured", labelZh: "参考文献列表", labelEn: "Reference lists" },
+    ];
+    return (
+      <div className="space-y-5">
+        <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
+          {zh
+            ? `识别到 ${counts.pdf} 个 PDF、${counts.citation} 个题录文件、${counts.unstructured} 份参考文献列表（共解析出 ${pooledCount} 条待人工确认）、已忽略 ${counts.ignored} 个不支持的文件。`
+            : `Found ${counts.pdf} PDF(s), ${counts.citation} citation file(s), ${counts.unstructured} reference list(s) (${pooledCount} entries parsed, pending confirmation), ignored ${counts.ignored} unsupported file(s).`}
+        </div>
+
+        {unstructuredErrors.length > 0 && (
+          <div className="text-xs text-amber-600 dark:text-amber-400 space-y-0.5">
+            {unstructuredErrors.map((e, i) => <p key={i}>⚠️ {e}</p>)}
+          </div>
+        )}
+
+        {categories.map(({ key, labelZh, labelEn }) => {
+          const items = classified.map((f, i) => ({ f, i })).filter(({ f }) => f.category === key);
+          if (items.length === 0) return null;
+          const allChecked = items.every(({ i }) => checked.has(i));
+          return (
+            <div key={key} className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? labelZh : labelEn} ({items.length})</p>
+                <button onClick={() => toggleCategoryAll(key, !allChecked)} className="text-xs text-primary hover:underline">
+                  {allChecked ? (zh ? "全部取消" : "Deselect all") : (zh ? "全部选中" : "Select all")}
+                </button>
+              </div>
+              <ul className="space-y-1 max-h-40 overflow-y-auto">
+                {items.map(({ f, i }) => (
+                  <li key={i} className="flex items-center gap-2 text-xs px-2 py-1 rounded-md hover:bg-muted/50">
+                    <input type="checkbox" checked={checked.has(i)} onChange={() => toggleChecked(i)} className="shrink-0" />
+                    <span className="truncate text-foreground">{f.relativePath}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+
+        {counts.ignored > 0 && (
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? "已忽略（不支持的文件类型）" : "Ignored (unsupported file type)"} ({counts.ignored})</p>
+            <ul className="space-y-0.5 max-h-24 overflow-y-auto">
+              {classified.filter((f) => f.category === "ignored").map((f, i) => (
+                <li key={i} className="text-xs text-muted-foreground px-2 truncate">{f.relativePath}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+        <div className="flex justify-end gap-2">
+          <button onClick={resetAll} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+            {zh ? "重新选择" : "Reselect"}
+          </button>
+          <button onClick={handleConfirmSummary} disabled={submitting || checked.size === 0}
+            className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+            {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+            {zh ? "确认并开始处理" : "Confirm & Start"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (stage === "unstructuredReview") {
+    return (
+      <div className="space-y-4">
+        <p className="text-xs text-muted-foreground">
+          {zh ? "以下是从参考文献列表里自动拆解出的条目，AI 解析结果可能有误，请逐条核对/编辑后再提交——这一步是必须的，不会跳过。"
+              : "These entries were auto-decomposed from the reference-list file(s). AI extraction can be wrong — review/edit each row before submitting; this step can't be skipped."}
+        </p>
+        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+          {unstructuredEntries.map((entry) => (
+            <div key={entry.id} className={`rounded-lg border p-2.5 space-y-1.5 ${entry.included ? "border-border bg-card" : "border-border/50 bg-muted/30 opacity-60"}`}>
+              <div className="flex items-center justify-between gap-2">
+                <label className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+                  <input type="checkbox" checked={entry.included} onChange={(e) => updateEntry(entry.id, { included: e.target.checked })} />
+                  <span className="truncate">{entry.sourceFile}</span>
+                </label>
+                <button onClick={() => removeEntry(entry.id)} className="text-muted-foreground hover:text-red-500 transition-colors shrink-0">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <input value={entry.title} onChange={(e) => updateEntry(entry.id, { title: e.target.value })}
+                placeholder={zh ? "标题" : "Title"}
+                className="w-full px-2 py-1 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <div className="grid grid-cols-3 gap-1.5">
+                <input value={entry.authorsText} onChange={(e) => updateEntry(entry.id, { authorsText: e.target.value })}
+                  placeholder={zh ? "作者（用；分隔）" : "Authors (; separated)"}
+                  className="col-span-1 px-2 py-1 text-xs rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                <input value={entry.year} onChange={(e) => updateEntry(entry.id, { year: e.target.value })}
+                  placeholder={zh ? "年份" : "Year"}
+                  className="col-span-1 px-2 py-1 text-xs rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                <input value={entry.urlOrDoi} onChange={(e) => updateEntry(entry.id, { urlOrDoi: e.target.value })}
+                  placeholder={zh ? "URL 或 DOI（可空）" : "URL or DOI (optional)"}
+                  className="col-span-1 px-2 py-1 text-xs rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+            </div>
+          ))}
+          {unstructuredEntries.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center py-4">{zh ? "没有可确认的条目" : "No entries to confirm"}</p>
+          )}
+        </div>
+        {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+        <div className="flex justify-end gap-2">
+          <button onClick={resetAll} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+            {zh ? "取消" : "Cancel"}
+          </button>
+          <button onClick={handleConfirmUnstructured} disabled={submitting}
+            className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+            {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+            {zh ? "确认提交" : "Confirm & Submit"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // stage === "progress"
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-foreground">{zh ? "已提交，正在后台处理——可关闭此窗口，稍后回来查看进度与核对。" : "Submitted — processing in the background. You can close this dialog and check progress later."}</p>
+      <button onClick={resetAll} className="text-xs text-primary hover:underline">{zh ? "导入另一个文件夹" : "Import another folder"}</button>
+      {folderImportId && <JobQueuePanel token={token} language={language} folderImportId={folderImportId} onSaved={onSaved} />}
+    </div>
+  );
+}
+
 // ── Upload Center — three tabs: Manual (sync) / DOI·URL (sync single + async batch) / PDF (async) ──
 function UploadCenterModal({ token, language, onClose, onSaved }: {
   token: string; language: string; isAdmin: boolean; onClose: () => void; onSaved: () => void;
 }) {
   const zh = language === "zh";
-  const [tab, setTab] = useState<"manual" | "url" | "pdf">("manual");
+  const [tab, setTab] = useState<"manual" | "url" | "pdf" | "folder">("manual");
 
   const TABS = [
     { key: "manual" as const, labelEn: "Manual", labelZh: "手动填写" },
     { key: "url" as const, labelEn: "DOI / URL", labelZh: "DOI·URL" },
     { key: "pdf" as const, labelEn: "PDF", labelZh: "PDF" },
+    { key: "folder" as const, labelEn: "Folder", labelZh: "文件夹导入" },
   ];
 
   return (
@@ -1346,6 +1769,7 @@ function UploadCenterModal({ token, language, onClose, onSaved }: {
           {tab === "manual" && <ManualTab token={token} language={language} onClose={onClose} onSaved={onSaved} />}
           {tab === "url" && <UrlTab token={token} language={language} onClose={onClose} onSaved={onSaved} />}
           {tab === "pdf" && <PdfTab token={token} language={language} onSaved={onSaved} />}
+          {tab === "folder" && <FolderImportTab token={token} language={language} onSaved={onSaved} />}
         </div>
       </div>
     </div>
