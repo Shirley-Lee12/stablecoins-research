@@ -1,40 +1,36 @@
-import dns from "node:dns/promises";
-import nodemailer from "nodemailer";
 import { logger } from "./logger";
 import { env } from "../config";
 
-/**
- * Back on SMTP again — Resend's shared test domain (onboarding@resend.dev) can only send to the
- * account's own verified test addresses, not real users, so it never worked for production. Now
- * pointed at Outlook/Microsoft 365 instead of 163.com.
- *
- * Kept the manual-IPv4-resolution approach from the 163.com attempt (dns.resolve4 + connecting to
- * the raw IP with tls.servername for correct SNI/cert validation) even though Outlook's mail
- * infrastructure is much less likely to have 163.com's specific problem (an unroutable-from-Render
- * IPv6 address) — nodemailer 9.x resolves both A and AAAA records and picks randomly between them
- * for the connection (confirmed by reading its source during the 163.com debugging), so this is
- * cheap insurance against the same class of bug regardless of provider.
- */
-async function createTransporter() {
-  let host: string = env.SMTP_HOST;
-  try {
-    const [ipv4] = await dns.resolve4(env.SMTP_HOST);
-    host = ipv4;
-  } catch (err) {
-    logger.warn({ err, host: env.SMTP_HOST }, "Could not resolve SMTP host to an IPv4 address, letting nodemailer resolve it itself");
-  }
-  return nodemailer.createTransport({
-    host,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_PORT === 465,
-    auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
-    tls: { servername: env.SMTP_HOST },
-  });
-}
+const BREVO_FROM_NAME = "ZIBS Stablecoin Hub";
 
+/**
+ * Sends via Brevo's HTTP API instead of SMTP. Root cause of every previous attempt (163.com, then
+ * Outlook/Microsoft 365) failing from Render: Render's free-tier instances have blocked all
+ * outbound SMTP ports (25/465/587) since September 2025 — no SMTP provider was ever going to work
+ * from this host, regardless of credentials or DNS-resolution workarounds. An HTTP API call sends
+ * over normal port 443, sidestepping that block entirely. Chose Brevo specifically because it sends
+ * to real recipients on the free tier without requiring a verified custom sending domain first
+ * (unlike Resend, whose shared test domain is sandboxed to the account's own verified addresses).
+ */
 export async function sendMail(to: string, subject: string, html: string) {
-  const transporter = await createTransporter();
-  await transporter.sendMail({ from: env.SMTP_FROM, to, subject, html });
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "api-key": env.BREVO_API_KEY,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      sender: { name: BREVO_FROM_NAME, email: env.BREVO_FROM_EMAIL },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    }),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Brevo API request failed (${res.status}): ${detail}`);
+  }
 }
 
 export async function sendVerificationCodeEmail(to: string, code: string) {

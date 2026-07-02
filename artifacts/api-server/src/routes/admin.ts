@@ -28,11 +28,9 @@ router.get("/admin/settings/status", requireAuth, requireAdmin, (_req, res) => {
       apiKey: maskSecret(env.LLM_API_KEY),
     },
     email: {
-      host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
-      user: env.SMTP_USER,
-      from: env.SMTP_FROM,
-      password: maskSecret(env.SMTP_PASS),
+      provider: "brevo",
+      from: env.BREVO_FROM_EMAIL,
+      apiKey: maskSecret(env.BREVO_API_KEY),
     },
     frontendUrl: env.FRONTEND_URL,
   });

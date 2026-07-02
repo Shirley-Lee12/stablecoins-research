@@ -8,14 +8,12 @@ const envSchema = z.object({
   LLM_PROVIDER: z.enum(["gemini", "anthropic"]).default("gemini"),
   LLM_API_KEY: z.string().min(1, "LLM_API_KEY is required"),
   LLM_MODEL: z.string().default("gemini-2.5-flash"),
-  // SMTP (registration / password-reset emails) — now Outlook/Microsoft 365 instead of 163.com
-  // (which kept failing from Render) or Resend (whose shared test domain can't send to real users
-  // without a verified custom domain).
-  SMTP_HOST: z.string().min(1, "SMTP_HOST is required"),
-  SMTP_PORT: z.coerce.number().default(587),
-  SMTP_USER: z.string().min(1, "SMTP_USER is required"),
-  SMTP_PASS: z.string().min(1, "SMTP_PASS is required"),
-  SMTP_FROM: z.string().min(1, "SMTP_FROM is required"),
+  // Brevo (registration / password-reset emails) — Render's free tier blocks all outbound SMTP
+  // ports (25/465/587), so neither 163.com nor Outlook SMTP could ever have worked from this host;
+  // Brevo's HTTP API sends over plain HTTPS (443) and, unlike Resend, doesn't require a verified
+  // custom sending domain to reach real recipients.
+  BREVO_API_KEY: z.string().min(1, "BREVO_API_KEY is required"),
+  BREVO_FROM_EMAIL: z.string().min(1, "BREVO_FROM_EMAIL is required"),
   FRONTEND_URL: z.string().default("http://localhost:5173"),
   ADMIN_BOOTSTRAP_EMAILS: z.string().default(""),
   CORS_ORIGIN: z.string().optional(),
