@@ -124,8 +124,8 @@ router.get("/rejection-reasons", async (req, res) => {
 /**
  * PATCH /api/admin/resources/:id/review — admin only.
  * Body: { action: 'approve' | 'reject', rejectionReasonId?, rejectionNote? } — rejectionReasonId is
- * required when action='reject'. Only acts on pending/needs_review resources — a resource that's
- * already been approved/rejected isn't re-reviewable through this route. Rejecting doesn't delete
+ * required when action='reject'. Only acts on 'pending' resources (docs/planning/15 §1.1) — a
+ * resource that's already been approved/rejected isn't re-reviewable through this route. Rejecting doesn't delete
  * the row (docs/planning/12 §2.4): the reason/note stay attached to it.
  */
 router.patch("/admin/resources/:id/review", requireAuth, requireAdmin, async (req: any, res) => {
@@ -141,8 +141,11 @@ router.patch("/admin/resources/:id/review", requireAuth, requireAdmin, async (re
 
     const [existing] = await db.select({ status: resourcesTable.status }).from(resourcesTable).where(eq(resourcesTable.id, id)).limit(1);
     if (!existing) { res.status(404).json({ error: "Not found" }); return; }
-    if (existing.status !== "pending" && existing.status !== "needs_review") {
-      res.status(400).json({ error: `This resource has already been reviewed (status: ${existing.status})` });
+    // Only 'pending' is admin-reviewable now (docs/planning/15 §1.1/§0.9) — the four self-service
+    // states (incomplete/disputed/off_topic/duplicate) are caught and bounced back to the submitter
+    // earlier, before ever reaching the admin queue.
+    if (existing.status !== "pending") {
+      res.status(400).json({ error: `This resource is not awaiting review (status: ${existing.status})` });
       return;
     }
 

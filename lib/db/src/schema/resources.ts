@@ -17,18 +17,29 @@ export const sourceTypeEnum = pgEnum("source_type", [
   "news",
 ]);
 
+// docs/planning/15 §0.9 — replaces the old pending/approved/rejected/needs_review/failed set.
+// "failed" never belonged here (that's upload_jobs.status); "needs_review" was a single catch-all
+// for four genuinely different problems that now get their own state, since each has a different
+// answer to "can the submitter fix this themselves, or does it need an admin's judgment call"
+// (docs/planning/15 §0.2):
+//   - incomplete: one of the six elements (title/authors/year/abstract/keywords/url-or-doi) is
+//     missing — the user can just add it.
+//   - disputed: six elements present, but a field disagrees with an authoritative source (DOI
+//     resolution, cross-checked authors/year) — the user can verify and correct it.
+//   - off_topic: tagging found no theme-facet match at all — the user can confirm relevance or
+//     withdraw.
+//   - duplicate: an exact DOI/URL match, or a strong title+year fuzzy match, against an existing
+//     resource (any status) — the user can confirm it's a genuinely different work or withdraw.
+// None of the four above ever reach the admin queue — only pending does. rejected is the admin's
+// own final call (source-quality or authenticity concerns that no self-check can resolve).
 export const resourceStatusEnum = pgEnum("resource_status", [
+  "incomplete",
+  "disputed",
+  "off_topic",
+  "duplicate",
   "pending",
   "approved",
   "rejected",
-  // Added for the upload pipeline (U.5): verification found issues or incomplete required fields —
-  // routed to the admin review queue instead of being silently dropped.
-  "needs_review",
-  // Defined here but the app never actually assigns it: completeness failures (missing title/
-  // author/year) are now rejected outright at confirm time (see missingHardRequiredFields() in
-  // lib/resourceStatus.ts) instead of being persisted with this status. "failed" belongs to
-  // upload_jobs.status — that's the one place extraction-level failures live.
-  "failed",
 ]);
 
 export const resourcesTable = pgTable("resources", {

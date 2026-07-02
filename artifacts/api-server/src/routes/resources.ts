@@ -293,7 +293,7 @@ router.get("/resources", optionalAuth, async (req: any, res) => {
     } else {
       // Admin: optional status filter
       const statusFilter = req.query["status"] as string | undefined;
-      if (statusFilter && ["pending", "approved", "rejected", "needs_review", "failed"].includes(statusFilter)) {
+      if (statusFilter && ["incomplete", "disputed", "off_topic", "duplicate", "pending", "approved", "rejected"].includes(statusFilter)) {
         conditions.push(eq(resourcesTable.status, statusFilter as any));
       }
     }

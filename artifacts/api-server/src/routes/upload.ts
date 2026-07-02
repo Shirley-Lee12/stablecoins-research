@@ -10,7 +10,8 @@ import { resolveLink } from "../lib/scholar";
 import { extractPdfText } from "../lib/pdfExtract";
 import { loadTagVocabulary, computeTagsForText, type TagVocabulary, type ComputedTags } from "../lib/tagging";
 import { verifyResource, verifyCitationRecord, type VerifyReport } from "../lib/verify";
-import { determineResourceStatus, missingHardRequiredFields } from "../lib/resourceStatus";
+import { classifyStatus, missingSixElements } from "../lib/resourceStatus";
+import { checkDuplicate } from "../lib/duplicateCheck";
 import { parseCitationFile, UnsupportedCitationFormatError, type CitationRecord } from "../lib/citation";
 import { extractListFileText, UnsupportedListFormatError } from "../lib/unstructuredList/extractText";
 import { decomposeReferenceList } from "../lib/unstructuredList/decompose";
@@ -194,10 +195,7 @@ async function runAutoPipeline(rawText: string, sourceTypeHint: string, vocab: T
   const tagIds = await computeTagsForText([draft.title, draft.abstract].filter(Boolean).join("\n\n"), vocab);
   const tags = await enrichTags(tagIds);
   const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
-  const missingRequired = missingHardRequiredFields(
-    { title: draft.title, authors: draft.authors, year: draft.year, url: draft.url, doi: draft.doi },
-    { requireUrlOrDoi: true },
-  );
+  const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi });
 
   return { draft, tagIds, tags, report, foundInScholarlyDb: linked.foundInScholarlyDb, missingRequired };
 }
@@ -220,9 +218,8 @@ router.post("/resources/upload/manual", requireAuth, async (req: any, res) => {
     const report = await verifyResource({
       title, authors: authors ?? [], year: year ?? null, doi: doi ?? null, url: url ?? null, abstract: abstract ?? null,
     });
-    const missingRequired = missingHardRequiredFields(
-      { title, authors: authors ?? [], year: year ?? null, url: url ?? null, doi: doi ?? null },
-      { requireUrlOrDoi: true },
+    const missingRequired = missingSixElements(
+      { title, authors: authors ?? [], year: year ?? null, abstract: abstract ?? null, url: url ?? null, doi: doi ?? null },
     );
 
     res.json({
@@ -366,7 +363,7 @@ interface CitationJobResult {
  * naturally below since the tagging input already falls back to title+keywords. This is tier 2:
  * only fires when there's no abstract AND a link to try; only ever summarizes text it actually
  * fetched — never fabricates a summary from the title alone. Leaves it blank on any failure,
- * routing to needs_review via the empty-abstract warning in verifyCitationRecord() rather than
+ * routing to 'incomplete' via the empty-abstract check in missingSixElements() rather than
  * silently making something up.
  */
 async function backfillAbstractFromFulltext(record: CitationRecord): Promise<{ abstract: string; abstractSource: "cnki" | "generated_from_fulltext" | null }> {
@@ -409,10 +406,7 @@ async function processCitationRecord(record: CitationRecord, vocab: TagVocabular
   const tagIds = await computeTagsForText(taggingText, vocab);
   const tags = await enrichTags(tagIds);
   const report = verifyCitationRecord({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
-  const missingRequired = missingHardRequiredFields(
-    { title: draft.title, authors: draft.authors, year: draft.year, url: draft.url, doi: draft.doi },
-    { requireUrlOrDoi: true },
-  );
+  const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi });
 
   return { draft, tagIds, tags, report, missingRequired, abstractSource };
 }
@@ -508,7 +502,7 @@ async function processTitleEntry(entry: { title: string; authors: string[]; year
     authors: linked.authors.length > 0 ? linked.authors : entry.authors,
     year: linked.year ?? entry.year,
     // No fetched page/PDF text exists for a title-search entry, so there's nothing to summarize an
-    // abstract from — leaving it blank (routes to needs_review via the empty-abstract warning)
+    // abstract from — leaving it blank (routes to 'incomplete' via missingSixElements())
     // instead of fabricating one from the title, same rule as the citation entry's abstract backfill.
     abstract: "",
     doi: linked.doi,
@@ -518,10 +512,7 @@ async function processTitleEntry(entry: { title: string; authors: string[]; year
   const tagIds = await computeTagsForText(draft.title, vocab);
   const tags = await enrichTags(tagIds);
   const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
-  const missingRequired = missingHardRequiredFields(
-    { title: draft.title, authors: draft.authors, year: draft.year, url: draft.url, doi: draft.doi },
-    { requireUrlOrDoi: true },
-  );
+  const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi });
   return { draft, tagIds, tags, report, foundInScholarlyDb: linked.foundInScholarlyDb, missingRequired };
 }
 
@@ -615,48 +606,43 @@ interface ConfirmInput {
   tagIds?: number[];
 }
 
-/** Thrown by persistConfirmedDraft() when a hard-required field is missing — callers turn this into a 400, not a 500. */
-class MissingRequiredFieldsError extends Error {
-  constructor(public readonly missingFields: string[]) {
-    super(`Missing required field(s): ${missingFields.join(", ")}`);
-  }
+/** True if any of the given tag ids is a theme-facet tag — used for the off_topic check (docs/planning/15 §0.4). */
+async function hasThemeFacetTag(tagIds: number[]): Promise<boolean> {
+  if (tagIds.length === 0) return false;
+  const [row] = await db.select({ id: tagsTable.id }).from(tagsTable).where(and(inArray(tagsTable.id, tagIds), eq(tagsTable.facet, "theme"))).limit(1);
+  return !!row;
 }
 
 /**
  * Shared persist step for both confirm routes below — this is the explicit user confirmation the
- * two-step AI-import rule requires. Rejects outright (throws, no insert at all) if a hard-required
- * field is missing — resources.status is never 'failed'; that state belongs to upload_jobs.
- *
- * requireUrlOrDoi distinguishes entry kind (docs/planning/12 §1): true for manual entry and DOI/URL
- * import (the link was supplied directly, so a gap is real), false for PDF import (the link comes
- * from an automated lookup that can legitimately turn up nothing — that routes to needs_review via
- * determineResourceStatus's verify-report check instead of blocking the confirm).
+ * two-step AI-import rule requires. ALWAYS inserts a row now (docs/planning/15 §0.8 — the old hard
+ * rejection for manual/URL entries with missing required fields is gone, along with the per-entry-
+ * kind requireUrlOrDoi distinction that used to gate it): every entry point uses the same
+ * completeness bar, and anything missing or questionable just changes the resulting status
+ * (docs/planning/15 §0.1-§0.9's incomplete/disputed/off_topic/duplicate/pending) instead of blocking
+ * the submission. `resources.status` is still never 'failed' — that state belongs to upload_jobs.
  *
  * skipNetworkVerification is for citation-import entries (docs/planning/14 §2): CNKI's own metadata
  * is trusted as-is, so re-running the network-based verifyResource() here (DOI resolution + URL
  * reachability) would just be re-verifying CNKI against itself — and does so badly, since CNKI's
  * Chinese-journal DOIs mostly aren't in Crossref/OpenAlex and link.cnki.net blocks bot HEAD/GET
- * requests, so every citation entry would spuriously fail verification and land in needs_review
- * regardless of how complete the record actually is.
+ * requests, so every citation entry would spuriously fail verification regardless of how complete
+ * the record actually is.
  */
-async function persistConfirmedDraft(
-  input: ConfirmInput,
-  userId: number,
-  isAdmin: boolean,
-  requireUrlOrDoi: boolean,
-  skipNetworkVerification: boolean = false,
-) {
+async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNetworkVerification: boolean = false) {
   const authors = input.authors ?? [];
   const year = input.year ?? null;
   const url = input.url ?? null;
   const doi = input.doi ?? null;
+  const abstract = input.abstract ?? null;
+  const tagIds = input.tagIds ?? [];
 
-  const missing = missingHardRequiredFields({ title: input.title, authors, year, url, doi }, { requireUrlOrDoi });
-  if (missing.length > 0) throw new MissingRequiredFieldsError(missing);
-
-  const verifyInput = { title: input.title, authors, year, doi, url, abstract: input.abstract ?? null };
+  const missingFields = missingSixElements({ title: input.title, authors, year, abstract, url, doi });
+  const verifyInput = { title: input.title, authors, year, doi, url, abstract };
   const report = skipNetworkVerification ? verifyCitationRecord(verifyInput) : await verifyResource(verifyInput);
-  const status = determineResourceStatus(report, isAdmin);
+  const duplicateSignal = await checkDuplicate({ title: input.title, doi, url, year });
+  const hasThemeTag = await hasThemeFacetTag(tagIds);
+  const status = classifyStatus({ duplicateSignal, missingFields, hasThemeTag, report });
 
   const [inserted] = await db
     .insert(resourcesTable)
@@ -666,31 +652,27 @@ async function persistConfirmedDraft(
       sourceType: (VALID_SOURCE_TYPES.includes(input.sourceType) ? input.sourceType : "journal_article") as any,
       url,
       doi,
-      abstract: input.abstract ?? null,
+      abstract,
       // Six-elements "year" — resources has no dedicated year column, so it goes in the free-text
       // publishedDate the legacy import routes already use (which also stores full dates like
       // "2021-07-20"; here we only ever have a bare year).
       publishedDate: year !== null ? String(year) : null,
-      status: status as any,
+      status,
       createdBy: userId,
     })
     .returning();
 
   await syncResourceAuthors(inserted.id, inserted.authors);
 
-  if (input.tagIds && input.tagIds.length > 0) {
-    await db.insert(resourceTagsTable).values(input.tagIds.map((tagId) => ({ resourceId: inserted.id, tagId, source: "auto" as const }))).onConflictDoNothing();
+  if (tagIds.length > 0) {
+    await db.insert(resourceTagsTable).values(tagIds.map((tagId) => ({ resourceId: inserted.id, tagId, source: "auto" as const }))).onConflictDoNothing();
   }
 
   return inserted;
 }
 
-/** Shared error handling for both confirm routes below — a missing hard-required field is a 400 (caller's fault), anything else is a 500. */
+/** Shared error handling for both confirm routes below. */
 function handleConfirmError(err: any, req: any, res: any) {
-  if (err instanceof MissingRequiredFieldsError) {
-    res.status(400).json({ error: err.message, missingFields: err.missingFields });
-    return;
-  }
   req.log.error(err);
   res.status(500).json({ error: "Failed to confirm upload", detail: err.message });
 }
@@ -699,14 +681,14 @@ function handleConfirmError(err: any, req: any, res: any) {
  * POST /api/resources/upload/confirm — must be logged in.
  * Body: the (possibly user-edited) final draft + tag ids, from the synchronous manual/single-URL
  * preview (POST /upload/manual or /upload/url). No upload_jobs row involved — this is the
- * confirm step for the in-memory pipeline. Both entries this route serves (manual, single URL/DOI)
- * require a URL or DOI (docs/planning/12 §1).
+ * confirm step for the in-memory pipeline. Always inserts (docs/planning/15 §0.8) — a missing
+ * URL/DOI here now routes to 'incomplete' like any other entry point, not a rejected confirm.
  */
 router.post("/resources/upload/confirm", requireAuth, async (req: any, res) => {
   try {
     const input = req.body as ConfirmInput;
     if (!input.title) { res.status(400).json({ error: "title is required" }); return; }
-    const inserted = await persistConfirmedDraft(input, req.user.userId, req.user.role === "admin", true);
+    const inserted = await persistConfirmedDraft(input, req.user.userId);
     res.status(201).json(inserted);
   } catch (err: any) {
     handleConfirmError(err, req, res);
@@ -716,9 +698,9 @@ router.post("/resources/upload/confirm", requireAuth, async (req: any, res) => {
 /**
  * POST /api/resources/upload/jobs/:id/confirm — must be logged in, owner only.
  * Body: the (possibly user-edited) final draft + tag ids. Persists the real resources row here —
- * this is the explicit user confirmation the two-step AI-import rule requires. This route serves
- * both PDF and URL-batch jobs; only the latter requires a URL/DOI (docs/planning/12 §1) — a PDF
- * whose link resolveLink couldn't find is expected to reach needs_review, not get rejected.
+ * this is the explicit user confirmation the two-step AI-import rule requires. Serves every job
+ * type (pdf/url/citation/title) identically now that there's no per-entry-kind hard-required
+ * distinction (docs/planning/15 §0.8) — only citation entries still skip network re-verification.
  */
 router.post("/resources/upload/jobs/:id/confirm", requireAuth, async (req: any, res) => {
   try {
@@ -730,13 +712,7 @@ router.post("/resources/upload/jobs/:id/confirm", requireAuth, async (req: any, 
     const input = req.body as ConfirmInput;
     if (!input.title) { res.status(400).json({ error: "title is required" }); return; }
 
-    const inserted = await persistConfirmedDraft(
-      input,
-      req.user.userId,
-      req.user.role === "admin",
-      job.type === "url",
-      job.type === "citation",
-    );
+    const inserted = await persistConfirmedDraft(input, req.user.userId, job.type === "citation");
     await db.delete(uploadJobsTable).where(eq(uploadJobsTable.id, id));
     res.status(201).json(inserted);
   } catch (err: any) {

@@ -11,7 +11,19 @@ import {
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type ResourceStatus = "pending" | "approved" | "rejected" | "needs_review" | "failed";
+// docs/planning/15 §0.9 — replaces the old pending/approved/rejected/needs_review/failed set. The
+// four self-service states (incomplete/disputed/off_topic/duplicate) only ever appear to their own
+// submitter (never in the public list or the admin queue) — see docs/planning/15 §2.1 for the
+// eventual My Contributions page; this file only wires the minimum needed to keep existing behavior
+// (public list, admin approve/reject queue) correct against the new enum for now.
+type ResourceStatus = "incomplete" | "disputed" | "off_topic" | "duplicate" | "pending" | "approved" | "rejected";
+const SELF_SERVICE_STATUSES: ResourceStatus[] = ["incomplete", "disputed", "off_topic", "duplicate"];
+const SELF_SERVICE_LABELS: Record<string, { zh: string; en: string }> = {
+  incomplete: { zh: "待补充", en: "Incomplete" },
+  disputed: { zh: "待核实", en: "Disputed" },
+  off_topic: { zh: "与稳定币无关", en: "Off-topic" },
+  duplicate: { zh: "疑似重复", en: "Possible duplicate" },
+};
 type FilterType = SourceType | "Expert" | "All";
 
 interface Resource {
@@ -113,22 +125,18 @@ function ResourceCard({
     ?? new Date(r.createdAt).toLocaleDateString(language === "zh" ? "zh-CN" : "en-US", { year: "numeric", month: "short" });
   const canEdit = isAdmin || (currentUserId != null && r.createdBy === currentUserId);
   const isPending = r.status === "pending";
-  const isNeedsReview = r.status === "needs_review";
+  const isSelfService = SELF_SERVICE_STATUSES.includes(r.status);
   const isRejected = r.status === "rejected";
-  // Only meaningful for needs_review — inferred straight from the resource's own url/doi (no
-  // separate stored flag needed) so the admin queue can spot "just needs a link" at a glance
-  // (docs/planning/12 §1).
-  const missingLink = isNeedsReview && !r.url && !r.doi;
   const rejectionReason = r.rejectionReasonId != null ? rejectionReasons?.find((x) => x.id === r.rejectionReasonId) : undefined;
 
   return (
     <div className={`group flex flex-col bg-card border rounded-xl overflow-hidden transition-all duration-200 ${
-      isPending || isNeedsReview ? "border-amber-300 dark:border-amber-700" :
+      isPending || isSelfService ? "border-amber-300 dark:border-amber-700" :
       isRejected ? "border-red-300 dark:border-red-800 opacity-70" :
       "border-border hover:border-primary/40 hover:shadow-md"
     }`}>
       <div className={`h-0.5 w-full bg-gradient-to-r ${
-        isPending || isNeedsReview ? "from-amber-400 to-amber-200" :
+        isPending || isSelfService ? "from-amber-400 to-amber-200" :
         isRejected ? "from-red-400 to-red-200" :
         "from-primary/70 to-primary/10"
       }`} />
@@ -145,10 +153,10 @@ function ResourceCard({
                 {language === "zh" ? "待审核" : "Pending"}
               </span>
             )}
-            {isNeedsReview && (
+            {isSelfService && (
               <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700">
                 <AlertCircle className="h-3 w-3" />
-                {missingLink ? (language === "zh" ? "待审核·缺链接" : "Needs review · no link") : (language === "zh" ? "待审核" : "Needs review")}
+                {language === "zh" ? SELF_SERVICE_LABELS[r.status]?.zh : SELF_SERVICE_LABELS[r.status]?.en}
               </span>
             )}
             {isRejected && (
@@ -228,14 +236,14 @@ function ResourceCard({
               {language === "zh" ? "编辑" : "Edit"}
             </button>
           )}
-          {onApprove && (isPending || isNeedsReview) && (
+          {onApprove && (isPending) && (
             <button onClick={() => onApprove(r.id)}
               className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 transition-colors">
               <Check className="h-3 w-3" />
               {language === "zh" ? "通过" : "Approve"}
             </button>
           )}
-          {onReject && (isPending || isNeedsReview) && (
+          {onReject && (isPending) && (
             <button onClick={() => onReject(r)}
               className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800 transition-colors">
               <XCircle className="h-3 w-3" />
@@ -820,7 +828,7 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
         {missingUrlDoi && (
           <p className="text-xs text-amber-600 dark:text-amber-400">
-            {zh ? "未找到 URL/DOI —— 若这是手填或 DOI/URL 导入将无法提交，PDF/批量导入可以补上后再入库审核" : "No URL/DOI found — manual/DOI-URL entries can't submit without one; PDF/batch entries can still go to needs_review and be filled in later"}
+            {zh ? "未找到 URL/DOI —— 仍可提交，会标记为「待补充」，之后可以自己补上再重新提交" : "No URL/DOI found — you can still submit; this will be marked \"Incomplete\" and you can add it later and resubmit"}
           </p>
         )}
       </div>
@@ -1858,7 +1866,7 @@ export default function AcademicResources() {
       .then((r) => r.json())
       .then((data: Resource[]) => {
         if (!Array.isArray(data)) { setApiResources([]); return; }
-        if (isAdmin) setPendingCount(data.filter((r: Resource) => r.status === "pending" || r.status === "needs_review").length);
+        if (isAdmin) setPendingCount(data.filter((r: Resource) => r.status === "pending").length);
         setApiResources(data);
         const wantedId = new URLSearchParams(window.location.search).get("id");
         if (wantedId) {
@@ -1903,8 +1911,10 @@ export default function AcademicResources() {
   const toggleTag = (tag: string) =>
     setSelectedTags((prev) => { const n = new Set(prev); n.has(tag) ? n.delete(tag) : n.add(tag); return n; });
 
-  // Admin approval center: pending + needs_review (docs/planning/12 §2.1 — both are reviewable)
-  const pendingResources = useMemo(() => resources.filter((r) => r.status === "pending" || r.status === "needs_review"), [resources]);
+  // Admin approval center: only 'pending' reaches here now — the four self-service states
+  // (incomplete/disputed/off_topic/duplicate) are bounced back to the submitter earlier and never
+  // reach the admin queue (docs/planning/15 §0.1/§1.1).
+  const pendingResources = useMemo(() => resources.filter((r) => r.status === "pending"), [resources]);
 
   // Normal filtered list
   const filtered = useMemo(() => {

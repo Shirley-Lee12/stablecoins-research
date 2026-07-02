@@ -70,7 +70,7 @@ pnpm --filter @workspace/db run push       # 仅本地开发，需要 TTY
 ## 数据库设计原则
 
 - `resources.source_type` 存语言无关 slug，7 个：`journal_article`、`working_paper`、`conference_paper`、`thesis`、`report`、`gov_document`、`news`（专家学者不算资源类型，属于 authors 模块）。前端按当前语言显示 nameZh/nameEn，不要把 sourceType 存成中英文字符串。详见 [`docs/planning/08-sourceType最终枚举.md`](./docs/planning/08-sourceType最终枚举.md)。
-- `resources.status` 枚举有 5 个值：`pending`/`approved`/`rejected`（早期审核工作流三态）+ `needs_review`/`failed`（上传管线 U.5 后补的两态）。是内容审核工作流的核心字段，不是普通状态位——改动相关逻辑前必须确认不会破坏审核语义，详见 [`docs/requirements.md`](./docs/requirements.md) 和 [`docs/api-design.md`](./docs/api-design.md)。**`failed` 目前应用代码从不会真正赋给任何一行**——硬性必填字段（标题/作者/年份）缺失时，`persistConfirmedDraft()` 会直接拒绝这次确认（400），不会插入一条 `status='failed'` 的资源；`failed` 只属于 `upload_jobs.status`，枚举里保留这个值只是历史遗留，不代表会被用到。
+- `resources.status` 枚举有 7 个值（docs/planning/15 §0.9 定稿，替换了早期的 5 值枚举）：`incomplete`/`disputed`/`off_topic`/`duplicate`（四个自助打回态，只有提交者自己能看到，系统自动判定并打回给用户修正，不占用管理员审核视野）+ `pending`（进入管理员审核队列）+ `approved`（唯一会出现在公开 Resources 页面的状态）+ `rejected`（管理员最终拒绝，理由收窄为 3 个：来源质量存疑/信息真实性存疑/其他）。是内容审核工作流的核心字段，不是普通状态位——改动相关逻辑前必须确认不会破坏审核语义，详见 [`docs/planning/15-用户反馈批量修复与优化.md`](./docs/planning/15-用户反馈批量修复与优化.md)。**任何入口的提交都不再因缺字段被硬性拒绝**——`persistConfirmedDraft()` 总是插入一行，缺六要素路由到 `incomplete`；`failed` 不属于这个枚举，只属于 `upload_jobs.status`。
 - Schema 变更标准流程：编辑 schema 文件 → 在 `lib/db/src/schema/index.ts` 重新导出 → `typecheck:libs` → api-server `typecheck` → `generate`/`migrate`。
 
 ## 测试要求
