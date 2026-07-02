@@ -1359,12 +1359,18 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    // webkitdirectory/directory aren't in React's DOM attribute typings (non-standard but
-    // universally supported) — set them imperatively instead of fighting the JSX typing.
-    if (inputRef.current) {
-      inputRef.current.setAttribute("webkitdirectory", "");
-      inputRef.current.setAttribute("directory", "");
+  // webkitdirectory/directory aren't in React's DOM attribute typings (non-standard but
+  // universally supported) — set them imperatively instead of fighting the JSX typing. Must be a
+  // callback ref, not a `useEffect(..., [])`: the <input> only exists in the DOM while
+  // stage === "select", so it unmounts on every other stage and a brand-new DOM node gets mounted
+  // each time "Reselect" brings stage back to "select" — a mount-once effect would only ever touch
+  // the very first node and silently miss every node after that, which is exactly what made
+  // "Reselect" fall back to a plain (non-folder) file picker after the first successful selection.
+  const setFolderInputRef = useCallback((node: HTMLInputElement | null) => {
+    inputRef.current = node;
+    if (node) {
+      node.setAttribute("webkitdirectory", "");
+      node.setAttribute("directory", "");
     }
   }, []);
 
@@ -1563,7 +1569,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
         </div>
         <div className="space-y-2">
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "选择文件夹" : "Select a folder"}</label>
-          <input ref={inputRef} type="file" multiple disabled={!webkitdirSupported}
+          <input ref={setFolderInputRef} type="file" multiple disabled={!webkitdirSupported}
             onChange={(e) => handleFolderSelected(e.target.files)}
             className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer disabled:opacity-50" />
         </div>
