@@ -1,39 +1,33 @@
-import dns from "node:dns/promises";
-import nodemailer from "nodemailer";
 import { logger } from "./logger";
 import { env } from "../config";
 
-/**
- * nodemailer 9.x resolves both the SMTP host's A and AAAA records and picks randomly between them
- * for the connection attempt (see resolveHostname() in its lib/shared/index.js) — the `family`
- * transport option is never actually read anywhere in that resolution path in this version, so it
- * can't be used to force IPv4 (confirmed by reading the installed package's source directly, after
- * the same ENETUNREACH error persisted post-deploy with `family: 4` set). 163.com's SMTP host has a
- * real AAAA record whose address isn't routable from Render's network, so roughly half the time
- * nodemailer's random pick lands on it and the send fails. Resolving to a specific IPv4 address
- * ourselves and connecting to it directly — with `tls.servername` set so TLS SNI/certificate
- * validation still checks the real hostname — sidesteps nodemailer's address selection entirely.
- */
-async function createTransporter() {
-  let host: string = env.SMTP_HOST;
-  try {
-    const [ipv4] = await dns.resolve4(env.SMTP_HOST);
-    host = ipv4;
-  } catch (err) {
-    logger.warn({ err, host: env.SMTP_HOST }, "Could not resolve SMTP host to an IPv4 address, letting nodemailer resolve it itself");
-  }
-  return nodemailer.createTransport({
-    host,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_PORT === 465,
-    auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
-    tls: { servername: env.SMTP_HOST },
-  });
-}
+const RESEND_FROM_NAME = "ZIBS Stablecoin Hub";
 
+/**
+ * Sends via Resend's HTTP API instead of SMTP — direct SMTP to 163.com kept failing from Render
+ * (first an unreachable IPv6 address, then a silent connection timeout on IPv4 too, consistent
+ * with 163/126's known practice of blocking or throttling mail submission from datacenter/cloud IP
+ * ranges rather than an actual code bug). A plain fetch() call sidesteps that whole class of
+ * problem — no SMTP socket, no per-provider IP reputation to fight.
+ */
 export async function sendMail(to: string, subject: string, html: string) {
-  const transporter = await createTransporter();
-  await transporter.sendMail({ from: env.SMTP_FROM, to, subject, html });
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: `${RESEND_FROM_NAME} <${env.RESEND_FROM_EMAIL}>`,
+      to,
+      subject,
+      html,
+    }),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Resend API request failed (${res.status}): ${detail}`);
+  }
 }
 
 export async function sendVerificationCodeEmail(to: string, code: string) {

@@ -8,11 +8,12 @@ const envSchema = z.object({
   LLM_PROVIDER: z.enum(["gemini", "anthropic"]).default("gemini"),
   LLM_API_KEY: z.string().min(1, "LLM_API_KEY is required"),
   LLM_MODEL: z.string().default("gemini-2.5-flash"),
-  SMTP_HOST: z.string().min(1, "SMTP_HOST is required"),
-  SMTP_PORT: z.coerce.number().default(465),
-  SMTP_USER: z.string().min(1, "SMTP_USER is required"),
-  SMTP_PASS: z.string().min(1, "SMTP_PASS is required"),
-  SMTP_FROM: z.string().min(1, "SMTP_FROM is required"),
+  // Resend (transactional email — registration / password-reset emails). Replaced direct SMTP to
+  // 163.com after Render's outbound connections to it kept failing (unreachable IPv6 record, then
+  // a silent connection timeout on the IPv4 one — consistent with 163/126's known practice of
+  // blocking/throttling mail submission from datacenter/cloud IP ranges).
+  RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
+  RESEND_FROM_EMAIL: z.string().min(1, "RESEND_FROM_EMAIL is required"),
   FRONTEND_URL: z.string().default("http://localhost:5173"),
   ADMIN_BOOTSTRAP_EMAILS: z.string().default(""),
   CORS_ORIGIN: z.string().optional(),
