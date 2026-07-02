@@ -7,7 +7,14 @@ const transporter = nodemailer.createTransport({
   port: env.SMTP_PORT,
   secure: env.SMTP_PORT === 465,
   auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
-});
+  // 163.com's SMTP host resolves to an IPv6 address that's unreachable from Render's network
+  // (ENETUNREACH) — nodemailer resolves the hostname itself and doesn't fall back to IPv4 on
+  // failure like Node's net.connect would, so force IPv4 explicitly. `family` is a real
+  // SMTPConnection option at runtime; it's just missing from @types/nodemailer@8 (nodemailer
+  // itself is v9) — cast through TransportOptions since that overload skips the outdated
+  // SMTPTransport.Options shape that's missing this field.
+  family: 4,
+} as nodemailer.TransportOptions);
 
 export async function sendMail(to: string, subject: string, html: string) {
   await transporter.sendMail({ from: env.SMTP_FROM, to, subject, html });
