@@ -30,7 +30,11 @@ ${text.slice(0, 12000)}
 
 Respond with ONLY a JSON object: { "entries": [ { "title": string, "authors": string[], "year": number | null, "urlOrDoi": string | null }, ... ] }. No markdown fences, no extra text.`;
 
-  const raw = await generateJson(prompt, 8192);
+  // A real 16-entry list already needed >4096 tokens to avoid truncating mid-response (see commit
+  // history); response length also varies run-to-run for the same input (LLM output isn't fully
+  // deterministic), so 8192 still wasn't a safe margin — one real run got cut off mid-string
+  // ("Unterminated string in JSON") even on a list this size. Doubled for real headroom.
+  const raw = await generateJson(prompt, 16384);
   const parsed = JSON.parse(raw);
   const entries = Array.isArray(parsed.entries) ? parsed.entries : [];
   return entries

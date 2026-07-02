@@ -1398,7 +1398,11 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
     setStage("extracting");
     const pooled: UnstructuredEntry[] = [];
     const errors: string[] = [];
-    for (const f of unstructuredFiles) {
+    // Each call is a real ~15-25s LLM decomposition — running them sequentially with `for...await`
+    // meant total wait time was the SUM across every unstructured file (over a minute with just 2-3
+    // files), which looked indistinguishable from a genuine hang. Running them concurrently caps the
+    // wait at roughly the slowest single file instead.
+    await Promise.all(unstructuredFiles.map(async (f) => {
       try {
         const form = new FormData();
         form.append("file", f.file);
@@ -1408,7 +1412,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
           body: form,
         });
         const data = await res.json();
-        if (!res.ok) { errors.push(`${f.relativePath}: ${data.error ?? (zh ? "解析失败" : "failed")}`); continue; }
+        if (!res.ok) { errors.push(`${f.relativePath}: ${data.error ?? (zh ? "解析失败" : "failed")}`); return; }
         (data.entries ?? []).forEach((e: { title?: string; authors?: string[]; year?: number | null; urlOrDoi?: string | null }, idx: number) => {
           pooled.push({
             id: `${f.relativePath}-${idx}`,
@@ -1423,7 +1427,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
       } catch {
         errors.push(`${f.relativePath}: ${zh ? "网络请求失败" : "network error"}`);
       }
-    }
+    }));
     setUnstructuredEntries(pooled);
     setUnstructuredErrors(errors);
     setStage("summary");
@@ -1605,10 +1609,12 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
   }
 
   if (stage === "extracting") {
+    const n = classified.filter((f) => f.category === "unstructured").length;
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-10 text-sm text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
-        {zh ? "正在解析参考文献列表文件…" : "Parsing reference-list files…"}
+        <p>{zh ? `正在解析 ${n} 份参考文献列表文件…` : `Parsing ${n} reference-list file(s)…`}</p>
+        <p className="text-xs">{zh ? "每份文件的 AI 解析大约需要 15–25 秒，请耐心等待。" : "AI parsing takes roughly 15–25 seconds per file — this can take a bit."}</p>
       </div>
     );
   }
