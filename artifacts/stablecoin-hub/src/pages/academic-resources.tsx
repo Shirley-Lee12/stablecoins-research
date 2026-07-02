@@ -1344,7 +1344,12 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
   const inputRef = useRef<HTMLInputElement>(null);
   const [webkitdirSupported] = useState(() => "webkitdirectory" in document.createElement("input"));
   const [stage, setStage] = useState<"select" | "extracting" | "summary" | "unstructuredReview" | "progress">("select");
-  const [sourceType, setSourceType] = useState<SourceType>("journal_article");
+  // Unset by default (not "journal_article") — this is only a fallback default for whichever files
+  // a sub-pipeline genuinely can't determine a type for on its own (PDF/URL trust the LLM reading
+  // the actual text; citation files trust their own RT/Reference Type field; title-search entries
+  // trust resolveLink()'s News signal when present) — it must never look like it applies to
+  // everything in the folder, since it doesn't.
+  const [sourceType, setSourceType] = useState<SourceType | "">("");
   const [showStructureHint, setShowStructureHint] = useState(false);
   const [classified, setClassified] = useState<ClassifiedFile[]>([]);
   const [checked, setChecked] = useState<Set<number>>(new Set());
@@ -1460,7 +1465,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
       if (pdfFiles.length > 0) {
         const form = new FormData();
         pdfFiles.forEach((f) => form.append("files", f.file));
-        form.append("sourceType", sourceType);
+        if (sourceType) form.append("sourceType", sourceType);
         form.append("folderImportId", newFolderImportId);
         await fetch(`${apiBase()}/api/resources/upload/jobs/pdf`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
       }
@@ -1501,7 +1506,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
         await fetch(`${apiBase()}/api/resources/upload/jobs/url-batch`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ urls: withLink.map((e) => normalizeUrlOrDoi(e.urlOrDoi)), sourceType, folderImportId }),
+          body: JSON.stringify({ urls: withLink.map((e) => normalizeUrlOrDoi(e.urlOrDoi)), sourceType: sourceType || undefined, folderImportId }),
         });
       }
       if (withoutLink.length > 0) {
@@ -1514,7 +1519,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
               authors: e.authorsText.split(";").map((a) => a.trim()).filter(Boolean),
               year: e.year.trim() ? Number(e.year.trim()) : null,
             })),
-            sourceType,
+            sourceType: sourceType || undefined,
             folderImportId,
           }),
         });
@@ -1543,11 +1548,18 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
           </p>
         )}
         <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "资源类型提示" : "Type hint"}</label>
-          <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType)}
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            {zh ? "无法判断类型时的默认值（可选）" : "Default when a type can't be determined (optional)"}
+          </label>
+          <select value={sourceType} onChange={(e) => setSourceType(e.target.value as SourceType | "")}
             className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <option value="">{zh ? "不设置（各文件按内容自动判断）" : "Unset (each file is judged from its own content)"}</option>
             {SOURCE_TYPES.map((o) => <option key={o.value} value={o.value}>{zh ? o.nameZh : o.nameEn}</option>)}
           </select>
+          <p className="text-xs text-muted-foreground">
+            {zh ? "PDF/参考文献列表条目由 AI 读取实际内容判断类型；题录文件的类型来自文件自带的字段。这里只在都判断不出来时才生效，不会覆盖已经判断出的结果。"
+                : "PDF and reference-list entries have their type determined by AI reading the actual content; citation files get it from their own embedded field. This only applies when neither is available — it never overrides a type that's already been determined."}
+          </p>
         </div>
         <div className="space-y-2">
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "选择文件夹" : "Select a folder"}</label>

@@ -490,7 +490,17 @@ router.post("/resources/upload/jobs/unstructured-list/preview", requireAuth, han
   }
 });
 
-/** Shared per-entry processing for title-only jobs: resolveLink()'s title-search path (no fetched page text to re-extract from — the six elements already came from the list decomposition), then tag + verify like every other entry point. */
+/**
+ * Shared per-entry processing for title-only jobs: resolveLink()'s title-search path (no fetched
+ * page text to re-extract from — the six elements already came from the list decomposition), then
+ * tag + verify like every other entry point.
+ *
+ * sourceTypeHint is a fallback default only, same as every other entry point (PDF/URL trust the
+ * LLM's read of the actual fetched text; citation trusts the file's own RT field) — it must NOT be
+ * applied unconditionally. The one real signal available here is resolveLink()'s own
+ * sourceTypeHint ("News" when the match came from a news-oriented search rather than a scholarly
+ * DB), which takes priority when present.
+ */
 async function processTitleEntry(entry: { title: string; authors: string[]; year: number | null }, sourceTypeHint: string, vocab: TagVocabulary): Promise<PipelineResult> {
   const linked = await resolveLink({ title: entry.title, authors: entry.authors, year: entry.year, doi: null });
   const draft: PipelineDraft = {
@@ -503,7 +513,7 @@ async function processTitleEntry(entry: { title: string; authors: string[]; year
     abstract: "",
     doi: linked.doi,
     url: linked.canonicalUrl ?? linked.fulltextUrl,
-    sourceType: sourceTypeHint,
+    sourceType: linked.sourceTypeHint === "News" ? "news" : sourceTypeHint,
   };
   const tagIds = await computeTagsForText(draft.title, vocab);
   const tags = await enrichTags(tagIds);
