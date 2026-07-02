@@ -1,22 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Shield, Users, CheckSquare, FileText, Settings as SettingsIcon,
-  Clock, Check, X, Loader2, ChevronRight, Database, Mail, Sparkles,
+  Clock, Check, X, Loader2, ChevronRight, Database, Mail, Sparkles, History, Pencil,
 } from "lucide-react";
+import {
+  ResourceDetailModal, RejectDialog, EditModal, VerifyReportList,
+  type Resource, type RejectionReason, type VerifyReport,
+} from "@/pages/academic-resources";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-interface Resource {
-  id: number; title: string; sourceType: string;
-  status: "pending" | "approved" | "rejected";
-  createdAt: string; createdBy: number | null;
-}
 interface UserRow {
   id: number; email: string; name: string;
   role: "user" | "admin"; createdAt: string;
+}
+interface ReviewLogEntry {
+  id: number; title: string; status: "approved" | "rejected";
+  submitterEmail: string | null; createdAt: string; reviewedAt: string | null; reviewerEmail: string | null;
+  rejectionReasonId: number | null; rejectionNote: string | null;
 }
 
 function apiBase() {
@@ -138,11 +142,13 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
 }
 
 // ── Settings Panel (read-only — all configuration lives in server .env) ───────
+// Mirrors the actual shape GET /api/admin/settings/status returns (artifacts/api-server/src/routes/
+// admin.ts) — email is Brevo (HTTP API), not SMTP, since the SMTP->Brevo migration.
 interface SettingsStatus {
   database: { configured: boolean };
   auth: { jwtSecret: string };
   llm: { provider: string; model: string; apiKey: string };
-  email: { host: string; port: number; user: string; from: string; password: string };
+  email: { provider: string; from: string; apiKey: string };
   frontendUrl: string;
 }
 
@@ -207,13 +213,11 @@ function SettingsPanel({ token, language }: { token: string; language: string })
       <div className="rounded-xl border border-border p-5 space-y-1">
         <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
           <Mail className="h-4 w-4 text-primary" />
-          {zh ? "邮件发送（SMTP）" : "Email Sending (SMTP)"}
+          {zh ? "邮件发送（Brevo API）" : "Email Sending (Brevo API)"}
         </h3>
-        <StatusRow label="Host" value={status.email.host} />
-        <StatusRow label="Port" value={String(status.email.port)} />
-        <StatusRow label={zh ? "发件邮箱" : "Sender Email"} value={status.email.user} />
-        <StatusRow label="From" value={status.email.from} />
-        <StatusRow label={zh ? "授权码" : "Auth Code / Password"} value={status.email.password} />
+        <StatusRow label={zh ? "服务商" : "Provider"} value={status.email.provider} />
+        <StatusRow label={zh ? "发件邮箱" : "Sender Email"} value={status.email.from} />
+        <StatusRow label="API Key" value={status.email.apiKey} />
       </div>
 
       <div className="rounded-xl border border-border p-5 space-y-1">
@@ -238,34 +242,74 @@ function SettingsPanel({ token, language }: { token: string; language: string })
   );
 }
 
-// ── Approvals Panel ───────────────────────────────────────────────────────────
-function ApprovalsPanel({ token, language }: { token: string; language: string }) {
+// ── Approvals Panel (docs/planning/15 §2.2) ───────────────────────────────────
+// Full flow: click a queued resource -> full detail view (reused ResourceDetailModal, extended
+// with a live verify report + Approve/Reject/Edit actions) -> Reject requires a controlled reason
+// (reused RejectDialog) -> Edit reuses EditModal in admin mode (facet tags, no re-verification).
+function ApprovalsPanel({ token, language, isAdmin }: { token: string; language: string; isAdmin: boolean }) {
   const zh = language === "zh";
   const [resources, setResources] = useState<Resource[]>([]);
+  const [reasons, setReasons] = useState<RejectionReason[]>([]);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<Record<number, boolean>>({});
+  const [viewing, setViewing] = useState<Resource | null>(null);
+  const [verifyReport, setVerifyReport] = useState<VerifyReport | null>(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [rejecting, setRejecting] = useState<Resource | null>(null);
+  const [editing, setEditing] = useState<Resource | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const fetchPending = () => {
+  const fetchPending = useCallback(() => {
     setLoading(true);
-    fetch(`${apiBase()}/api/resources?status=pending`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    fetch(`${apiBase()}/api/resources?status=pending`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => setResources(Array.isArray(data) ? data : []))
       .catch(() => setResources([]))
       .finally(() => setLoading(false));
-  };
+  }, [token]);
 
-  useEffect(() => { fetchPending(); }, [token]);
+  useEffect(() => { fetchPending(); }, [fetchPending]);
+  useEffect(() => {
+    fetch(`${apiBase()}/api/rejection-reasons`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => setReasons(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
 
-  async function doApprove(id: number, status: "approved" | "rejected") {
-    setBusy((p) => ({ ...p, [id]: true }));
-    await fetch(`${apiBase()}/api/resources/${id}/approve`, {
+  function openDetail(r: Resource) {
+    setViewing(r);
+    setVerifyReport(null);
+    setReportLoading(true);
+    fetch(`${apiBase()}/api/admin/resources/${r.id}/verify-report`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => (res.ok ? res.json() : null))
+      .then(setVerifyReport)
+      .finally(() => setReportLoading(false));
+  }
+
+  async function doApprove(id: number) {
+    setBusy(true);
+    try {
+      await fetch(`${apiBase()}/api/admin/resources/${id}/review`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "approve" }),
+      });
+      setViewing(null);
+      fetchPending();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitReject(reasonId: number, note: string) {
+    if (!rejecting) return;
+    const res = await fetch(`${apiBase()}/api/admin/resources/${rejecting.id}/review`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ action: "reject", rejectionReasonId: reasonId, rejectionNote: note || undefined }),
     });
-    setBusy((p) => ({ ...p, [id]: false }));
+    if (!res.ok) throw new Error("Reject failed");
+    setRejecting(null);
+    setViewing(null);
     fetchPending();
   }
 
@@ -274,7 +318,7 @@ function ApprovalsPanel({ token, language }: { token: string; language: string }
       <div>
         <h2 className="text-base font-semibold">{zh ? "待审核资源" : "Pending Approvals"}</h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {zh ? "审核用户提交的文献资源，通过或驳回。" : "Review user-submitted resources and approve or reject them."}
+          {zh ? "点击一条资源查看完整信息后再决定通过或驳回。" : "Click a resource to see its full details before approving or rejecting."}
         </p>
       </div>
 
@@ -291,8 +335,8 @@ function ApprovalsPanel({ token, language }: { token: string; language: string }
       ) : (
         <div className="space-y-3">
           {resources.map((r) => (
-            <div key={r.id}
-              className="flex items-center justify-between gap-4 p-4 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-950/20">
+            <button key={r.id} onClick={() => openDetail(r)}
+              className="w-full flex items-center justify-between gap-4 p-4 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-950/20 hover:bg-amber-100/50 dark:hover:bg-amber-950/40 transition-colors text-left">
               <div className="flex items-start gap-3 min-w-0">
                 <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                 <div className="min-w-0">
@@ -302,24 +346,164 @@ function ApprovalsPanel({ token, language }: { token: string; language: string }
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  disabled={busy[r.id]}
-                  onClick={() => doApprove(r.id, "approved")}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-950/70 transition-colors disabled:opacity-50">
-                  {busy[r.id] ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
-                  {zh ? "通过" : "Approve"}
-                </button>
-                <button
-                  disabled={busy[r.id]}
-                  onClick={() => doApprove(r.id, "rejected")}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-950/70 transition-colors disabled:opacity-50">
-                  <X className="h-3 w-3" />
-                  {zh ? "驳回" : "Reject"}
-                </button>
-              </div>
-            </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+            </button>
           ))}
+        </div>
+      )}
+
+      {viewing && (
+        <ResourceDetailModal
+          resource={viewing}
+          language={language}
+          onClose={() => setViewing(null)}
+          extraSection={
+            <div className="pt-2 border-t border-border space-y-1.5">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "核对报告" : "Verification Report"}</h3>
+              {reportLoading || !verifyReport ? (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  {zh ? "正在核对…" : "Verifying…"}
+                </div>
+              ) : (
+                <VerifyReportList report={verifyReport} language={language} />
+              )}
+            </div>
+          }
+          footer={
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setEditing(viewing)}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+                <Pencil className="h-3 w-3" />
+                {zh ? "编辑" : "Edit"}
+              </button>
+              <button disabled={busy} onClick={() => setRejecting(viewing)}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-950/70 transition-colors disabled:opacity-50">
+                <X className="h-3 w-3" />
+                {zh ? "驳回" : "Reject"}
+              </button>
+              <button disabled={busy} onClick={() => doApprove(viewing.id)}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-950/70 transition-colors disabled:opacity-50">
+                {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                {zh ? "通过" : "Approve"}
+              </button>
+            </div>
+          }
+        />
+      )}
+
+      {rejecting && (
+        <RejectDialog resource={rejecting} reasons={reasons} language={language}
+          onClose={() => setRejecting(null)} onSubmit={submitReject} />
+      )}
+
+      {editing && (
+        <EditModal resource={editing} token={token} language={language} isAdmin={isAdmin}
+          onClose={() => setEditing(null)}
+          onSaved={() => { setEditing(null); setViewing(null); fetchPending(); }} />
+      )}
+    </div>
+  );
+}
+
+// ── Review Log Panel (docs/planning/15 §2.3) ──────────────────────────────────
+function ReviewLogPanel({ token, language }: { token: string; language: string }) {
+  const zh = language === "zh";
+  const [entries, setEntries] = useState<ReviewLogEntry[]>([]);
+  const [reasons, setReasons] = useState<RejectionReason[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<"" | "approved" | "rejected">("");
+
+  useEffect(() => {
+    fetch(`${apiBase()}/api/rejection-reasons`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => setReasons(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    const qs = statusFilter ? `?status=${statusFilter}` : "";
+    fetch(`${apiBase()}/api/admin/review-log${qs}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => setEntries(Array.isArray(data) ? data : []))
+      .catch(() => setEntries([]))
+      .finally(() => setLoading(false));
+  }, [token, statusFilter]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h2 className="text-base font-semibold">{zh ? "审核记录" : "Review Log"}</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {zh ? "所有已经过管理员处理的资源（通过或驳回）。" : "Every resource that's been through an admin decision (approved or rejected)."}
+          </p>
+        </div>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)}
+          className="text-xs px-3 py-1.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
+          <option value="">{zh ? "全部结果" : "All results"}</option>
+          <option value="approved">{zh ? "已通过" : "Approved"}</option>
+          <option value="rejected">{zh ? "已拒绝" : "Rejected"}</option>
+        </select>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-16 gap-2 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="text-sm">{zh ? "加载中…" : "Loading…"}</span>
+        </div>
+      ) : entries.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+          <History className="h-10 w-10 text-muted-foreground/30" />
+          <p className="text-sm text-muted-foreground">{zh ? "暂无审核记录" : "No review history yet"}</p>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 border-b border-border">
+              <tr>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{zh ? "资源标题" : "Resource"}</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{zh ? "提交者" : "Submitter"}</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{zh ? "提交时间" : "Submitted"}</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{zh ? "处理时间" : "Reviewed"}</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{zh ? "处理人" : "Reviewer"}</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{zh ? "结果" : "Result"}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {entries.map((e) => {
+                const reason = e.rejectionReasonId != null ? reasons.find((x) => x.id === e.rejectionReasonId) : undefined;
+                return (
+                  <tr key={e.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3 max-w-xs">
+                      <a href={`/academic-resources?id=${e.id}`} className="font-medium text-foreground hover:text-primary hover:underline line-clamp-1">
+                        {e.title}
+                      </a>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{e.submitterEmail ?? "—"}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(e.createdAt).toLocaleDateString(zh ? "zh-CN" : "en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{e.reviewedAt ? new Date(e.reviewedAt).toLocaleDateString(zh ? "zh-CN" : "en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{e.reviewerEmail ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      {e.status === "approved" ? (
+                        <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
+                          <Check className="h-3 w-3" />{zh ? "已通过" : "Approved"}
+                        </span>
+                      ) : (
+                        <span className="inline-flex flex-col items-start gap-0.5">
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800">
+                            <X className="h-3 w-3" />{zh ? "已拒绝" : "Rejected"}
+                          </span>
+                          {reason && <span className="text-xs text-muted-foreground">{zh ? reason.nameZh : reason.nameEn}</span>}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
@@ -427,7 +611,7 @@ export default function AdminCenter() {
 
       {/* Tabs */}
       <Tabs defaultValue="approvals">
-        <TabsList className="h-9 bg-muted/50 border border-border p-0.5 rounded-lg">
+        <TabsList className="h-9 bg-muted/50 border border-border p-0.5 rounded-lg flex-wrap h-auto">
           <TabsTrigger value="users" className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm">
             <Users className="h-3.5 w-3.5" />
             {zh ? "用户管理" : "User Management"}
@@ -435,6 +619,10 @@ export default function AdminCenter() {
           <TabsTrigger value="approvals" className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm">
             <CheckSquare className="h-3.5 w-3.5" />
             {zh ? "审核" : "Approvals"}
+          </TabsTrigger>
+          <TabsTrigger value="review-log" className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm">
+            <History className="h-3.5 w-3.5" />
+            {zh ? "审核记录" : "Review Log"}
           </TabsTrigger>
           <TabsTrigger value="cms" className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm">
             <FileText className="h-3.5 w-3.5" />
@@ -451,7 +639,11 @@ export default function AdminCenter() {
         </TabsContent>
 
         <TabsContent value="approvals" className="mt-6">
-          <ApprovalsPanel token={token!} language={language} />
+          <ApprovalsPanel token={token!} language={language} isAdmin />
+        </TabsContent>
+
+        <TabsContent value="review-log" className="mt-6">
+          <ReviewLogPanel token={token!} language={language} />
         </TabsContent>
 
         <TabsContent value="cms" className="mt-6">

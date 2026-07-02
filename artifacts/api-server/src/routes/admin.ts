@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { db, usersTable, resourcesTable, rejectionReasonsTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, gte, lte, isNotNull } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { requireAuth, requireAdmin } from "./auth";
 import { env } from "../config";
 import { retagResources } from "../lib/tagging";
+import { verifyResource } from "../lib/verify";
 
 const router = Router();
 
@@ -122,6 +124,28 @@ router.get("/rejection-reasons", async (req, res) => {
 });
 
 /**
+ * GET /api/admin/resources/:id/verify-report — admin only (docs/planning/15 §2.2 point 2).
+ * Re-runs verifyResource() live against the resource's current stored data — not persisted
+ * anywhere, purely for the admin detail view before approving. For a 'pending' resource this
+ * should always come back clean (hasFailure/hasWarning both false), since a resource can't reach
+ * 'pending' at all unless it already passed every check the state machine runs (docs/planning/15
+ * §0.6) — showing it here is reassurance for the admin, not something they're expected to act on.
+ */
+router.get("/admin/resources/:id/verify-report", requireAuth, requireAdmin, async (req: any, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [r] = await db.select().from(resourcesTable).where(eq(resourcesTable.id, id)).limit(1);
+    if (!r) { res.status(404).json({ error: "Not found" }); return; }
+    const year = r.publishedDate?.match(/^\d{4}/)?.[0] ? Number(r.publishedDate.match(/^\d{4}/)![0]) : null;
+    const report = await verifyResource({ title: r.title, authors: r.authors, year, doi: r.doi, url: r.url, abstract: r.abstract });
+    res.json(report);
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to compute verify report" });
+  }
+});
+
+/**
  * PATCH /api/admin/resources/:id/review — admin only.
  * Body: { action: 'approve' | 'reject', rejectionReasonId?, rejectionNote? } — rejectionReasonId is
  * required when action='reject'. Only acts on 'pending' resources (docs/planning/15 §1.1) — a
@@ -174,6 +198,53 @@ router.patch("/admin/resources/:id/review", requireAuth, requireAdmin, async (re
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to review resource" });
+  }
+});
+
+/**
+ * GET /api/admin/review-log — admin only (docs/planning/15 §2.3).
+ * Every resource that's been through an admin decision (reviewedBy IS NOT NULL) — approved or
+ * rejected. No separate audit-log table: `resources` itself already carries one review outcome per
+ * row (reviewedBy/reviewedAt/rejectionReasonId/rejectionNote), and there's no "resubmit and get
+ * reviewed again" flow yet for this to need to be a append-only history — see doc for when that'd
+ * change.
+ * Optional filters: ?status=approved|rejected, ?reviewedBy=<userId>, ?from=<ISO date>, ?to=<ISO date>
+ * (filtered on reviewedAt).
+ */
+router.get("/admin/review-log", requireAuth, requireAdmin, async (req: any, res) => {
+  try {
+    const submitter = alias(usersTable, "submitter");
+    const reviewer = alias(usersTable, "reviewer");
+
+    const { status, reviewedBy, from, to } = req.query as { status?: string; reviewedBy?: string; from?: string; to?: string };
+    const conditions = [isNotNull(resourcesTable.reviewedBy)];
+    if (status === "approved" || status === "rejected") conditions.push(eq(resourcesTable.status, status));
+    if (reviewedBy && !isNaN(parseInt(reviewedBy))) conditions.push(eq(resourcesTable.reviewedBy, parseInt(reviewedBy)));
+    if (from) conditions.push(gte(resourcesTable.reviewedAt, new Date(from)));
+    if (to) conditions.push(lte(resourcesTable.reviewedAt, new Date(to)));
+
+    const rows = await db
+      .select({
+        id: resourcesTable.id,
+        title: resourcesTable.title,
+        status: resourcesTable.status,
+        submitterEmail: submitter.email,
+        createdAt: resourcesTable.createdAt,
+        reviewedAt: resourcesTable.reviewedAt,
+        reviewerEmail: reviewer.email,
+        rejectionReasonId: resourcesTable.rejectionReasonId,
+        rejectionNote: resourcesTable.rejectionNote,
+      })
+      .from(resourcesTable)
+      .leftJoin(submitter, eq(resourcesTable.createdBy, submitter.id))
+      .leftJoin(reviewer, eq(resourcesTable.reviewedBy, reviewer.id))
+      .where(and(...conditions))
+      .orderBy(desc(resourcesTable.reviewedAt));
+
+    res.json(rows);
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to fetch review log" });
   }
 });
 

@@ -1,0 +1,1 @@
+ALTER TABLE "resources" ADD COLUMN "admin_edited" boolean DEFAULT false NOT NULL;

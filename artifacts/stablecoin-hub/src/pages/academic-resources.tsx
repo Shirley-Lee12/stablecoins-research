@@ -16,9 +16,9 @@ import {
 // submitter (never in the public list or the admin queue) — see docs/planning/15 §2.1 for the
 // eventual My Contributions page; this file only wires the minimum needed to keep existing behavior
 // (public list, admin approve/reject queue) correct against the new enum for now.
-type ResourceStatus = "incomplete" | "disputed" | "off_topic" | "duplicate" | "pending" | "approved" | "rejected";
-const SELF_SERVICE_STATUSES: ResourceStatus[] = ["incomplete", "disputed", "off_topic", "duplicate"];
-const SELF_SERVICE_LABELS: Record<string, { zh: string; en: string }> = {
+export type ResourceStatus = "incomplete" | "disputed" | "off_topic" | "duplicate" | "pending" | "approved" | "rejected";
+export const SELF_SERVICE_STATUSES: ResourceStatus[] = ["incomplete", "disputed", "off_topic", "duplicate"];
+export const SELF_SERVICE_LABELS: Record<string, { zh: string; en: string }> = {
   incomplete: { zh: "待补充", en: "Incomplete" },
   disputed: { zh: "待核实", en: "Disputed" },
   off_topic: { zh: "与稳定币无关", en: "Off-topic" },
@@ -26,7 +26,7 @@ const SELF_SERVICE_LABELS: Record<string, { zh: string; en: string }> = {
 };
 type FilterType = SourceType | "Expert" | "All";
 
-interface Resource {
+export interface Resource {
   id: number;
   title: string;
   authors: string[];
@@ -46,7 +46,7 @@ interface Resource {
   reviewedAt: string | null;
 }
 
-interface RejectionReason {
+export interface RejectionReason {
   id: number;
   slug: string;
   nameZh: string;
@@ -71,7 +71,7 @@ const STABLECOIN_TAGS = [
   "Technology & Infrastructure",
 ];
 
-const SOURCE_TYPE_ICONS: Record<SourceType, React.ElementType> = {
+export const SOURCE_TYPE_ICONS: Record<SourceType, React.ElementType> = {
   journal_article: FileText,
   working_paper: BookOpen,
   conference_paper: Presentation,
@@ -81,7 +81,7 @@ const SOURCE_TYPE_ICONS: Record<SourceType, React.ElementType> = {
   news: Newspaper,
 };
 
-const SOURCE_TYPE_COLORS: Record<SourceType, string> = {
+export const SOURCE_TYPE_COLORS: Record<SourceType, string> = {
   journal_article: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
   working_paper: "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-800",
   conference_paper: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
@@ -100,7 +100,7 @@ const FILTER_TYPES: { value: FilterType; labelEn: string; labelZh: string; icon:
 const BADGE_COLORS = SOURCE_TYPE_COLORS;
 const BADGE_ICONS = SOURCE_TYPE_ICONS;
 
-function apiBase() {
+export function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
 }
 
@@ -257,7 +257,13 @@ function ResourceCard({
 }
 
 // ── Resource Detail Modal ───────────────────────────────────────────────────────
-function ResourceDetailModal({ resource, language, onClose, onFacetTagClick }: { resource: Resource; language: string; onClose: () => void; onFacetTagClick?: (slug: string) => void }) {
+export function ResourceDetailModal({ resource, language, onClose, onFacetTagClick, extraSection, footer }: {
+  resource: Resource; language: string; onClose: () => void; onFacetTagClick?: (slug: string) => void;
+  /** Injected docs/planning/15 §2.2's admin review flow (live verify report) — reused as-is by the public detail view, which passes nothing here. */
+  extraSection?: React.ReactNode;
+  /** Injected by the admin review flow for Approve/Reject/Edit actions — omitted entirely for the public detail view. */
+  footer?: React.ReactNode;
+}) {
   const zh = language === "zh";
   const Icon  = BADGE_ICONS[resource.sourceType] ?? FileText;
   const color = BADGE_COLORS[resource.sourceType] ?? BADGE_COLORS["journal_article"];
@@ -326,14 +332,17 @@ function ResourceDetailModal({ resource, language, onClose, onFacetTagClick }: {
               {resource.doi && <p className="text-xs text-muted-foreground">DOI: {resource.doi}</p>}
             </div>
           )}
+
+          {extraSection}
         </div>
+        {footer && <div className="px-6 py-4 border-t border-border shrink-0">{footer}</div>}
       </div>
     </div>
   );
 }
 
 // ── Reject Dialog — admin picks a controlled reason (required) + optional free-text note ──────
-function RejectDialog({ resource, reasons, language, onClose, onSubmit }: {
+export function RejectDialog({ resource, reasons, language, onClose, onSubmit }: {
   resource: Resource; reasons: RejectionReason[]; language: string;
   onClose: () => void; onSubmit: (reasonId: number, note: string) => Promise<void>;
 }) {
@@ -441,7 +450,7 @@ const MAX_CUSTOM_TAGS = 1;
 // Mostly-closed vocabulary: up to MAX_TAXONOMY_TAGS from the fixed research-direction list
 // (keeps the library-wide tag cloud usable), plus one optional free-form tag for paper-specific
 // detail (e.g. a named stablecoin or jurisdiction) that the preset list doesn't capture.
-function TagEditor({ tags, onChange, language }: { tags: string[]; onChange: (t: string[]) => void; language: string }) {
+export function TagEditor({ tags, onChange, language }: { tags: string[]; onChange: (t: string[]) => void; language: string }) {
   const zh = language === "zh";
   const [customInput, setCustomInput] = useState("");
 
@@ -520,7 +529,7 @@ function TagEditor({ tags, onChange, language }: { tags: string[]; onChange: (t:
 // ── Author picker (autocomplete existing authors, or create new on the fly) ───
 interface AuthorSuggestion { name: string; institutionName: string | null }
 
-function AuthorPicker({ authors, onChange, language }: { authors: string[]; onChange: (a: string[]) => void; language: string }) {
+export function AuthorPicker({ authors, onChange, language }: { authors: string[]; onChange: (a: string[]) => void; language: string }) {
   const zh = language === "zh";
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<AuthorSuggestion[]>([]);
@@ -594,8 +603,57 @@ function AuthorPicker({ authors, onChange, language }: { authors: string[]; onCh
 }
 
 // ── Edit Modal ────────────────────────────────────────────────────────────────
-function EditModal({ resource, token, language, onClose, onSaved }: {
-  resource: Resource; token: string; language: string;
+// ── Facet-tag picker (docs/planning/15 §2.4 — admin-only editing of the real theme/jurisdiction/
+// asset tag system, distinct from the legacy free-text TagEditor above). Checked tags are sent as
+// `tagIds` and the backend marks every one `source: 'manual'` on save, per T.4's protection scheme.
+export function FacetTagPicker({ selectedIds, onChange, language }: { selectedIds: number[]; onChange: (ids: number[]) => void; language: string }) {
+  const zh = language === "zh";
+  const [vocab, setVocab] = useState<TagSummary[]>([]);
+
+  useEffect(() => {
+    fetch(`${apiBase()}/api/tags`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: TagSummary[]) => setVocab(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  function toggle(id: number) {
+    onChange(selectedIds.includes(id) ? selectedIds.filter((x) => x !== id) : [...selectedIds, id]);
+  }
+
+  const byFacet: Partial<Record<TagSummary["facet"], TagSummary[]>> = {};
+  for (const t of vocab) (byFacet[t.facet] ??= []).push(t);
+
+  return (
+    <div className="space-y-2">
+      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "分类标签（管理员）" : "Facet Tags (admin)"}</label>
+      <div className="space-y-2.5 max-h-48 overflow-y-auto rounded-lg border border-border p-3">
+        {(["theme", "jurisdiction", "asset"] as const).filter((f) => byFacet[f]?.length).map((facet) => (
+          <div key={facet} className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              {zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {byFacet[facet]!.map((t) => (
+                <button key={t.id} type="button" onClick={() => toggle(t.id)}
+                  className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                    selectedIds.includes(t.id)
+                      ? "bg-primary/10 text-primary border-primary/30"
+                      : "bg-muted/50 text-muted-foreground border-border/60 hover:border-primary/40"
+                  }`}>
+                  {zh ? t.nameZh : t.nameEn}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function EditModal({ resource, token, language, isAdmin, onClose, onSaved }: {
+  resource: Resource; token: string; language: string; isAdmin?: boolean;
   onClose: () => void; onSaved: () => void;
 }) {
   const zh = language === "zh";
@@ -605,6 +663,7 @@ function EditModal({ resource, token, language, onClose, onSaved }: {
   const [doi,      setDoi]      = useState(resource.doi ?? "");
   const [abstract, setAbstract] = useState(resource.abstract ?? "");
   const [tags,     setTags]     = useState(resource.tags);
+  const [tagIds,   setTagIds]   = useState<number[]>((resource.facetedTags ?? []).map((t) => t.id));
   const [publishedDate, setPublishedDate] = useState(resource.publishedDate ?? "");
   const [sourceType, setSourceType] = useState<SourceType>(resource.sourceType);
   const [saving,   setSaving]   = useState(false);
@@ -622,6 +681,7 @@ function EditModal({ resource, token, language, onClose, onSaved }: {
           url: url.trim() || null, doi: doi.trim() || null,
           abstract: abstract.trim(), tags,
           publishedDate: publishedDate.trim() || null,
+          ...(isAdmin && { tagIds }),
         }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); setSaving(false); return; }
@@ -679,6 +739,14 @@ function EditModal({ resource, token, language, onClose, onSaved }: {
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
           </div>
           <TagEditor tags={tags} onChange={setTags} language={language} />
+          {isAdmin && (
+            <>
+              <FacetTagPicker selectedIds={tagIds} onChange={setTagIds} language={language} />
+              <p className="text-xs text-muted-foreground">
+                {zh ? "管理员编辑不会触发重新核对，状态保持不变。" : "Admin edits don't trigger re-verification — status is left unchanged."}
+              </p>
+            </>
+          )}
           {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
           <div className="flex justify-end gap-2 pt-1">
             <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
@@ -697,19 +765,19 @@ function EditModal({ resource, token, language, onClose, onSaved }: {
 }
 
 // ── Upload Center shared types (mirror artifacts/api-server/src/routes/upload.ts) ─
-interface DraftData {
+export interface DraftData {
   title: string; authors: string[]; year: number | null; abstract: string;
   doi: string | null; url: string | null; sourceType: string;
 }
-interface TagSummary {
+export interface TagSummary {
   id: number; slug: string; nameEn: string; nameZh: string;
   facet: "theme" | "jurisdiction" | "asset"; status: "active" | "candidate";
 }
-interface FieldCheck { field: string; status: "✅" | "⚠️" | "❌"; detail: string }
-interface VerifyReport { checks: FieldCheck[]; hasFailure: boolean; hasWarning: boolean }
+export interface FieldCheck { field: string; status: "✅" | "⚠️" | "❌"; detail: string }
+export interface VerifyReport { checks: FieldCheck[]; hasFailure: boolean; hasWarning: boolean }
 interface PipelineResultLike { draft: DraftData; tags: TagSummary[]; report: VerifyReport; foundInScholarlyDb: boolean; missingRequired: string[] }
-type UploadJobType = "pdf" | "url" | "citation" | "title";
-interface UploadJob {
+export type UploadJobType = "pdf" | "url" | "citation" | "title";
+export interface UploadJob {
   id: number; batchId: string | null; folderImportId?: string | null; type: UploadJobType; status: "queued" | "processing" | "ready_for_review" | "failed";
   input: { fileName?: string; url?: string; title?: string; sourceTypeHint?: string };
   result: PipelineResultLike | null; error: string | null; createdAt: string;
@@ -726,7 +794,7 @@ const CHECK_FIELD_LABELS: Record<string, { en: string; zh: string }> = {
 };
 
 // ── Tag summary display (read-only — the new facet-based tag system, separate from the legacy STABLECOIN_TAGS free-text array TagEditor edits) ──
-function TagSummaryList({ tags, language, onTagClick }: { tags: TagSummary[]; language: string; onTagClick?: (slug: string) => void }) {
+export function TagSummaryList({ tags, language, onTagClick }: { tags: TagSummary[]; language: string; onTagClick?: (slug: string) => void }) {
   const zh = language === "zh";
   if (tags.length === 0) return <p className="text-xs text-muted-foreground">{zh ? "未匹配到标签" : "No tags matched"}</p>;
   const byFacet: Partial<Record<TagSummary["facet"], TagSummary[]>> = {};
@@ -759,7 +827,7 @@ function TagSummaryList({ tags, language, onTagClick }: { tags: TagSummary[]; la
   );
 }
 
-function VerifyReportList({ report, language }: { report: VerifyReport; language: string }) {
+export function VerifyReportList({ report, language }: { report: VerifyReport; language: string }) {
   const zh = language === "zh";
   return (
     <div className="space-y-1">
@@ -979,7 +1047,7 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
 // Filters either by a single job `type` (existing per-entry tabs) or by `folderImportId` (folder
 // import's combined "this submission" progress view, docs/planning/14 §3.4) — exactly one of the
 // two should be passed.
-function JobQueuePanel({ token, language, type, folderImportId, onSaved }: {
+export function JobQueuePanel({ token, language, type, folderImportId, onSaved }: {
   token: string; language: string; type?: UploadJobType; folderImportId?: string; onSaved: () => void;
 }) {
   const zh = language === "zh";
@@ -2120,7 +2188,7 @@ export default function AcademicResources() {
         <UploadCenterModal token={token} language={language} isAdmin={isAdmin} onClose={() => setUploadCenterOpen(false)} onSaved={fetchResources} />
       )}
       {editResource && token && (
-        <EditModal resource={editResource} token={token} language={language} onClose={() => setEditResource(null)} onSaved={fetchResources} />
+        <EditModal resource={editResource} token={token} language={language} isAdmin={isAdmin} onClose={() => setEditResource(null)} onSaved={fetchResources} />
       )}
       {detailResource && (
         <ResourceDetailModal resource={detailResource} language={language} onClose={() => setDetailResource(null)}

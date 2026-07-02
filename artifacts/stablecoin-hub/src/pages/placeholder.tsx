@@ -78,6 +78,3 @@ export function ProfilePage() {
 export function ChangePasswordPage() {
   return <PlaceholderPage titleEn="Change Password" titleZh="修改密码" parentHref="/" parentLabelEn="Home" parentLabelZh="首页" descEn="Update your account password securely." descZh="安全地更新您的账号密码。" />;
 }
-export function MyContributionsPage() {
-  return <PlaceholderPage titleEn="My Contributions" titleZh="我的贡献" parentHref="/academic-resources" parentLabelEn="Resources" parentLabelZh="资源库" descEn="View all resources you have submitted to the platform." descZh="查看您提交到平台的所有文献资源。" />;
-}

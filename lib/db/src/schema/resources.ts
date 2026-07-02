@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, pgEnum, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
@@ -64,6 +64,11 @@ export const resourcesTable = pgTable("resources", {
   rejectionNote: text("rejection_note"),
   reviewedBy: integer("reviewed_by").references(() => usersTable.id, { onDelete: "set null" }),
   reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  // docs/planning/15 §2.4 — coarse-grained marker: true if an admin has ever directly edited this
+  // resource's fields (title/authors/year/abstract/url/doi/tags) outside the normal approve/reject
+  // review action. Lets the UI/future audits distinguish "system-extracted as-is" from "an admin's
+  // judgment call touched this," without needing per-field history (not required yet per the doc).
+  adminEdited: boolean("admin_edited").notNull().default(false),
 });
 
 export const insertResourceSchema = createInsertSchema(resourcesTable).omit({

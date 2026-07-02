@@ -20,6 +20,7 @@ import MarketData from "@/pages/market-data";
 import Quantitative from "@/pages/quantitative";
 import ResetPassword from "@/pages/reset-password";
 import AdminCenter from "@/pages/admin-center";
+import MyContributionsPage from "@/pages/my-contributions";
 import {
   AboutHistory,
   AboutTypes,
@@ -31,7 +32,6 @@ import {
   MarketTradingVolume,
   ProfilePage,
   ChangePasswordPage,
-  MyContributionsPage,
 } from "@/pages/placeholder";
 
 const queryClient = new QueryClient();

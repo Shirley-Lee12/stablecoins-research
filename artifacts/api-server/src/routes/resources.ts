@@ -5,6 +5,10 @@ import { eq, desc, ilike, or, sql, and, inArray } from "drizzle-orm";
 import { requireAuth, optionalAuth, requireAdmin } from "./auth";
 import { syncResourceAuthors } from "./authors";
 import { generateJson, generateJsonFromPdf } from "../lib/llm";
+import { verifyResource } from "../lib/verify";
+import { missingSixElements, classifyStatus } from "../lib/resourceStatus";
+import { checkDuplicate } from "../lib/duplicateCheck";
+import { retagResources } from "../lib/tagging";
 
 const router = Router();
 
@@ -674,86 +678,23 @@ router.post("/resources/import/pdf/batch", requireAuth, handleUpload(pdfUpload.a
 });
 
 /**
- * POST /api/resources  — must be logged in
- * Admin → status='approved'; others → status='pending'
- */
-router.post("/resources", requireAuth, async (req: any, res) => {
-  try {
-    const { title, authors, sourceType, url, doi, abstract, tags, publishedDate } = req.body;
-    if (!title) { res.status(400).json({ error: "title is required" }); return; }
-
-    const dupConditions = [ilike(resourcesTable.title, title.trim())];
-    if (doi && doi.trim()) dupConditions.push(eq(resourcesTable.doi, doi.trim()));
-    const [duplicate] = await db
-      .select({ id: resourcesTable.id, title: resourcesTable.title, status: resourcesTable.status })
-      .from(resourcesTable)
-      .where(or(...dupConditions))
-      .limit(1);
-    if (duplicate) {
-      res.status(409).json({
-        error: "duplicate",
-        message: "A resource with this title or DOI already exists in the library.",
-        existing: duplicate,
-      });
-      return;
-    }
-
-    const isAdmin = req.user.role === "admin";
-
-    const [inserted] = await db
-      .insert(resourcesTable)
-      .values({
-        title,
-        authors:       authors       ?? [],
-        sourceType:    sourceType    ?? "journal_article",
-        url:           url           ?? null,
-        doi:           doi           ?? null,
-        abstract:      abstract      ?? null,
-        tags:          sanitizeTags(tags),
-        publishedDate: publishedDate ?? null,
-        status:        isAdmin ? "approved" : "pending",
-        createdBy:     req.user.userId,
-      })
-      .returning();
-
-    await syncResourceAuthors(inserted.id, inserted.authors);
-    res.status(201).json(inserted);
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Failed to create resource" });
-  }
-});
-
-/**
- * PATCH /api/resources/:id/approve  — admin only
- * Body: { status: 'approved' | 'rejected' }
- */
-router.patch("/resources/:id/approve", requireAuth, requireAdmin, async (req: any, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const { status } = req.body as { status?: string };
-    if (!status || !["approved", "rejected"].includes(status)) {
-      res.status(400).json({ error: "status must be 'approved' or 'rejected'" });
-      return;
-    }
-
-    const [updated] = await db
-      .update(resourcesTable)
-      .set({ status: status as "approved" | "rejected" })
-      .where(eq(resourcesTable.id, id))
-      .returning();
-
-    if (!updated) { res.status(404).json({ error: "Not found" }); return; }
-    res.json(updated);
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Failed to update status" });
-  }
-});
-
-/**
  * PATCH /api/resources/:id
- * Admin or owner only. Non-admin edits → status reset to 'pending'.
+ * Admin or owner only. Body may include `tagIds` (facet tag ids — admin only, see below).
+ *
+ * Admin edits (docs/planning/15 §2.4): status is left untouched — an admin's judgment is
+ * authoritative, so there's no "re-check" step like the owner path below. `tagIds`, if present,
+ * replaces the resource's facet tags and marks every kept/added one `source: 'manual'` (so a future
+ * retagResources() rerun — which only ever touches source='auto' rows — won't silently undo an
+ * admin's tag choices, per T.4's protection mechanism). `adminEdited` is set true on any admin PATCH
+ * through this route, as a coarse "an admin has touched this resource's content" marker.
+ *
+ * Owner (non-admin) edits (docs/planning/15 §0.7): this is the resubmission flow — the whole check
+ * pipeline (six-elements completeness, verify/cross-check, duplicate, topic-relevance-via-tags)
+ * reruns against the edited content, and the resulting status is whichever of
+ * incomplete/disputed/off_topic/duplicate/pending the checks land on, same as a brand-new
+ * submission — NOT a blind reset to 'pending' like the old behavior. Tags aren't editable by a
+ * non-admin owner here; they're recomputed automatically (via retagResources) from the edited
+ * title/abstract, same as any other auto-tagging path.
  */
 router.patch("/resources/:id", requireAuth, async (req: any, res) => {
   try {
@@ -768,25 +709,73 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       return;
     }
 
-    const { title, authors, sourceType, url, doi, abstract, tags, publishedDate } = req.body;
+    const { title, authors, sourceType, url, doi, abstract, tags, publishedDate, tagIds } = req.body as {
+      title?: string; authors?: string[]; sourceType?: string; url?: string | null; doi?: string | null;
+      abstract?: string; tags?: string[]; publishedDate?: string | null; tagIds?: number[];
+    };
+
     const [updated] = await db
       .update(resourcesTable)
       .set({
         ...(title         !== undefined && { title }),
         ...(authors       !== undefined && { authors }),
-        ...(sourceType    !== undefined && { sourceType }),
+        ...(sourceType    !== undefined && { sourceType: sourceType as any }),
         ...(url           !== undefined && { url }),
         ...(doi           !== undefined && { doi }),
         ...(abstract      !== undefined && { abstract }),
         ...(tags          !== undefined && { tags: sanitizeTags(tags) }),
         ...(publishedDate !== undefined && { publishedDate }),
-        // Non-admin edits require re-approval
-        ...(!isAdmin && { status: "pending" as const }),
+        ...(isAdmin && { adminEdited: true }),
       })
       .where(eq(resourcesTable.id, id))
       .returning();
 
     if (authors !== undefined) await syncResourceAuthors(id, updated.authors);
+
+    if (isAdmin) {
+      if (tagIds !== undefined) {
+        const currentLinks = await db.select({ tagId: resourceTagsTable.tagId }).from(resourceTagsTable).where(eq(resourceTagsTable.resourceId, id));
+        const currentIds = new Set(currentLinks.map((l) => l.tagId));
+        const newIds = new Set(tagIds);
+        const toRemove = [...currentIds].filter((tagId) => !newIds.has(tagId));
+        if (toRemove.length > 0) {
+          await db.delete(resourceTagsTable).where(and(eq(resourceTagsTable.resourceId, id), inArray(resourceTagsTable.tagId, toRemove)));
+        }
+        if (newIds.size > 0) {
+          await db
+            .insert(resourceTagsTable)
+            .values([...newIds].map((tagId) => ({ resourceId: id, tagId, source: "manual" as const })))
+            .onConflictDoUpdate({ target: [resourceTagsTable.resourceId, resourceTagsTable.tagId], set: { source: "manual" as const } });
+        }
+      }
+      res.json(updated);
+      return;
+    }
+
+    // Owner resubmission — rerun the full check pipeline (docs/planning/15 §0.7).
+    const contentChanged = title !== undefined || authors !== undefined || url !== undefined || doi !== undefined || abstract !== undefined || publishedDate !== undefined;
+    if (contentChanged) {
+      const year = updated.publishedDate?.match(/^\d{4}/)?.[0] ? Number(updated.publishedDate.match(/^\d{4}/)![0]) : null;
+      const missingFields = missingSixElements({ title: updated.title, authors: updated.authors, year, abstract: updated.abstract, url: updated.url, doi: updated.doi });
+      const report = await verifyResource({ title: updated.title, authors: updated.authors, year, doi: updated.doi, url: updated.url, abstract: updated.abstract });
+      const duplicateSignal = await checkDuplicate({ title: updated.title, doi: updated.doi, url: updated.url, year }, id);
+      await retagResources([id]);
+      const themeRows = await db
+        .select({ facet: tagsTable.facet })
+        .from(resourceTagsTable)
+        .innerJoin(tagsTable, eq(resourceTagsTable.tagId, tagsTable.id))
+        .where(eq(resourceTagsTable.resourceId, id));
+      const hasThemeTag = themeRows.some((t) => t.facet === "theme");
+      const newStatus = classifyStatus({ duplicateSignal, missingFields, hasThemeTag, report });
+      const [reclassified] = await db
+        .update(resourcesTable)
+        .set({ status: newStatus, rejectionReasonId: null, rejectionNote: null, reviewedBy: null, reviewedAt: null })
+        .where(eq(resourcesTable.id, id))
+        .returning();
+      res.json(reclassified);
+      return;
+    }
+
     res.json(updated);
   } catch (err) {
     req.log.error(err);
