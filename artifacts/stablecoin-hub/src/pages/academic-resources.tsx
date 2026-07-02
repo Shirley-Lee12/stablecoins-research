@@ -1356,6 +1356,10 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
   const [unstructuredEntries, setUnstructuredEntries] = useState<UnstructuredEntry[]>([]);
   const [unstructuredErrors, setUnstructuredErrors] = useState<string[]>([]);
   const [folderImportId, setFolderImportId] = useState<string | null>(null);
+  // Bumped every time we return to the "select" stage — used as the <input>'s React `key` so a
+  // brand-new DOM node (with no possible memory of a prior selection) is guaranteed on every
+  // reselect, on top of the callback ref already reapplying webkitdirectory/directory to it.
+  const [pickerGeneration, setPickerGeneration] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -1541,7 +1545,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
   function resetAll() {
     setStage("select"); setClassified([]); setChecked(new Set()); setUnstructuredEntries([]);
     setUnstructuredErrors([]); setFolderImportId(null); setError("");
-    if (inputRef.current) inputRef.current.value = "";
+    setPickerGeneration((g) => g + 1);
   }
 
   if (stage === "select") {
@@ -1569,7 +1573,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
         </div>
         <div className="space-y-2">
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "选择文件夹" : "Select a folder"}</label>
-          <input ref={setFolderInputRef} type="file" multiple disabled={!webkitdirSupported}
+          <input key={pickerGeneration} ref={setFolderInputRef} type="file" multiple disabled={!webkitdirSupported}
             onChange={(e) => handleFolderSelected(e.target.files)}
             className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer disabled:opacity-50" />
         </div>
