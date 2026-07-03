@@ -16,6 +16,9 @@ const themeTags: InsertTag[] = [
   { slug: "commodity-rwa-backed", nameEn: "Commodity & RWA-backed", nameZh: "商品/RWA 抵押型", facet: "theme", definition: "由黄金、大宗商品或代币化现实世界资产支持的稳定币。", region: null, category: A, status: "active" },
   { slug: "cbdc", nameEn: "CBDC", nameZh: "央行数字货币", facet: "theme", definition: "由中央银行发行的数字法币,及其与稳定币的关系与竞争。", region: null, category: A, status: "active" },
   { slug: "tokenized-deposits-mmf", nameEn: "Tokenized deposits & MMFs", nameZh: "代币化存款与货基", facet: "theme", definition: "商业银行存款或货币市场基金的代币化形态,作为稳定价值载体。", region: null, category: A, status: "active" },
+  // A 追加(docs/planning/16)—— 理论背景标签,不新增大类
+  { slug: "shadow-banking", nameEn: "Shadow Banking", nameZh: "影子银行", facet: "theme", definition: "游离于传统银行监管体系之外的信用中介活动,是理解稳定币货币功能的重要理论背景。", region: null, category: A, status: "active" },
+  { slug: "money-market-funds", nameEn: "Money Market Funds", nameZh: "货币市场基金", facet: "theme", definition: "投资于短期高流动性资产的基金,其挤兑与稳定机制研究是稳定币风险分析的重要参照系,与代币化货基(tokenized-deposits-mmf)分属传统金融与链上代币化两个角度,两者不合并。", region: null, category: A, status: "active" },
   // B 稳定性与风险
   { slug: "peg-stability-depeg", nameEn: "Peg stability & depeg", nameZh: "锚定稳定与脱锚", facet: "theme", definition: "稳定币维持或偏离其锚定价格的机制、动态与脱锚事件分析。", region: null, category: B, status: "active" },
   { slug: "run-liquidity-risk", nameEn: "Run & liquidity risk", nameZh: "挤兑与流动性风险", facet: "theme", definition: "大规模赎回、挤兑及赎回流动性不足导致的风险。", region: null, category: B, status: "active" },
@@ -48,6 +51,9 @@ const themeTags: InsertTag[] = [
   { slug: "oracles-data-feeds", nameEn: "Oracles & data feeds", nameZh: "预言机与数据源", facet: "theme", definition: "为稳定币机制提供价格与数据输入的预言机系统。", region: null, category: F, status: "active" },
   { slug: "privacy-compliance-tech", nameEn: "Privacy & compliance tech", nameZh: "隐私与合规技术", facet: "theme", definition: "兼顾隐私保护与监管合规的技术方案。", region: null, category: F, status: "active" },
   { slug: "programmability", nameEn: "Programmability", nameZh: "可编程性", facet: "theme", definition: "稳定币的可编程特性及其在自动化金融中的应用。", region: null, category: F, status: "active" },
+  // F 追加(docs/planning/16)—— 理论背景标签,不新增大类
+  { slug: "crypto-asset-foundations", nameEn: "Crypto Asset Foundations", nameZh: "加密资产基础研究", facet: "theme", definition: "非稳定币专属的加密资产研究(如早期比特币、DeFi代币、治理代币等),为理解稳定币的市场与资产背景提供基础。", region: null, category: F, status: "active" },
+  { slug: "blockchain-foundations", nameEn: "Blockchain Foundations", nameZh: "区块链基础研究", facet: "theme", definition: "区块链底层技术研究,包括密码学、共识机制、分布式系统架构等,是稳定币技术实现的理论前提。此标签与crypto-asset-foundations不合并——前者偏金融/经济学视角(资产、市场),后者偏计算机科学视角(底层技术),两类读者检索意图不同。", region: null, category: F, status: "active" },
 ];
 
 const jurisdictionTags: InsertTag[] = [

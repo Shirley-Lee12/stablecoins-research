@@ -114,7 +114,9 @@ category   text                       -- 六大类 slug（如 types_mechanisms�
 status     tag_status_enum NOT NULL DEFAULT 'active'   -- 'active' | 'candidate'
 created_at timestamptz NOT NULL DEFAULT now()
 ```
-种子数据：`scripts/src/seed-tags.ts`（`pnpm --filter @workspace/scripts run seed-tags`，按 slug 幂等），33 个 theme + 16 个 jurisdiction + 15 个 asset，全部 `status=active`。`candidate` 状态的行由 `retagResources()`（见下）在打标时自动创建，不在种子脚本里。33 个 theme 标签的 `category` 由 `scripts/src/backfill-tag-categories.ts` 一次性回填（`pnpm --filter @workspace/scripts run backfill-tag-categories`，按 slug 幂等，只更新 `category IS NULL` 的行）。
+种子数据：`scripts/src/seed-tags.ts`（`pnpm --filter @workspace/scripts run seed-tags`，按 slug 幂等），37 个 theme + 16 个 jurisdiction + 15 个 asset，全部 `status=active`。`candidate` 状态的行由 `retagResources()`（见下）在打标时自动创建，不在种子脚本里。theme 标签的 `category` 由 `scripts/src/backfill-tag-categories.ts` 一次性回填（`pnpm --filter @workspace/scripts run backfill-tag-categories`，按 slug 幂等，只更新 `category IS NULL` 的行）。
+
+理论背景标签（docs/planning/16）：33 个稳定币专属主题标签之外，另加 4 个理论背景标签——`shadow-banking`/`money-market-funds`（归入 `types_mechanisms`）、`crypto-asset-foundations`/`blockchain-foundations`（归入 `tech_infrastructure`），theme 总数 33→37。背景：`off_topic` 判定只看"主题标签有没有命中"，稳定币研究大量借鉴影子银行/货币市场基金/加密资产/区块链基础理论，这类背景文献天然命中不了原来 33 个稳定币专属标签，会被误判跑题；修法不是放宽 `off_topic` 阈值，是承认这四类背景领域本身该是正式标签。`off_topic` 判定逻辑本身没有改动——`loadTagVocabulary()`/`computeTagsForText()` 全程从 `tags` 表动态读取 `facet='theme' AND status='active'` 的行，没有任何地方硬编码标签数量，词表扩大后自动生效。
 
 ### `resource_tags`（`tags.ts`）—— resources ↔ tags 多对多关联表
 ```
@@ -160,10 +162,10 @@ our_research                      （独立表，不与其他表关联）
 
 | 枚举 | 取值 | 用途 |
 |---|---|---|
-| `source_type` | `Paper`、`Report`、`Gov Document`、`News`、`Experts & Scholars` | `resources.source_type`，**必须精确使用这些字符串**（含空格、大小写） |
+| `source_type` | `journal_article`、`working_paper`、`conference_paper`、`thesis`、`report`、`gov_document`、`news` | `resources.source_type`，语言无关 slug，**必须精确使用这些字符串**；前端按当前语言映射 nameZh/nameEn 展示，详见 [`08-sourceType最终枚举.md`](./planning/08-sourceType最终枚举.md) |
 | `resource_status` | `incomplete`、`disputed`、`off_topic`、`duplicate`、`pending`、`approved`、`rejected` | `resources.status`，七值状态机（docs/planning/15 §0.9），只有 `approved` 出现在公开 Resources 页面，详见 [`database.md`](#resources-resourcests--全球文献库) 上方表定义和 [`requirements.md`](./requirements.md) |
 | `user_role` | `user`、`admin` | `users.role`，权限模型 |
-| `upload_job_type` | `pdf`、`url` | `upload_jobs.type` |
+| `upload_job_type` | `pdf`、`url`、`citation`、`title` | `upload_jobs.type`——`citation` 是题录导入(docs/planning/06/14)，`title` 是文件夹批量导入里没有 URL/DOI、走标题搜索路径的条目(docs/planning/14 §3.3) |
 | `upload_job_status` | `queued`、`processing`、`ready_for_review`、`failed` | `upload_jobs.status`，与 `resource_status` 是两套独立枚举，不要混用 |
 | `tag_facet` | `theme`、`jurisdiction`、`asset` | `tags.facet`，标签三大分面，详见 [`roadmap.md`](./roadmap.md) Part 3 |
 | `tag_status` | `active`、`candidate` | `tags.status`，`active` 进正式聚合，`candidate` 是 AI 打标时映射不进任何 active 标签的候选词，等人工审核 |
