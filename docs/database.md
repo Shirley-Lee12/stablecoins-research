@@ -60,8 +60,12 @@ rejection_note      text
 reviewed_by         integer REFERENCES users(id) ON DELETE SET NULL
 reviewed_at         timestamptz
 admin_edited        boolean NOT NULL DEFAULT false          -- 管理员是否直接编辑过字段（docs/planning/15 §2.4，粗粒度标记）
+verification_report jsonb                                   -- lib/verify.ts 的 VerifyReport，逐字段核对结果缓存（docs/planning/16 §16.1）
+verified_at         timestamptz                              -- verification_report 的生成时间
 ```
-`keywords`/`keywords_source`（docs/planning/15 §5）：题录导入(CNKI K1/EndNote %K/NoteExpress Keywords) 与 PDF/URL 抽取的"关键词:"/"Keywords:"章节 → `extracted`；用户手填或事后编辑（`PATCH /api/resources/:id` 带 `keywords` 字段，无论编辑者是所有者还是管理员）→ `manual`；原文没有关键词章节且用户没手填时，允许（非强制）LLM 从摘要提炼 3-5 个 → `generated`，前端必须给 `generated` 来源打上明显的"AI生成"标注。六要素完整性判定里，`keywords` 只要非空就算满足，不区分来源。
+`keywords`/`keywords_source`（docs/planning/15 §5）：题录导入(CNKI K1/EndNote %K/NoteExpress Keywords) 与 PDF/URL 抽取的"关键词:"/"Keywords:"章节 → `extracted`；用户手填或事后编辑（`PATCH /api/resources/:id` 带 `keywords` 字段，无论编辑者是所有者还是管理员）→ `manual`；原文没有关键词章节且用户没手填时，允许（非强制）LLM 从摘要提炼 3-5 个 → `generated`，前端必须给 `generated` 来源打上明显的"AI生成"标注。六要素完整性判定里，`keywords` 只要非空就算满足，不区分来源。`verify.ts` 的核对报告里也有一项关键词数量校验（3-5 个建议区间），超出/不足只标 ⚠️，不算失败，不强制。
+
+`verification_report`/`verified_at`（docs/planning/16 §16.1）：核对报告只在两处写入——`persistConfirmedDraft()`（首次入库）和 `PATCH /api/resources/:id` 的所有者重新提交全套检查路径（docs/planning/15 §0.7）——都是本来就要算一次核对报告的地方，顺手缓存下来。`GET /api/admin/resources/:id/verify-report` 改成纯读这两列，不再每次打开详情页都重新调用 DOI 解析/URL 可达性检查；如果管理员确实想强制刷新，走显式的 `POST /api/admin/resources/:id/reverify`（会重新调用外部接口并覆盖这两列，前端要求二次确认）。管理员编辑资源字段（`isAdmin` 分支）不触发这条路径，报告保持不变——这是仿照 §2.4"管理员编辑不重新核对"的既有原则。
 
 ### `our_research`（`our_research.ts`）—— ZIBS 自有研究
 ```

@@ -766,7 +766,7 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
     if (contentChanged) {
       const year = updated.publishedDate?.match(/^\d{4}/)?.[0] ? Number(updated.publishedDate.match(/^\d{4}/)![0]) : null;
       const missingFields = missingSixElements({ title: updated.title, authors: updated.authors, year, abstract: updated.abstract, url: updated.url, doi: updated.doi, keywords: updated.keywords });
-      const report = await verifyResource({ title: updated.title, authors: updated.authors, year, doi: updated.doi, url: updated.url, abstract: updated.abstract });
+      const report = await verifyResource({ title: updated.title, authors: updated.authors, year, doi: updated.doi, url: updated.url, abstract: updated.abstract, keywords: updated.keywords });
       const duplicateSignal = await checkDuplicate({ title: updated.title, doi: updated.doi, url: updated.url, year }, id);
       await retagResources([id]);
       const themeRows = await db
@@ -778,7 +778,9 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       const newStatus = classifyStatus({ duplicateSignal, missingFields, hasThemeTag, report });
       const [reclassified] = await db
         .update(resourcesTable)
-        .set({ status: newStatus, rejectionReasonId: null, rejectionNote: null, reviewedBy: null, reviewedAt: null })
+        // docs/planning/16 §16.1 — cache the report computed above (the same reasoning as
+        // persistConfirmedDraft: this resubmission recheck already has to compute it fresh).
+        .set({ status: newStatus, rejectionReasonId: null, rejectionNote: null, reviewedBy: null, reviewedAt: null, verificationReport: report, verifiedAt: new Date() })
         .where(eq(resourcesTable.id, id))
         .returning();
       res.json(reclassified);

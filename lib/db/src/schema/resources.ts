@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, pgEnum, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, pgEnum, integer, boolean, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
@@ -77,6 +77,13 @@ export const resourcesTable = pgTable("resources", {
   // review action. Lets the UI/future audits distinguish "system-extracted as-is" from "an admin's
   // judgment call touched this," without needing per-field history (not required yet per the doc).
   adminEdited: boolean("admin_edited").notNull().default(false),
+  // docs/planning/16 §Commit 16.1 — the field-by-field verify report (lib/verify.ts's VerifyReport)
+  // computed once at persist/resubmit time and cached here, so the admin detail view is a pure DB
+  // read instead of re-running DOI-resolution/URL-reachability network calls every time it's opened.
+  // Null only for rows that predate this column. Refreshed by the explicit POST .../reverify action,
+  // never as a side effect of merely viewing the resource.
+  verificationReport: jsonb("verification_report"),
+  verifiedAt: timestamp("verified_at", { withTimezone: true }),
 });
 
 export const insertResourceSchema = createInsertSchema(resourcesTable).omit({

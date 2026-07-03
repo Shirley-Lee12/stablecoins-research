@@ -110,6 +110,8 @@ async function generateKeywordsFromAbstract(abstract: string): Promise<string[]>
   try {
     const prompt = `Read the following academic abstract and extract 3 to 5 concise keywords or key phrases (in the same language as the abstract) that best represent its core topics.
 
+Prefer specific terms that identify the paper's actual method, mechanism, or subject — e.g. "Benford's Law", "power-law distribution" — over generic field-level words like a bare "cryptocurrency" or "finance" that could apply to almost any paper in the field.
+
 Abstract:
 ---
 ${abstract.slice(0, 3000)}
@@ -248,7 +250,7 @@ async function runAutoPipeline(rawText: string, sourceTypeHint: string, vocab: T
 
   const tagIds = await computeTagsForText({ title: draft.title, abstract: draft.abstract }, vocab);
   const tags = await enrichTags(tagIds);
-  const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
+  const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract, keywords: draft.keywords });
   const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi, keywords: draft.keywords });
 
   return { draft, tagIds, tags, report, foundInScholarlyDb: linked.foundInScholarlyDb, missingRequired };
@@ -269,15 +271,15 @@ router.post("/resources/upload/manual", requireAuth, async (req: any, res) => {
     const vocab = await loadTagVocabulary();
     const tagIds = await computeTagsForText({ title, abstract }, vocab);
     const tags = await enrichTags(tagIds);
-    const report = await verifyResource({
-      title, authors: authors ?? [], year: year ?? null, doi: doi ?? null, url: url ?? null, abstract: abstract ?? null,
-    });
     // docs/planning/15 §5.3 — user-typed keywords win outright ('manual'); only fall back to
     // LLM generation from the abstract when the user left this blank.
     const manualKeywords = Array.isArray(typedKeywords) ? typedKeywords.map((k) => k.trim()).filter(Boolean) : [];
     const { keywords, keywordsSource } = manualKeywords.length > 0
       ? { keywords: manualKeywords, keywordsSource: "manual" as const }
       : await resolveKeywords([], abstract ?? null);
+    const report = await verifyResource({
+      title, authors: authors ?? [], year: year ?? null, doi: doi ?? null, url: url ?? null, abstract: abstract ?? null, keywords,
+    });
     const missingRequired = missingSixElements(
       { title, authors: authors ?? [], year: year ?? null, abstract: abstract ?? null, url: url ?? null, doi: doi ?? null, keywords },
     );
@@ -470,7 +472,7 @@ async function processCitationRecord(record: CitationRecord, vocab: TagVocabular
   // abstract, instead of tagging on title alone.
   const tagIds = await computeTagsForText({ title: draft.title, abstract: draft.abstract || record.keywords.join(" ") }, vocab);
   const tags = await enrichTags(tagIds);
-  const report = verifyCitationRecord({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
+  const report = verifyCitationRecord({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract, keywords: draft.keywords });
   const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi, keywords: draft.keywords });
 
   return { draft, tagIds, tags, report, missingRequired, abstractSource };
@@ -580,7 +582,7 @@ async function processTitleEntry(entry: { title: string; authors: string[]; year
   };
   const tagIds = await computeTagsForText({ title: draft.title }, vocab);
   const tags = await enrichTags(tagIds);
-  const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
+  const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract, keywords: draft.keywords });
   const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi, keywords: draft.keywords });
   return { draft, tagIds, tags, report, foundInScholarlyDb: linked.foundInScholarlyDb, missingRequired };
 }
@@ -717,7 +719,7 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNe
   const keywordsSource = keywords.length > 0 ? (input.keywordsSource ?? "manual") : null;
 
   const missingFields = missingSixElements({ title: input.title, authors, year, abstract, url, doi, keywords });
-  const verifyInput = { title: input.title, authors, year, doi, url, abstract };
+  const verifyInput = { title: input.title, authors, year, doi, url, abstract, keywords };
   const report = skipNetworkVerification ? verifyCitationRecord(verifyInput) : await verifyResource(verifyInput);
   const duplicateSignal = await checkDuplicate({ title: input.title, doi, url, year });
   const hasThemeTag = await hasThemeFacetTag(tagIds);
@@ -740,6 +742,10 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNe
       publishedDate: year !== null ? String(year) : null,
       status,
       createdBy: userId,
+      // docs/planning/16 §16.1 — cache the report computed above instead of discarding it; the admin
+      // detail view reads this column instead of re-running verifyResource() on every open.
+      verificationReport: report,
+      verifiedAt: new Date(),
     })
     .returning();
 

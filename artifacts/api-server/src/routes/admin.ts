@@ -125,23 +125,46 @@ router.get("/rejection-reasons", async (req, res) => {
 
 /**
  * GET /api/admin/resources/:id/verify-report — admin only (docs/planning/15 §2.2 point 2).
- * Re-runs verifyResource() live against the resource's current stored data — not persisted
- * anywhere, purely for the admin detail view before approving. For a 'pending' resource this
- * should always come back clean (hasFailure/hasWarning both false), since a resource can't reach
- * 'pending' at all unless it already passed every check the state machine runs (docs/planning/15
- * §0.6) — showing it here is reassurance for the admin, not something they're expected to act on.
+ * Pure DB read (docs/planning/16 §16.1) — the report is computed once, at persist/resubmit time
+ * (upload.ts's persistConfirmedDraft, resources.ts's owner-resubmission path) and cached on
+ * `resources.verificationReport`. Previously this route re-ran verifyResource() live on every call,
+ * burning a DOI-resolution + URL-reachability round trip every single time an admin opened (or
+ * re-opened) the same resource's detail view — pure waste, since the report can't have changed
+ * between two views of the same unedited row. Null only for rows that predate this column, or that
+ * somehow haven't been through a persist/reverify pass yet.
  */
 router.get("/admin/resources/:id/verify-report", requireAuth, requireAdmin, async (req: any, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [r] = await db.select({ verificationReport: resourcesTable.verificationReport, verifiedAt: resourcesTable.verifiedAt }).from(resourcesTable).where(eq(resourcesTable.id, id)).limit(1);
+    if (!r) { res.status(404).json({ error: "Not found" }); return; }
+    res.json({ report: r.verificationReport ?? null, verifiedAt: r.verifiedAt ?? null });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to fetch verify report" });
+  }
+});
+
+/**
+ * POST /api/admin/resources/:id/reverify — admin only (docs/planning/16 §16.1).
+ * Explicit, admin-triggered re-run of verifyResource() against the resource's current stored data —
+ * the only place this route's network calls (DOI resolution, URL reachability) happen outside of
+ * persist/resubmit time. Does not touch status/tags — this is a read recheck, not a reclassification
+ * (an admin who wants the full pipeline rerun, including retagging, should edit-and-save instead).
+ */
+router.post("/admin/resources/:id/reverify", requireAuth, requireAdmin, async (req: any, res) => {
   try {
     const id = parseInt(req.params.id);
     const [r] = await db.select().from(resourcesTable).where(eq(resourcesTable.id, id)).limit(1);
     if (!r) { res.status(404).json({ error: "Not found" }); return; }
     const year = r.publishedDate?.match(/^\d{4}/)?.[0] ? Number(r.publishedDate.match(/^\d{4}/)![0]) : null;
-    const report = await verifyResource({ title: r.title, authors: r.authors, year, doi: r.doi, url: r.url, abstract: r.abstract });
-    res.json(report);
+    const report = await verifyResource({ title: r.title, authors: r.authors, year, doi: r.doi, url: r.url, abstract: r.abstract, keywords: r.keywords });
+    const verifiedAt = new Date();
+    await db.update(resourcesTable).set({ verificationReport: report, verifiedAt }).where(eq(resourcesTable.id, id));
+    res.json({ report, verifiedAt });
   } catch (err) {
     req.log.error(err);
-    res.status(500).json({ error: "Failed to compute verify report" });
+    res.status(500).json({ error: "Failed to reverify resource" });
   }
 });
 

@@ -26,7 +26,14 @@ export interface VerifyInput {
   doi: string | null;
   url: string | null;
   abstract: string | null;
+  keywords: string[];
 }
+
+// docs/planning/16 §16.3 — a target, not a hard rule: extracted keywords mirror whatever the
+// source paper actually lists (could legitimately be 2 or 8), so this only flags out-of-range
+// counts as a non-blocking ⚠️, never as a mismatch/failure.
+const KEYWORD_COUNT_MIN = 3;
+const KEYWORD_COUNT_MAX = 5;
 
 export interface VerifyReport {
   checks: FieldCheck[];
@@ -122,6 +129,16 @@ function checkAbstract(input: VerifyInput): FieldCheck {
     : { field: "abstract", status: "⚠️", detail: "缺少摘要", kind: "missing" };
 }
 
+/** docs/planning/16 §16.3 — informational only; never blocks (no "mismatch" kind), since a paper legitimately having 2 or 8 keywords isn't wrong, just outside the suggested range. */
+function checkKeywords(input: VerifyInput): FieldCheck {
+  const n = input.keywords.length;
+  if (n === 0) return { field: "keywords", status: "⚠️", detail: "未提供关键词", kind: "missing" };
+  if (n < KEYWORD_COUNT_MIN || n > KEYWORD_COUNT_MAX) {
+    return { field: "keywords", status: "⚠️", detail: `关键词数量为 ${n} 个，建议 ${KEYWORD_COUNT_MIN}-${KEYWORD_COUNT_MAX} 个（不强制）` };
+  }
+  return { field: "keywords", status: "✅", detail: `关键词数量（${n}）符合建议区间` };
+}
+
 /**
  * Pre-persist verification — produces a field-by-field report rather than a binary pass/reject,
  * so the upload confirm dialog can show the user exactly what's uncertain instead of a black box.
@@ -129,7 +146,7 @@ function checkAbstract(input: VerifyInput): FieldCheck {
  */
 export async function verifyResource(input: VerifyInput): Promise<VerifyReport> {
   const [doiCheck, urlCheck, authorYearChecks] = await Promise.all([checkDoi(input), checkUrl(input), checkAuthorsAndYear(input)]);
-  const checks = [checkTitle(input), doiCheck, urlCheck, ...authorYearChecks, checkAbstract(input)];
+  const checks = [checkTitle(input), doiCheck, urlCheck, ...authorYearChecks, checkAbstract(input), checkKeywords(input)];
   return {
     checks,
     hasFailure: checks.some((c) => c.status === "❌"),
@@ -160,6 +177,7 @@ export function verifyCitationRecord(input: VerifyInput): VerifyReport {
       ? { field: "url", status: "✅", detail: "题录自带直达链接（来自 CNKI，不再核对可达性）" }
       : { field: "url", status: "⚠️", detail: "题录未提供直达链接", kind: "missing" },
     checkAbstract(input),
+    checkKeywords(input),
   ];
   return {
     checks,

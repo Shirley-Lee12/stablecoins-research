@@ -5,7 +5,7 @@ import { useLanguage } from "@/lib/language-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Shield, Users, CheckSquare, FileText, Settings as SettingsIcon,
-  Clock, Check, X, Loader2, ChevronRight, Database, Mail, Sparkles, History, Pencil,
+  Clock, Check, X, Loader2, ChevronRight, Database, Mail, Sparkles, History, Pencil, RefreshCw,
 } from "lucide-react";
 import {
   ResourceDetailModal, RejectDialog, EditModal, VerifyReportList,
@@ -253,7 +253,9 @@ function ApprovalsPanel({ token, language, isAdmin }: { token: string; language:
   const [loading, setLoading] = useState(true);
   const [viewing, setViewing] = useState<Resource | null>(null);
   const [verifyReport, setVerifyReport] = useState<VerifyReport | null>(null);
+  const [verifiedAt, setVerifiedAt] = useState<string | null>(null);
   const [reportLoading, setReportLoading] = useState(false);
+  const [reverifying, setReverifying] = useState(false);
   const [rejecting, setRejecting] = useState<Resource | null>(null);
   const [editing, setEditing] = useState<Resource | null>(null);
   const [busy, setBusy] = useState(false);
@@ -275,14 +277,42 @@ function ApprovalsPanel({ token, language, isAdmin }: { token: string; language:
       .catch(() => {});
   }, []);
 
+  function fetchVerifyReport(id: number) {
+    setVerifyReport(null);
+    setVerifiedAt(null);
+    setReportLoading(true);
+    fetch(`${apiBase()}/api/admin/resources/${id}/verify-report`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { report: VerifyReport | null; verifiedAt: string | null } | null) => {
+        setVerifyReport(data?.report ?? null);
+        setVerifiedAt(data?.verifiedAt ?? null);
+      })
+      .finally(() => setReportLoading(false));
+  }
+
   function openDetail(r: Resource) {
     setViewing(r);
-    setVerifyReport(null);
-    setReportLoading(true);
-    fetch(`${apiBase()}/api/admin/resources/${r.id}/verify-report`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => (res.ok ? res.json() : null))
-      .then(setVerifyReport)
-      .finally(() => setReportLoading(false));
+    fetchVerifyReport(r.id);
+  }
+
+  /** docs/planning/16 §16.1 — the only place this page re-runs the live DOI/URL network checks; everywhere else just reads the cached column. */
+  async function doReverify() {
+    if (!viewing) return;
+    if (!confirm(zh ? "重新核验会调用外部 DOI/链接检查接口，确定要继续吗？" : "Re-verifying calls external DOI/link-check APIs — continue?")) return;
+    setReverifying(true);
+    try {
+      const res = await fetch(`${apiBase()}/api/admin/resources/${viewing.id}/reverify`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data: { report: VerifyReport; verifiedAt: string } = await res.json();
+        setVerifyReport(data.report);
+        setVerifiedAt(data.verifiedAt);
+      }
+    } finally {
+      setReverifying(false);
+    }
   }
 
   async function doApprove(id: number) {
@@ -359,14 +389,32 @@ function ApprovalsPanel({ token, language, isAdmin }: { token: string; language:
           onClose={() => setViewing(null)}
           extraSection={
             <div className="pt-2 border-t border-border space-y-1.5">
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "核对报告" : "Verification Report"}</h3>
-              {reportLoading || !verifyReport ? (
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "核对报告" : "Verification Report"}</h3>
+                {!reportLoading && (
+                  <button disabled={reverifying} onClick={doReverify}
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary disabled:opacity-50 transition-colors">
+                    {reverifying ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                    {zh ? "重新核验" : "Re-verify"}
+                  </button>
+                )}
+              </div>
+              {reportLoading ? (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  {zh ? "正在核对…" : "Verifying…"}
+                  {zh ? "加载中…" : "Loading…"}
                 </div>
+              ) : verifyReport ? (
+                <>
+                  <VerifyReportList report={verifyReport} language={language} />
+                  {verifiedAt && (
+                    <p className="text-xs text-muted-foreground/70">
+                      {zh ? "核对时间：" : "Verified: "}{new Date(verifiedAt).toLocaleString(zh ? "zh-CN" : "en-US")}
+                    </p>
+                  )}
+                </>
               ) : (
-                <VerifyReportList report={verifyReport} language={language} />
+                <p className="text-xs text-muted-foreground py-2">{zh ? "尚无核对报告——点击“重新核验”生成一份。" : "No verification report yet — click \"Re-verify\" to generate one."}</p>
               )}
             </div>
           }

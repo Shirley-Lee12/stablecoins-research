@@ -513,9 +513,15 @@ export function AuthorPicker({ authors, onChange, language }: { authors: string[
 // ── Facet-tag picker (docs/planning/15 §2.4 — admin-only editing of the real theme/jurisdiction/
 // asset tag system, distinct from the legacy free-text TagEditor above). Checked tags are sent as
 // `tagIds` and the backend marks every one `source: 'manual'` on save, per T.4's protection scheme.
+// docs/planning/16 §16.2 — theme facet gets the same two-level folding tree as the sidebar
+// (Group 3), so an admin fixing one wrong tag doesn't have to scan a flat wall of 37 buttons.
+// Categories that already contain a selected tag start expanded, so current state is visible at a
+// glance; everything else starts collapsed. jurisdiction/asset stay flat (same as the sidebar).
 export function FacetTagPicker({ selectedIds, onChange, language }: { selectedIds: number[]; onChange: (ids: number[]) => void; language: string }) {
   const zh = language === "zh";
   const [vocab, setVocab] = useState<TagSummary[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const initializedExpansion = useRef(false);
 
   useEffect(() => {
     fetch(`${apiBase()}/api/tags`)
@@ -524,33 +530,92 @@ export function FacetTagPicker({ selectedIds, onChange, language }: { selectedId
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (initializedExpansion.current || vocab.length === 0) return;
+    initializedExpansion.current = true;
+    const withSelection = new Set(
+      vocab.filter((t) => t.facet === "theme" && t.category && selectedIds.includes(t.id)).map((t) => t.category as string),
+    );
+    if (withSelection.size > 0) setExpandedCategories(withSelection);
+  }, [vocab, selectedIds]);
+
   function toggle(id: number) {
     onChange(selectedIds.includes(id) ? selectedIds.filter((x) => x !== id) : [...selectedIds, id]);
+  }
+
+  function toggleCategory(cat: string) {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat); else next.add(cat);
+      return next;
+    });
   }
 
   const byFacet: Partial<Record<TagSummary["facet"], TagSummary[]>> = {};
   for (const t of vocab) (byFacet[t.facet] ??= []).push(t);
 
+  const themeTags = byFacet.theme ?? [];
+  const byCategory = new Map<string, TagSummary[]>();
+  for (const t of themeTags) {
+    const cat = t.category ?? "";
+    if (!byCategory.has(cat)) byCategory.set(cat, []);
+    byCategory.get(cat)!.push(t);
+  }
+  const categorySlugs = THEME_CATEGORY_ORDER.filter((c) => byCategory.has(c));
+
+  function renderChip(t: TagSummary) {
+    return (
+      <button key={t.id} type="button" onClick={() => toggle(t.id)}
+        className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+          selectedIds.includes(t.id)
+            ? "bg-primary/10 text-primary border-primary/30"
+            : "bg-muted/50 text-muted-foreground border-border/60 hover:border-primary/40"
+        }`}>
+        {zh ? t.nameZh : t.nameEn}
+      </button>
+    );
+  }
+
   return (
     <div className="space-y-2">
       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "分类标签（管理员）" : "Facet Tags (admin)"}</label>
-      <div className="space-y-2.5 max-h-48 overflow-y-auto rounded-lg border border-border p-3">
-        {(["theme", "jurisdiction", "asset"] as const).filter((f) => byFacet[f]?.length).map((facet) => (
+      <div className="space-y-2.5 max-h-64 overflow-y-auto rounded-lg border border-border p-3">
+        {themeTags.length > 0 && (
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              {zh ? FACET_LABELS.theme.zh : FACET_LABELS.theme.en}
+            </p>
+            <div className="space-y-0.5">
+              {categorySlugs.map((cat) => {
+                const expanded = expandedCategories.has(cat);
+                const tagsInCategory = byCategory.get(cat)!;
+                const selectedCount = tagsInCategory.filter((t) => selectedIds.includes(t.id)).length;
+                return (
+                  <div key={cat}>
+                    <button type="button" onClick={() => toggleCategory(cat)}
+                      className="flex items-center gap-1 w-full px-1 py-1 text-xs font-semibold text-foreground/85 hover:text-foreground text-left transition-colors">
+                      <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${expanded ? "rotate-90" : ""}`} />
+                      {zh ? THEME_CATEGORY_LABELS[cat]?.zh ?? cat : THEME_CATEGORY_LABELS[cat]?.en ?? cat}
+                      {selectedCount > 0 && <span className="text-primary font-normal">({selectedCount})</span>}
+                    </button>
+                    {expanded && (
+                      <div className="flex flex-wrap gap-1.5 pl-4 pt-1 pb-1.5">
+                        {tagsInCategory.map(renderChip)}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {(["jurisdiction", "asset"] as const).filter((f) => byFacet[f]?.length).map((facet) => (
           <div key={facet} className="space-y-1">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               {zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {byFacet[facet]!.map((t) => (
-                <button key={t.id} type="button" onClick={() => toggle(t.id)}
-                  className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
-                    selectedIds.includes(t.id)
-                      ? "bg-primary/10 text-primary border-primary/30"
-                      : "bg-muted/50 text-muted-foreground border-border/60 hover:border-primary/40"
-                  }`}>
-                  {zh ? t.nameZh : t.nameEn}
-                </button>
-              ))}
+              {byFacet[facet]!.map(renderChip)}
             </div>
           </div>
         ))}
@@ -576,6 +641,10 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
   const [sourceType, setSourceType] = useState<SourceType>(resource.sourceType);
   const [saving,   setSaving]   = useState(false);
   const [error,    setError]    = useState("");
+  // docs/planning/16 §16.2 — the tag picker (37+16+22 tags) stays collapsed unless the admin
+  // explicitly asks to edit tags, so opening this modal to fix a typo doesn't also dump the whole
+  // vocabulary on screen.
+  const [editingTags, setEditingTags] = useState(false);
 
   async function handleSave() {
     setSaving(true);
@@ -652,11 +721,20 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
               onChange={(e) => setKeywords(e.target.value.split(/[,，]/).map((k) => k.trim()).filter(Boolean))}
               placeholder={zh ? "多个关键词用逗号分隔" : "Comma-separated keywords"}
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+            <KeywordCountHint count={keywords.length} language={language} />
           </div>
           <TagEditor tags={tags} onChange={setTags} language={language} />
           {isAdmin && (
             <>
-              <FacetTagPicker selectedIds={tagIds} onChange={setTagIds} language={language} />
+              {editingTags ? (
+                <FacetTagPicker selectedIds={tagIds} onChange={setTagIds} language={language} />
+              ) : (
+                <button type="button" onClick={() => setEditingTags(true)}
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+                  <Tag className="h-3 w-3" />
+                  {zh ? `编辑分类标签（管理员，当前 ${tagIds.length} 个）` : `Edit facet tags (admin, ${tagIds.length} selected)`}
+                </button>
+              )}
               <p className="text-xs text-muted-foreground">
                 {zh ? "管理员编辑不会触发重新核对，状态保持不变。" : "Admin edits don't trigger re-verification — status is left unchanged."}
               </p>
@@ -741,7 +819,21 @@ function tagScoresPayload(tags: TagSummary[]): Record<number, number> {
 const CHECK_FIELD_LABELS: Record<string, { en: string; zh: string }> = {
   title: { en: "Title", zh: "标题" }, doi: { en: "DOI", zh: "DOI" }, url: { en: "URL", zh: "链接" },
   authors: { en: "Authors", zh: "作者" }, year: { en: "Year", zh: "年份" }, abstract: { en: "Abstract", zh: "摘要" },
+  keywords: { en: "Keywords", zh: "关键词" },
 };
+// docs/planning/16 §16.3 — soft target only, mirrors verify.ts's KEYWORD_COUNT_MIN/MAX.
+const KEYWORD_COUNT_MIN = 3;
+const KEYWORD_COUNT_MAX = 5;
+/** Non-blocking hint shown under a keyword input when the count falls outside the suggested range — never disables submit. */
+function KeywordCountHint({ count, language }: { count: number; language: string }) {
+  const zh = language === "zh";
+  if (count === 0 || (count >= KEYWORD_COUNT_MIN && count <= KEYWORD_COUNT_MAX)) return null;
+  return (
+    <p className="text-xs text-amber-600 dark:text-amber-400">
+      {zh ? `当前 ${count} 个，建议 ${KEYWORD_COUNT_MIN}-${KEYWORD_COUNT_MAX} 个（不强制）` : `${count} keyword${count === 1 ? "" : "s"} — suggested range is ${KEYWORD_COUNT_MIN}-${KEYWORD_COUNT_MAX} (not required)`}
+    </p>
+  );
+}
 
 // ── Keywords display (docs/planning/15 §5.4) — the document's own free-text keywords, deliberately
 // styled distinctly from TagSummaryList below (different heading, no pill-click-to-filter behavior)
@@ -895,6 +987,7 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
           onChange={(e) => onChange({ ...draft, keywords: e.target.value.split(/[,，]/).map((k) => k.trim()).filter(Boolean), keywordsSource: "manual" })}
           placeholder={zh ? "多个关键词用逗号分隔（原文没有的话可以自己填，或留空由 AI 从摘要提炼）" : "Comma-separated — leave blank to let AI suggest some from the abstract"}
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+        <KeywordCountHint count={draft.keywords.length} language={language} />
       </div>
       <div className="space-y-1.5">
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "自动匹配的标签" : "Auto-matched tags"}</label>
