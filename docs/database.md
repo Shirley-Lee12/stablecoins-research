@@ -48,7 +48,6 @@ source_type         source_type_enum NOT NULL DEFAULT 'journal_article'
 url                 text
 doi                 text
 abstract            text
-tags                text[] NOT NULL DEFAULT '{}'          -- 旧版自由标签，逐步被 tags/resource_tags 结构化标签取代
 keywords            text[] NOT NULL DEFAULT '{}'          -- 文献自带的关键词，自由文本，不是受控词表（区别于 tags）
 keywords_source     text                                   -- 'extracted'(原文提取) | 'generated'(AI生成) | 'manual'(用户手填)，为空只能对应 keywords=[]
 status              resource_status_enum NOT NULL DEFAULT 'pending'   -- 七值枚举，见下方"枚举全集"表
@@ -66,6 +65,8 @@ verified_at         timestamptz                              -- verification_rep
 `keywords`/`keywords_source`（docs/planning/15 §5）：题录导入(CNKI K1/EndNote %K/NoteExpress Keywords) 与 PDF/URL 抽取的"关键词:"/"Keywords:"章节 → `extracted`；用户手填或事后编辑（`PATCH /api/resources/:id` 带 `keywords` 字段，无论编辑者是所有者还是管理员）→ `manual`；原文没有关键词章节且用户没手填时，允许（非强制）LLM 从摘要提炼 3-5 个 → `generated`，前端必须给 `generated` 来源打上明显的"AI生成"标注。六要素完整性判定里，`keywords` 只要非空就算满足，不区分来源。`verify.ts` 的核对报告里也有一项关键词数量校验（3-5 个建议区间），超出/不足只标 ⚠️，不算失败，不强制。
 
 `verification_report`/`verified_at`（docs/planning/16 §16.1）：核对报告只在两处写入——`persistConfirmedDraft()`（首次入库）和 `PATCH /api/resources/:id` 的所有者重新提交全套检查路径（docs/planning/15 §0.7）——都是本来就要算一次核对报告的地方，顺手缓存下来。`GET /api/admin/resources/:id/verify-report` 改成纯读这两列，不再每次打开详情页都重新调用 DOI 解析/URL 可达性检查；如果管理员确实想强制刷新，走显式的 `POST /api/admin/resources/:id/reverify`（会重新调用外部接口并覆盖这两列，前端要求二次确认）。管理员编辑资源字段（`isAdmin` 分支）不触发这条路径，报告保持不变——这是仿照 §2.4"管理员编辑不重新核对"的既有原则。
+
+**`tags` 字段已删除（docs/planning/18 §18.2）**：旧版"Research Tags（最多3个，固定12项列表）+ Additional Tag（最多1个自由文本）"系统，从未纳入 T.1–T.5 的受控词表规划。逻辑几乎全嵌在已废弃的 `/resources/import*` 死路由里（迁移到 upload.ts 新管线后无调用方，见 §18.2 step a），真正的活写入路径是 `PATCH /resources/:id`（`EditModal` 的 `TagEditor` UI，已随本次一并下线）。删除前确认线上库里该列全部是空数组，无需数据迁移。资源标签的唯一入口现在是 `tags`/`resource_tags` 表（theme/jurisdiction/asset facet）。
 
 ### `our_research`（`our_research.ts`）—— ZIBS 自有研究
 ```
@@ -105,7 +106,7 @@ author_id   integer NOT NULL REFERENCES authors(id) ON DELETE CASCADE
 UNIQUE (resource_id, author_id)
 ```
 
-### `tags`（`tags.ts`）—— 结构化标签（替代 `resources.tags` 自由文本数组）
+### `tags`（`tags.ts`）—— 结构化标签（唯一的资源标签系统，已下线的旧版 Research Tags/Additional Tag 曾经用过 `resources.tags` 自由文本数组，该列已删除，见上方 §18.2 说明）
 ```
 id         serial PRIMARY KEY
 slug       text UNIQUE NOT NULL
@@ -133,7 +134,7 @@ UNIQUE (resource_id, tag_id)
 ```
 `source='manual'` 的行（管理员手动加的标签）永远不会被 `retagResources()` 重跑覆盖；重跑只清空重建 `source='auto'` 的行。由于 `(resource_id, tag_id)` 是唯一约束（不区分 source），同一对资源-标签只能存在一条记录——manual 优先于 auto：重跑时如果某个 auto 匹配命中的标签已经有 manual 记录，insert 会因唯一冲突被 `onConflictDoNothing` 跳过，manual 记录原样保留。
 
-> **当前状态（2026-07-03）**：表结构 + 种子数据已就绪，T.5（前端按 facet 渲染）已完成，`GET /api/resources`/`GET /api/resources/:id` 已返回 `facetedTags`（含 `category`/`score`）。新上传管线（U.6）每次确认入库都会写入 `resource_tags`（`source='auto'`）。`retagResources()`/`POST /api/admin/tags/retag` 用于词表变更后的全库重打标，目前库里还没有真实资源数据，尚未实际触发过。`resources.tags text[]` 仍保留作为旧资源的兼容兜底（前端卡片优先显示 `facetedTags`，没有才回退显示它）。主题标签相似度打分改为标题+摘要加权（`TITLE_WEIGHT`/`ABSTRACT_WEIGHT` 常量，`artifacts/api-server/src/lib/tagging.ts`），资源列表侧边栏的 theme facet 改为按 `category` 折叠的两级树（默认全部折叠）。
+> **当前状态（2026-07-04）**：表结构 + 种子数据已就绪，T.5（前端按 facet 渲染）已完成，`GET /api/resources`/`GET /api/resources/:id` 已返回 `facetedTags`（含 `category`/`score`）。新上传管线（U.6）每次确认入库都会写入 `resource_tags`（`source='auto'`）。`retagResources()`/`POST /api/admin/tags/retag` 用于词表变更后的全库重打标，目前库里还没有真实资源数据，尚未实际触发过。`resources.tags`（旧版自由文本兜底）已随 doc 18 §18.2 删除——`tags`/`resource_tags` 是现在唯一的标签系统，不再有回退分支。主题标签相似度打分改为标题+摘要加权（`TITLE_WEIGHT`/`ABSTRACT_WEIGHT` 常量，`artifacts/api-server/src/lib/tagging.ts`），资源列表侧边栏的 theme facet 改为按 `category` 折叠的两级树（默认全部折叠）。
 
 ### `upload_jobs`（`upload_jobs.ts`）—— 批量/PDF 上传的异步进度记录（不是已导入的资源）
 ```

@@ -23,7 +23,7 @@ interface FacetedTag {
   score: number | null;
 }
 
-/** Attaches each resource's structured tags (new tags/resource_tags system) alongside the legacy resources.tags text[] array. */
+/** Attaches each resource's structured theme/jurisdiction/asset tags from the tags/resource_tags system. */
 async function attachFacetedTags<T extends { id: number }>(rows: T[]): Promise<(T & { facetedTags: FacetedTag[] })[]> {
   if (rows.length === 0) return rows as (T & { facetedTags: FacetedTag[] })[];
   const ids = rows.map((r) => r.id);
@@ -53,49 +53,6 @@ async function attachFacetedTags<T extends { id: number }>(rows: T[]): Promise<(
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-// Legacy "Research Tags" closed vocabulary (docs/planning/18 §18.2) — this and sanitizeTags() are
-// still the real write path for PATCH /resources/:id's `tags` field (EditModal's TagEditor), even
-// though the 4 old /resources/import* routes that also referenced this list are gone (they were
-// dead — superseded by upload.ts's pipeline). Slated for full removal alongside the frontend
-// TagEditor UI once step 18.2(c)/(d) lands; kept for now so the still-live write path keeps working.
-// Keep in sync with STABLECOIN_TAGS in academic-resources.tsx.
-const STABLECOIN_TAGS = [
-  "Regulation & Policy",
-  "Financial Stability & Run Risk",
-  "Monetary Policy",
-  "CBDC",
-  "DeFi & Crypto Markets",
-  "Algorithmic Design & Pegging",
-  "Reserves & Collateral",
-  "Cross-Border Payments",
-  "Consumer Protection",
-  "Market Adoption",
-  "Systemic Risk",
-  "Technology & Infrastructure",
-];
-
-/**
- * Keeps up to 3 tags from the closed vocabulary (preferred, for a consistent library-wide tag
- * cloud) plus at most 1 additional free-form tag for paper-specific detail. Capped at 4 total.
- */
-function sanitizeTags(tags: unknown): string[] {
-  if (!Array.isArray(tags)) return [];
-  const strings = tags.filter((t): t is string => typeof t === "string" && t.trim().length > 0).map((t) => t.trim());
-  const fromTaxonomy = [...new Set(strings.filter((t) => STABLECOIN_TAGS.includes(t)))].slice(0, 3);
-  const custom = [...new Set(strings.filter((t) => !STABLECOIN_TAGS.includes(t)))].slice(0, 1);
-  return [...fromTaxonomy, ...custom].slice(0, 4);
-}
-
-function parseTagList(raw: unknown): string[] {
-  const list: string[] = [];
-  if (!raw) return list;
-  const arr = Array.isArray(raw) ? raw : [raw];
-  arr.forEach((t) => {
-    if (typeof t === "string") t.split(",").forEach((s) => { const v = s.trim(); if (v) list.push(v); });
-  });
-  return list;
-}
-
 /**
  * GET /api/resources
  * Visibility rules:
@@ -106,7 +63,6 @@ function parseTagList(raw: unknown): string[] {
 router.get("/resources", optionalAuth, async (req: any, res) => {
   try {
     const { source_type, search } = req.query as Record<string, string>;
-    const tagList = parseTagList(req.query["tags"]);
 
     const conditions: ReturnType<typeof eq>[] = [];
 
@@ -130,8 +86,6 @@ router.get("/resources", optionalAuth, async (req: any, res) => {
 
     // ── Domain filters ──
     if (source_type) conditions.push(eq(resourcesTable.sourceType, source_type as any));
-    for (const tag of tagList) conditions.push(sql`${tag} = ANY(${resourcesTable.tags})` as any);
-    // New facet-based tag system (separate from the legacy resources.tags text[] filter above).
     const facetTagSlug = req.query["facetTag"] as string | undefined;
     if (facetTagSlug) {
       conditions.push(sql`EXISTS (
@@ -146,7 +100,7 @@ router.get("/resources", optionalAuth, async (req: any, res) => {
           ilike(resourcesTable.title, like),
           ilike(resourcesTable.abstract, like),
           sql`EXISTS (SELECT 1 FROM unnest(${resourcesTable.authors}) a WHERE a ILIKE ${like})`,
-          sql`EXISTS (SELECT 1 FROM unnest(${resourcesTable.tags}) t WHERE t ILIKE ${like})`,
+          sql`EXISTS (SELECT 1 FROM unnest(${resourcesTable.keywords}) k WHERE k ILIKE ${like})`,
         ) as any,
       );
     }
@@ -239,9 +193,9 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       return;
     }
 
-    const { title, authors, sourceType, url, doi, abstract, tags, publishedDate, tagIds, keywords } = req.body as {
+    const { title, authors, sourceType, url, doi, abstract, publishedDate, tagIds, keywords } = req.body as {
       title?: string; authors?: string[]; sourceType?: string; url?: string | null; doi?: string | null;
-      abstract?: string; tags?: string[]; publishedDate?: string | null; tagIds?: number[]; keywords?: string[];
+      abstract?: string; publishedDate?: string | null; tagIds?: number[]; keywords?: string[];
     };
 
     const [updated] = await db
@@ -253,7 +207,6 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
         ...(url           !== undefined && { url }),
         ...(doi           !== undefined && { doi }),
         ...(abstract      !== undefined && { abstract }),
-        ...(tags          !== undefined && { tags: sanitizeTags(tags) }),
         // Editing this field is inherently a human act, whether the editor is the owner or an admin
         // (docs/planning/15 §5.3's "manual" source) — not re-derived from wherever it started.
         ...(keywords      !== undefined && { keywords, keywordsSource: keywords.length > 0 ? "manual" as const : null }),

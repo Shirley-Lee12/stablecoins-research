@@ -50,7 +50,6 @@ export const resourcesTable = pgTable("resources", {
   url: text("url"),
   doi: text("doi"),
   abstract: text("abstract"),
-  tags: text("tags").array().notNull().default([]),
   // docs/planning/15 §5.2 — free-text keywords from the document itself, distinct from `tags`
   // (the controlled theme/jurisdiction/asset vocabulary). keywordsSource records where they came
   // from: 'extracted' (CNKI K1 field or a "Keywords:" section the PDF/URL extractor found),
@@ -73,9 +72,9 @@ export const resourcesTable = pgTable("resources", {
   reviewedBy: integer("reviewed_by").references(() => usersTable.id, { onDelete: "set null" }),
   reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   // docs/planning/15 §2.4 — coarse-grained marker: true if an admin has ever directly edited this
-  // resource's fields (title/authors/year/abstract/url/doi/tags) outside the normal approve/reject
-  // review action. Lets the UI/future audits distinguish "system-extracted as-is" from "an admin's
-  // judgment call touched this," without needing per-field history (not required yet per the doc).
+  // resource's fields (title/authors/year/abstract/url/doi/facet tags) outside the normal approve/
+  // reject review action. Lets the UI/future audits distinguish "system-extracted as-is" from "an
+  // admin's judgment call touched this," without needing per-field history (not required yet per the doc).
   adminEdited: boolean("admin_edited").notNull().default(false),
   // docs/planning/16 §Commit 16.1 — the field-by-field verify report (lib/verify.ts's VerifyReport)
   // computed once at persist/resubmit time and cached here, so the admin detail view is a pure DB

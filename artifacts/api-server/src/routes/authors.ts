@@ -87,7 +87,6 @@ router.get("/authors/:name", async (req, res) => {
         url: resourcesTable.url,
         doi: resourcesTable.doi,
         abstract: resourcesTable.abstract,
-        tags: resourcesTable.tags,
         createdAt: resourcesTable.createdAt,
       })
       .from(resourceAuthorsTable)

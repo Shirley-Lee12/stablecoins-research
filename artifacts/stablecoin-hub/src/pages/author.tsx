@@ -27,7 +27,6 @@ interface ApiResource {
   url?: string | null;
   doi?: string | null;
   abstract?: string | null;
-  tags?: string[];
   createdAt?: string;
 }
 
@@ -371,14 +370,7 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                         {resource.abstract}
                       </p>
                     )}
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex flex-wrap gap-1.5">
-                        {(resource.tags ?? []).map((tag, idx) => (
-                          <span key={idx} className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-sm">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
+                    <div className="flex flex-wrap items-center justify-end gap-3">
                       {resource.doi && (
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <LinkIcon className="h-3 w-3" />

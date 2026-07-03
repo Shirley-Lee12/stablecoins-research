@@ -38,8 +38,7 @@ export interface Resource {
   url: string | null;
   doi: string | null;
   abstract: string | null;
-  tags: string[];
-  /** New facet-based tags (tags/resource_tags), distinct from the legacy free-text `tags` array above. Declared with `TagSummary` further down (shared with the Upload Center). */
+  /** Structured theme/jurisdiction/asset tags (tags/resource_tags). Declared with `TagSummary` further down (shared with the Upload Center). */
   facetedTags?: TagSummary[];
   /** docs/planning/15 §5.2 — the document's own keywords, free text, distinct from the controlled `tags`/`facetedTags`. */
   keywords: string[];
@@ -61,23 +60,6 @@ export interface RejectionReason {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-// Closed tag vocabulary — research themes, not named entities. Keep in sync with
-// STABLECOIN_TAGS in artifacts/api-server/src/routes/resources.ts.
-const STABLECOIN_TAGS = [
-  "Regulation & Policy",
-  "Financial Stability & Run Risk",
-  "Monetary Policy",
-  "CBDC",
-  "DeFi & Crypto Markets",
-  "Algorithmic Design & Pegging",
-  "Reserves & Collateral",
-  "Cross-Border Payments",
-  "Consumer Protection",
-  "Market Adoption",
-  "Systemic Risk",
-  "Technology & Infrastructure",
-];
-
 export const SOURCE_TYPE_ICONS: Record<SourceType, React.ElementType> = {
   journal_article: FileText,
   working_paper: BookOpen,
@@ -228,15 +210,9 @@ export function ResourceDetailModal({ resource, language, onClose, onFacetTagCli
             </div>
           )}
 
-          {(resource.facetedTags && resource.facetedTags.length > 0) ? (
+          {resource.facetedTags && resource.facetedTags.length > 0 && (
             <div className="pt-2 border-t border-border">
               <TagSummaryList tags={resource.facetedTags} language={language} onTagClick={onFacetTagClick} />
-            </div>
-          ) : resource.tags.length > 0 && (
-            <div className="pt-2 border-t border-border flex flex-wrap gap-1.5">
-              {resource.tags.map((tag) => (
-                <span key={tag} className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60">{tag}</span>
-              ))}
             </div>
           )}
 
@@ -335,104 +311,6 @@ function ExpertPanel({ language }: { language: string }) {
   );
 }
 
-// ── Tag chip editor (shared between Import and Edit modals) ───────────────────
-const TAG_LABELS_ZH: Record<string, string> = {
-  "Regulation & Policy": "监管与政策",
-  "Financial Stability & Run Risk": "金融稳定与挤兑风险",
-  "Monetary Policy": "货币政策",
-  "CBDC": "央行数字货币",
-  "DeFi & Crypto Markets": "DeFi与加密市场",
-  "Algorithmic Design & Pegging": "算法设计与锚定机制",
-  "Reserves & Collateral": "储备与抵押",
-  "Cross-Border Payments": "跨境支付",
-  "Consumer Protection": "消费者保护",
-  "Market Adoption": "市场采用",
-  "Systemic Risk": "系统性风险",
-  "Technology & Infrastructure": "技术与基础设施",
-};
-
-const MAX_TAXONOMY_TAGS = 3;
-const MAX_CUSTOM_TAGS = 1;
-
-// Mostly-closed vocabulary: up to MAX_TAXONOMY_TAGS from the fixed research-direction list
-// (keeps the library-wide tag cloud usable), plus one optional free-form tag for paper-specific
-// detail (e.g. a named stablecoin or jurisdiction) that the preset list doesn't capture.
-export function TagEditor({ tags, onChange, language }: { tags: string[]; onChange: (t: string[]) => void; language: string }) {
-  const zh = language === "zh";
-  const [customInput, setCustomInput] = useState("");
-
-  const taxonomyTags = tags.filter((t) => STABLECOIN_TAGS.includes(t));
-  const customTags = tags.filter((t) => !STABLECOIN_TAGS.includes(t));
-
-  function toggle(tag: string) {
-    if (tags.includes(tag)) onChange(tags.filter((x) => x !== tag));
-    else if (taxonomyTags.length < MAX_TAXONOMY_TAGS) onChange([...tags, tag]);
-  }
-  function addCustom(raw: string) {
-    const t = raw.trim();
-    if (t && customTags.length < MAX_CUSTOM_TAGS && !tags.includes(t)) onChange([...tags, t]);
-    setCustomInput("");
-  }
-  function removeCustom(tag: string) {
-    onChange(tags.filter((x) => x !== tag));
-  }
-
-  return (
-    <div className="space-y-1.5">
-      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-        {zh ? `研究方向标签（最多选 ${MAX_TAXONOMY_TAGS} 个）` : `Research Tags (up to ${MAX_TAXONOMY_TAGS})`}
-      </label>
-      <div className="flex flex-wrap gap-1.5">
-        {STABLECOIN_TAGS.map((tag) => {
-          const selected = tags.includes(tag);
-          const disabled = !selected && taxonomyTags.length >= MAX_TAXONOMY_TAGS;
-          return (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => toggle(tag)}
-              disabled={disabled}
-              className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                selected
-                  ? "bg-primary/10 text-primary border-primary/30"
-                  : disabled
-                    ? "bg-muted/40 text-muted-foreground/50 border-border cursor-not-allowed"
-                    : "bg-background text-muted-foreground border-border hover:border-primary/40"
-              }`}
-            >
-              {selected && <Check className="h-2.5 w-2.5" />}
-              {zh ? (TAG_LABELS_ZH[tag] ?? tag) : tag}
-            </button>
-          );
-        })}
-      </div>
-
-      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide block pt-1">
-        {zh ? `补充标签（可选，最多 ${MAX_CUSTOM_TAGS} 个）` : `Additional Tag (optional, up to ${MAX_CUSTOM_TAGS})`}
-      </label>
-      <div className="flex flex-wrap gap-1.5 items-center">
-        {customTags.map((tag) => (
-          <span key={tag} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-secondary/10 text-secondary-foreground border border-secondary/30">
-            {tag}
-            <button type="button" onClick={() => removeCustom(tag)} className="hover:text-red-500 transition-colors">
-              <X className="h-2.5 w-2.5" />
-            </button>
-          </span>
-        ))}
-        {customTags.length < MAX_CUSTOM_TAGS && (
-          <input
-            value={customInput}
-            onChange={(e) => setCustomInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addCustom(customInput); } }}
-            placeholder={zh ? "例如：USDC，新加坡…" : "e.g. USDC, Singapore…"}
-            className="flex-1 min-w-[140px] px-3 py-1 text-xs rounded-full border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ── Author picker (autocomplete existing authors, or create new on the fly) ───
 interface AuthorSuggestion { name: string; institutionName: string | null }
 
@@ -510,9 +388,9 @@ export function AuthorPicker({ authors, onChange, language }: { authors: string[
 }
 
 // ── Edit Modal ────────────────────────────────────────────────────────────────
-// ── Facet-tag picker (docs/planning/15 §2.4 — admin-only editing of the real theme/jurisdiction/
-// asset tag system, distinct from the legacy free-text TagEditor above). Checked tags are sent as
-// `tagIds` and the backend marks every one `source: 'manual'` on save, per T.4's protection scheme.
+// ── Facet-tag picker (docs/planning/15 §2.4 — admin-only editing of the theme/jurisdiction/asset
+// tag system). Checked tags are sent as `tagIds` and the backend marks every one `source: 'manual'`
+// on save, per T.4's protection scheme.
 // docs/planning/16 §16.2 — theme facet gets the same two-level folding tree as the sidebar
 // (Group 3), so an admin fixing one wrong tag doesn't have to scan a flat wall of 37 buttons.
 // Categories that already contain a selected tag start expanded, so current state is visible at a
@@ -635,7 +513,6 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
   const [doi,      setDoi]      = useState(resource.doi ?? "");
   const [abstract, setAbstract] = useState(resource.abstract ?? "");
   const [keywords, setKeywords] = useState(resource.keywords);
-  const [tags,     setTags]     = useState(resource.tags);
   const [tagIds,   setTagIds]   = useState<number[]>((resource.facetedTags ?? []).map((t) => t.id));
   const [publishedDate, setPublishedDate] = useState(resource.publishedDate ?? "");
   const [sourceType, setSourceType] = useState<SourceType>(resource.sourceType);
@@ -656,7 +533,7 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
           title: title.trim(), sourceType,
           authors,
           url: url.trim() || null, doi: doi.trim() || null,
-          abstract: abstract.trim(), tags, keywords,
+          abstract: abstract.trim(), keywords,
           publishedDate: publishedDate.trim() || null,
           ...(isAdmin && { tagIds }),
         }),
@@ -723,7 +600,6 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
             <KeywordCountHint count={keywords.length} language={language} />
           </div>
-          <TagEditor tags={tags} onChange={setTags} language={language} />
           {isAdmin && (
             <>
               {editingTags ? (
@@ -864,7 +740,7 @@ export function KeywordsBlock({ keywords, keywordsSource, language }: { keywords
   );
 }
 
-// ── Tag summary display (read-only — the new facet-based tag system, separate from the legacy STABLECOIN_TAGS free-text array TagEditor edits) ──
+// ── Tag summary display (read-only — the facet-based theme/jurisdiction/asset tag system) ──
 export function TagSummaryList({ tags, language, onTagClick }: { tags: TagSummary[]; language: string; onTagClick?: (slug: string) => void }) {
   const zh = language === "zh";
   if (tags.length === 0) return <p className="text-xs text-muted-foreground">{zh ? "未匹配到标签" : "No tags matched"}</p>;
@@ -1974,7 +1850,6 @@ export default function AcademicResources() {
 
   const [searchQuery,   setSearchQuery]   = useState("");
   const [selectedType,  setSelectedType]  = useState<FilterType>("All");
-  const [selectedTags,  setSelectedTags]  = useState<Set<string>>(new Set());
   const [selectedFacetTag, setSelectedFacetTag] = useState<string | null>(() => new URLSearchParams(window.location.search).get("tag"));
   const [facetTagVocab, setFacetTagVocab] = useState<TagSummary[]>([]);
   const [apiResources,  setApiResources]  = useState<Resource[] | null>(null);
@@ -2025,14 +1900,6 @@ export default function AcademicResources() {
 
   const resources = apiResources ?? [];
 
-  const allTags = useMemo(
-    () => Array.from(new Set(resources.filter((r) => r.status === "approved").flatMap((r) => r.tags))).sort(),
-    [resources],
-  );
-
-  const toggleTag = (tag: string) =>
-    setSelectedTags((prev) => { const n = new Set(prev); n.has(tag) ? n.delete(tag) : n.add(tag); return n; });
-
   // Only 'approved' resources ever appear on this public browsing list (docs/planning/15 §0.1) — a
   // submitter's own pending/self-service-status resources live in My Contributions instead, and the
   // admin queue lives at /admin (AdminCenter). No adminView/own-resource carve-out here anymore.
@@ -2041,20 +1908,19 @@ export default function AcademicResources() {
     return resources.filter((r) => {
       if (r.status !== "approved") return false;
       const matchType = selectedType === "All" || r.sourceType === selectedType;
-      const matchTags = selectedTags.size === 0 || [...selectedTags].every((t) => r.tags.includes(t));
       const matchFacetTag = !selectedFacetTag || (r.facetedTags ?? []).some((t) => t.slug === selectedFacetTag);
       const q = searchQuery.toLowerCase().trim();
       const matchSearch =
         !q || r.title.toLowerCase().includes(q) ||
         (r.abstract ?? "").toLowerCase().includes(q) ||
         r.authors.some((a) => a.toLowerCase().includes(q)) ||
-        r.tags.some((tg) => tg.toLowerCase().includes(q));
-      return matchType && matchTags && matchFacetTag && matchSearch;
+        r.keywords.some((k) => k.toLowerCase().includes(q));
+      return matchType && matchFacetTag && matchSearch;
     });
-  }, [resources, searchQuery, selectedType, selectedTags, selectedFacetTag]);
+  }, [resources, searchQuery, selectedType, selectedFacetTag]);
 
   const showExperts = selectedType === "Expert";
-  const hasActiveFilters = selectedType !== "All" || selectedTags.size > 0 || !!selectedFacetTag || searchQuery;
+  const hasActiveFilters = selectedType !== "All" || !!selectedFacetTag || searchQuery;
 
   return (
     <div className="max-w-screen-xl mx-auto space-y-6">
@@ -2193,26 +2059,6 @@ export default function AcademicResources() {
               </div>
             </div>
           )}
-          {!showExperts && allTags.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? "旧版自由标签" : "Legacy Tags"}</p>
-                {selectedTags.size > 0 && (
-                  <button onClick={() => setSelectedTags(new Set())} className="text-xs text-primary hover:underline">{t("Clear", "清除")}</button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {allTags.map((tag) => (
-                  <button key={tag} onClick={() => toggleTag(tag)}
-                    className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                      selectedTags.has(tag) ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
-                    }`}>
-                    <Tag className="h-2.5 w-2.5" />{tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </aside>
 
         {/* ── Results ── */}
@@ -2232,7 +2078,7 @@ export default function AcademicResources() {
                   </p>
                 )}
                 {hasActiveFilters && (
-                  <button onClick={() => { setSelectedType("All"); setSelectedTags(new Set()); setSearchQuery(""); if (selectedFacetTag) handleFacetTagClick(selectedFacetTag); }}
+                  <button onClick={() => { setSelectedType("All"); setSearchQuery(""); if (selectedFacetTag) handleFacetTagClick(selectedFacetTag); }}
                     className="text-xs text-primary hover:underline">{t("Reset filters", "重置筛选")}</button>
                 )}
               </div>
