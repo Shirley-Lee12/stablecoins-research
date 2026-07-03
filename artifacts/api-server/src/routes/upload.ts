@@ -6,6 +6,7 @@ import { eq, and, desc, inArray } from "drizzle-orm";
 import { requireAuth } from "./auth";
 import { syncResourceAuthors } from "./authors";
 import { generateJson } from "../lib/llm";
+import { logger } from "../lib/logger";
 import { resolveLink } from "../lib/scholar";
 import { extractPdfText } from "../lib/pdfExtract";
 import { loadTagVocabulary, computeTagsForText, type TagVocabulary, type ComputedTags } from "../lib/tagging";
@@ -98,11 +99,16 @@ Respond with ONLY the JSON object, no markdown fences, no extra text.`;
  * Last-resort keyword source (docs/planning/15 §5.3) — only called when neither the source text nor
  * the user provided any keywords. Constrained to 3-5 terms via the prompt; returns [] on any failure
  * so an entry never gets stuck unable to complete just because generation failed.
+ *
+ * The prompt must NOT claim the abstract is "about stablecoins" — this library also carries adjacent
+ * crypto/DeFi/regulatory topics (e.g. a wash-trading paper), and telling the model it's reading a
+ * stablecoin abstract when it plainly isn't produced empty/confused output in practice (observed:
+ * NBER's "Crypto Wash Trading", DOI 10.3386/w30783 — real production upload, not this sandbox).
  */
 async function generateKeywordsFromAbstract(abstract: string): Promise<string[]> {
   if (!abstract.trim()) return [];
   try {
-    const prompt = `Read the following academic abstract about stablecoins and extract 3 to 5 concise keywords or key phrases (in the same language as the abstract) that best represent its core topics.
+    const prompt = `Read the following academic abstract and extract 3 to 5 concise keywords or key phrases (in the same language as the abstract) that best represent its core topics.
 
 Abstract:
 ---
@@ -110,12 +116,15 @@ ${abstract.slice(0, 3000)}
 ---
 
 Return ONLY a JSON object: { "keywords": string[] } with between 3 and 5 items.`;
-    const raw = await generateJson(prompt, 256);
+    const raw = await generateJson(prompt, 512);
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed.keywords)
+    const keywords = Array.isArray(parsed.keywords)
       ? parsed.keywords.filter((k: unknown): k is string => typeof k === "string" && k.trim().length > 0).slice(0, 5)
       : [];
-  } catch {
+    if (keywords.length === 0) logger.warn({ raw }, "generateKeywordsFromAbstract: model returned no usable keywords");
+    return keywords;
+  } catch (err) {
+    logger.error({ err }, "generateKeywordsFromAbstract failed");
     return [];
   }
 }
