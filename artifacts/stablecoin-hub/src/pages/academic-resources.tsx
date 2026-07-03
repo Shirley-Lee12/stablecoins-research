@@ -736,7 +736,9 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
                 </button>
               )}
               <p className="text-xs text-muted-foreground">
-                {zh ? "管理员编辑不会触发重新核对，状态保持不变。" : "Admin edits don't trigger re-verification — status is left unchanged."}
+                {zh
+                  ? "管理员编辑不会自动触发核对 agent 重新核验；资源状态仍会按常规完整性规则更新。如需重新核验请使用「重新核验」按钮手动触发。"
+                  : "Admin edits don't automatically trigger the verify agent to re-run — but the resource's status still updates per the normal completeness rules. Use the \"Re-verify\" button if you want to manually trigger a fresh check."}
               </p>
             </>
           )}

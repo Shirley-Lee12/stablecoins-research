@@ -66,6 +66,7 @@ pnpm --filter @workspace/db run push       # 仅本地开发，需要 TTY
 - 鉴权用自定义 JWT（`jose`）+ bcrypt —— **不是** session cookie，**不是** Clerk。不要给 CORS 加 `credentials: true`，不要引入 cookie-based session。
 - 前端所有用户可见文案必须包 `t(en, zh)`（来自 `useLanguage()`），禁止硬编码单一语言字符串。
 - 主题切换是 class-based（`<html>` 加/去 `dark` class），不要改用 Tailwind 的 `darkMode: 'media'`。
+- 新增任何面向角色的提示文案/按钮/字段（如"仅管理员可见"的操作）时，设计阶段就要标注清楚是"仅管理员可见"还是"所有用户可见"，并用条件渲染（如 `{isAdmin && (...)}`）落实——不是先做成所有人可见、发现问题后再补丁区分（docs/planning/18 §18.1）。
 
 ## 数据库设计原则
 
