@@ -6,7 +6,7 @@ import { SOURCE_TYPES, sourceTypeLabel, type SourceType } from "@/lib/source-typ
 import {
   Search, ExternalLink, FileText, BookOpen, Newspaper,
   Tag, Users, ChevronRight, Loader2, Plus, X, Upload, AlertCircle,
-  Check, ShieldCheck, Clock, XCircle, Pencil, List, LayoutGrid,
+  Check, Clock, XCircle, Pencil, List, LayoutGrid,
   Presentation, GraduationCap, ScrollText, Landmark,
 } from "lucide-react";
 
@@ -105,152 +105,47 @@ export function apiBase() {
 }
 
 // ── Resource Card ─────────────────────────────────────────────────────────────
-function ResourceCard({
-  r, language, currentUserId, isAdmin, rejectionReasons,
-  onApprove, onReject, onEdit, onOpenDetail, onFacetTagClick,
-}: {
+// Minimal by design (docs/planning/15 §6.1) — only title/authors/year/one primary tag. Only ever
+// rendered for status='approved' resources (the public Resources list, per §0.1's "approved is the
+// only status that appears publicly" rule), so there's no status badge, edit, or approve/reject
+// affordance here; those belong to My Contributions and /admin (AdminCenter) respectively. The
+// direct-link button and the full tag set live on the detail page instead (§6.2/§6.3).
+function ResourceCard({ r, language, onOpenDetail }: {
   r: Resource; language: string;
-  currentUserId?: number; isAdmin?: boolean; rejectionReasons?: RejectionReason[];
-  onApprove?: (id: number) => void;
-  onReject?: (r: Resource) => void;
-  onEdit?: (r: Resource) => void;
   onOpenDetail?: (r: Resource) => void;
-  onFacetTagClick?: (slug: string) => void;
 }) {
-  const Icon  = BADGE_ICONS[r.sourceType] ?? FileText;
-  const color = BADGE_COLORS[r.sourceType] ?? BADGE_COLORS["journal_article"];
-  const href  = r.url ?? (r.doi ? `https://doi.org/${r.doi}` : null);
+  const zh = language === "zh";
   // Prefer the document's own publication year; fall back to when it was added to this library.
-  const date  = r.publishedDate?.match(/^\d{4}/)?.[0]
-    ?? new Date(r.createdAt).toLocaleDateString(language === "zh" ? "zh-CN" : "en-US", { year: "numeric", month: "short" });
-  const canEdit = isAdmin || (currentUserId != null && r.createdBy === currentUserId);
-  const isPending = r.status === "pending";
-  const isSelfService = SELF_SERVICE_STATUSES.includes(r.status);
-  const isRejected = r.status === "rejected";
-  const rejectionReason = r.rejectionReasonId != null ? rejectionReasons?.find((x) => x.id === r.rejectionReasonId) : undefined;
+  const year = r.publishedDate?.match(/^\d{4}/)?.[0]
+    ?? new Date(r.createdAt).toLocaleDateString(zh ? "zh-CN" : "en-US", { year: "numeric" });
+  const primaryTag = pickPrimaryThemeTag(r.facetedTags);
+  const primaryCategory = primaryTag?.category ? THEME_CATEGORY_LABELS[primaryTag.category] : undefined;
 
   return (
-    <div className={`group flex flex-col bg-card border rounded-xl overflow-hidden transition-all duration-200 ${
-      isPending || isSelfService ? "border-amber-300 dark:border-amber-700" :
-      isRejected ? "border-red-300 dark:border-red-800 opacity-70" :
-      "border-border hover:border-primary/40 hover:shadow-md"
-    }`}>
-      <div className={`h-0.5 w-full bg-gradient-to-r ${
-        isPending || isSelfService ? "from-amber-400 to-amber-200" :
-        isRejected ? "from-red-400 to-red-200" :
-        "from-primary/70 to-primary/10"
-      }`} />
-
-      <div className="flex flex-col flex-1 p-5 gap-3">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border ${color}`}>
-            <Icon className="h-3 w-3" />{sourceTypeLabel(r.sourceType, language === "zh")}
+    <div className="group flex flex-col bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:border-primary/40 hover:shadow-md p-5 gap-2">
+      <h3 onClick={() => onOpenDetail?.(r)}
+        className="text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-3 cursor-pointer">
+        {r.title}
+      </h3>
+      {r.authors.length > 0 && (
+        <p className="text-xs text-muted-foreground line-clamp-1 font-medium">
+          {r.authors.map((a, i) => (
+            <React.Fragment key={a}>
+              {i > 0 && "; "}
+              <Link href={`/authors/${encodeURIComponent(a)}`}>
+                <span className="hover:text-primary hover:underline cursor-pointer">{a}</span>
+              </Link>
+            </React.Fragment>
+          ))}
+        </p>
+      )}
+      <div className="flex items-center gap-2 pt-1">
+        <span className="text-xs text-muted-foreground tabular-nums">{year}</span>
+        {primaryCategory && (
+          <span className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60">
+            {zh ? primaryCategory.zh : primaryCategory.en}
           </span>
-          <div className="flex items-center gap-1.5">
-            {isPending && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700">
-                <Clock className="h-3 w-3" />
-                {language === "zh" ? "待审核" : "Pending"}
-              </span>
-            )}
-            {isSelfService && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700">
-                <AlertCircle className="h-3 w-3" />
-                {language === "zh" ? SELF_SERVICE_LABELS[r.status]?.zh : SELF_SERVICE_LABELS[r.status]?.en}
-              </span>
-            )}
-            {isRejected && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-300 dark:bg-red-950/40 dark:text-red-300 dark:border-red-700">
-                <XCircle className="h-3 w-3" />
-                {language === "zh" ? "已驳回" : "Rejected"}
-              </span>
-            )}
-            <span className="text-xs text-muted-foreground tabular-nums">{date}</span>
-          </div>
-        </div>
-
-        <h3
-          onClick={() => onOpenDetail?.(r)}
-          className="text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-3 cursor-pointer"
-        >
-          {r.title}
-        </h3>
-        {r.authors.length > 0 && (
-          <p className="text-xs text-muted-foreground line-clamp-1 font-medium">
-            {r.authors.map((a, i) => (
-              <React.Fragment key={a}>
-                {i > 0 && "; "}
-                <Link href={`/authors/${encodeURIComponent(a)}`} onClick={(e) => e.stopPropagation()}>
-                  <span className="hover:text-primary hover:underline cursor-pointer">{a}</span>
-                </Link>
-              </React.Fragment>
-            ))}
-          </p>
         )}
-        {r.abstract && (
-          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 flex-1">{r.abstract}</p>
-        )}
-        {isRejected && canEdit && (
-          <div className="text-xs px-2.5 py-1.5 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300">
-            <span className="font-medium">{language === "zh" ? "拒绝理由：" : "Rejected: "}</span>
-            {rejectionReason ? (language === "zh" ? rejectionReason.nameZh : rejectionReason.nameEn) : (language === "zh" ? "未说明" : "Not specified")}
-            {r.rejectionNote && <span className="block mt-0.5 text-red-600/80 dark:text-red-400/80">{r.rejectionNote}</span>}
-          </div>
-        )}
-        {r.facetedTags && r.facetedTags.length > 0 ? (
-          <div className="flex flex-wrap gap-1 pt-1">
-            {r.facetedTags.slice(0, 4).map((t) => (
-              <button key={t.id} onClick={(e) => { e.stopPropagation(); onFacetTagClick?.(t.slug); }}
-                className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60 hover:border-primary/50 hover:text-foreground transition-colors">
-                {language === "zh" ? t.nameZh : t.nameEn}
-              </button>
-            ))}
-            {r.facetedTags.length > 4 && <span className="text-xs px-2 py-0.5 text-muted-foreground">+{r.facetedTags.length - 4}</span>}
-          </div>
-        ) : r.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 pt-1">
-            {r.tags.slice(0, 4).map((tag) => (
-              <span key={tag} className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60">{tag}</span>
-            ))}
-            {r.tags.length > 4 && <span className="text-xs px-2 py-0.5 text-muted-foreground">+{r.tags.length - 4}</span>}
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className={`border-t border-border px-5 py-2.5 flex items-center justify-between gap-2 ${!href && !canEdit && !onApprove ? "hidden" : ""}`}>
-        <div>
-          {href && (
-            <a href={href} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
-              {r.doi ? `DOI: ${r.doi}` : language === "zh" ? "查看原文" : "View Source"}
-              <ExternalLink className="h-3 w-3" />
-            </a>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5">
-          {canEdit && onEdit && (
-            <button onClick={() => onEdit(r)}
-              className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-border text-muted-foreground hover:bg-muted transition-colors">
-              <Pencil className="h-3 w-3" />
-              {language === "zh" ? "编辑" : "Edit"}
-            </button>
-          )}
-          {onApprove && (isPending) && (
-            <button onClick={() => onApprove(r.id)}
-              className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 transition-colors">
-              <Check className="h-3 w-3" />
-              {language === "zh" ? "通过" : "Approve"}
-            </button>
-          )}
-          {onReject && (isPending) && (
-            <button onClick={() => onReject(r)}
-              className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800 transition-colors">
-              <XCircle className="h-3 w-3" />
-              {language === "zh" ? "驳回" : "Reject"}
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );
@@ -304,6 +199,10 @@ export function ResourceDetailModal({ resource, language, onClose, onFacetTagCli
             <Clock className="h-3 w-3" />{dateLabel}: {date}
           </p>
 
+          {/* Body order per docs/planning/15 §6.2: abstract -> keywords -> direct link -> full tag
+              set (tags last, unfolded). Keywords (resources.keywords/keywordsSource) is doc 15
+              group 5, not yet built — its section slots in right here, between abstract and link,
+              once that field exists. */}
           {resource.abstract && (
             <div className="space-y-1">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</h3>
@@ -311,18 +210,8 @@ export function ResourceDetailModal({ resource, language, onClose, onFacetTagCli
             </div>
           )}
 
-          {resource.facetedTags && resource.facetedTags.length > 0 ? (
-            <TagSummaryList tags={resource.facetedTags} language={language} onTagClick={onFacetTagClick} />
-          ) : resource.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {resource.tags.map((tag) => (
-                <span key={tag} className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60">{tag}</span>
-              ))}
-            </div>
-          )}
-
           {(href || resource.doi) && (
-            <div className="pt-2 border-t border-border space-y-1">
+            <div className="space-y-1">
               {href && (
                 <a href={href} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
@@ -330,6 +219,18 @@ export function ResourceDetailModal({ resource, language, onClose, onFacetTagCli
                 </a>
               )}
               {resource.doi && <p className="text-xs text-muted-foreground">DOI: {resource.doi}</p>}
+            </div>
+          )}
+
+          {(resource.facetedTags && resource.facetedTags.length > 0) ? (
+            <div className="pt-2 border-t border-border">
+              <TagSummaryList tags={resource.facetedTags} language={language} onTagClick={onFacetTagClick} />
+            </div>
+          ) : resource.tags.length > 0 && (
+            <div className="pt-2 border-t border-border flex flex-wrap gap-1.5">
+              {resource.tags.map((tag) => (
+                <span key={tag} className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60">{tag}</span>
+              ))}
             </div>
           )}
 
@@ -1866,7 +1767,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
 
 // ── Upload Center — three tabs: Manual (sync) / DOI·URL (sync single + async batch) / PDF (async) ──
 function UploadCenterModal({ token, language, onClose, onSaved }: {
-  token: string; language: string; isAdmin: boolean; onClose: () => void; onSaved: () => void;
+  token: string; language: string; onClose: () => void; onSaved: () => void;
 }) {
   const zh = language === "zh";
   const [tab, setTab] = useState<"manual" | "url" | "pdf" | "folder">("manual");
@@ -1928,28 +1829,15 @@ export default function AcademicResources() {
   const [apiResources,  setApiResources]  = useState<Resource[] | null>(null);
   const [isLoading,     setIsLoading]     = useState(true);
   const [uploadCenterOpen, setUploadCenterOpen] = useState(false);
-  const [editResource,  setEditResource]  = useState<Resource | null>(null);
   const [detailResource, setDetailResource] = useState<Resource | null>(null);
-  const [adminView,     setAdminView]     = useState(false);
-  const [pendingCount,  setPendingCount]  = useState(0);
-  const [rejectionReasons, setRejectionReasons] = useState<RejectionReason[]>([]);
-  const [rejectingResource, setRejectingResource] = useState<Resource | null>(null);
   // Theme facet's folding tree (docs/planning/15 §3.4) — all six categories start collapsed so the
   // sidebar doesn't open already full of dozens of tags.
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-
-  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     fetch(`${apiBase()}/api/tags`)
       .then((r) => (r.ok ? r.json() : []))
       .then((data: TagSummary[]) => setFacetTagVocab(Array.isArray(data) ? data : []))
-      .catch(() => {});
-    // Fetched unconditionally (not just for admins) — an owner viewing their own rejected
-    // resource needs this to resolve rejectionReasonId into a readable name (docs/planning/12 §2.4).
-    fetch(`${apiBase()}/api/rejection-reasons`)
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data: RejectionReason[]) => setRejectionReasons(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, []);
 
@@ -1971,7 +1859,6 @@ export default function AcademicResources() {
       .then((r) => r.json())
       .then((data: Resource[]) => {
         if (!Array.isArray(data)) { setApiResources([]); return; }
-        if (isAdmin) setPendingCount(data.filter((r: Resource) => r.status === "pending").length);
         setApiResources(data);
         const wantedId = new URLSearchParams(window.location.search).get("id");
         if (wantedId) {
@@ -1981,30 +1868,9 @@ export default function AcademicResources() {
       })
       .catch(() => setApiResources([]))
       .finally(() => setIsLoading(false));
-  }, [token, isAdmin]);
+  }, [token]);
 
   useEffect(() => { fetchResources(); }, [fetchResources]);
-
-  async function handleApprove(id: number) {
-    await fetch(`${apiBase()}/api/admin/resources/${id}/review`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token!}` },
-      body: JSON.stringify({ action: "approve" }),
-    });
-    fetchResources();
-  }
-
-  async function submitReject(reasonId: number, note: string) {
-    if (!rejectingResource) return;
-    const res = await fetch(`${apiBase()}/api/admin/resources/${rejectingResource.id}/review`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token!}` },
-      body: JSON.stringify({ action: "reject", rejectionReasonId: reasonId, rejectionNote: note || undefined }),
-    });
-    if (!res.ok) throw new Error("Reject failed");
-    setRejectingResource(null);
-    fetchResources();
-  }
 
   const resources = apiResources ?? [];
 
@@ -2016,17 +1882,13 @@ export default function AcademicResources() {
   const toggleTag = (tag: string) =>
     setSelectedTags((prev) => { const n = new Set(prev); n.has(tag) ? n.delete(tag) : n.add(tag); return n; });
 
-  // Admin approval center: only 'pending' reaches here now — the four self-service states
-  // (incomplete/disputed/off_topic/duplicate) are bounced back to the submitter earlier and never
-  // reach the admin queue (docs/planning/15 §0.1/§1.1).
-  const pendingResources = useMemo(() => resources.filter((r) => r.status === "pending"), [resources]);
-
-  // Normal filtered list
+  // Only 'approved' resources ever appear on this public browsing list (docs/planning/15 §0.1) — a
+  // submitter's own pending/self-service-status resources live in My Contributions instead, and the
+  // admin queue lives at /admin (AdminCenter). No adminView/own-resource carve-out here anymore.
   const filtered = useMemo(() => {
     if (selectedType === "Expert") return [];
-    const pool = adminView ? pendingResources : resources;
-    return pool.filter((r) => {
-      if (!adminView && r.status === "rejected") return false; // hide rejected from normal view unless owner/admin
+    return resources.filter((r) => {
+      if (r.status !== "approved") return false;
       const matchType = selectedType === "All" || r.sourceType === selectedType;
       const matchTags = selectedTags.size === 0 || [...selectedTags].every((t) => r.tags.includes(t));
       const matchFacetTag = !selectedFacetTag || (r.facetedTags ?? []).some((t) => t.slug === selectedFacetTag);
@@ -2038,7 +1900,7 @@ export default function AcademicResources() {
         r.tags.some((tg) => tg.toLowerCase().includes(q));
       return matchType && matchTags && matchFacetTag && matchSearch;
     });
-  }, [resources, searchQuery, selectedType, selectedTags, selectedFacetTag, adminView, pendingResources]);
+  }, [resources, searchQuery, selectedType, selectedTags, selectedFacetTag]);
 
   const showExperts = selectedType === "Expert";
   const hasActiveFilters = selectedType !== "All" || selectedTags.size > 0 || !!selectedFacetTag || searchQuery;
@@ -2072,160 +1934,141 @@ export default function AcademicResources() {
             </div>
           )}
         </div>
-
-        {/* Admin approval center toggle */}
-        {isAdmin && pendingCount > 0 && (
-          <button onClick={() => setAdminView((v) => !v)}
-            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
-              adminView
-                ? "bg-amber-100 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300"
-                : "border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
-            }`}>
-            <ShieldCheck className="h-4 w-4" />
-            {zh ? `审核中心（${pendingCount} 条待审核）` : `Approval Center (${pendingCount} Pending)`}
-            {adminView && <X className="h-3.5 w-3.5" />}
-          </button>
-        )}
-
       </div>
 
       {/* ── Search ── */}
-      {!adminView && (
-        <div className="relative max-w-xl">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-          <input type="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("Search by title, abstract, author or tag…", "按标题、摘要、作者或标签搜索…")}
-            className="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors placeholder:text-muted-foreground" />
-        </div>
-      )}
+      <div className="relative max-w-xl">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <input type="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={t("Search by title, abstract, author or tag…", "按标题、摘要、作者或标签搜索…")}
+          className="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors placeholder:text-muted-foreground" />
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* ── Sidebar (hidden in admin view) ── */}
-        {!adminView && (
-          <aside className="w-full lg:w-52 shrink-0 space-y-6">
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground px-1">
-                {t("Resource Type", "资源类型")}
-              </p>
-              <div className="flex flex-col gap-0.5">
-                {FILTER_TYPES.map(({ value, labelEn, labelZh, icon: Icon }) => (
-                  <button key={value} onClick={() => { setSelectedType(value); if (value !== "All") setSearchQuery(""); }}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left w-full ${
-                      selectedType === value ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted hover:text-foreground"
+        {/* ── Sidebar ── */}
+        <aside className="w-full lg:w-52 shrink-0 space-y-6">
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground px-1">
+              {t("Resource Type", "资源类型")}
+            </p>
+            <div className="flex flex-col gap-0.5">
+              {FILTER_TYPES.map(({ value, labelEn, labelZh, icon: Icon }) => (
+                <button key={value} onClick={() => { setSelectedType(value); if (value !== "All") setSearchQuery(""); }}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left w-full ${
+                    selectedType === value ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted hover:text-foreground"
+                  }`}>
+                  <Icon className="h-4 w-4 shrink-0" />{zh ? labelZh : labelEn}
+                </button>
+              ))}
+            </div>
+          </div>
+          {!showExperts && facetTagVocab.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t("Filter by Tags", "按标签筛选")}</p>
+                {selectedFacetTag && (
+                  <button onClick={() => handleFacetTagClick(selectedFacetTag)} className="text-xs text-primary hover:underline">{t("Clear", "清除")}</button>
+                )}
+              </div>
+              <div className="space-y-2.5">
+                {(["theme", "jurisdiction", "asset"] as const).map((facet) => {
+                  const tagsInFacet = facetTagVocab.filter((t) => t.facet === facet);
+                  if (tagsInFacet.length === 0) return null;
+                  // Theme facet gets a two-level folding tree (docs/planning/15 §3.4): category
+                  // headers are the top level, individual tags only show once expanded.
+                  // jurisdiction/asset stay flat pill lists, same as before.
+                  if (facet === "theme") {
+                    const byCategory = new Map<string, TagSummary[]>();
+                    for (const tg of tagsInFacet) {
+                      const cat = tg.category ?? "";
+                      if (!byCategory.has(cat)) byCategory.set(cat, []);
+                      byCategory.get(cat)!.push(tg);
+                    }
+                    const categorySlugs = THEME_CATEGORY_ORDER.filter((c) => byCategory.has(c));
+                    return (
+                      <div key={facet} className="space-y-1">
+                        <p className="text-xs text-muted-foreground/70 px-1">{zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}</p>
+                        <div className="space-y-0.5">
+                          {categorySlugs.map((cat) => {
+                            const expanded = expandedCategories.has(cat);
+                            const tagsInCategory = byCategory.get(cat)!;
+                            return (
+                              <div key={cat}>
+                                <button
+                                  onClick={() => setExpandedCategories((prev) => {
+                                    const next = new Set(prev);
+                                    if (next.has(cat)) next.delete(cat); else next.add(cat);
+                                    return next;
+                                  })}
+                                  className="flex items-center gap-1 w-full px-1 py-1 text-sm font-semibold text-foreground/85 hover:text-foreground text-left transition-colors">
+                                  <ChevronRight className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? "rotate-90" : ""}`} />
+                                  {zh ? THEME_CATEGORY_LABELS[cat]?.zh ?? cat : THEME_CATEGORY_LABELS[cat]?.en ?? cat}
+                                </button>
+                                {expanded && (
+                                  <div className="flex flex-wrap gap-1.5 pl-4 pt-1 pb-1.5">
+                                    {tagsInCategory.map((tg) => (
+                                      <button key={tg.id} onClick={() => handleFacetTagClick(tg.slug)}
+                                        className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                                          selectedFacetTag === tg.slug ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
+                                        }`}>
+                                        <Tag className="h-2.5 w-2.5" />{zh ? tg.nameZh : tg.nameEn}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={facet} className="space-y-1">
+                      <p className="text-xs text-muted-foreground/70 px-1">{zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {tagsInFacet.map((tg) => (
+                          <button key={tg.id} onClick={() => handleFacetTagClick(tg.slug)}
+                            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                              selectedFacetTag === tg.slug ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
+                            }`}>
+                            <Tag className="h-2.5 w-2.5" />{zh ? tg.nameZh : tg.nameEn}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {!showExperts && allTags.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? "旧版自由标签" : "Legacy Tags"}</p>
+                {selectedTags.size > 0 && (
+                  <button onClick={() => setSelectedTags(new Set())} className="text-xs text-primary hover:underline">{t("Clear", "清除")}</button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {allTags.map((tag) => (
+                  <button key={tag} onClick={() => toggleTag(tag)}
+                    className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                      selectedTags.has(tag) ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
                     }`}>
-                    <Icon className="h-4 w-4 shrink-0" />{zh ? labelZh : labelEn}
+                    <Tag className="h-2.5 w-2.5" />{tag}
                   </button>
                 ))}
               </div>
             </div>
-            {!showExperts && facetTagVocab.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t("Filter by Tags", "按标签筛选")}</p>
-                  {selectedFacetTag && (
-                    <button onClick={() => handleFacetTagClick(selectedFacetTag)} className="text-xs text-primary hover:underline">{t("Clear", "清除")}</button>
-                  )}
-                </div>
-                <div className="space-y-2.5">
-                  {(["theme", "jurisdiction", "asset"] as const).map((facet) => {
-                    const tagsInFacet = facetTagVocab.filter((t) => t.facet === facet);
-                    if (tagsInFacet.length === 0) return null;
-                    // Theme facet gets a two-level folding tree (docs/planning/15 §3.4): category
-                    // headers are the top level, individual tags only show once expanded.
-                    // jurisdiction/asset stay flat pill lists, same as before.
-                    if (facet === "theme") {
-                      const byCategory = new Map<string, TagSummary[]>();
-                      for (const tg of tagsInFacet) {
-                        const cat = tg.category ?? "";
-                        if (!byCategory.has(cat)) byCategory.set(cat, []);
-                        byCategory.get(cat)!.push(tg);
-                      }
-                      const categorySlugs = THEME_CATEGORY_ORDER.filter((c) => byCategory.has(c));
-                      return (
-                        <div key={facet} className="space-y-1">
-                          <p className="text-xs text-muted-foreground/70 px-1">{zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}</p>
-                          <div className="space-y-0.5">
-                            {categorySlugs.map((cat) => {
-                              const expanded = expandedCategories.has(cat);
-                              const tagsInCategory = byCategory.get(cat)!;
-                              return (
-                                <div key={cat}>
-                                  <button
-                                    onClick={() => setExpandedCategories((prev) => {
-                                      const next = new Set(prev);
-                                      if (next.has(cat)) next.delete(cat); else next.add(cat);
-                                      return next;
-                                    })}
-                                    className="flex items-center gap-1 w-full px-1 py-1 text-sm font-semibold text-foreground/85 hover:text-foreground text-left transition-colors">
-                                    <ChevronRight className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? "rotate-90" : ""}`} />
-                                    {zh ? THEME_CATEGORY_LABELS[cat]?.zh ?? cat : THEME_CATEGORY_LABELS[cat]?.en ?? cat}
-                                  </button>
-                                  {expanded && (
-                                    <div className="flex flex-wrap gap-1.5 pl-4 pt-1 pb-1.5">
-                                      {tagsInCategory.map((tg) => (
-                                        <button key={tg.id} onClick={() => handleFacetTagClick(tg.slug)}
-                                          className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                                            selectedFacetTag === tg.slug ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
-                                          }`}>
-                                          <Tag className="h-2.5 w-2.5" />{zh ? tg.nameZh : tg.nameEn}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    }
-                    return (
-                      <div key={facet} className="space-y-1">
-                        <p className="text-xs text-muted-foreground/70 px-1">{zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {tagsInFacet.map((tg) => (
-                            <button key={tg.id} onClick={() => handleFacetTagClick(tg.slug)}
-                              className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                                selectedFacetTag === tg.slug ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
-                              }`}>
-                              <Tag className="h-2.5 w-2.5" />{zh ? tg.nameZh : tg.nameEn}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            {!showExperts && allTags.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? "旧版自由标签" : "Legacy Tags"}</p>
-                  {selectedTags.size > 0 && (
-                    <button onClick={() => setSelectedTags(new Set())} className="text-xs text-primary hover:underline">{t("Clear", "清除")}</button>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {allTags.map((tag) => (
-                    <button key={tag} onClick={() => toggleTag(tag)}
-                      className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                        selectedTags.has(tag) ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
-                      }`}>
-                      <Tag className="h-2.5 w-2.5" />{tag}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </aside>
-        )}
+          )}
+        </aside>
 
         {/* ── Results ── */}
         <div className="flex-1 min-w-0 space-y-4">
-          {showExperts && !adminView && <ExpertPanel language={language} />}
+          {showExperts && <ExpertPanel language={language} />}
 
-          {(adminView || !showExperts) && (
+          {!showExperts && (
             <>
               <div className="flex items-center justify-between h-6">
                 {isLoading ? (
@@ -2237,7 +2080,7 @@ export default function AcademicResources() {
                     {zh ? `共 ${filtered.length} 条结果` : `${filtered.length} result${filtered.length !== 1 ? "s" : ""}`}
                   </p>
                 )}
-                {!adminView && hasActiveFilters && (
+                {hasActiveFilters && (
                   <button onClick={() => { setSelectedType("All"); setSelectedTags(new Set()); setSearchQuery(""); if (selectedFacetTag) handleFacetTagClick(selectedFacetTag); }}
                     className="text-xs text-primary hover:underline">{t("Reset filters", "重置筛选")}</button>
                 )}
@@ -2245,22 +2088,12 @@ export default function AcademicResources() {
 
               {!isLoading && filtered.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
-                  {adminView
-                    ? <><ShieldCheck className="h-10 w-10 text-emerald-500/50" /><p className="font-medium text-muted-foreground">{zh ? "暂无待审核文献" : "No pending resources"}</p></>
-                    : <><Search className="h-10 w-10 text-muted-foreground/30" /><p className="font-medium text-muted-foreground">{t("No resources found", "未找到相关资源")}</p></>
-                  }
+                  <Search className="h-10 w-10 text-muted-foreground/30" /><p className="font-medium text-muted-foreground">{t("No resources found", "未找到相关资源")}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {filtered.map((r) => (
-                    <ResourceCard key={r.id} r={r} language={language}
-                      currentUserId={user?.id} isAdmin={isAdmin} rejectionReasons={rejectionReasons}
-                      onApprove={isAdmin ? handleApprove : undefined}
-                      onReject={isAdmin ? setRejectingResource : undefined}
-                      onEdit={setEditResource}
-                      onOpenDetail={setDetailResource}
-                      onFacetTagClick={handleFacetTagClick}
-                    />
+                    <ResourceCard key={r.id} r={r} language={language} onOpenDetail={setDetailResource} />
                   ))}
                 </div>
               )}
@@ -2271,18 +2104,11 @@ export default function AcademicResources() {
 
       {/* ── Modals ── */}
       {uploadCenterOpen && token && (
-        <UploadCenterModal token={token} language={language} isAdmin={isAdmin} onClose={() => setUploadCenterOpen(false)} onSaved={fetchResources} />
-      )}
-      {editResource && token && (
-        <EditModal resource={editResource} token={token} language={language} isAdmin={isAdmin} onClose={() => setEditResource(null)} onSaved={fetchResources} />
+        <UploadCenterModal token={token} language={language} onClose={() => setUploadCenterOpen(false)} onSaved={fetchResources} />
       )}
       {detailResource && (
         <ResourceDetailModal resource={detailResource} language={language} onClose={() => setDetailResource(null)}
           onFacetTagClick={(slug) => { handleFacetTagClick(slug); setDetailResource(null); }} />
-      )}
-      {rejectingResource && (
-        <RejectDialog resource={rejectingResource} reasons={rejectionReasons} language={language}
-          onClose={() => setRejectingResource(null)} onSubmit={submitReject} />
       )}
     </div>
   );
