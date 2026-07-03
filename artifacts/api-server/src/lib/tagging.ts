@@ -5,6 +5,13 @@ import { embedText, generateJson } from "./llm";
 const THEME_MATCH_LIMIT = 4;
 const THEME_SIMILARITY_THRESHOLD = 0.5;
 
+// Title vs. abstract weighting for theme-tag similarity (docs/planning/15 §3.5) — the title
+// usually signals a paper's core intent even when the body touches several themes, so it counts
+// for more than the abstract. Initial guess, not tuned yet; adjust here once real tagging output
+// has been eyeballed against a decent-sized library.
+const TITLE_WEIGHT = 0.6;
+const ABSTRACT_WEIGHT = 0.4;
+
 // Common abbreviations the literature uses instead of the seeded canonical name — alias matching
 // alone would otherwise miss most real mentions ("the US Treasury", not "the United States Treasury").
 const JURISDICTION_ALIASES: Record<string, string[]> = {
@@ -154,6 +161,8 @@ export async function loadTagVocabulary(): Promise<TagVocabulary> {
 
 export interface ComputedTags {
   themeTagIds: number[];
+  /** Weighted title+abstract cosine similarity that qualified each theme tag id above — the raw number that, once persisted to resource_tags.score, drives the "highest-scoring theme tag" pick on the resource list page (docs/planning/15 §3.5/§3.6). */
+  themeTagScores: Record<number, number>;
   assetTagIds: number[];
   jurisdictionTagIds: number[];
   candidateTagIds: number[];
@@ -163,27 +172,51 @@ export interface ComputedTags {
  * Core matcher — shared by retagResources() (existing DB rows, see below) and the upload pipeline
  * (in-memory drafts that haven't been persisted yet, see lib/scholar and the import routes). Takes
  * a pre-loaded TagVocabulary so callers can batch many texts against one vocabulary snapshot.
+ *
+ * Title and abstract are embedded and scored against each theme tag separately, then combined with
+ * TITLE_WEIGHT/ABSTRACT_WEIGHT — a single title-only entry (no fetched full text to summarize, e.g.
+ * processTitleEntry) just omits `abstract` and gets scored on title alone. Asset/jurisdiction alias
+ * matching and named-entity extraction aren't similarity-weighted, so they still run over the plain
+ * concatenated title+abstract text.
  */
-export async function computeTagsForText(text: string, vocab: TagVocabulary, onCandidateCreated?: () => void): Promise<ComputedTags> {
-  if (!text.trim()) return { themeTagIds: [], assetTagIds: [], jurisdictionTagIds: [], candidateTagIds: [] };
+export async function computeTagsForText(
+  input: { title: string; abstract?: string | null },
+  vocab: TagVocabulary,
+  onCandidateCreated?: () => void,
+): Promise<ComputedTags> {
+  const title = input.title?.trim() ?? "";
+  const abstract = input.abstract?.trim() ?? "";
+  const fullText = [title, abstract].filter(Boolean).join("\n\n");
+  if (!fullText) return { themeTagIds: [], themeTagScores: {}, assetTagIds: [], jurisdictionTagIds: [], candidateTagIds: [] };
 
-  const textEmbedding = await embedText(text);
-  const themeTagIds = vocab.themeTagEmbeddings
-    .map((t) => ({ id: t.id, score: cosineSimilarity(textEmbedding, t.embedding) }))
+  const titleEmbedding = title ? await embedText(title) : null;
+  const abstractEmbedding = abstract ? await embedText(abstract) : null;
+
+  const themeMatches = vocab.themeTagEmbeddings
+    .map((t) => {
+      const titleScore = titleEmbedding ? cosineSimilarity(titleEmbedding, t.embedding) : null;
+      const abstractScore = abstractEmbedding ? cosineSimilarity(abstractEmbedding, t.embedding) : null;
+      const score = titleScore !== null && abstractScore !== null
+        ? TITLE_WEIGHT * titleScore + ABSTRACT_WEIGHT * abstractScore
+        : (titleScore ?? abstractScore ?? 0);
+      return { id: t.id, score };
+    })
     .filter((t) => t.score >= THEME_SIMILARITY_THRESHOLD)
     .sort((a, b) => b.score - a.score)
-    .slice(0, THEME_MATCH_LIMIT)
-    .map((t) => t.id);
+    .slice(0, THEME_MATCH_LIMIT);
+  const themeTagIds = themeMatches.map((t) => t.id);
+  const themeTagScores = Object.fromEntries(themeMatches.map((t) => [t.id, t.score]));
 
-  const assetTagIds = vocab.activeAssetTags.filter((tag) => tagAliases(tag).some((alias) => textMentions(text, alias))).map((t) => t.id);
-  const jurisdictionTagIds = vocab.activeJurisdictionTags.filter((tag) => tagAliases(tag).some((alias) => textMentions(text, alias))).map((t) => t.id);
+  const assetTagIds = vocab.activeAssetTags.filter((tag) => tagAliases(tag).some((alias) => textMentions(fullText, alias))).map((t) => t.id);
+  const jurisdictionTagIds = vocab.activeJurisdictionTags.filter((tag) => tagAliases(tag).some((alias) => textMentions(fullText, alias))).map((t) => t.id);
 
-  const { assets: extractedAssets, jurisdictions: extractedJurisdictions } = await extractNamedEntities(text);
+  const { assets: extractedAssets, jurisdictions: extractedJurisdictions } = await extractNamedEntities(fullText);
   const assetCandidates = await resolveCandidates(extractedAssets, "asset", vocab.tagsBySlug, new Set(assetTagIds), onCandidateCreated);
   const jurisdictionCandidates = await resolveCandidates(extractedJurisdictions, "jurisdiction", vocab.tagsBySlug, new Set(jurisdictionTagIds), onCandidateCreated);
 
   return {
     themeTagIds,
+    themeTagScores,
     assetTagIds,
     jurisdictionTagIds,
     candidateTagIds: [...assetCandidates, ...jurisdictionCandidates],
@@ -221,8 +254,7 @@ export async function retagResources(resourceIds?: number[]): Promise<RetagSumma
   };
 
   for (const resource of resources) {
-    const text = [resource.title, resource.abstract].filter(Boolean).join("\n\n");
-    const computed = await computeTagsForText(text, vocab, () => summary.candidatesCreated++);
+    const computed = await computeTagsForText({ title: resource.title, abstract: resource.abstract }, vocab, () => summary.candidatesCreated++);
     const autoTagIds = [...new Set([...computed.themeTagIds, ...computed.assetTagIds, ...computed.jurisdictionTagIds, ...computed.candidateTagIds])];
 
     await db.transaction(async (tx) => {
@@ -230,7 +262,7 @@ export async function retagResources(resourceIds?: number[]): Promise<RetagSumma
       if (autoTagIds.length > 0) {
         await tx
           .insert(resourceTagsTable)
-          .values(autoTagIds.map((tagId) => ({ resourceId: resource.id, tagId, source: "auto" as const })))
+          .values(autoTagIds.map((tagId) => ({ resourceId: resource.id, tagId, source: "auto" as const, score: computed.themeTagScores[tagId] ?? null })))
           .onConflictDoNothing({ target: [resourceTagsTable.resourceId, resourceTagsTable.tagId] });
       }
     });

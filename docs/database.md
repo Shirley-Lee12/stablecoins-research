@@ -101,10 +101,11 @@ name_zh    text NOT NULL
 facet      tag_facet_enum NOT NULL    -- 'theme' | 'jurisdiction' | 'asset'
 definition text                       -- 定义句，theme facet 做 embedding 相似度匹配用
 region     text                       -- 'Americas'|'Europe'|'APAC'|'Middle East'|'Africa'|'Global'，仅 jurisdiction facet 使用
+category   text                       -- 六大类 slug（如 types_mechanisms），仅 theme facet 使用，见 docs/planning/15 §3.2/§3.3
 status     tag_status_enum NOT NULL DEFAULT 'active'   -- 'active' | 'candidate'
 created_at timestamptz NOT NULL DEFAULT now()
 ```
-种子数据：`scripts/src/seed-tags.ts`（`pnpm --filter @workspace/scripts run seed-tags`，按 slug 幂等），33 个 theme + 16 个 jurisdiction + 15 个 asset，全部 `status=active`。`candidate` 状态的行由 `retagResources()`（见下）在打标时自动创建，不在种子脚本里。
+种子数据：`scripts/src/seed-tags.ts`（`pnpm --filter @workspace/scripts run seed-tags`，按 slug 幂等），33 个 theme + 16 个 jurisdiction + 15 个 asset，全部 `status=active`。`candidate` 状态的行由 `retagResources()`（见下）在打标时自动创建，不在种子脚本里。33 个 theme 标签的 `category` 由 `scripts/src/backfill-tag-categories.ts` 一次性回填（`pnpm --filter @workspace/scripts run backfill-tag-categories`，按 slug 幂等，只更新 `category IS NULL` 的行）。
 
 ### `resource_tags`（`tags.ts`）—— resources ↔ tags 多对多关联表
 ```
@@ -112,11 +113,12 @@ id          serial PRIMARY KEY
 resource_id integer NOT NULL REFERENCES resources(id) ON DELETE CASCADE
 tag_id      integer NOT NULL REFERENCES tags(id) ON DELETE CASCADE
 source      resource_tag_source_enum NOT NULL DEFAULT 'auto'   -- 'auto' | 'manual'
+score       numeric(5,4)             -- 加权（标题60%+摘要40%）后的相似度分数，仅 theme facet 的 auto 行有值；从未计算过分数的 manual 行为 null（auto 行被管理员改成 manual 后分数保留，不清空）。用于列表页选取"最核心一级标签"，见 docs/planning/15 §3.5/§3.6
 UNIQUE (resource_id, tag_id)
 ```
 `source='manual'` 的行（管理员手动加的标签）永远不会被 `retagResources()` 重跑覆盖；重跑只清空重建 `source='auto'` 的行。由于 `(resource_id, tag_id)` 是唯一约束（不区分 source），同一对资源-标签只能存在一条记录——manual 优先于 auto：重跑时如果某个 auto 匹配命中的标签已经有 manual 记录，insert 会因唯一冲突被 `onConflictDoNothing` 跳过，manual 记录原样保留。
 
-> **当前状态（2026-06-30）**：表结构 + 种子数据已就绪，T.5（前端按 facet 渲染）已完成，`GET /api/resources`/`GET /api/resources/:id` 已返回 `facetedTags`。新上传管线（U.6）每次确认入库都会写入 `resource_tags`（`source='auto'`）。`retagResources()`/`POST /api/admin/tags/retag` 用于词表变更后的全库重打标，目前库里还没有真实资源数据，尚未实际触发过。`resources.tags text[]` 仍保留作为旧资源的兼容兜底（前端卡片优先显示 `facetedTags`，没有才回退显示它）。
+> **当前状态（2026-07-03）**：表结构 + 种子数据已就绪，T.5（前端按 facet 渲染）已完成，`GET /api/resources`/`GET /api/resources/:id` 已返回 `facetedTags`（含 `category`/`score`）。新上传管线（U.6）每次确认入库都会写入 `resource_tags`（`source='auto'`）。`retagResources()`/`POST /api/admin/tags/retag` 用于词表变更后的全库重打标，目前库里还没有真实资源数据，尚未实际触发过。`resources.tags text[]` 仍保留作为旧资源的兼容兜底（前端卡片优先显示 `facetedTags`，没有才回退显示它）。主题标签相似度打分改为标题+摘要加权（`TITLE_WEIGHT`/`ABSTRACT_WEIGHT` 常量，`artifacts/api-server/src/lib/tagging.ts`），资源列表侧边栏的 theme facet 改为按 `category` 折叠的两级树（默认全部折叠）。
 
 ### `upload_jobs`（`upload_jobs.ts`）—— 批量/PDF 上传的异步进度记录（不是已导入的资源）
 ```

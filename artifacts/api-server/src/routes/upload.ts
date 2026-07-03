@@ -142,6 +142,8 @@ export interface TagSummary {
   nameZh: string;
   facet: "theme" | "jurisdiction" | "asset";
   status: "active" | "candidate";
+  /** Weighted title+abstract similarity (docs/planning/15 §3.5) — only set for facet='theme'; undefined for asset/jurisdiction/candidate, which aren't similarity-scored. */
+  score?: number;
 }
 
 export interface PipelineResult {
@@ -165,7 +167,7 @@ async function enrichTags(computed: ComputedTags): Promise<TagSummary[]> {
   const allIds = [...new Set([...computed.themeTagIds, ...computed.assetTagIds, ...computed.jurisdictionTagIds, ...computed.candidateTagIds])];
   if (allIds.length === 0) return [];
   const rows = await db.select().from(tagsTable).where(inArray(tagsTable.id, allIds));
-  return rows.map((r) => ({ id: r.id, slug: r.slug, nameEn: r.nameEn, nameZh: r.nameZh, facet: r.facet, status: r.status }));
+  return rows.map((r) => ({ id: r.id, slug: r.slug, nameEn: r.nameEn, nameZh: r.nameZh, facet: r.facet, status: r.status, score: computed.themeTagScores[r.id] }));
 }
 
 /**
@@ -192,7 +194,7 @@ async function runAutoPipeline(rawText: string, sourceTypeHint: string, vocab: T
     sourceType: extracted.sourceType,
   };
 
-  const tagIds = await computeTagsForText([draft.title, draft.abstract].filter(Boolean).join("\n\n"), vocab);
+  const tagIds = await computeTagsForText({ title: draft.title, abstract: draft.abstract }, vocab);
   const tags = await enrichTags(tagIds);
   const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
   const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi });
@@ -213,7 +215,7 @@ router.post("/resources/upload/manual", requireAuth, async (req: any, res) => {
     if (!title || typeof title !== "string") { res.status(400).json({ error: "title is required" }); return; }
 
     const vocab = await loadTagVocabulary();
-    const tagIds = await computeTagsForText([title, abstract].filter(Boolean).join("\n\n"), vocab);
+    const tagIds = await computeTagsForText({ title, abstract }, vocab);
     const tags = await enrichTags(tagIds);
     const report = await verifyResource({
       title, authors: authors ?? [], year: year ?? null, doi: doi ?? null, url: url ?? null, abstract: abstract ?? null,
@@ -402,8 +404,7 @@ async function processCitationRecord(record: CitationRecord, vocab: TagVocabular
 
   // Tier 1 (docs/planning/06 §4): tagging input falls back to title+keywords when there's still no
   // abstract, instead of tagging on title alone.
-  const taggingText = [draft.title, draft.abstract || record.keywords.join(" ")].filter(Boolean).join("\n\n");
-  const tagIds = await computeTagsForText(taggingText, vocab);
+  const tagIds = await computeTagsForText({ title: draft.title, abstract: draft.abstract || record.keywords.join(" ") }, vocab);
   const tags = await enrichTags(tagIds);
   const report = verifyCitationRecord({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
   const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi });
@@ -509,7 +510,7 @@ async function processTitleEntry(entry: { title: string; authors: string[]; year
     url: linked.canonicalUrl ?? linked.fulltextUrl,
     sourceType: linked.sourceTypeHint === "News" ? "news" : sourceTypeHint,
   };
-  const tagIds = await computeTagsForText(draft.title, vocab);
+  const tagIds = await computeTagsForText({ title: draft.title }, vocab);
   const tags = await enrichTags(tagIds);
   const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
   const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi });
@@ -604,6 +605,8 @@ interface ConfirmInput {
   doi?: string;
   sourceType: string;
   tagIds?: number[];
+  /** Theme-tag id -> weighted similarity score, echoed back from the enrichTags() preview the client already received — the confirm dialog doesn't let users edit the tag list, so this is trustworthy as-is and avoids re-embedding title/abstract just to recompute a number purely used for list-page sorting (docs/planning/15 §3.5). */
+  tagScores?: Record<number, number>;
 }
 
 /** True if any of the given tag ids is a theme-facet tag — used for the off_topic check (docs/planning/15 §0.4). */
@@ -636,6 +639,7 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNe
   const doi = input.doi ?? null;
   const abstract = input.abstract ?? null;
   const tagIds = input.tagIds ?? [];
+  const tagScores = input.tagScores ?? {};
 
   const missingFields = missingSixElements({ title: input.title, authors, year, abstract, url, doi });
   const verifyInput = { title: input.title, authors, year, doi, url, abstract };
@@ -665,7 +669,7 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNe
   await syncResourceAuthors(inserted.id, inserted.authors);
 
   if (tagIds.length > 0) {
-    await db.insert(resourceTagsTable).values(tagIds.map((tagId) => ({ resourceId: inserted.id, tagId, source: "auto" as const }))).onConflictDoNothing();
+    await db.insert(resourceTagsTable).values(tagIds.map((tagId) => ({ resourceId: inserted.id, tagId, source: "auto" as const, score: tagScores[tagId] ?? null }))).onConflictDoNothing();
   }
 
   return inserted;

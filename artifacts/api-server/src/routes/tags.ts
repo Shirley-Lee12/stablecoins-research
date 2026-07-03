@@ -11,7 +11,7 @@ const router = Router();
 router.get("/tags", async (req, res) => {
   try {
     const rows = await db
-      .select({ id: tagsTable.id, slug: tagsTable.slug, nameEn: tagsTable.nameEn, nameZh: tagsTable.nameZh, facet: tagsTable.facet, region: tagsTable.region })
+      .select({ id: tagsTable.id, slug: tagsTable.slug, nameEn: tagsTable.nameEn, nameZh: tagsTable.nameZh, facet: tagsTable.facet, region: tagsTable.region, category: tagsTable.category })
       .from(tagsTable)
       .where(eq(tagsTable.status, "active"));
     res.json(rows);

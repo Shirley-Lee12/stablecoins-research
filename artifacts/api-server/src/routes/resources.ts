@@ -19,6 +19,10 @@ interface FacetedTag {
   nameZh: string;
   facet: "theme" | "jurisdiction" | "asset";
   status: "active" | "candidate";
+  /** Top-level category slug for the theme facet's folding tree (docs/planning/15 §3.2) — null for jurisdiction/asset. */
+  category: string | null;
+  /** Weighted title+abstract similarity that produced this link (docs/planning/15 §3.5) — null for source='manual' rows. Used to pick the resource list page's single highest-scoring theme tag (§3.6). */
+  score: number | null;
 }
 
 /** Attaches each resource's structured tags (new tags/resource_tags system) alongside the legacy resources.tags text[] array. */
@@ -34,6 +38,8 @@ async function attachFacetedTags<T extends { id: number }>(rows: T[]): Promise<(
       nameZh: tagsTable.nameZh,
       facet: tagsTable.facet,
       status: tagsTable.status,
+      category: tagsTable.category,
+      score: resourceTagsTable.score,
     })
     .from(resourceTagsTable)
     .innerJoin(tagsTable, eq(resourceTagsTable.tagId, tagsTable.id))

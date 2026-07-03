@@ -772,6 +772,12 @@ export interface DraftData {
 export interface TagSummary {
   id: number; slug: string; nameEn: string; nameZh: string;
   facet: "theme" | "jurisdiction" | "asset"; status: "active" | "candidate";
+  /** Region grouping (facet='jurisdiction' only), e.g. "Americas" | "Europe" | "APAC". */
+  region?: string | null;
+  /** Top-level category slug for the theme facet's folding tree (docs/planning/15 §3.2) — null for jurisdiction/asset. */
+  category?: string | null;
+  /** Weighted title+abstract similarity (docs/planning/15 §3.5) — only meaningful for facet='theme'. */
+  score?: number | null;
 }
 export interface FieldCheck { field: string; status: "✅" | "⚠️" | "❌"; detail: string }
 export interface VerifyReport { checks: FieldCheck[]; hasFailure: boolean; hasWarning: boolean }
@@ -788,6 +794,34 @@ const FACET_LABELS: Record<TagSummary["facet"], { en: string; zh: string }> = {
   jurisdiction: { en: "Jurisdiction", zh: "辖区" },
   asset: { en: "Asset", zh: "币种" },
 };
+
+// Six-group folding tree over the theme facet (docs/planning/15 §3.2/§3.3/§3.4).
+const THEME_CATEGORY_ORDER = ["types_mechanisms", "stability_risk", "regulation_policy", "monetary_macro", "markets_adoption", "tech_infrastructure"] as const;
+const THEME_CATEGORY_LABELS: Record<string, { en: string; zh: string }> = {
+  types_mechanisms: { en: "Types & Mechanisms", zh: "类型与机制" },
+  stability_risk: { en: "Stability & Risk", zh: "稳定性与风险" },
+  regulation_policy: { en: "Regulation & Policy", zh: "监管与政策" },
+  monetary_macro: { en: "Monetary & Macro", zh: "货币与宏观" },
+  markets_adoption: { en: "Markets & Adoption", zh: "市场与应用" },
+  tech_infrastructure: { en: "Tech & Infrastructure", zh: "技术与基础设施" },
+};
+
+/**
+ * Picks the resource list page's single "primary" theme tag (docs/planning/15 §3.6) — the
+ * highest-scoring matched theme tag, used to show one representative category badge instead of
+ * the full tag set. Known information loss for resources spanning multiple distinct themes,
+ * accepted per §3.6 — the complete tag list still shows in full on the detail page (§6.2).
+ */
+export function pickPrimaryThemeTag(facetedTags: TagSummary[] | undefined): TagSummary | null {
+  const themeTags = (facetedTags ?? []).filter((t) => t.facet === "theme" && t.score != null);
+  if (themeTags.length === 0) return null;
+  return themeTags.reduce((best, t) => ((t.score ?? -Infinity) > (best.score ?? -Infinity) ? t : best));
+}
+
+/** Echoes the preview's per-tag scores back to /confirm so the server can persist resource_tags.score without re-embedding (docs/planning/15 §3.5) — see ConfirmInput.tagScores in upload.ts. */
+function tagScoresPayload(tags: TagSummary[]): Record<number, number> {
+  return Object.fromEntries(tags.filter((t) => t.score != null).map((t) => [t.id, t.score as number]));
+}
 const CHECK_FIELD_LABELS: Record<string, { en: string; zh: string }> = {
   title: { en: "Title", zh: "标题" }, doi: { en: "DOI", zh: "DOI" }, url: { en: "URL", zh: "链接" },
   authors: { en: "Authors", zh: "作者" }, year: { en: "Year", zh: "年份" }, abstract: { en: "Abstract", zh: "摘要" },
@@ -971,7 +1005,7 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
       const res = await fetch(`${apiBase()}/api/resources/upload/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ...draft, tagIds: tags.map((t) => t.id) }),
+        body: JSON.stringify({ ...draft, tagIds: tags.map((t) => t.id), tagScores: tagScoresPayload(tags) }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); setStep("review"); return; }
       onSaved(); onClose();
@@ -1085,7 +1119,7 @@ export function JobQueuePanel({ token, language, type, folderImportId, onSaved }
       const res = await fetch(`${apiBase()}/api/resources/upload/jobs/${reviewingId}/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ...reviewDraft, tagIds: reviewTags.map((t) => t.id) }),
+        body: JSON.stringify({ ...reviewDraft, tagIds: reviewTags.map((t) => t.id), tagScores: tagScoresPayload(reviewTags) }),
       });
       if (res.ok) { setReviewingId(null); onSaved(); fetchJobs(); }
     } finally {
@@ -1206,7 +1240,7 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
       const res = await fetch(`${apiBase()}/api/resources/upload/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ...draft, tagIds: tags.map((t) => t.id) }),
+        body: JSON.stringify({ ...draft, tagIds: tags.map((t) => t.id), tagScores: tagScoresPayload(tags) }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); setStep("review"); return; }
       onSaved(); onClose();
@@ -1900,6 +1934,9 @@ export default function AcademicResources() {
   const [pendingCount,  setPendingCount]  = useState(0);
   const [rejectionReasons, setRejectionReasons] = useState<RejectionReason[]>([]);
   const [rejectingResource, setRejectingResource] = useState<Resource | null>(null);
+  // Theme facet's folding tree (docs/planning/15 §3.4) — all six categories start collapsed so the
+  // sidebar doesn't open already full of dozens of tags.
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const isAdmin = user?.role === "admin";
 
@@ -2093,6 +2130,55 @@ export default function AcademicResources() {
                   {(["theme", "jurisdiction", "asset"] as const).map((facet) => {
                     const tagsInFacet = facetTagVocab.filter((t) => t.facet === facet);
                     if (tagsInFacet.length === 0) return null;
+                    // Theme facet gets a two-level folding tree (docs/planning/15 §3.4): category
+                    // headers are the top level, individual tags only show once expanded.
+                    // jurisdiction/asset stay flat pill lists, same as before.
+                    if (facet === "theme") {
+                      const byCategory = new Map<string, TagSummary[]>();
+                      for (const tg of tagsInFacet) {
+                        const cat = tg.category ?? "";
+                        if (!byCategory.has(cat)) byCategory.set(cat, []);
+                        byCategory.get(cat)!.push(tg);
+                      }
+                      const categorySlugs = THEME_CATEGORY_ORDER.filter((c) => byCategory.has(c));
+                      return (
+                        <div key={facet} className="space-y-1">
+                          <p className="text-xs text-muted-foreground/70 px-1">{zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}</p>
+                          <div className="space-y-0.5">
+                            {categorySlugs.map((cat) => {
+                              const expanded = expandedCategories.has(cat);
+                              const tagsInCategory = byCategory.get(cat)!;
+                              return (
+                                <div key={cat}>
+                                  <button
+                                    onClick={() => setExpandedCategories((prev) => {
+                                      const next = new Set(prev);
+                                      if (next.has(cat)) next.delete(cat); else next.add(cat);
+                                      return next;
+                                    })}
+                                    className="flex items-center gap-1 w-full px-1 py-1 text-sm font-semibold text-foreground/85 hover:text-foreground text-left transition-colors">
+                                    <ChevronRight className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? "rotate-90" : ""}`} />
+                                    {zh ? THEME_CATEGORY_LABELS[cat]?.zh ?? cat : THEME_CATEGORY_LABELS[cat]?.en ?? cat}
+                                  </button>
+                                  {expanded && (
+                                    <div className="flex flex-wrap gap-1.5 pl-4 pt-1 pb-1.5">
+                                      {tagsInCategory.map((tg) => (
+                                        <button key={tg.id} onClick={() => handleFacetTagClick(tg.slug)}
+                                          className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                                            selectedFacetTag === tg.slug ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
+                                          }`}>
+                                          <Tag className="h-2.5 w-2.5" />{zh ? tg.nameZh : tg.nameEn}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    }
                     return (
                       <div key={facet} className="space-y-1">
                         <p className="text-xs text-muted-foreground/70 px-1">{zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}</p>
