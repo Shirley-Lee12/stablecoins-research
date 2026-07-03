@@ -139,7 +139,7 @@ async function resolveKeywords(extracted: string[], abstract: string | null): Pr
 }
 
 /**
- * Fetches a URL's page text — mirrors the existing /api/resources/import fetch/strip pattern.
+ * Fetches a URL's page text (basic HTML tag-stripping fetch/strip pattern).
  * Detects a direct PDF link via Content-Type (falling back to a ".pdf" URL check for servers that
  * mislabel it) and routes those through the same local text extraction PDF uploads use, instead of
  * running PDF bytes through the HTML tag-stripper, which would only produce binary garbage.
