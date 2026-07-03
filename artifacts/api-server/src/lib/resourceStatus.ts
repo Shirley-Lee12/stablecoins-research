@@ -11,11 +11,7 @@ export interface SixElementsInput {
   abstract: string | null;
   url: string | null;
   doi: string | null;
-  // keywords is intentionally NOT checked here yet — docs/planning/15 §0.2 defines the six elements
-  // as title/authors/year/abstract/keywords/url-or-doi, but `resources.keywords` doesn't exist as a
-  // column until docs/planning/15 §5 (group 5) lands. Completeness is 5-of-6 until then; this needs
-  // a follow-up update once that column exists, or "incomplete" will under-fire (missing keywords
-  // alone won't be caught) until group 5 is done.
+  keywords: string[];
 }
 
 /**
@@ -23,6 +19,9 @@ export interface SixElementsInput {
  * missingHardRequiredFields()/requireUrlOrDoi split. That distinction is gone: EVERY entry point now
  * uses the same bar (URL-or-DOI included), and missing anything routes to 'incomplete' instead of
  * blocking the submission outright.
+ *
+ * keywords (docs/planning/15 §5.3): satisfied by a non-empty array regardless of source — extracted,
+ * manually typed, or LLM-generated from the abstract all count equally toward completeness.
  */
 export function missingSixElements(input: SixElementsInput): string[] {
   const missing: string[] = [];
@@ -31,6 +30,7 @@ export function missingSixElements(input: SixElementsInput): string[] {
   if (input.year === null) missing.push("year");
   if (!input.abstract || !input.abstract.trim()) missing.push("abstract");
   if (!input.url && !input.doi) missing.push("url_doi");
+  if (input.keywords.length === 0) missing.push("keywords");
   return missing;
 }
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { randomUUID } from "node:crypto";
-import { db, resourcesTable, uploadJobsTable, resourceTagsTable, tagsTable } from "@workspace/db";
+import { db, resourcesTable, uploadJobsTable, resourceTagsTable, tagsTable, type KeywordsSource } from "@workspace/db";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { requireAuth } from "./auth";
 import { syncResourceAuthors } from "./authors";
@@ -53,6 +53,8 @@ interface ExtractedDraft {
   abstract: string;
   doi: string | null;
   sourceType: string;
+  /** Terms found under an explicit "关键词:"/"Keywords:" section — empty if the text has no such section (docs/planning/15 §5.3, never fabricated here; see resolveKeywords() for the generation fallback). */
+  keywords: string[];
 }
 
 /** Single LLM call to pull the six elements out of raw text — link resolution and tagging happen in separate, dedicated steps afterward. */
@@ -76,6 +78,7 @@ Return a JSON object with exactly these fields:
 - "abstract": string — if the text has its own "Abstract" section, copy it verbatim; otherwise write a concise 2-4 sentence summary
 - "doi": string | null — the document's DOI if printed in the text, else null
 - "sourceType": one of exactly: "journal_article", "working_paper", "conference_paper", "thesis", "report", "gov_document", "news"
+- "keywords": string[] — ONLY if the text has an explicit "关键词:"/"Keywords:" section, list those terms exactly as given; otherwise return an empty array. Do not invent keywords that aren't explicitly labeled as such in the text.
 
 Respond with ONLY the JSON object, no markdown fences, no extra text.`;
   const raw = await generateJson(prompt, 2048);
@@ -87,7 +90,41 @@ Respond with ONLY the JSON object, no markdown fences, no extra text.`;
     abstract: typeof parsed.abstract === "string" ? parsed.abstract : "",
     doi: typeof parsed.doi === "string" && parsed.doi.trim() ? parsed.doi.trim() : null,
     sourceType: VALID_SOURCE_TYPES.includes(parsed.sourceType) ? parsed.sourceType : sourceTypeHint,
+    keywords: Array.isArray(parsed.keywords) ? parsed.keywords.filter((k: unknown): k is string => typeof k === "string" && k.trim().length > 0) : [],
   };
+}
+
+/**
+ * Last-resort keyword source (docs/planning/15 §5.3) — only called when neither the source text nor
+ * the user provided any keywords. Constrained to 3-5 terms via the prompt; returns [] on any failure
+ * so an entry never gets stuck unable to complete just because generation failed.
+ */
+async function generateKeywordsFromAbstract(abstract: string): Promise<string[]> {
+  if (!abstract.trim()) return [];
+  try {
+    const prompt = `Read the following academic abstract about stablecoins and extract 3 to 5 concise keywords or key phrases (in the same language as the abstract) that best represent its core topics.
+
+Abstract:
+---
+${abstract.slice(0, 3000)}
+---
+
+Return ONLY a JSON object: { "keywords": string[] } with between 3 and 5 items.`;
+    const raw = await generateJson(prompt, 256);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed.keywords)
+      ? parsed.keywords.filter((k: unknown): k is string => typeof k === "string" && k.trim().length > 0).slice(0, 5)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Priority per docs/planning/15 §5.3: extracted > generated-from-abstract. (Manual entry is handled by callers directly, since it doesn't go through extraction at all.) */
+async function resolveKeywords(extracted: string[], abstract: string | null): Promise<{ keywords: string[]; keywordsSource: KeywordsSource | null }> {
+  if (extracted.length > 0) return { keywords: extracted, keywordsSource: "extracted" };
+  const generated = abstract ? await generateKeywordsFromAbstract(abstract) : [];
+  return generated.length > 0 ? { keywords: generated, keywordsSource: "generated" } : { keywords: [], keywordsSource: null };
 }
 
 /**
@@ -133,6 +170,9 @@ export interface PipelineDraft {
   doi: string | null;
   url: string | null;
   sourceType: string;
+  /** docs/planning/15 §5.2 — free-text keywords, distinct from the controlled tags/facetedTags system. */
+  keywords: string[];
+  keywordsSource: KeywordsSource | null;
 }
 
 export interface TagSummary {
@@ -179,6 +219,7 @@ async function enrichTags(computed: ComputedTags): Promise<TagSummary[]> {
 async function runAutoPipeline(rawText: string, sourceTypeHint: string, vocab: TagVocabulary): Promise<PipelineResult> {
   const extracted = await extractFromText(rawText, sourceTypeHint);
   const linked = await resolveLink({ title: extracted.title, authors: extracted.authors, year: extracted.year, doi: extracted.doi });
+  const { keywords, keywordsSource } = await resolveKeywords(extracted.keywords, extracted.abstract);
 
   const draft: PipelineDraft = {
     title: linked.found ? linked.title : extracted.title,
@@ -192,12 +233,14 @@ async function runAutoPipeline(rawText: string, sourceTypeHint: string, vocab: T
     // this" (can happen to legitimate working papers due to search recall variance, not just
     // genuine news/opinion pieces) and would otherwise wrongly downgrade real papers to "News".
     sourceType: extracted.sourceType,
+    keywords,
+    keywordsSource,
   };
 
   const tagIds = await computeTagsForText({ title: draft.title, abstract: draft.abstract }, vocab);
   const tags = await enrichTags(tagIds);
   const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
-  const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi });
+  const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi, keywords: draft.keywords });
 
   return { draft, tagIds, tags, report, foundInScholarlyDb: linked.foundInScholarlyDb, missingRequired };
 }
@@ -209,8 +252,8 @@ async function runAutoPipeline(rawText: string, sourceTypeHint: string, vocab: T
  */
 router.post("/resources/upload/manual", requireAuth, async (req: any, res) => {
   try {
-    const { title, authors, year, abstract, url, doi, sourceType } = req.body as {
-      title?: string; authors?: string[]; year?: number | null; abstract?: string; url?: string; doi?: string; sourceType?: string;
+    const { title, authors, year, abstract, url, doi, sourceType, keywords: typedKeywords } = req.body as {
+      title?: string; authors?: string[]; year?: number | null; abstract?: string; url?: string; doi?: string; sourceType?: string; keywords?: string[];
     };
     if (!title || typeof title !== "string") { res.status(400).json({ error: "title is required" }); return; }
 
@@ -220,12 +263,18 @@ router.post("/resources/upload/manual", requireAuth, async (req: any, res) => {
     const report = await verifyResource({
       title, authors: authors ?? [], year: year ?? null, doi: doi ?? null, url: url ?? null, abstract: abstract ?? null,
     });
+    // docs/planning/15 §5.3 — user-typed keywords win outright ('manual'); only fall back to
+    // LLM generation from the abstract when the user left this blank.
+    const manualKeywords = Array.isArray(typedKeywords) ? typedKeywords.map((k) => k.trim()).filter(Boolean) : [];
+    const { keywords, keywordsSource } = manualKeywords.length > 0
+      ? { keywords: manualKeywords, keywordsSource: "manual" as const }
+      : await resolveKeywords([], abstract ?? null);
     const missingRequired = missingSixElements(
-      { title, authors: authors ?? [], year: year ?? null, abstract: abstract ?? null, url: url ?? null, doi: doi ?? null },
+      { title, authors: authors ?? [], year: year ?? null, abstract: abstract ?? null, url: url ?? null, doi: doi ?? null, keywords },
     );
 
     res.json({
-      draft: { title, authors: authors ?? [], year: year ?? null, abstract: abstract ?? "", doi: doi ?? null, url: url ?? null, sourceType: sourceType ?? "journal_article" },
+      draft: { title, authors: authors ?? [], year: year ?? null, abstract: abstract ?? "", doi: doi ?? null, url: url ?? null, sourceType: sourceType ?? "journal_article", keywords, keywordsSource },
       tagIds,
       tags,
       report,
@@ -396,10 +445,16 @@ Respond with ONLY a JSON object: { "abstract": string }`;
 /** Shared per-record processing: tag + completeness-check a single parsed citation record. No resolveLink/network verification (docs/planning/06 §3 — CNKI's own metadata, including its DOI, is trusted as-is). */
 async function processCitationRecord(record: CitationRecord, vocab: TagVocabulary): Promise<CitationJobResult> {
   const { abstract, abstractSource } = await backfillAbstractFromFulltext(record);
+  // docs/planning/15 §5.3 — CNKI's own K1/%K/{Keywords} field wins outright ('extracted'); only
+  // fall back to LLM generation from the (possibly backfilled) abstract when the record had none.
+  const { keywords, keywordsSource } = record.keywords.length > 0
+    ? { keywords: record.keywords, keywordsSource: "extracted" as const }
+    : await resolveKeywords([], abstract);
 
   const draft: PipelineDraft = {
     title: record.title, authors: record.authors, year: record.year, abstract,
     doi: record.doi, url: record.url, sourceType: record.sourceType,
+    keywords, keywordsSource,
   };
 
   // Tier 1 (docs/planning/06 §4): tagging input falls back to title+keywords when there's still no
@@ -407,7 +462,7 @@ async function processCitationRecord(record: CitationRecord, vocab: TagVocabular
   const tagIds = await computeTagsForText({ title: draft.title, abstract: draft.abstract || record.keywords.join(" ") }, vocab);
   const tags = await enrichTags(tagIds);
   const report = verifyCitationRecord({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
-  const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi });
+  const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi, keywords: draft.keywords });
 
   return { draft, tagIds, tags, report, missingRequired, abstractSource };
 }
@@ -509,11 +564,15 @@ async function processTitleEntry(entry: { title: string; authors: string[]; year
     doi: linked.doi,
     url: linked.canonicalUrl ?? linked.fulltextUrl,
     sourceType: linked.sourceTypeHint === "News" ? "news" : sourceTypeHint,
+    // Same reasoning as abstract above — no text to extract keywords from, and no abstract to
+    // generate them from either, so this always resolves to empty rather than calling the LLM.
+    keywords: [],
+    keywordsSource: null,
   };
   const tagIds = await computeTagsForText({ title: draft.title }, vocab);
   const tags = await enrichTags(tagIds);
   const report = await verifyResource({ title: draft.title, authors: draft.authors, year: draft.year, doi: draft.doi, url: draft.url, abstract: draft.abstract });
-  const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi });
+  const missingRequired = missingSixElements({ title: draft.title, authors: draft.authors, year: draft.year, abstract: draft.abstract, url: draft.url, doi: draft.doi, keywords: draft.keywords });
   return { draft, tagIds, tags, report, foundInScholarlyDb: linked.foundInScholarlyDb, missingRequired };
 }
 
@@ -607,6 +666,8 @@ interface ConfirmInput {
   tagIds?: number[];
   /** Theme-tag id -> weighted similarity score, echoed back from the enrichTags() preview the client already received — the confirm dialog doesn't let users edit the tag list, so this is trustworthy as-is and avoids re-embedding title/abstract just to recompute a number purely used for list-page sorting (docs/planning/15 §3.5). */
   tagScores?: Record<number, number>;
+  keywords?: string[];
+  keywordsSource?: KeywordsSource | null;
 }
 
 /** True if any of the given tag ids is a theme-facet tag — used for the off_topic check (docs/planning/15 §0.4). */
@@ -640,8 +701,13 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNe
   const abstract = input.abstract ?? null;
   const tagIds = input.tagIds ?? [];
   const tagScores = input.tagScores ?? {};
+  const keywords = input.keywords ?? [];
+  // Invariant: a non-null source only ever pairs with a non-empty array. Falls back to 'manual'
+  // rather than null if the client somehow sent keywords without a source — under normal use this
+  // never happens, since every code path that produces non-empty keywords also sets a source.
+  const keywordsSource = keywords.length > 0 ? (input.keywordsSource ?? "manual") : null;
 
-  const missingFields = missingSixElements({ title: input.title, authors, year, abstract, url, doi });
+  const missingFields = missingSixElements({ title: input.title, authors, year, abstract, url, doi, keywords });
   const verifyInput = { title: input.title, authors, year, doi, url, abstract };
   const report = skipNetworkVerification ? verifyCitationRecord(verifyInput) : await verifyResource(verifyInput);
   const duplicateSignal = await checkDuplicate({ title: input.title, doi, url, year });
@@ -657,6 +723,8 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNe
       url,
       doi,
       abstract,
+      keywords,
+      keywordsSource,
       // Six-elements "year" — resources has no dedicated year column, so it goes in the free-text
       // publishedDate the legacy import routes already use (which also stores full dates like
       // "2021-07-20"; here we only ever have a bare year).

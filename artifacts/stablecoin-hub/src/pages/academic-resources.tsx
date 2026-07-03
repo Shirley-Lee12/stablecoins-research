@@ -6,7 +6,7 @@ import { SOURCE_TYPES, sourceTypeLabel, type SourceType } from "@/lib/source-typ
 import {
   Search, ExternalLink, FileText, BookOpen, Newspaper,
   Tag, Users, ChevronRight, Loader2, Plus, X, Upload, AlertCircle,
-  Check, Clock, XCircle, Pencil, List, LayoutGrid,
+  Check, Clock, XCircle, Pencil, List, LayoutGrid, Sparkles,
   Presentation, GraduationCap, ScrollText, Landmark,
 } from "lucide-react";
 
@@ -26,6 +26,10 @@ export const SELF_SERVICE_LABELS: Record<string, { zh: string; en: string }> = {
 };
 type FilterType = SourceType | "Expert" | "All";
 
+// docs/planning/15 §5.2 — mirrors lib/db's KeywordsSource (frontend has no direct DB import, same
+// hand-mirrored pattern as TagSummary below).
+export type KeywordsSource = "extracted" | "generated" | "manual";
+
 export interface Resource {
   id: number;
   title: string;
@@ -37,6 +41,9 @@ export interface Resource {
   tags: string[];
   /** New facet-based tags (tags/resource_tags), distinct from the legacy free-text `tags` array above. Declared with `TagSummary` further down (shared with the Upload Center). */
   facetedTags?: TagSummary[];
+  /** docs/planning/15 §5.2 — the document's own keywords, free text, distinct from the controlled `tags`/`facetedTags`. */
+  keywords: string[];
+  keywordsSource: KeywordsSource | null;
   publishedDate: string | null;
   status: ResourceStatus;
   createdBy: number | null;
@@ -199,16 +206,15 @@ export function ResourceDetailModal({ resource, language, onClose, onFacetTagCli
             <Clock className="h-3 w-3" />{dateLabel}: {date}
           </p>
 
-          {/* Body order per docs/planning/15 §6.2: abstract -> keywords -> direct link -> full tag
-              set (tags last, unfolded). Keywords (resources.keywords/keywordsSource) is doc 15
-              group 5, not yet built — its section slots in right here, between abstract and link,
-              once that field exists. */}
+          {/* Body order per docs/planning/15 §6.2: abstract -> keywords -> direct link -> full tag set (tags last, unfolded). */}
           {resource.abstract && (
             <div className="space-y-1">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</h3>
               <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{resource.abstract}</p>
             </div>
           )}
+
+          <KeywordsBlock keywords={resource.keywords} keywordsSource={resource.keywordsSource} language={language} />
 
           {(href || resource.doi) && (
             <div className="space-y-1">
@@ -563,6 +569,7 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
   const [url,      setUrl]      = useState(resource.url ?? "");
   const [doi,      setDoi]      = useState(resource.doi ?? "");
   const [abstract, setAbstract] = useState(resource.abstract ?? "");
+  const [keywords, setKeywords] = useState(resource.keywords);
   const [tags,     setTags]     = useState(resource.tags);
   const [tagIds,   setTagIds]   = useState<number[]>((resource.facetedTags ?? []).map((t) => t.id));
   const [publishedDate, setPublishedDate] = useState(resource.publishedDate ?? "");
@@ -580,7 +587,7 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
           title: title.trim(), sourceType,
           authors,
           url: url.trim() || null, doi: doi.trim() || null,
-          abstract: abstract.trim(), tags,
+          abstract: abstract.trim(), tags, keywords,
           publishedDate: publishedDate.trim() || null,
           ...(isAdmin && { tagIds }),
         }),
@@ -639,6 +646,13 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
             <textarea value={abstract} onChange={(e) => setAbstract(e.target.value)} rows={4}
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
           </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "关键词" : "Keywords"}</label>
+            <input value={keywords.join(", ")}
+              onChange={(e) => setKeywords(e.target.value.split(/[,，]/).map((k) => k.trim()).filter(Boolean))}
+              placeholder={zh ? "多个关键词用逗号分隔" : "Comma-separated keywords"}
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+          </div>
           <TagEditor tags={tags} onChange={setTags} language={language} />
           {isAdmin && (
             <>
@@ -669,6 +683,7 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
 export interface DraftData {
   title: string; authors: string[]; year: number | null; abstract: string;
   doi: string | null; url: string | null; sourceType: string;
+  keywords: string[]; keywordsSource: KeywordsSource | null;
 }
 export interface TagSummary {
   id: number; slug: string; nameEn: string; nameZh: string;
@@ -727,6 +742,33 @@ const CHECK_FIELD_LABELS: Record<string, { en: string; zh: string }> = {
   title: { en: "Title", zh: "标题" }, doi: { en: "DOI", zh: "DOI" }, url: { en: "URL", zh: "链接" },
   authors: { en: "Authors", zh: "作者" }, year: { en: "Year", zh: "年份" }, abstract: { en: "Abstract", zh: "摘要" },
 };
+
+// ── Keywords display (docs/planning/15 §5.4) — the document's own free-text keywords, deliberately
+// styled distinctly from TagSummaryList below (different heading, no pill-click-to-filter behavior)
+// since `keywords` isn't the controlled tags/facetedTags vocabulary. A 'generated' source always
+// shows the "AI生成" badge — this is an integrity requirement, not a nice-to-have, so it can't be
+// suppressed or visually blended with extracted/manual keywords.
+export function KeywordsBlock({ keywords, keywordsSource, language }: { keywords: string[]; keywordsSource: KeywordsSource | null; language: string }) {
+  const zh = language === "zh";
+  if (keywords.length === 0) return null;
+  return (
+    <div className="space-y-1">
+      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+        {zh ? "关键词" : "Keywords"}
+        {keywordsSource === "generated" && (
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800 normal-case tracking-normal">
+            <Sparkles className="h-2.5 w-2.5" />{zh ? "AI生成" : "AI-generated"}
+          </span>
+        )}
+      </h3>
+      <div className="flex flex-wrap gap-1.5">
+        {keywords.map((k) => (
+          <span key={k} className="text-xs px-2 py-0.5 bg-muted/60 rounded-full text-muted-foreground border border-border/60">{k}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // ── Tag summary display (read-only — the new facet-based tag system, separate from the legacy STABLECOIN_TAGS free-text array TagEditor edits) ──
 export function TagSummaryList({ tags, language, onTagClick }: { tags: TagSummary[]; language: string; onTagClick?: (slug: string) => void }) {
@@ -839,6 +881,20 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
         <textarea value={draft.abstract} onChange={(e) => onChange({ ...draft, abstract: e.target.value })} rows={4}
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+          {zh ? "关键词" : "Keywords"}
+          {draft.keywordsSource === "generated" && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800 normal-case tracking-normal">
+              <Sparkles className="h-2.5 w-2.5" />{zh ? "AI生成，可编辑" : "AI-generated, editable"}
+            </span>
+          )}
+        </label>
+        <input value={draft.keywords.join(", ")}
+          onChange={(e) => onChange({ ...draft, keywords: e.target.value.split(/[,，]/).map((k) => k.trim()).filter(Boolean), keywordsSource: "manual" })}
+          placeholder={zh ? "多个关键词用逗号分隔（原文没有的话可以自己填，或留空由 AI 从摘要提炼）" : "Comma-separated — leave blank to let AI suggest some from the abstract"}
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
       </div>
       <div className="space-y-1.5">
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "自动匹配的标签" : "Auto-matched tags"}</label>

@@ -51,6 +51,14 @@ export const resourcesTable = pgTable("resources", {
   doi: text("doi"),
   abstract: text("abstract"),
   tags: text("tags").array().notNull().default([]),
+  // docs/planning/15 §5.2 — free-text keywords from the document itself, distinct from `tags`
+  // (the controlled theme/jurisdiction/asset vocabulary). keywordsSource records where they came
+  // from: 'extracted' (CNKI K1 field or a "Keywords:" section the PDF/URL extractor found),
+  // 'manual' (user-typed), 'generated' (LLM-derived from the abstract when neither of the above
+  // exists — §5.3's last-resort, non-authoritative fallback, must stay visibly labeled in the UI).
+  // Null keywordsSource only ever pairs with an empty keywords array.
+  keywords: text("keywords").array().notNull().default([]),
+  keywordsSource: text("keywords_source"),
   status: resourceStatusEnum("status").notNull().default("pending"),
   createdBy: integer("created_by").references(() => usersTable.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -77,3 +85,7 @@ export const insertResourceSchema = createInsertSchema(resourcesTable).omit({
 });
 export type InsertResource = z.infer<typeof insertResourceSchema>;
 export type Resource = typeof resourcesTable.$inferSelect;
+
+// App-level enum for resources.keywords_source (kept as a plain `text` column, not a pg enum, per
+// docs/planning/15 §5.2 — mirrors how tags.category is also plain text).
+export type KeywordsSource = "extracted" | "generated" | "manual";

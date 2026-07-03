@@ -715,9 +715,9 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       return;
     }
 
-    const { title, authors, sourceType, url, doi, abstract, tags, publishedDate, tagIds } = req.body as {
+    const { title, authors, sourceType, url, doi, abstract, tags, publishedDate, tagIds, keywords } = req.body as {
       title?: string; authors?: string[]; sourceType?: string; url?: string | null; doi?: string | null;
-      abstract?: string; tags?: string[]; publishedDate?: string | null; tagIds?: number[];
+      abstract?: string; tags?: string[]; publishedDate?: string | null; tagIds?: number[]; keywords?: string[];
     };
 
     const [updated] = await db
@@ -730,6 +730,9 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
         ...(doi           !== undefined && { doi }),
         ...(abstract      !== undefined && { abstract }),
         ...(tags          !== undefined && { tags: sanitizeTags(tags) }),
+        // Editing this field is inherently a human act, whether the editor is the owner or an admin
+        // (docs/planning/15 §5.3's "manual" source) — not re-derived from wherever it started.
+        ...(keywords      !== undefined && { keywords, keywordsSource: keywords.length > 0 ? "manual" as const : null }),
         ...(publishedDate !== undefined && { publishedDate }),
         ...(isAdmin && { adminEdited: true }),
       })
@@ -759,10 +762,10 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
     }
 
     // Owner resubmission — rerun the full check pipeline (docs/planning/15 §0.7).
-    const contentChanged = title !== undefined || authors !== undefined || url !== undefined || doi !== undefined || abstract !== undefined || publishedDate !== undefined;
+    const contentChanged = title !== undefined || authors !== undefined || url !== undefined || doi !== undefined || abstract !== undefined || publishedDate !== undefined || keywords !== undefined;
     if (contentChanged) {
       const year = updated.publishedDate?.match(/^\d{4}/)?.[0] ? Number(updated.publishedDate.match(/^\d{4}/)![0]) : null;
-      const missingFields = missingSixElements({ title: updated.title, authors: updated.authors, year, abstract: updated.abstract, url: updated.url, doi: updated.doi });
+      const missingFields = missingSixElements({ title: updated.title, authors: updated.authors, year, abstract: updated.abstract, url: updated.url, doi: updated.doi, keywords: updated.keywords });
       const report = await verifyResource({ title: updated.title, authors: updated.authors, year, doi: updated.doi, url: updated.url, abstract: updated.abstract });
       const duplicateSignal = await checkDuplicate({ title: updated.title, doi: updated.doi, url: updated.url, year }, id);
       await retagResources([id]);

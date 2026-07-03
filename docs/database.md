@@ -41,18 +41,27 @@ created_at timestamptz NOT NULL DEFAULT now()
 
 ### `resources`（`resources.ts`）—— 全球文献库
 ```
-id          serial PRIMARY KEY
-title       text NOT NULL
-authors     text[] NOT NULL DEFAULT '{}'
-source_type source_type_enum NOT NULL DEFAULT 'Paper'
-url         text
-doi         text
-abstract    text
-tags        text[] NOT NULL DEFAULT '{}'
-status      resource_status_enum NOT NULL DEFAULT 'pending'   -- 'pending' | 'approved' | 'rejected'
-created_by  integer REFERENCES users(id) ON DELETE SET NULL
-created_at  timestamptz NOT NULL DEFAULT now()
+id                  serial PRIMARY KEY
+title               text NOT NULL
+authors             text[] NOT NULL DEFAULT '{}'
+source_type         source_type_enum NOT NULL DEFAULT 'journal_article'
+url                 text
+doi                 text
+abstract            text
+tags                text[] NOT NULL DEFAULT '{}'          -- 旧版自由标签，逐步被 tags/resource_tags 结构化标签取代
+keywords            text[] NOT NULL DEFAULT '{}'          -- 文献自带的关键词，自由文本，不是受控词表（区别于 tags）
+keywords_source     text                                   -- 'extracted'(原文提取) | 'generated'(AI生成) | 'manual'(用户手填)，为空只能对应 keywords=[]
+status              resource_status_enum NOT NULL DEFAULT 'pending'   -- 七值枚举，见下方"枚举全集"表
+created_by          integer REFERENCES users(id) ON DELETE SET NULL
+created_at          timestamptz NOT NULL DEFAULT now()
+published_date      text                                   -- 文献自身发表日期（自由文本，如"2021"或"2021-07-20"），不同于 created_at
+rejection_reason_id integer REFERENCES rejection_reasons(id) ON DELETE SET NULL
+rejection_note      text
+reviewed_by         integer REFERENCES users(id) ON DELETE SET NULL
+reviewed_at         timestamptz
+admin_edited        boolean NOT NULL DEFAULT false          -- 管理员是否直接编辑过字段（docs/planning/15 §2.4，粗粒度标记）
 ```
+`keywords`/`keywords_source`（docs/planning/15 §5）：题录导入(CNKI K1/EndNote %K/NoteExpress Keywords) 与 PDF/URL 抽取的"关键词:"/"Keywords:"章节 → `extracted`；用户手填或事后编辑（`PATCH /api/resources/:id` 带 `keywords` 字段，无论编辑者是所有者还是管理员）→ `manual`；原文没有关键词章节且用户没手填时，允许（非强制）LLM 从摘要提炼 3-5 个 → `generated`，前端必须给 `generated` 来源打上明显的"AI生成"标注。六要素完整性判定里，`keywords` 只要非空就算满足，不区分来源。
 
 ### `our_research`（`our_research.ts`）—— ZIBS 自有研究
 ```
@@ -152,7 +161,7 @@ our_research                      （独立表，不与其他表关联）
 | 枚举 | 取值 | 用途 |
 |---|---|---|
 | `source_type` | `Paper`、`Report`、`Gov Document`、`News`、`Experts & Scholars` | `resources.source_type`，**必须精确使用这些字符串**（含空格、大小写） |
-| `resource_status` | `pending`、`approved`、`rejected`、`needs_review`、`failed` | `resources.status`，内容审核工作流 + 上传管线核对结果，详见 [`requirements.md`](./requirements.md) 和 [`api-design.md`](./api-design.md) |
+| `resource_status` | `incomplete`、`disputed`、`off_topic`、`duplicate`、`pending`、`approved`、`rejected` | `resources.status`，七值状态机（docs/planning/15 §0.9），只有 `approved` 出现在公开 Resources 页面，详见 [`database.md`](#resources-resourcests--全球文献库) 上方表定义和 [`requirements.md`](./requirements.md) |
 | `user_role` | `user`、`admin` | `users.role`，权限模型 |
 | `upload_job_type` | `pdf`、`url` | `upload_jobs.type` |
 | `upload_job_status` | `queued`、`processing`、`ready_for_review`、`failed` | `upload_jobs.status`，与 `resource_status` 是两套独立枚举，不要混用 |
