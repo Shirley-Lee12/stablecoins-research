@@ -17,9 +17,9 @@ function getSecret() {
   return new TextEncoder().encode(env.JWT_SECRET);
 }
 
-/** Min 8 chars, at least one uppercase and one lowercase letter. */
+/** Min 8 chars, at least one uppercase letter, one lowercase letter, and one digit. */
 function isValidPassword(password: string): boolean {
-  return password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password);
+  return password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password);
 }
 
 /** Emails in ADMIN_BOOTSTRAP_EMAILS (comma-separated) get role='admin' on first registration. */
@@ -88,7 +88,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       return;
     }
     if (!isValidPassword(password)) {
-      res.status(400).json({ error: "Password must be at least 8 characters and include both an uppercase and a lowercase letter" });
+      res.status(400).json({ error: "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a digit" });
       return;
     }
 
@@ -282,7 +282,7 @@ router.post("/auth/reset-password", async (req, res): Promise<void> => {
       return;
     }
     if (!isValidPassword(password)) {
-      res.status(400).json({ error: "Password must be at least 8 characters and include both an uppercase and a lowercase letter" });
+      res.status(400).json({ error: "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a digit" });
       return;
     }
 

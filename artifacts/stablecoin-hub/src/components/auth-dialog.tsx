@@ -10,7 +10,7 @@ import { Loader2, Eye, EyeOff, AlertCircle, CheckCircle2, Mail } from "lucide-re
 type View = "login" | "register" | "verify" | "forgot" | "forgot-sent";
 
 function isValidPassword(password: string): boolean {
-  return password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password);
+  return password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password);
 }
 
 interface AuthDialogProps {
@@ -70,8 +70,8 @@ export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDi
     }
     if (!isValidPassword(form.password)) {
       setError(t(
-        "Password must be at least 8 characters and include both an uppercase and a lowercase letter.",
-        "密码至少需要8个字符，且必须包含至少一个大写字母和一个小写字母。",
+        "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a digit.",
+        "密码至少需要8个字符，且必须包含至少一个大写字母、一个小写字母和一个数字。",
       ));
       return;
     }
@@ -189,7 +189,7 @@ export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDi
               <div className="space-y-2">
                 <Label htmlFor="reg-password">{t("Password", "密码")}</Label>
                 <div className="relative">
-                  <Input id="reg-password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder={t("Min. 8 chars, upper + lower", "至少8位，含大小写字母")} value={form.password} onChange={update("password")} required className="pr-10" />
+                  <Input id="reg-password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder={t("Min. 8 chars, upper + lower + digit", "至少8位，含大小写字母和数字")} value={form.password} onChange={update("password")} required className="pr-10" />
                   <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
