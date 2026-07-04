@@ -50,12 +50,20 @@ router.post("/resources/:id/tag-keyword-suggestions", requireAuth, async (req: a
 
     // Controlled-vocabulary check: every proposed id must be an existing active tag in the facet the
     // user claims it belongs to — this is a picker over lib/db's tags table, not a free-create field.
+    // Exception: a tag already attached to this resource is grandfathered in even if it has since been
+    // demoted to 'candidate' (or otherwise isn't 'active') — a submitter re-proposing an unrelated
+    // change (e.g. just adding keywords) shouldn't have their whole suggestion rejected because the
+    // picker pre-populated a legacy tag they never touched.
     const allIds = [...themeIds, ...jurisdictionIds, ...assetIds];
     if (allIds.length > 0) {
-      const rows = await db.select({ id: tagsTable.id, facet: tagsTable.facet, status: tagsTable.status }).from(tagsTable).where(inArray(tagsTable.id, [...new Set(allIds)]));
+      const [rows, currentLinks] = await Promise.all([
+        db.select({ id: tagsTable.id, facet: tagsTable.facet, status: tagsTable.status }).from(tagsTable).where(inArray(tagsTable.id, [...new Set(allIds)])),
+        db.select({ tagId: resourceTagsTable.tagId }).from(resourceTagsTable).where(eq(resourceTagsTable.resourceId, resourceId)),
+      ]);
       const byId = new Map(rows.map((r) => [r.id, r]));
+      const currentlyAttached = new Set(currentLinks.map((l) => l.tagId));
       const isValid = (ids: number[], facet: "theme" | "jurisdiction" | "asset") =>
-        ids.every((id) => byId.get(id)?.status === "active" && byId.get(id)?.facet === facet);
+        ids.every((id) => byId.get(id)?.facet === facet && (byId.get(id)?.status === "active" || currentlyAttached.has(id)));
       if (!isValid(themeIds, "theme") || !isValid(jurisdictionIds, "jurisdiction") || !isValid(assetIds, "asset")) {
         res.status(400).json({ error: "One or more tag ids are invalid or don't belong to the stated facet" });
         return;
