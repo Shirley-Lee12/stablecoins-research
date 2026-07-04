@@ -61,6 +61,14 @@ export function classifyStatus(input: {
   return "pending";
 }
 
+export interface StatusRecomputeResult {
+  status: SelfServiceStatus | "approved";
+  missingFields: string[];
+  hasThemeTag: boolean;
+  duplicateSignal: DuplicateSignal;
+  hasMismatch: boolean;
+}
+
 /**
  * Recomputes `status` after a tag/keyword-only change — an admin's direct edit via PATCH
  * /resources/:id, or an approved non-admin suggestion (docs/planning/18 §18.4). Completeness,
@@ -70,8 +78,17 @@ export function classifyStatus(input: {
  * This is the "skip re-verify" vs. "still recalc status" split §18.4 requires; the two must not be
  * conflated into one if-branch, since skipping the network verify call is not the same decision as
  * freezing status in place.
+ *
+ * Every caller of this helper is itself an admin-initiated action (a direct admin edit, or an admin
+ * approving a suggestion) — the admin IS the reviewer performing this action, so "all checks pass"
+ * resolves straight to 'approved', not classifyStatus()'s 'pending' fallback (which is correct for
+ * the OWNER-resubmission path, where a fresh admin review is genuinely still needed, but would
+ * otherwise re-queue an admin's own edit for admin review — a no-op loop).
+ *
+ * Returns the full check breakdown (not just the final status) so callers can tell the admin
+ * *why* status changed, if it did — this must never happen silently (docs/planning/18 §18.4).
  */
-export async function recomputeStatusAfterTagKeywordEdit(resourceId: number): Promise<DeterminedStatus> {
+export async function recomputeStatusAfterTagKeywordEdit(resourceId: number): Promise<StatusRecomputeResult> {
   const [r] = await db.select().from(resourcesTable).where(eq(resourcesTable.id, resourceId)).limit(1);
   if (!r) throw new Error(`Resource ${resourceId} not found`);
 
@@ -86,5 +103,12 @@ export async function recomputeStatusAfterTagKeywordEdit(resourceId: number): Pr
   const hasThemeTag = themeRows.some((t) => t.facet === "theme");
   const report = (r.verificationReport as VerifyReport | null) ?? { checks: [], hasFailure: false, hasWarning: false };
 
-  return classifyStatus({ duplicateSignal, missingFields, hasThemeTag, report });
+  const classified = classifyStatus({ duplicateSignal, missingFields, hasThemeTag, report });
+  return {
+    status: classified === "pending" ? "approved" : classified,
+    missingFields,
+    hasThemeTag,
+    duplicateSignal,
+    hasMismatch: hasMismatch(report),
+  };
 }

@@ -4,7 +4,7 @@ import { eq, desc, ilike, or, sql, and, inArray } from "drizzle-orm";
 import { requireAuth, optionalAuth } from "./auth";
 import { syncResourceAuthors } from "./authors";
 import { verifyResource } from "../lib/verify";
-import { missingSixElements, classifyStatus } from "../lib/resourceStatus";
+import { missingSixElements, classifyStatus, recomputeStatusAfterTagKeywordEdit } from "../lib/resourceStatus";
 import { checkDuplicate } from "../lib/duplicateCheck";
 import { retagResources, attachFacetedTags } from "../lib/tagging";
 
@@ -156,6 +156,10 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       abstract?: string; publishedDate?: string | null; tagIds?: number[]; keywords?: string[];
     };
 
+    // docs/planning/18 §18.4 — tags/keywords are no longer directly editable by a non-admin through
+    // this route: any logged-in user (owner or not) proposes those two fields via
+    // POST /resources/:id/tag-keyword-suggestions instead, and an admin applies them through the
+    // review queue. Only an admin's own PATCH still writes tagIds/keywords here, immediately.
     const [updated] = await db
       .update(resourcesTable)
       .set({
@@ -165,9 +169,9 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
         ...(url           !== undefined && { url }),
         ...(doi           !== undefined && { doi }),
         ...(abstract      !== undefined && { abstract }),
-        // Editing this field is inherently a human act, whether the editor is the owner or an admin
-        // (docs/planning/15 §5.3's "manual" source) — not re-derived from wherever it started.
-        ...(keywords      !== undefined && { keywords, keywordsSource: keywords.length > 0 ? "manual" as const : null }),
+        // Editing this field is inherently a human act (docs/planning/15 §5.3's "manual" source) —
+        // not re-derived from wherever it started. Admin-only per §18.4 (see comment above).
+        ...(isAdmin && keywords !== undefined && { keywords, keywordsSource: keywords.length > 0 ? "manual" as const : null }),
         ...(publishedDate !== undefined && { publishedDate }),
         ...(isAdmin && { adminEdited: true }),
       })
@@ -192,7 +196,23 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
             .onConflictDoUpdate({ target: [resourceTagsTable.resourceId, resourceTagsTable.tagId], set: { source: "manual" as const } });
         }
       }
-      res.json(updated);
+      // docs/planning/18 §18.4 — "skip the verify agent" and "recalc status from completeness
+      // rules" are two separate decisions; admin edits still skip the former but must not skip the
+      // latter (e.g. filling in a missing DOI should still move incomplete -> pending/approved).
+      // This can move an already-'approved' resource somewhere else too, if this edit (or an
+      // unrelated pre-existing gap) means it no longer clears every check — never silent: the
+      // response always says what changed and why.
+      const previousStatus = updated.status;
+      const result = await recomputeStatusAfterTagKeywordEdit(id);
+      const [reclassified] = await db.update(resourcesTable).set({ status: result.status }).where(eq(resourcesTable.id, id)).returning();
+      res.json({
+        ...reclassified,
+        previousStatus,
+        statusChanged: previousStatus !== result.status,
+        ...(previousStatus !== result.status && {
+          statusChangeReason: { missingFields: result.missingFields, hasThemeTag: result.hasThemeTag, duplicateSignal: result.duplicateSignal, hasMismatch: result.hasMismatch },
+        }),
+      });
       return;
     }
 

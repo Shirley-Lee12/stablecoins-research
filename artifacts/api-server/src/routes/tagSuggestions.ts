@@ -225,6 +225,9 @@ router.patch("/admin/tag-suggestions/:id/review", requireAuth, requireAdmin, asy
     }
 
     const { resourceId } = suggestion;
+    const [beforeEdit] = await db.select({ status: resourcesTable.status }).from(resourcesTable).where(eq(resourcesTable.id, resourceId)).limit(1);
+    if (!beforeEdit) { res.status(404).json({ error: "Resource not found" }); return; }
+    const previousStatus = beforeEdit.status;
     const proposedTagIds = [...(suggestion.proposedThemeTags as number[]), ...(suggestion.proposedJurisdictionTags as number[]), ...(suggestion.proposedAssetTags as number[])];
 
     await db.update(resourcesTable).set({
@@ -246,14 +249,26 @@ router.patch("/admin/tag-suggestions/:id/review", requireAuth, requireAdmin, asy
         .onConflictDoUpdate({ target: [resourceTagsTable.resourceId, resourceTagsTable.tagId], set: { source: "manual" as const } });
     }
 
-    const newStatus = await recomputeStatusAfterTagKeywordEdit(resourceId);
-    await db.update(resourcesTable).set({ status: newStatus }).where(eq(resourcesTable.id, resourceId));
+    // Never silent (docs/planning/18 §18.4) — the response always says whether/why the resource's
+    // status changed as a result of applying this proposal, same as the admin-direct-edit path.
+    const result = await recomputeStatusAfterTagKeywordEdit(resourceId);
+    await db.update(resourcesTable).set({ status: result.status }).where(eq(resourcesTable.id, resourceId));
 
     const [approved] = await db
       .update(tagKeywordEditSuggestionsTable)
       .set({ status: "approved", reviewedBy: req.user.userId, reviewedAt: new Date(), reviewNote: reviewNote?.trim() || null })
       .where(eq(tagKeywordEditSuggestionsTable.id, id))
       .returning();
+    res.json({
+      ...approved,
+      resourceStatusChanged: previousStatus !== result.status,
+      previousResourceStatus: previousStatus,
+      newResourceStatus: result.status,
+      ...(previousStatus !== result.status && {
+        resourceStatusChangeReason: { missingFields: result.missingFields, hasThemeTag: result.hasThemeTag, duplicateSignal: result.duplicateSignal, hasMismatch: result.hasMismatch },
+      }),
+    });
+    return;
     res.json(approved);
   } catch (err) {
     req.log.error(err);

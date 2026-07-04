@@ -626,11 +626,22 @@ function TagSuggestionsPanel({ token, language }: { token: string; language: str
   async function review(id: number, action: "approve" | "reject", reviewNote?: string) {
     setBusy(true);
     try {
-      await fetch(`${apiBase()}/api/admin/tag-suggestions/${id}/review`, {
+      const res = await fetch(`${apiBase()}/api/admin/tag-suggestions/${id}/review`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ action, reviewNote }),
       });
+      // docs/planning/18 §18.4 — approving a proposal can move the resource's status (a pre-existing
+      // gap can surface, or this fix satisfies one) — never let that happen silently.
+      const data = await res.json().catch(() => null);
+      if (data?.resourceStatusChanged) {
+        const missing = data.resourceStatusChangeReason?.missingFields?.length
+          ? (zh ? `缺少：${data.resourceStatusChangeReason.missingFields.join("、")}` : `missing: ${data.resourceStatusChangeReason.missingFields.join(", ")}`)
+          : "";
+        alert(zh
+          ? `注意：该资源状态已从「${data.previousResourceStatus}」变为「${data.newResourceStatus}」。${missing}`
+          : `Note: this resource's status changed from "${data.previousResourceStatus}" to "${data.newResourceStatus}". ${missing}`);
+      }
       setViewing(null);
       setRejecting(false);
       setRejectNote("");

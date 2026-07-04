@@ -539,6 +539,18 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
         }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); setSaving(false); return; }
+      // docs/planning/18 §18.4 — an admin edit can recompute this resource's status (e.g. an
+      // unrelated pre-existing gap surfaces once anything triggers a recheck); never let that
+      // happen silently to the admin who just clicked Save.
+      const saved = await res.json();
+      if (isAdmin && saved.statusChanged) {
+        const missing = saved.statusChangeReason?.missingFields?.length
+          ? (zh ? `缺少：${saved.statusChangeReason.missingFields.join("、")}` : `missing: ${saved.statusChangeReason.missingFields.join(", ")}`)
+          : "";
+        alert(zh
+          ? `注意：资源状态已从「${saved.previousStatus}」变为「${saved.status}」。${missing}`
+          : `Note: this resource's status changed from "${saved.previousStatus}" to "${saved.status}". ${missing}`);
+      }
       onSaved(); onClose();
     } catch { setError(zh ? "网络请求失败" : "Network error"); setSaving(false); }
   }
