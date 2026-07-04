@@ -1,12 +1,10 @@
 import { Router } from "express";
-import { db, resourcesTable, resourceTagsTable, tagsTable } from "@workspace/db";
+import { db, resourcesTable, resourceTagsTable } from "@workspace/db";
 import { eq, desc, ilike, or, sql, and, inArray } from "drizzle-orm";
 import { requireAuth, optionalAuth } from "./auth";
 import { syncResourceAuthors } from "./authors";
-import { verifyResource } from "../lib/verify";
-import { missingSixElements, classifyStatus, recomputeStatusAfterTagKeywordEdit } from "../lib/resourceStatus";
-import { checkDuplicate } from "../lib/duplicateCheck";
-import { retagResources, attachFacetedTags } from "../lib/tagging";
+import { missingSixElements, recomputeStatusAfterTagKeywordEdit } from "../lib/resourceStatus";
+import { attachFacetedTags } from "../lib/tagging";
 
 const router = Router();
 
@@ -219,26 +217,24 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       return;
     }
 
-    // Owner resubmission — rerun the full check pipeline (docs/planning/15 §0.7).
+    // Owner resubmission (docs/planning/19 §19.1 — supersedes the old "rerun the full check
+    // pipeline" rule from docs/planning/15 §0.7). off_topic/disputed/duplicate are automatic-
+    // detection signals; re-running that same detection on every resubmission trapped an owner who
+    // disagreed with the call (or made an unrelated fix) in a permanent loop, since nothing about
+    // the signal itself had changed. Resubmission now only re-checks completeness — the verify
+    // agent, theme-relevance retagging, and duplicate check each only ever run once, at initial
+    // submission (upload.ts's persistConfirmedDraft). From here on, an admin who can see the
+    // original flagged reason plus whatever the owner changed/explained makes the call, not another
+    // automatic pass. The resource's existing cached verificationReport/facet tags are left alone —
+    // they still reflect the last real check and remain the basis for 19.2's disputed-reason display.
     const contentChanged = title !== undefined || authors !== undefined || url !== undefined || doi !== undefined || abstract !== undefined || publishedDate !== undefined || keywords !== undefined;
     if (contentChanged) {
       const year = updated.publishedDate?.match(/^\d{4}/)?.[0] ? Number(updated.publishedDate.match(/^\d{4}/)![0]) : null;
       const missingFields = missingSixElements({ title: updated.title, authors: updated.authors, year, abstract: updated.abstract, url: updated.url, doi: updated.doi, keywords: updated.keywords });
-      const report = await verifyResource({ title: updated.title, authors: updated.authors, year, doi: updated.doi, url: updated.url, abstract: updated.abstract, keywords: updated.keywords });
-      const duplicateSignal = await checkDuplicate({ title: updated.title, doi: updated.doi, url: updated.url, year }, id);
-      await retagResources([id]);
-      const themeRows = await db
-        .select({ facet: tagsTable.facet })
-        .from(resourceTagsTable)
-        .innerJoin(tagsTable, eq(resourceTagsTable.tagId, tagsTable.id))
-        .where(eq(resourceTagsTable.resourceId, id));
-      const hasThemeTag = themeRows.some((t) => t.facet === "theme");
-      const newStatus = classifyStatus({ duplicateSignal, missingFields, hasThemeTag, report });
+      const newStatus = missingFields.length > 0 ? "incomplete" : "pending";
       const [reclassified] = await db
         .update(resourcesTable)
-        // docs/planning/16 §16.1 — cache the report computed above (the same reasoning as
-        // persistConfirmedDraft: this resubmission recheck already has to compute it fresh).
-        .set({ status: newStatus, rejectionReasonId: null, rejectionNote: null, reviewedBy: null, reviewedAt: null, verificationReport: report, verifiedAt: new Date() })
+        .set({ status: newStatus, rejectionReasonId: null, rejectionNote: null, reviewedBy: null, reviewedAt: null })
         .where(eq(resourcesTable.id, id))
         .returning();
       res.json(reclassified);
