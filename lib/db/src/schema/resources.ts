@@ -32,6 +32,11 @@ export const sourceTypeEnum = pgEnum("source_type", [
 //     resource (any status) — the user can confirm it's a genuinely different work or withdraw.
 // None of the four above ever reach the admin queue — only pending does. rejected is the admin's
 // own final call (source-quality or authenticity concerns that no self-check can resolve).
+//
+// docs/planning/19 §19.3 — 'withdrawn' added (making it eight, not the "final seven" §0.9 described):
+// the submitter's own explicit "yes, this is a duplicate, never mind" action on a 'duplicate' row.
+// Not a physical delete (keeps the record for the submitter's own history) but invisible to admins
+// and the public interface alike — visible only in the submitter's own My Contributions.
 export const resourceStatusEnum = pgEnum("resource_status", [
   "incomplete",
   "disputed",
@@ -40,7 +45,15 @@ export const resourceStatusEnum = pgEnum("resource_status", [
   "pending",
   "approved",
   "rejected",
+  "withdrawn",
 ]);
+
+// docs/planning/19 §19.3 — every existing resource a 'duplicate' determination matched against
+// (exact DOI/URL, or fuzzy title+year), captured once at the moment 'duplicate' is first
+// determined (persistConfirmedDraft — the only place that can happen, since §19.1 means
+// resubmission never re-runs duplicate detection). A submission can match more than one existing
+// resource, hence a separate table rather than a single column.
+export const duplicateMatchTypeEnum = pgEnum("duplicate_match_type", ["exact_doi", "exact_url", "fuzzy_title"]);
 
 export const resourcesTable = pgTable("resources", {
   id: serial("id").primaryKey(),
@@ -91,6 +104,13 @@ export const resourcesTable = pgTable("resources", {
   // reason verificationReport is: never regenerate on every view. Null for anything that was never
   // off_topic, and for off_topic rows that predate this column.
   offTopicExplanation: text("off_topic_explanation"),
+  // docs/planning/19 §19.3 — the submitter's own explanation when confirming a 'duplicate'-flagged
+  // resource is NOT actually a duplicate (e.g. "this is the working-paper version of the same study,
+  // distinct from the published version already in the library"), submitted alongside a normal
+  // resubmission. Shown to the admin next to the original duplicate_candidates matches so they can
+  // make the final call — distinct from rejectionNote, which is the admin's own reasoning, not the
+  // submitter's.
+  duplicateNote: text("duplicate_note"),
 });
 
 export const insertResourceSchema = createInsertSchema(resourcesTable).omit({
@@ -99,6 +119,16 @@ export const insertResourceSchema = createInsertSchema(resourcesTable).omit({
 });
 export type InsertResource = z.infer<typeof insertResourceSchema>;
 export type Resource = typeof resourcesTable.$inferSelect;
+
+// docs/planning/19 §19.3
+export const duplicateCandidatesTable = pgTable("duplicate_candidates", {
+  id: serial("id").primaryKey(),
+  resourceId: integer("resource_id").notNull().references(() => resourcesTable.id, { onDelete: "cascade" }),
+  candidateResourceId: integer("candidate_resource_id").notNull().references(() => resourcesTable.id, { onDelete: "cascade" }),
+  matchType: duplicateMatchTypeEnum("match_type").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export type DuplicateCandidateRow = typeof duplicateCandidatesTable.$inferSelect;
 
 // App-level enum for resources.keywords_source (kept as a plain `text` column, not a pg enum, per
 // docs/planning/15 §5.2 — mirrors how tags.category is also plain text).
