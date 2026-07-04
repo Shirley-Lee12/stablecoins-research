@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db, resourcesTable, resourceTagsTable } from "@workspace/db";
-import { eq, desc, ilike, or, sql, and, inArray } from "drizzle-orm";
+import { db, resourcesTable, resourceTagsTable, duplicateCandidatesTable } from "@workspace/db";
+import { eq, ne, desc, ilike, or, sql, and, inArray } from "drizzle-orm";
 import { requireAuth, optionalAuth } from "./auth";
 import { syncResourceAuthors } from "./authors";
 import { missingSixElements, computeMissingFields, recomputeStatusAfterTagKeywordEdit } from "../lib/resourceStatus";
@@ -14,7 +14,9 @@ const router = Router();
  * Visibility rules:
  *   - unauthenticated → status = 'approved' only
  *   - user            → status = 'approved' OR created_by = req.user.userId
- *   - admin           → all rows (optional ?status filter)
+ *   - admin           → all rows except other people's 'withdrawn' (docs/planning/19 §19.3 — visible
+ *     only to the resource's own owner, even when that owner happens to be an admin), plus an
+ *     optional ?status filter ('withdrawn' deliberately not selectable this way either)
  */
 router.get("/resources", optionalAuth, async (req: any, res) => {
   try {
@@ -33,7 +35,12 @@ router.get("/resources", optionalAuth, async (req: any, res) => {
         ) as any,
       );
     } else {
-      // Admin: optional status filter
+      conditions.push(
+        or(
+          ne(resourcesTable.status, "withdrawn"),
+          eq(resourcesTable.createdBy, req.user.userId),
+        ) as any,
+      );
       const statusFilter = req.query["status"] as string | undefined;
       if (statusFilter && ["incomplete", "disputed", "off_topic", "duplicate", "pending", "approved", "rejected"].includes(statusFilter)) {
         conditions.push(eq(resourcesTable.status, statusFilter as any));
@@ -111,6 +118,9 @@ router.get("/resources/:id", optionalAuth, async (req: any, res) => {
       if (row.status !== "approved" && row.createdBy !== req.user.userId) {
         res.status(404).json({ error: "Not found" }); return;
       }
+    } else if (row.status === "withdrawn" && row.createdBy !== req.user.userId) {
+      // docs/planning/19 §19.3 — 'withdrawn' is invisible to admins too, unless they're also the owner.
+      res.status(404).json({ error: "Not found" }); return;
     }
 
     const [withTags] = await attachFacetedTags([row]);
@@ -121,6 +131,61 @@ router.get("/resources/:id", optionalAuth, async (req: any, res) => {
   }
 });
 
+/**
+ * GET /api/resources/:id/duplicate-candidates (docs/planning/19 §19.3)
+ * Owner or admin only — the existing resources a 'duplicate' determination matched against, so the
+ * submitter can compare before deciding to withdraw or confirm it's a distinct work, and the admin
+ * can see the same thing when reviewing a resubmission.
+ */
+router.get("/resources/:id/duplicate-candidates", requireAuth, async (req: any, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [row] = await db.select({ id: resourcesTable.id, createdBy: resourcesTable.createdBy }).from(resourcesTable).where(eq(resourcesTable.id, id)).limit(1);
+    if (!row) { res.status(404).json({ error: "Not found" }); return; }
+    if (req.user.role !== "admin" && row.createdBy !== req.user.userId) {
+      res.status(404).json({ error: "Not found" }); return;
+    }
+
+    const matches = await db
+      .select({
+        matchType: duplicateCandidatesTable.matchType,
+        candidateResourceId: resourcesTable.id,
+        title: resourcesTable.title,
+        authors: resourcesTable.authors,
+        publishedDate: resourcesTable.publishedDate,
+      })
+      .from(duplicateCandidatesTable)
+      .innerJoin(resourcesTable, eq(duplicateCandidatesTable.candidateResourceId, resourcesTable.id))
+      .where(eq(duplicateCandidatesTable.resourceId, id));
+
+    res.json(matches);
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to fetch duplicate candidates" });
+  }
+});
+
+/**
+ * POST /api/resources/:id/withdraw (docs/planning/19 §19.3)
+ * Owner only — the submitter's explicit "yes, this is a duplicate, never mind" action on a
+ * 'duplicate'-flagged resource. Not a physical delete; moves to 'withdrawn', which is invisible to
+ * admins and the public interface, visible only in the submitter's own My Contributions.
+ */
+router.post("/resources/:id/withdraw", requireAuth, async (req: any, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [row] = await db.select().from(resourcesTable).where(eq(resourcesTable.id, id)).limit(1);
+    if (!row) { res.status(404).json({ error: "Not found" }); return; }
+    if (row.createdBy !== req.user.userId) { res.status(403).json({ error: "You do not have permission to withdraw this resource" }); return; }
+    if (row.status !== "duplicate") { res.status(400).json({ error: "Only a resource flagged as a possible duplicate can be withdrawn" }); return; }
+
+    const [updated] = await db.update(resourcesTable).set({ status: "withdrawn" }).where(eq(resourcesTable.id, id)).returning();
+    res.json(updated);
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to withdraw resource" });
+  }
+});
 
 /**
  * PATCH /api/resources/:id
@@ -133,13 +198,16 @@ router.get("/resources/:id", optionalAuth, async (req: any, res) => {
  * admin's tag choices, per T.4's protection mechanism). `adminEdited` is set true on any admin PATCH
  * through this route, as a coarse "an admin has touched this resource's content" marker.
  *
- * Owner (non-admin) edits (docs/planning/15 §0.7): this is the resubmission flow — the whole check
- * pipeline (six-elements completeness, verify/cross-check, duplicate, topic-relevance-via-tags)
- * reruns against the edited content, and the resulting status is whichever of
- * incomplete/disputed/off_topic/duplicate/pending the checks land on, same as a brand-new
- * submission — NOT a blind reset to 'pending' like the old behavior. Tags aren't editable by a
- * non-admin owner here; they're recomputed automatically (via retagResources) from the edited
- * title/abstract, same as any other auto-tagging path.
+ * Owner (non-admin) edits (docs/planning/19 §19.1 — supersedes the old docs/planning/15 §0.7
+ * "rerun everything" rule): this is the resubmission flow, and it now only re-checks six-elements
+ * completeness — complete goes to 'pending' for a fresh admin review, still-incomplete stays
+ * 'incomplete'. verify/cross-check, duplicate detection, and topic-relevance-via-tags each only
+ * ever run once, at initial submission; resubmitting never re-triggers them; this is what breaks
+ * the dead loop an owner who disagreed with (or couldn't fix) one of those signals used to hit.
+ * Tags aren't editable by a non-admin owner here at all (see docs/planning/18 §18.4 instead).
+ * `duplicateNote`, if present, is the owner's explanation when confirming a 'duplicate'-flagged
+ * resource is not actually a duplicate (docs/planning/19 §19.3) — stored for the admin to see
+ * alongside the original duplicate_candidates matches.
  */
 router.patch("/resources/:id", requireAuth, async (req: any, res) => {
   try {
@@ -154,9 +222,9 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       return;
     }
 
-    const { title, authors, sourceType, url, doi, abstract, publishedDate, tagIds, keywords } = req.body as {
+    const { title, authors, sourceType, url, doi, abstract, publishedDate, tagIds, keywords, duplicateNote } = req.body as {
       title?: string; authors?: string[]; sourceType?: string; url?: string | null; doi?: string | null;
-      abstract?: string; publishedDate?: string | null; tagIds?: number[]; keywords?: string[];
+      abstract?: string; publishedDate?: string | null; tagIds?: number[]; keywords?: string[]; duplicateNote?: string;
     };
 
     // docs/planning/18 §18.4 — for an APPROVED resource, tags/keywords are no longer directly
@@ -179,6 +247,9 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
         // not re-derived from wherever it started.
         ...((isAdmin || nonAdminCanEditKeywords) && keywords !== undefined && { keywords, keywordsSource: keywords.length > 0 ? "manual" as const : null }),
         ...(publishedDate !== undefined && { publishedDate }),
+        // docs/planning/19 §19.3 — only meaningful when resubmitting a 'duplicate'-flagged resource
+        // to confirm it isn't actually one; harmless to accept otherwise.
+        ...(duplicateNote !== undefined && { duplicateNote }),
         ...(isAdmin && { adminEdited: true }),
       })
       .where(eq(resourcesTable.id, id))
@@ -232,7 +303,7 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
     // original flagged reason plus whatever the owner changed/explained makes the call, not another
     // automatic pass. The resource's existing cached verificationReport/facet tags are left alone —
     // they still reflect the last real check and remain the basis for 19.2's disputed-reason display.
-    const contentChanged = title !== undefined || authors !== undefined || url !== undefined || doi !== undefined || abstract !== undefined || publishedDate !== undefined || keywords !== undefined;
+    const contentChanged = title !== undefined || authors !== undefined || url !== undefined || doi !== undefined || abstract !== undefined || publishedDate !== undefined || keywords !== undefined || duplicateNote !== undefined;
     if (contentChanged) {
       const year = updated.publishedDate?.match(/^\d{4}/)?.[0] ? Number(updated.publishedDate.match(/^\d{4}/)![0]) : null;
       const missingFields = missingSixElements({ title: updated.title, authors: updated.authors, year, abstract: updated.abstract, url: updated.url, doi: updated.doi, keywords: updated.keywords });

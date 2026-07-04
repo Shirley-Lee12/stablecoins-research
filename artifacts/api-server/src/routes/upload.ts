@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { randomUUID } from "node:crypto";
-import { db, resourcesTable, uploadJobsTable, resourceTagsTable, tagsTable, type KeywordsSource } from "@workspace/db";
+import { db, resourcesTable, uploadJobsTable, resourceTagsTable, tagsTable, duplicateCandidatesTable, type KeywordsSource } from "@workspace/db";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { requireAuth } from "./auth";
 import { syncResourceAuthors } from "./authors";
@@ -12,7 +12,7 @@ import { extractPdfText } from "../lib/pdfExtract";
 import { loadTagVocabulary, computeTagsForText, type TagVocabulary, type ComputedTags } from "../lib/tagging";
 import { verifyResource, verifyCitationRecord, type VerifyReport } from "../lib/verify";
 import { classifyStatus, missingSixElements } from "../lib/resourceStatus";
-import { checkDuplicate } from "../lib/duplicateCheck";
+import { findDuplicateCandidates, type DuplicateSignal } from "../lib/duplicateCheck";
 import { parseCitationFile, UnsupportedCitationFormatError, type CitationRecord } from "../lib/citation";
 import { extractListFileText, UnsupportedListFormatError } from "../lib/unstructuredList/extractText";
 import { decomposeReferenceList } from "../lib/unstructuredList/decompose";
@@ -751,7 +751,10 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNe
   const missingFields = missingSixElements({ title: input.title, authors, year, abstract, url, doi, keywords });
   const verifyInput = { title: input.title, authors, year, doi, url, abstract, keywords };
   const report = skipNetworkVerification ? verifyCitationRecord(verifyInput) : await verifyResource(verifyInput);
-  const duplicateSignal = await checkDuplicate({ title: input.title, doi, url, year });
+  const duplicateMatches = await findDuplicateCandidates({ title: input.title, doi, url, year });
+  const duplicateSignal: DuplicateSignal = duplicateMatches.some((m) => m.matchType !== "fuzzy_title")
+    ? "exact"
+    : duplicateMatches.length > 0 ? "fuzzy" : null;
   const hasThemeTag = await hasThemeFacetTag(tagIds);
   const status = classifyStatus({ duplicateSignal, missingFields, hasThemeTag, report });
   // docs/planning/19 §19.2 — generated once, right here, since this is the only place off_topic is
@@ -787,6 +790,14 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNe
 
   if (tagIds.length > 0) {
     await db.insert(resourceTagsTable).values(tagIds.map((tagId) => ({ resourceId: inserted.id, tagId, source: "auto" as const, score: tagScores[tagId] ?? null }))).onConflictDoNothing();
+  }
+
+  // docs/planning/19 §19.3 — record every matched existing resource, not just the yes/no signal,
+  // so the submitter/admin can later see exactly what this was flagged against.
+  if (status === "duplicate" && duplicateMatches.length > 0) {
+    await db.insert(duplicateCandidatesTable).values(
+      duplicateMatches.map((m) => ({ resourceId: inserted.id, candidateResourceId: m.candidateResourceId, matchType: m.matchType })),
+    );
   }
 
   return inserted;

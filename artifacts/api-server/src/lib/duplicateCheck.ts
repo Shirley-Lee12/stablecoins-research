@@ -32,19 +32,36 @@ function yearOf(publishedDate: string | null): number | null {
  * different titles too — those are correctly NOT caught here, matching docs/planning/15 §0.5's
  * explicit "don't misjudge this as a duplicate" carve-out.
  */
-export async function checkDuplicate(
+export interface DuplicateCandidateMatch {
+  candidateResourceId: number;
+  matchType: "exact_doi" | "exact_url" | "fuzzy_title";
+}
+
+/**
+ * docs/planning/19 §19.3 — like checkDuplicate()'s detection logic, but collects every matching
+ * existing resource (a submission can match more than one) instead of stopping at the first hit,
+ * so persistConfirmedDraft() can record them all into duplicate_candidates. checkDuplicate() below
+ * is now a thin wrapper over this, kept for callers that only need the yes/no signal.
+ */
+export async function findDuplicateCandidates(
   input: { title: string; doi: string | null; url: string | null; year: number | null },
   excludeResourceId?: number,
-): Promise<DuplicateSignal> {
-  if (input.doi || input.url) {
-    const linkConditions = [];
-    if (input.doi) linkConditions.push(eq(resourcesTable.doi, input.doi));
-    if (input.url) linkConditions.push(eq(resourcesTable.url, input.url));
+): Promise<DuplicateCandidateMatch[]> {
+  const matches = new Map<number, DuplicateCandidateMatch>();
+
+  if (input.doi) {
     const conditions = excludeResourceId
-      ? [or(...linkConditions), ne(resourcesTable.id, excludeResourceId)]
-      : [or(...linkConditions)];
-    const [exactMatch] = await db.select({ id: resourcesTable.id }).from(resourcesTable).where(and(...conditions)).limit(1);
-    if (exactMatch) return "exact";
+      ? [eq(resourcesTable.doi, input.doi), ne(resourcesTable.id, excludeResourceId)]
+      : [eq(resourcesTable.doi, input.doi)];
+    const rows = await db.select({ id: resourcesTable.id }).from(resourcesTable).where(and(...conditions));
+    for (const r of rows) matches.set(r.id, { candidateResourceId: r.id, matchType: "exact_doi" });
+  }
+  if (input.url) {
+    const conditions = excludeResourceId
+      ? [eq(resourcesTable.url, input.url), ne(resourcesTable.id, excludeResourceId)]
+      : [eq(resourcesTable.url, input.url)];
+    const rows = await db.select({ id: resourcesTable.id }).from(resourcesTable).where(and(...conditions));
+    for (const r of rows) if (!matches.has(r.id)) matches.set(r.id, { candidateResourceId: r.id, matchType: "exact_url" });
   }
 
   const candidates = await db
@@ -52,11 +69,22 @@ export async function checkDuplicate(
     .from(resourcesTable);
   for (const c of candidates) {
     if (excludeResourceId && c.id === excludeResourceId) continue;
+    if (matches.has(c.id)) continue; // already recorded via a stronger (exact) match
     if (titleOverlapScore(input.title, c.title) < FUZZY_TITLE_THRESHOLD) continue;
     const candidateYear = yearOf(c.publishedDate);
     if (input.year !== null && candidateYear !== null && Math.abs(input.year - candidateYear) > FUZZY_YEAR_TOLERANCE) continue;
-    return "fuzzy";
+    matches.set(c.id, { candidateResourceId: c.id, matchType: "fuzzy_title" });
   }
 
+  return [...matches.values()];
+}
+
+export async function checkDuplicate(
+  input: { title: string; doi: string | null; url: string | null; year: number | null },
+  excludeResourceId?: number,
+): Promise<DuplicateSignal> {
+  const matches = await findDuplicateCandidates(input, excludeResourceId);
+  if (matches.some((m) => m.matchType === "exact_doi" || m.matchType === "exact_url")) return "exact";
+  if (matches.length > 0) return "fuzzy";
   return null;
 }
