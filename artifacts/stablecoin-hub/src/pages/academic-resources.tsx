@@ -24,6 +24,16 @@ export const SELF_SERVICE_LABELS: Record<string, { zh: string; en: string }> = {
   off_topic: { zh: "与稳定币无关", en: "Off-topic" },
   duplicate: { zh: "疑似重复", en: "Possible duplicate" },
 };
+// docs/planning/19 §19.2 — labels for missingSixElements()'s field keys, so an 'incomplete'
+// resource can list exactly which fields still need filling in instead of just showing the badge.
+export const MISSING_FIELD_LABELS: Record<string, { zh: string; en: string }> = {
+  title: { zh: "标题", en: "Title" },
+  authors: { zh: "作者", en: "Authors" },
+  year: { zh: "年份", en: "Year" },
+  abstract: { zh: "摘要", en: "Abstract" },
+  url_doi: { zh: "URL 或 DOI", en: "URL or DOI" },
+  keywords: { zh: "关键词", en: "Keywords" },
+};
 type FilterType = SourceType | "Expert" | "All";
 
 // docs/planning/15 §5.2 — mirrors lib/db's KeywordsSource (frontend has no direct DB import, same
@@ -50,6 +60,12 @@ export interface Resource {
   rejectionReasonId: number | null;
   rejectionNote: string | null;
   reviewedAt: string | null;
+  /** docs/planning/19 §19.2 — computed fresh on every GET, not a stored column; lets My Contributions show *which* six-elements fields are missing for an 'incomplete' resource. */
+  missingFields?: string[];
+  /** docs/planning/16 §16.1 — cached field-by-field check, reused by 19.2's disputed-reason display. */
+  verificationReport?: VerifyReport | null;
+  /** docs/planning/19 §19.2 — cached natural-language explanation, generated once when off_topic is first determined. */
+  offTopicExplanation?: string | null;
 }
 
 export interface RejectionReason {
@@ -920,6 +936,51 @@ export function VerifyReportList({ report, language }: { report: VerifyReport; l
       ))}
     </div>
   );
+}
+
+// docs/planning/19 §19.2 — a self-service-status resource used to show just a status badge in My
+// Contributions ("incomplete"/"disputed"/etc), with no way to tell what to actually fix. Each of the
+// four states gets its own concrete explanation here instead: incomplete lists the specific missing
+// fields, disputed reuses the existing ✅/⚠️/❌ verify report, off_topic shows the cached
+// LLM-generated explanation (never regenerated — see resources.offTopicExplanation). duplicate is
+// intentionally left to doc 19.3, which adds the candidate-resource comparison UI this status needs.
+export function SelfServiceStatusDetail({ resource, language }: { resource: Resource; language: string }) {
+  const zh = language === "zh";
+  if (resource.status === "incomplete") {
+    const fields = resource.missingFields ?? [];
+    if (fields.length === 0) return null;
+    return (
+      <div className="space-y-1">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "缺少以下信息" : "Missing"}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {fields.map((f) => (
+            <span key={f} className="text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800">
+              {zh ? MISSING_FIELD_LABELS[f]?.zh ?? f : MISSING_FIELD_LABELS[f]?.en ?? f}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  if (resource.status === "disputed") {
+    if (!resource.verificationReport) return null;
+    return (
+      <div className="space-y-1">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "核对报告" : "Verification Report"}</p>
+        <VerifyReportList report={resource.verificationReport} language={language} />
+      </div>
+    );
+  }
+  if (resource.status === "off_topic") {
+    if (!resource.offTopicExplanation) return null;
+    return (
+      <div className="space-y-1">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "判定原因" : "Why this was flagged"}</p>
+        <p className="text-xs text-foreground/90 leading-relaxed">{resource.offTopicExplanation}</p>
+      </div>
+    );
+  }
+  return null;
 }
 
 // ── Shared editable review/confirm step — used by all three upload tabs ───────

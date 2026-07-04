@@ -3,7 +3,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import {
   ResourceDetailModal, EditModal, JobQueuePanel,
-  SuggestEditModal, MySuggestionBadge,
+  SuggestEditModal, MySuggestionBadge, SelfServiceStatusDetail,
   SELF_SERVICE_STATUSES, SELF_SERVICE_LABELS,
   type Resource, type RejectionReason,
 } from "@/pages/academic-resources";
@@ -186,6 +186,10 @@ export default function MyContributionsPage() {
                   <Tag className="h-3 w-3" />
                   {zh ? "建议修改标签/关键词" : "Suggest tag/keyword edit"}
                 </button>
+              </div>
+            ) : SELF_SERVICE_STATUSES.includes(viewing.status) ? (
+              <div className="pt-2 border-t border-border">
+                <SelfServiceStatusDetail resource={viewing} language={language} />
               </div>
             ) : undefined
           }
