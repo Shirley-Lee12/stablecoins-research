@@ -1700,6 +1700,11 @@ interface UnstructuredEntry {
 function FolderImportTab({ token, language, onSaved }: { token: string; language: string; onSaved: () => void }) {
   const zh = language === "zh";
   const inputRef = useRef<HTMLInputElement>(null);
+  // docs/planning/20 — a separate plain multi-file picker (no webkitdirectory), for when the user
+  // just wants to grab a handful of loose files rather than build a whole folder for them.
+  // handleFolderSelected() already tolerates this — relativePath falls back to the bare file name
+  // when webkitRelativePath isn't present, which is exactly the case for a non-folder selection.
+  const filesInputRef = useRef<HTMLInputElement>(null);
   const [webkitdirSupported] = useState(() => "webkitdirectory" in document.createElement("input"));
   const [stage, setStage] = useState<"select" | "extracting" | "summary" | "unstructuredReview" | "progress">("select");
   // Unset by default (not "journal_article") — this is only a fallback default for whichever files
@@ -1922,7 +1927,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
         {!webkitdirSupported && (
           <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-1.5">
             <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-            {zh ? "你的浏览器不支持选择文件夹，请改用其他标签页的多选文件上传。" : "Your browser doesn't support folder selection — please use one of the other tabs' multi-file upload instead."}
+            {zh ? "你的浏览器不支持选择文件夹，请用下方“选择文件”按钮改为多选文件。" : "Your browser doesn't support folder selection — use the \"Select Files\" button below instead."}
           </p>
         )}
         <div className="space-y-1">
@@ -1940,10 +1945,21 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
           </p>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "选择文件夹" : "Select a folder"}</label>
-          <input key={pickerGeneration} ref={setFolderInputRef} type="file" multiple disabled={!webkitdirSupported}
-            onChange={(e) => handleFolderSelected(e.target.files)}
-            className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer disabled:opacity-50" />
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "选择要导入的内容" : "Select what to import"}</label>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => inputRef.current?.click()} disabled={!webkitdirSupported}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-muted text-foreground text-xs font-medium hover:bg-muted/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              {zh ? "选择文件夹" : "Select a Folder"}
+            </button>
+            <button type="button" onClick={() => filesInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-muted text-foreground text-xs font-medium hover:bg-muted/80 transition-colors">
+              {zh ? "选择文件" : "Select Files"}
+            </button>
+          </div>
+          <input key={`folder-${pickerGeneration}`} ref={setFolderInputRef} type="file" multiple disabled={!webkitdirSupported}
+            onChange={(e) => handleFolderSelected(e.target.files)} className="hidden" />
+          <input key={`files-${pickerGeneration}`} ref={filesInputRef} type="file" multiple
+            onChange={(e) => handleFolderSelected(e.target.files)} className="hidden" />
         </div>
         <div>
           <button onClick={() => setShowStructureHint((v) => !v)} className="text-xs text-primary hover:underline">
@@ -2129,7 +2145,7 @@ function UploadCenterModal({ token, language, onClose, onSaved }: {
     { key: "manual" as const, labelEn: "Manual", labelZh: "手动填写" },
     { key: "url" as const, labelEn: "DOI / URL", labelZh: "DOI·URL" },
     { key: "pdf" as const, labelEn: "PDF", labelZh: "PDF" },
-    { key: "folder" as const, labelEn: "Folder", labelZh: "文件夹导入" },
+    { key: "folder" as const, labelEn: "Batch Import", labelZh: "批量导入" },
   ];
 
   return (
