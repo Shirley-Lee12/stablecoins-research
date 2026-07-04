@@ -3,7 +3,7 @@ import { db, resourcesTable, resourceTagsTable, duplicateCandidatesTable } from 
 import { eq, ne, desc, ilike, or, sql, and, inArray } from "drizzle-orm";
 import { requireAuth, optionalAuth } from "./auth";
 import { syncResourceAuthors } from "./authors";
-import { missingSixElements, computeMissingFields, recomputeStatusAfterTagKeywordEdit } from "../lib/resourceStatus";
+import { missingSixElements, computeMissingFields, recomputeResourceStatus } from "../lib/resourceStatus";
 import { attachFacetedTags } from "../lib/tagging";
 
 const router = Router();
@@ -280,7 +280,7 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       // unrelated pre-existing gap) means it no longer clears every check — never silent: the
       // response always says what changed and why.
       const previousStatus = updated.status;
-      const result = await recomputeStatusAfterTagKeywordEdit(id);
+      const result = await recomputeResourceStatus(id);
       const [reclassified] = await db.update(resourcesTable).set({ status: result.status }).where(eq(resourcesTable.id, id)).returning();
       res.json({
         ...reclassified,

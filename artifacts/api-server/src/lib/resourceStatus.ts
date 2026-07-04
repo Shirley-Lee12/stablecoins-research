@@ -76,14 +76,16 @@ export interface StatusRecomputeResult {
 }
 
 /**
- * Recomputes `status` after a tag/keyword-only change — an admin's direct edit via PATCH
- * /resources/:id, or an approved non-admin suggestion (docs/planning/18 §18.4). Completeness,
- * duplicate, and theme-tag-presence are all recalculated fresh (tags/keywords can newly satisfy or
- * break any of those), but the verify agent is deliberately NOT re-run — the resource's already-
- * cached `verificationReport` (docs/planning/16 §16.1) is reused for the mismatch check instead.
- * This is the "skip re-verify" vs. "still recalc status" split §18.4 requires; the two must not be
- * conflated into one if-branch, since skipping the network verify call is not the same decision as
- * freezing status in place.
+ * Recomputes `status` after an admin-initiated change to any of a resource's fields — an admin's
+ * direct edit via PATCH /resources/:id, or an admin approving a non-admin's edit suggestion (any
+ * field, docs/planning/20 §20.1; originally tag/keyword-only per docs/planning/18 §18.4). Reads the
+ * resource fresh from the DB and recalculates completeness/duplicate/theme-tag-presence regardless
+ * of which specific field(s) just changed — it doesn't need to know, since it recomputes from
+ * scratch either way. The verify agent is deliberately NOT re-run — the resource's already-cached
+ * `verificationReport` (docs/planning/16 §16.1) is reused for the mismatch check instead. This is
+ * the "skip re-verify" vs. "still recalc status" split §18.4 requires; the two must not be conflated
+ * into one if-branch, since skipping the network verify call is not the same decision as freezing
+ * status in place.
  *
  * Every caller of this helper is itself an admin-initiated action (a direct admin edit, or an admin
  * approving a suggestion) — the admin IS the reviewer performing this action, so "all checks pass"
@@ -94,7 +96,7 @@ export interface StatusRecomputeResult {
  * Returns the full check breakdown (not just the final status) so callers can tell the admin
  * *why* status changed, if it did — this must never happen silently (docs/planning/18 §18.4).
  */
-export async function recomputeStatusAfterTagKeywordEdit(resourceId: number): Promise<StatusRecomputeResult> {
+export async function recomputeResourceStatus(resourceId: number): Promise<StatusRecomputeResult> {
   const [r] = await db.select().from(resourcesTable).where(eq(resourcesTable.id, resourceId)).limit(1);
   if (!r) throw new Error(`Resource ${resourceId} not found`);
 
