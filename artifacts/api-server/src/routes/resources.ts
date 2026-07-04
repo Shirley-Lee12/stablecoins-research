@@ -156,10 +156,13 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       abstract?: string; publishedDate?: string | null; tagIds?: number[]; keywords?: string[];
     };
 
-    // docs/planning/18 §18.4 — tags/keywords are no longer directly editable by a non-admin through
-    // this route: any logged-in user (owner or not) proposes those two fields via
+    // docs/planning/18 §18.4 — for an APPROVED resource, tags/keywords are no longer directly
+    // editable by a non-admin through this route: any logged-in user proposes those two fields via
     // POST /resources/:id/tag-keyword-suggestions instead, and an admin applies them through the
-    // review queue. Only an admin's own PATCH still writes tagIds/keywords here, immediately.
+    // review queue. This does NOT apply to the owner's self-service resubmission flow (docs/planning/15)
+    // for a not-yet-approved resource — an owner fixing e.g. a missing-keywords 'incomplete' resource
+    // must still be able to write keywords directly here, or they could never escape that status.
+    const nonAdminCanEditKeywords = existing.status !== "approved";
     const [updated] = await db
       .update(resourcesTable)
       .set({
@@ -170,8 +173,8 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
         ...(doi           !== undefined && { doi }),
         ...(abstract      !== undefined && { abstract }),
         // Editing this field is inherently a human act (docs/planning/15 §5.3's "manual" source) —
-        // not re-derived from wherever it started. Admin-only per §18.4 (see comment above).
-        ...(isAdmin && keywords !== undefined && { keywords, keywordsSource: keywords.length > 0 ? "manual" as const : null }),
+        // not re-derived from wherever it started.
+        ...((isAdmin || nonAdminCanEditKeywords) && keywords !== undefined && { keywords, keywordsSource: keywords.length > 0 ? "manual" as const : null }),
         ...(publishedDate !== undefined && { publishedDate }),
         ...(isAdmin && { adminEdited: true }),
       })
