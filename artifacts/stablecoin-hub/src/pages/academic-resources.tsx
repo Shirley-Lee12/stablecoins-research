@@ -1241,7 +1241,7 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
         body: JSON.stringify({ title: title.trim(), authors, year, abstract: abstract.trim(), url: url.trim() || undefined, doi: doi.trim() || undefined, sourceType }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Failed"); setStep("input"); return; }
+      if (!res.ok) { setError((data.error ?? "Failed") + (data.detail ? ` (${data.detail})` : "")); setStep("input"); return; }
       setDraft(data.draft); setTags(data.tags); setReport(data.report); setMissingRequired(data.missingRequired ?? []); setStep("review");
     } catch { setError(zh ? "网络请求失败" : "Network error"); setStep("input"); }
   }
@@ -1476,7 +1476,7 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
         body: JSON.stringify({ url: singleUrl.trim(), sourceType }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Failed"); setStep("input"); return; }
+      if (!res.ok) { setError((data.error ?? "Failed") + (data.detail ? ` (${data.detail})` : "")); setStep("input"); return; }
       setDraft(data.draft); setTags(data.tags); setReport(data.report); setMissingRequired(data.missingRequired ?? []); setStep("review");
     } catch { setError(zh ? "网络请求失败" : "Network error"); setStep("input"); }
   }
@@ -1770,7 +1770,13 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
           body: form,
         });
         const data = await res.json();
-        if (!res.ok) { errors.push(`${f.relativePath}: ${data.error ?? (zh ? "解析失败" : "failed")}`); return; }
+        if (!res.ok) {
+          // docs/planning/20 §20.0.1 — the backend already returns a specific `detail` (e.g. the
+          // actual LLM/parsing error) alongside the generic `error` label; this used to drop it.
+          const message = data.error ?? (zh ? "解析失败" : "failed");
+          errors.push(`${f.relativePath}: ${message}${data.detail ? ` (${data.detail})` : ""}`);
+          return;
+        }
         (data.entries ?? []).forEach((e: { title?: string; authors?: string[]; year?: number | null; urlOrDoi?: string | null }, idx: number) => {
           pooled.push({
             id: `${f.relativePath}-${idx}`,
