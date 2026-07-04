@@ -7,6 +7,7 @@ import authorsRouter from "./authors";
 import adminRouter from "./admin";
 import uploadRouter from "./upload";
 import tagsRouter from "./tags";
+import tagSuggestionsRouter from "./tagSuggestions";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(authorsRouter);
 router.use(adminRouter);
 router.use(uploadRouter);
 router.use(tagsRouter);
+router.use(tagSuggestionsRouter);
 
 export default router;

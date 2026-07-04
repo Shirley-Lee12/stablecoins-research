@@ -5,3 +5,4 @@ export * from "./authors";
 export * from "./tags";
 export * from "./upload_jobs";
 export * from "./rejectionReasons";
+export * from "./tagKeywordEditSuggestions";
