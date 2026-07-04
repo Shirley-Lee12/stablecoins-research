@@ -628,9 +628,9 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "关键词" : "Keywords"}</label>
-            <input value={keywords.join(", ")}
-              onChange={(e) => setKeywords(e.target.value.split(/[,，]/).map((k) => k.trim()).filter(Boolean))}
-              placeholder={zh ? "多个关键词用逗号分隔" : "Comma-separated keywords"}
+            <input value={keywords.join("；")}
+              onChange={(e) => setKeywords(e.target.value.split(/[;；]/).map((k) => k.trim()).filter(Boolean))}
+              placeholder={zh ? "多个关键词用分号（；）分隔" : "Semicolon (;) separated keywords"}
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
             <KeywordCountHint count={keywords.length} language={language} />
           </div>
@@ -736,9 +736,9 @@ export function SuggestEditModal({ resource, token, language, onClose, onSubmitt
           <FacetTagPicker selectedIds={tagIds} onChange={setTagIds} language={language} />
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "关键词" : "Keywords"}</label>
-            <input value={keywords.join(", ")}
-              onChange={(e) => setKeywords(e.target.value.split(/[,，]/).map((k) => k.trim()).filter(Boolean))}
-              placeholder={zh ? "多个关键词用逗号分隔" : "Comma-separated keywords"}
+            <input value={keywords.join("；")}
+              onChange={(e) => setKeywords(e.target.value.split(/[;；]/).map((k) => k.trim()).filter(Boolean))}
+              placeholder={zh ? "多个关键词用分号（；）分隔" : "Semicolon (;) separated keywords"}
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
             <KeywordCountHint count={keywords.length} language={language} />
           </div>
@@ -868,11 +868,12 @@ function KeywordCountHint({ count, language }: { count: number; language: string
   );
 }
 
-// ── Keywords display (docs/planning/15 §5.4) — the document's own free-text keywords, deliberately
-// styled distinctly from TagSummaryList below (different heading, no pill-click-to-filter behavior)
-// since `keywords` isn't the controlled tags/facetedTags vocabulary. A 'generated' source always
-// shows the "AI生成" badge — this is an integrity requirement, not a nice-to-have, so it can't be
-// suppressed or visually blended with extracted/manual keywords.
+// ── Keywords display (docs/planning/15 §5.4, reworked per docs/planning/20 §20.0.6) — the
+// document's own free-text keywords, deliberately styled distinctly from TagSummaryList below since
+// `keywords` isn't the controlled tags/facetedTags vocabulary: plain semicolon-separated text (the
+// CNKI/SSRN convention), not pills/badges, so it can't be visually mistaken for the tag system. A
+// 'generated' source always shows the "AI生成" badge — this is an integrity requirement, not a
+// nice-to-have, so it can't be suppressed or visually blended with extracted/manual keywords.
 export function KeywordsBlock({ keywords, keywordsSource, language }: { keywords: string[]; keywordsSource: KeywordsSource | null; language: string }) {
   const zh = language === "zh";
   if (keywords.length === 0) return null;
@@ -886,11 +887,7 @@ export function KeywordsBlock({ keywords, keywordsSource, language }: { keywords
           </span>
         )}
       </h3>
-      <div className="flex flex-wrap gap-1.5">
-        {keywords.map((k) => (
-          <span key={k} className="text-xs px-2 py-0.5 bg-muted/60 rounded-full text-muted-foreground border border-border/60">{k}</span>
-        ))}
-      </div>
+      <p className="text-sm text-foreground/90">{keywords.join("；")}</p>
     </div>
   );
 }
@@ -1184,11 +1181,11 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
             </span>
           )}
         </label>
-        <input value={draft.keywords.join(", ")}
-          onChange={(e) => onChange({ ...draft, keywords: e.target.value.split(/[,，]/).map((k) => k.trim()).filter(Boolean), keywordsSource: "manual" })}
-          placeholder={zh ? "多个关键词用逗号分隔（原文没有的话可以自己填，或留空由 AI 从摘要提炼）" : "Comma-separated — leave blank to let AI suggest some from the abstract"}
+        <input value={(draft.keywords ?? []).join("；")}
+          onChange={(e) => onChange({ ...draft, keywords: e.target.value.split(/[;；]/).map((k) => k.trim()).filter(Boolean), keywordsSource: "manual" })}
+          placeholder={zh ? "多个关键词用分号（；）分隔（原文没有的话可以自己填，或留空由 AI 从摘要提炼）" : "Semicolon (;) separated — leave blank to let AI suggest some from the abstract"}
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
-        <KeywordCountHint count={draft.keywords.length} language={language} />
+        <KeywordCountHint count={(draft.keywords ?? []).length} language={language} />
       </div>
       <div className="space-y-1.5">
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "自动匹配的标签" : "Auto-matched tags"}</label>
