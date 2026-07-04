@@ -3,10 +3,11 @@ import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import {
   ResourceDetailModal, EditModal, JobQueuePanel,
+  SuggestEditModal, MySuggestionBadge,
   SELF_SERVICE_STATUSES, SELF_SERVICE_LABELS,
   type Resource, type RejectionReason,
 } from "@/pages/academic-resources";
-import { Loader2, Inbox, ChevronRight, Shield } from "lucide-react";
+import { Loader2, Inbox, ChevronRight, Shield, Tag } from "lucide-react";
 
 function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
@@ -51,6 +52,11 @@ export default function MyContributionsPage() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [viewing, setViewing] = useState<Resource | null>(null);
   const [editing, setEditing] = useState<Resource | null>(null);
+  // docs/planning/18 §18.4 — owners of an already-approved resource propose tag/keyword edits
+  // through the suggestion queue too, same as any other logged-in user (this is separate from the
+  // self-service resubmission Edit&Resubmit flow above, which only applies to non-approved statuses).
+  const [suggesting, setSuggesting] = useState<Resource | null>(null);
+  const [suggestionRefreshKey, setSuggestionRefreshKey] = useState(0);
 
   const fetchMine = useCallback(() => {
     if (!token || !user) return;
@@ -171,6 +177,18 @@ export default function MyContributionsPage() {
               </div>
             ) : undefined
           }
+          extraSection={
+            viewing.status === "approved" ? (
+              <div className="pt-2 border-t border-border space-y-2">
+                <MySuggestionBadge resourceId={viewing.id} token={token} language={language} refreshKey={suggestionRefreshKey} />
+                <button type="button" onClick={() => setSuggesting(viewing)}
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+                  <Tag className="h-3 w-3" />
+                  {zh ? "建议修改标签/关键词" : "Suggest tag/keyword edit"}
+                </button>
+              </div>
+            ) : undefined
+          }
         />
       )}
 
@@ -182,6 +200,16 @@ export default function MyContributionsPage() {
           isAdmin={false}
           onClose={() => setEditing(null)}
           onSaved={() => { setEditing(null); setViewing(null); fetchMine(); }}
+        />
+      )}
+
+      {suggesting && (
+        <SuggestEditModal
+          resource={suggesting}
+          token={token}
+          language={language}
+          onClose={() => setSuggesting(null)}
+          onSubmitted={() => setSuggestionRefreshKey((k) => k + 1)}
         />
       )}
     </div>

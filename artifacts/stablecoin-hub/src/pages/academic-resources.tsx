@@ -456,7 +456,7 @@ export function FacetTagPicker({ selectedIds, onChange, language }: { selectedId
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "分类标签（管理员）" : "Facet Tags (admin)"}</label>
+      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "分类标签" : "Facet Tags"}</label>
       <div className="space-y-2.5 max-h-64 overflow-y-auto rounded-lg border border-border p-3">
         {themeTags.length > 0 && (
           <div className="space-y-1">
@@ -643,6 +643,127 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Tag/keyword edit suggestion (docs/planning/18 §18.4) — any logged-in user can propose a
+// Theme/Jurisdiction/Asset tag change and a keyword change on an APPROVED resource. Unlike EditModal,
+// this never writes directly: it lands in tag_keyword_edit_suggestions as status='pending' until an
+// admin reviews it (see admin-center.tsx's Tag Suggestions tab). Kept as a separate modal rather than
+// folded into EditModal's admin/owner-resubmission permission gate, so that well-tested flow stays
+// untouched.
+export function SuggestEditModal({ resource, token, language, onClose, onSubmitted }: {
+  resource: Resource; token: string; language: string; onClose: () => void; onSubmitted: () => void;
+}) {
+  const zh = language === "zh";
+  const [tagIds, setTagIds] = useState<number[]>((resource.facetedTags ?? []).map((t) => t.id));
+  const [keywords, setKeywords] = useState(resource.keywords);
+  const [vocab, setVocab] = useState<TagSummary[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch(`${apiBase()}/api/tags`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: TagSummary[]) => setVocab(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  async function handleSubmit() {
+    setSubmitting(true); setError("");
+    try {
+      const byId = new Map(vocab.map((t) => [t.id, t]));
+      const themeTagIds = tagIds.filter((id) => byId.get(id)?.facet === "theme");
+      const jurisdictionTagIds = tagIds.filter((id) => byId.get(id)?.facet === "jurisdiction");
+      const assetTagIds = tagIds.filter((id) => byId.get(id)?.facet === "asset");
+      const res = await fetch(`${apiBase()}/api/resources/${resource.id}/tag-keyword-suggestions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ themeTagIds, jurisdictionTagIds, assetTagIds, keywords }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => null);
+        setError(d?.error ?? (zh ? "提交失败" : "Failed to submit"));
+        setSubmitting(false);
+        return;
+      }
+      onSubmitted(); onClose();
+    } catch { setError(zh ? "网络请求失败" : "Network error"); setSubmitting(false); }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Tag className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold">{zh ? "建议修改标签/关键词" : "Suggest Tag/Keyword Edit"}</h2>
+          </div>
+          <button onClick={onClose} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+          <p className="text-xs text-muted-foreground">
+            {zh
+              ? "你的修改建议将提交给管理员审核，通过后才会生效；审核期间该资源的公开展示内容不受影响。"
+              : "Your suggestion goes to an admin for review and only takes effect once approved — the resource's public display is unaffected while it's pending."}
+          </p>
+          <FacetTagPicker selectedIds={tagIds} onChange={setTagIds} language={language} />
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "关键词" : "Keywords"}</label>
+            <input value={keywords.join(", ")}
+              onChange={(e) => setKeywords(e.target.value.split(/[,，]/).map((k) => k.trim()).filter(Boolean))}
+              placeholder={zh ? "多个关键词用逗号分隔" : "Comma-separated keywords"}
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+            <KeywordCountHint count={keywords.length} language={language} />
+          </div>
+          {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+          <div className="flex justify-end gap-2 pt-1">
+            <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+              {zh ? "取消" : "Cancel"}
+            </button>
+            <button onClick={handleSubmit} disabled={submitting}
+              className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+              {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+              {zh ? "提交建议" : "Submit Suggestion"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface MyTagSuggestion { status: "pending" | "approved" | "rejected" }
+
+/** docs/planning/18 §18.4 — "your edit is pending review" indicator, visible only to the submitter. */
+export function MySuggestionBadge({ resourceId, token, language, refreshKey }: {
+  resourceId: number; token: string; language: string;
+  /** Bump this to force a refetch right after a new suggestion is submitted. */
+  refreshKey?: number;
+}) {
+  const zh = language === "zh";
+  const [suggestion, setSuggestion] = useState<MyTagSuggestion | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${apiBase()}/api/resources/${resourceId}/tag-keyword-suggestions/mine`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (!cancelled) setSuggestion(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [resourceId, token, refreshKey]);
+
+  if (!suggestion || suggestion.status !== "pending") return null;
+  return (
+    <div className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800">
+      <Clock className="h-3.5 w-3.5 shrink-0" />
+      {zh ? "你对该资源标签/关键词的修改建议正在等待管理员审核。" : "Your tag/keyword edit suggestion for this resource is pending admin review."}
     </div>
   );
 }
@@ -1868,6 +1989,10 @@ export default function AcademicResources() {
   const [isLoading,     setIsLoading]     = useState(true);
   const [uploadCenterOpen, setUploadCenterOpen] = useState(false);
   const [detailResource, setDetailResource] = useState<Resource | null>(null);
+  // docs/planning/18 §18.4 — any logged-in user can propose a tag/keyword edit on an approved
+  // resource; suggestionRefreshKey forces MySuggestionBadge to refetch right after a submission.
+  const [suggestingResource, setSuggestingResource] = useState<Resource | null>(null);
+  const [suggestionRefreshKey, setSuggestionRefreshKey] = useState(0);
   // Theme facet's folding tree (docs/planning/15 §3.4) — all six categories start collapsed so the
   // sidebar doesn't open already full of dozens of tags.
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -2117,7 +2242,24 @@ export default function AcademicResources() {
       )}
       {detailResource && (
         <ResourceDetailModal resource={detailResource} language={language} onClose={() => setDetailResource(null)}
-          onFacetTagClick={(slug) => { handleFacetTagClick(slug); setDetailResource(null); }} />
+          onFacetTagClick={(slug) => { handleFacetTagClick(slug); setDetailResource(null); }}
+          extraSection={
+            detailResource.status === "approved" && token ? (
+              <div className="pt-2 border-t border-border space-y-2">
+                <MySuggestionBadge resourceId={detailResource.id} token={token} language={language} refreshKey={suggestionRefreshKey} />
+                <button type="button" onClick={() => setSuggestingResource(detailResource)}
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+                  <Tag className="h-3 w-3" />
+                  {zh ? "建议修改标签/关键词" : "Suggest tag/keyword edit"}
+                </button>
+              </div>
+            ) : undefined
+          } />
+      )}
+      {suggestingResource && token && (
+        <SuggestEditModal resource={suggestingResource} token={token} language={language}
+          onClose={() => setSuggestingResource(null)}
+          onSubmitted={() => setSuggestionRefreshKey((k) => k + 1)} />
       )}
     </div>
   );
