@@ -36,6 +36,12 @@ export function missingSixElements(input: SixElementsInput): string[] {
   return missing;
 }
 
+/** Shared by every call site that has a raw resources row rather than an already-parsed year — extracts the bare year from the free-text publishedDate before delegating to missingSixElements(). */
+export function computeMissingFields(r: { title: string; authors: string[]; publishedDate: string | null; abstract: string | null; url: string | null; doi: string | null; keywords: string[] }): string[] {
+  const year = r.publishedDate?.match(/^\d{4}/)?.[0] ? Number(r.publishedDate.match(/^\d{4}/)![0]) : null;
+  return missingSixElements({ title: r.title, authors: r.authors, year, abstract: r.abstract, url: r.url, doi: r.doi, keywords: r.keywords });
+}
+
 /** True only for checks flagged `kind: "mismatch"` (value present but disagrees with an authoritative source) — "missing" and unclassified checks (e.g. URL temporarily unreachable) don't count, since those are handled by missingSixElements() or are purely informational. */
 export function hasMismatch(report: VerifyReport): boolean {
   return report.checks.some((c) => c.kind === "mismatch");
@@ -93,7 +99,7 @@ export async function recomputeStatusAfterTagKeywordEdit(resourceId: number): Pr
   if (!r) throw new Error(`Resource ${resourceId} not found`);
 
   const year = r.publishedDate?.match(/^\d{4}/)?.[0] ? Number(r.publishedDate.match(/^\d{4}/)![0]) : null;
-  const missingFields = missingSixElements({ title: r.title, authors: r.authors, year, abstract: r.abstract, url: r.url, doi: r.doi, keywords: r.keywords });
+  const missingFields = computeMissingFields(r);
   const duplicateSignal = await checkDuplicate({ title: r.title, doi: r.doi, url: r.url, year }, resourceId);
   const themeRows = await db
     .select({ facet: tagsTable.facet })

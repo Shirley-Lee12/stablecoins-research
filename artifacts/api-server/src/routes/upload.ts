@@ -139,6 +139,36 @@ async function resolveKeywords(extracted: string[], abstract: string | null): Pr
 }
 
 /**
+ * docs/planning/19 §19.2 — a submitter-facing explanation of why tagging found no theme-facet
+ * match, since "未命中主题标签" on its own gives someone no way to judge whether to fix it or
+ * withdraw. Only ever called once, right when off_topic is first determined (persistConfirmedDraft)
+ * — never regenerated later, same reasoning as generateKeywordsFromAbstract. Falls back to a generic
+ * (still honest) message on any failure so a submission is never blocked by this being best-effort.
+ */
+async function generateOffTopicExplanation(title: string, abstract: string | null): Promise<string> {
+  const fallback = "This resource's topic doesn't appear to directly engage stablecoins or their underlying theory/technology.";
+  if (!abstract?.trim() && !title.trim()) return fallback;
+  try {
+    const prompt = `Read the following academic paper's title and abstract. In one or two sentences (in the same language as the title/abstract), explain concretely what the paper actually studies, and why that doesn't appear to directly engage stablecoins or their underlying theory/technology (e.g. monetary economics, digital currency, blockchain payment rails). Be specific about the paper's actual subject — don't just say "it doesn't mention stablecoins".
+
+Title: ${title}
+Abstract:
+---
+${(abstract ?? "").slice(0, 3000)}
+---
+
+Return ONLY a JSON object: { "explanation": string }`;
+    const raw = await generateJson(prompt, 512);
+    const parsed = JSON.parse(raw);
+    const explanation = typeof parsed.explanation === "string" ? parsed.explanation.trim() : "";
+    return explanation || fallback;
+  } catch (err) {
+    logger.error({ err }, "generateOffTopicExplanation failed");
+    return fallback;
+  }
+}
+
+/**
  * Fetches a URL's page text (basic HTML tag-stripping fetch/strip pattern).
  * Detects a direct PDF link via Content-Type (falling back to a ".pdf" URL check for servers that
  * mislabel it) and routes those through the same local text extraction PDF uploads use, instead of
@@ -724,6 +754,9 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNe
   const duplicateSignal = await checkDuplicate({ title: input.title, doi, url, year });
   const hasThemeTag = await hasThemeFacetTag(tagIds);
   const status = classifyStatus({ duplicateSignal, missingFields, hasThemeTag, report });
+  // docs/planning/19 §19.2 — generated once, right here, since this is the only place off_topic is
+  // ever first determined (§19.1 means resubmission no longer re-runs theme-relevance detection).
+  const offTopicExplanation = status === "off_topic" ? await generateOffTopicExplanation(input.title, abstract) : null;
 
   const [inserted] = await db
     .insert(resourcesTable)
@@ -746,6 +779,7 @@ async function persistConfirmedDraft(input: ConfirmInput, userId: number, skipNe
       // detail view reads this column instead of re-running verifyResource() on every open.
       verificationReport: report,
       verifiedAt: new Date(),
+      offTopicExplanation,
     })
     .returning();
 

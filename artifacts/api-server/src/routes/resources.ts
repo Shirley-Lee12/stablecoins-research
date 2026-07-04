@@ -3,7 +3,7 @@ import { db, resourcesTable, resourceTagsTable } from "@workspace/db";
 import { eq, desc, ilike, or, sql, and, inArray } from "drizzle-orm";
 import { requireAuth, optionalAuth } from "./auth";
 import { syncResourceAuthors } from "./authors";
-import { missingSixElements, recomputeStatusAfterTagKeywordEdit } from "../lib/resourceStatus";
+import { missingSixElements, computeMissingFields, recomputeStatusAfterTagKeywordEdit } from "../lib/resourceStatus";
 import { attachFacetedTags } from "../lib/tagging";
 
 const router = Router();
@@ -67,7 +67,11 @@ router.get("/resources", optionalAuth, async (req: any, res) => {
       .where(conditions.length > 0 ? and(...(conditions as any[])) : undefined)
       .orderBy(desc(resourcesTable.createdAt));
 
-    res.json(await attachFacetedTags(rows));
+    // docs/planning/19 §19.2 — lets My Contributions show *which* fields are missing for an
+    // 'incomplete' resource instead of just the status label. Cheap to compute for every row (pure
+    // string-array check, no I/O), so no special-casing by status.
+    const withTags = await attachFacetedTags(rows);
+    res.json(withTags.map((r) => ({ ...r, missingFields: computeMissingFields(r) })));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch resources" });
@@ -109,7 +113,8 @@ router.get("/resources/:id", optionalAuth, async (req: any, res) => {
       }
     }
 
-    res.json((await attachFacetedTags([row]))[0]);
+    const [withTags] = await attachFacetedTags([row]);
+    res.json({ ...withTags, missingFields: computeMissingFields(row) });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch resource" });
