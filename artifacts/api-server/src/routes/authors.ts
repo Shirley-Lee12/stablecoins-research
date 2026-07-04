@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, authorsTable, institutionsTable, resourceAuthorsTable, resourcesTable } from "@workspace/db";
 import { eq, ilike, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./auth";
+import { attachFacetedTags } from "../lib/tagging";
 
 const router = Router();
 
@@ -94,7 +95,7 @@ router.get("/authors/:name", async (req, res) => {
       .where(sql`${resourceAuthorsTable.authorId} = ${author.id} AND ${resourcesTable.status} = 'approved'`)
       .orderBy(resourcesTable.createdAt);
 
-    res.json({ ...author, resources });
+    res.json({ ...author, resources: await attachFacetedTags(resources) });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch author" });

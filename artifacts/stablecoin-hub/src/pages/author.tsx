@@ -18,6 +18,7 @@ import {
   Calendar, ArrowLeft, Building2, Pencil,
 } from "lucide-react";
 import { sourceTypeLabel } from "@/lib/source-types";
+import { TagSummaryList, type TagSummary } from "@/pages/academic-resources";
 
 interface ApiResource {
   id: number;
@@ -28,6 +29,7 @@ interface ApiResource {
   doi?: string | null;
   abstract?: string | null;
   createdAt?: string;
+  facetedTags?: TagSummary[];
 }
 
 interface AuthorProfile {
@@ -369,6 +371,15 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                       <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-3">
                         {resource.abstract}
                       </p>
+                    )}
+                    {resource.facetedTags && resource.facetedTags.length > 0 && (
+                      <div className="mb-3">
+                        <TagSummaryList
+                          tags={resource.facetedTags}
+                          language={language}
+                          onTagClick={(slug) => setLocation(`/academic-resources?tag=${encodeURIComponent(slug)}`)}
+                        />
+                      </div>
                     )}
                     <div className="flex flex-wrap items-center justify-end gap-3">
                       {resource.doi && (
