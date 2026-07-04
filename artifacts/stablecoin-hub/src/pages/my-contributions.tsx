@@ -7,7 +7,7 @@ import {
   SELF_SERVICE_STATUSES, SELF_SERVICE_LABELS,
   type Resource, type RejectionReason,
 } from "@/pages/academic-resources";
-import { Loader2, Inbox, ChevronRight, Shield, Tag } from "lucide-react";
+import { Loader2, Inbox, ChevronRight, Shield, Tag, Pencil } from "lucide-react";
 
 function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
@@ -61,6 +61,12 @@ export default function MyContributionsPage() {
   // self-service resubmission Edit&Resubmit flow above, which only applies to non-approved statuses).
   const [suggesting, setSuggesting] = useState<Resource | null>(null);
   const [suggestionRefreshKey, setSuggestionRefreshKey] = useState(0);
+  // docs/planning/20 §20.0.4 — an admin viewing their own approved resource here previously had no
+  // direct-edit path either, only the suggestion flow — same bug as the public list, separate state
+  // so it doesn't get tangled with the owner-resubmission `editing` above (that one must stay
+  // isAdmin=false regardless of the viewer's role, since resubmission behavior is keyed off the
+  // resource's status, not who's editing it).
+  const [adminEditing, setAdminEditing] = useState<Resource | null>(null);
 
   const fetchMine = useCallback(() => {
     if (!token || !user) return;
@@ -185,14 +191,24 @@ export default function MyContributionsPage() {
           }
           extraSection={
             viewing.status === "approved" ? (
-              <div className="pt-2 border-t border-border space-y-2">
-                <MySuggestionBadge resourceId={viewing.id} token={token} language={language} refreshKey={suggestionRefreshKey} />
-                <button type="button" onClick={() => setSuggesting(viewing)}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
-                  <Tag className="h-3 w-3" />
-                  {zh ? "建议修改标签/关键词" : "Suggest tag/keyword edit"}
-                </button>
-              </div>
+              user?.role === "admin" ? (
+                <div className="pt-2 border-t border-border">
+                  <button type="button" onClick={() => setAdminEditing(viewing)}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+                    <Pencil className="h-3 w-3" />
+                    {zh ? "编辑（管理员，立即生效）" : "Edit (admin, takes effect immediately)"}
+                  </button>
+                </div>
+              ) : (
+                <div className="pt-2 border-t border-border space-y-2">
+                  <MySuggestionBadge resourceId={viewing.id} token={token} language={language} refreshKey={suggestionRefreshKey} />
+                  <button type="button" onClick={() => setSuggesting(viewing)}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+                    <Tag className="h-3 w-3" />
+                    {zh ? "建议修改标签/关键词" : "Suggest tag/keyword edit"}
+                  </button>
+                </div>
+              )
             ) : viewing.status === "duplicate" ? (
               <div className="pt-2 border-t border-border">
                 <DuplicateCandidatesPanel resource={viewing} token={token} language={language}
@@ -225,6 +241,17 @@ export default function MyContributionsPage() {
           language={language}
           onClose={() => setSuggesting(null)}
           onSubmitted={() => setSuggestionRefreshKey((k) => k + 1)}
+        />
+      )}
+
+      {adminEditing && (
+        <EditModal
+          resource={adminEditing}
+          token={token}
+          language={language}
+          isAdmin
+          onClose={() => setAdminEditing(null)}
+          onSaved={() => { setAdminEditing(null); setViewing(null); fetchMine(); }}
         />
       )}
     </div>

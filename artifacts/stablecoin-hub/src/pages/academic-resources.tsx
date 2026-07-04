@@ -2183,6 +2183,11 @@ export default function AcademicResources() {
   // resource; suggestionRefreshKey forces MySuggestionBadge to refetch right after a submission.
   const [suggestingResource, setSuggestingResource] = useState<Resource | null>(null);
   const [suggestionRefreshKey, setSuggestionRefreshKey] = useState(0);
+  // docs/planning/20 §20.0.4 — an admin viewing an approved resource here previously had NO direct
+  // edit path at all, only the non-admin "suggest edit" flow (which always queues for review) — so
+  // an admin's own edit silently ended up as a pending suggestion instead of taking effect. This is
+  // the actual admin-direct-edit modal, same one the admin review queue already uses.
+  const [editingResource, setEditingResource] = useState<Resource | null>(null);
   // Theme facet's folding tree (docs/planning/15 §3.4) — all six categories start collapsed so the
   // sidebar doesn't open already full of dozens of tags.
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -2435,14 +2440,24 @@ export default function AcademicResources() {
           onFacetTagClick={(slug) => { handleFacetTagClick(slug); setDetailResource(null); }}
           extraSection={
             detailResource.status === "approved" && token ? (
-              <div className="pt-2 border-t border-border space-y-2">
-                <MySuggestionBadge resourceId={detailResource.id} token={token} language={language} refreshKey={suggestionRefreshKey} />
-                <button type="button" onClick={() => setSuggestingResource(detailResource)}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
-                  <Tag className="h-3 w-3" />
-                  {zh ? "建议修改标签/关键词" : "Suggest tag/keyword edit"}
-                </button>
-              </div>
+              user?.role === "admin" ? (
+                <div className="pt-2 border-t border-border">
+                  <button type="button" onClick={() => setEditingResource(detailResource)}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+                    <Pencil className="h-3 w-3" />
+                    {zh ? "编辑（管理员，立即生效）" : "Edit (admin, takes effect immediately)"}
+                  </button>
+                </div>
+              ) : (
+                <div className="pt-2 border-t border-border space-y-2">
+                  <MySuggestionBadge resourceId={detailResource.id} token={token} language={language} refreshKey={suggestionRefreshKey} />
+                  <button type="button" onClick={() => setSuggestingResource(detailResource)}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+                    <Tag className="h-3 w-3" />
+                    {zh ? "建议修改标签/关键词" : "Suggest tag/keyword edit"}
+                  </button>
+                </div>
+              )
             ) : undefined
           } />
       )}
@@ -2450,6 +2465,11 @@ export default function AcademicResources() {
         <SuggestEditModal resource={suggestingResource} token={token} language={language}
           onClose={() => setSuggestingResource(null)}
           onSubmitted={() => setSuggestionRefreshKey((k) => k + 1)} />
+      )}
+      {editingResource && token && (
+        <EditModal resource={editingResource} token={token} language={language} isAdmin
+          onClose={() => setEditingResource(null)}
+          onSaved={() => { setEditingResource(null); setDetailResource(null); fetchResources(); }} />
       )}
     </div>
   );
