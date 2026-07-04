@@ -3,7 +3,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import {
   ResourceDetailModal, EditModal, JobQueuePanel,
-  SuggestEditModal, MySuggestionBadge, SelfServiceStatusDetail,
+  SuggestEditModal, MySuggestionBadge, SelfServiceStatusDetail, DuplicateCandidatesPanel,
   SELF_SERVICE_STATUSES, SELF_SERVICE_LABELS,
   type Resource, type RejectionReason,
 } from "@/pages/academic-resources";
@@ -23,6 +23,10 @@ const STATUS_BADGE: Record<string, { zh: string; en: string; cls: string }> = {
   disputed:   { zh: SELF_SERVICE_LABELS.disputed.zh,   en: SELF_SERVICE_LABELS.disputed.en,   cls: "bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700" },
   off_topic:  { zh: SELF_SERVICE_LABELS.off_topic.zh,  en: SELF_SERVICE_LABELS.off_topic.en,   cls: "bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700" },
   duplicate:  { zh: SELF_SERVICE_LABELS.duplicate.zh,  en: SELF_SERVICE_LABELS.duplicate.en,   cls: "bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700" },
+  // docs/planning/19 §19.3 — a closed/terminal state (the submitter's own choice), so it gets a
+  // neutral gray badge rather than the amber "needs action" styling the other four self-service
+  // states use.
+  withdrawn:  { zh: SELF_SERVICE_LABELS.withdrawn.zh,  en: SELF_SERVICE_LABELS.withdrawn.en,   cls: "bg-muted text-muted-foreground border-border" },
 };
 
 function StatChip({ label, count, active, color, onClick }: { label: string; count: number; active: boolean; color?: "amber"; onClick: () => void }) {
@@ -168,7 +172,9 @@ export default function MyContributionsPage() {
           language={language}
           onClose={() => setViewing(null)}
           footer={
-            (SELF_SERVICE_STATUSES.includes(viewing.status) || viewing.status === "rejected") ? (
+            // docs/planning/19 §19.3 — 'duplicate' gets its own dedicated withdraw/not-a-duplicate
+            // flow below (DuplicateCandidatesPanel), not the generic Edit & Resubmit button.
+            ((SELF_SERVICE_STATUSES.includes(viewing.status) && viewing.status !== "duplicate") || viewing.status === "rejected") ? (
               <div className="flex justify-end">
                 <button onClick={() => setEditing(viewing)}
                   className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
@@ -186,6 +192,11 @@ export default function MyContributionsPage() {
                   <Tag className="h-3 w-3" />
                   {zh ? "建议修改标签/关键词" : "Suggest tag/keyword edit"}
                 </button>
+              </div>
+            ) : viewing.status === "duplicate" ? (
+              <div className="pt-2 border-t border-border">
+                <DuplicateCandidatesPanel resource={viewing} token={token} language={language}
+                  onResolved={() => { setViewing(null); fetchMine(); }} />
               </div>
             ) : SELF_SERVICE_STATUSES.includes(viewing.status) ? (
               <div className="pt-2 border-t border-border">

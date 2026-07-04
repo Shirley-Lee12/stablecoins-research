@@ -16,13 +16,17 @@ import {
 // submitter (never in the public list or the admin queue) — see docs/planning/15 §2.1 for the
 // eventual My Contributions page; this file only wires the minimum needed to keep existing behavior
 // (public list, admin approve/reject queue) correct against the new enum for now.
-export type ResourceStatus = "incomplete" | "disputed" | "off_topic" | "duplicate" | "pending" | "approved" | "rejected";
+// docs/planning/19 §19.3 — 'withdrawn' added as an 8th value: the submitter's own explicit "yes,
+// this is a duplicate" action on a 'duplicate' row. Deliberately NOT in SELF_SERVICE_STATUSES — it's
+// a closed/terminal state (no Edit & Resubmit affordance), unlike the four that still need action.
+export type ResourceStatus = "incomplete" | "disputed" | "off_topic" | "duplicate" | "pending" | "approved" | "rejected" | "withdrawn";
 export const SELF_SERVICE_STATUSES: ResourceStatus[] = ["incomplete", "disputed", "off_topic", "duplicate"];
 export const SELF_SERVICE_LABELS: Record<string, { zh: string; en: string }> = {
   incomplete: { zh: "待补充", en: "Incomplete" },
   disputed: { zh: "待核实", en: "Disputed" },
   off_topic: { zh: "与稳定币无关", en: "Off-topic" },
   duplicate: { zh: "疑似重复", en: "Possible duplicate" },
+  withdrawn: { zh: "已撤回", en: "Withdrawn" },
 };
 // docs/planning/19 §19.2 — labels for missingSixElements()'s field keys, so an 'incomplete'
 // resource can list exactly which fields still need filling in instead of just showing the badge.
@@ -66,6 +70,8 @@ export interface Resource {
   verificationReport?: VerifyReport | null;
   /** docs/planning/19 §19.2 — cached natural-language explanation, generated once when off_topic is first determined. */
   offTopicExplanation?: string | null;
+  /** docs/planning/19 §19.3 — the submitter's own explanation when confirming a duplicate-flagged resource isn't actually one. */
+  duplicateNote?: string | null;
 }
 
 export interface RejectionReason {
@@ -943,7 +949,9 @@ export function VerifyReportList({ report, language }: { report: VerifyReport; l
 // four states gets its own concrete explanation here instead: incomplete lists the specific missing
 // fields, disputed reuses the existing ✅/⚠️/❌ verify report, off_topic shows the cached
 // LLM-generated explanation (never regenerated — see resources.offTopicExplanation). duplicate is
-// intentionally left to doc 19.3, which adds the candidate-resource comparison UI this status needs.
+// deliberately NOT handled here — it needs the interactive candidate-comparison/withdraw/resubmit UI
+// (DuplicateCandidatesPanel below), which needs a token and an onResolved callback this read-only
+// component doesn't take; my-contributions.tsx branches to that component directly instead.
 export function SelfServiceStatusDetail({ resource, language }: { resource: Resource; language: string }) {
   const zh = language === "zh";
   if (resource.status === "incomplete") {
@@ -981,6 +989,127 @@ export function SelfServiceStatusDetail({ resource, language }: { resource: Reso
     );
   }
   return null;
+}
+
+interface DuplicateCandidate {
+  candidateResourceId: number;
+  matchType: "exact_doi" | "exact_url" | "fuzzy_title";
+  title: string;
+  authors: string[];
+  publishedDate: string | null;
+}
+
+// docs/planning/19 §19.3 — the two explicit actions a submitter can take on a 'duplicate'-flagged
+// resource: confirm it really is a duplicate (withdraw — a soft, reversible-in-spirit "never mind",
+// not a physical delete) or confirm it's genuinely a different work (a short explanation, resubmitted
+// through the existing 19.1 resubmission path so the admin sees the note next to the original
+// matches). Deliberately its own component rather than folded into SelfServiceStatusDetail, since
+// this is the one self-service status that needs live data (the matched candidates) and mutating
+// actions, not just a read-only explanation.
+export function DuplicateCandidatesPanel({ resource, token, language, onResolved }: {
+  resource: Resource; token: string; language: string; onResolved: () => void;
+}) {
+  const zh = language === "zh";
+  const [candidates, setCandidates] = useState<DuplicateCandidate[]>([]);
+  const [viewingCandidate, setViewingCandidate] = useState<Resource | null>(null);
+  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch(`${apiBase()}/api/resources/${resource.id}/duplicate-candidates`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => setCandidates(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, [resource.id, token]);
+
+  async function openCandidate(id: number) {
+    const res = await fetch(`${apiBase()}/api/resources/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) setViewingCandidate(await res.json());
+  }
+
+  async function withdraw() {
+    setBusy(true); setError("");
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/${resource.id}/withdraw`, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) {
+        const d = await res.json().catch(() => null);
+        setError(d?.error ?? (zh ? "操作失败" : "Failed"));
+        setBusy(false);
+        return;
+      }
+      onResolved();
+    } catch { setError(zh ? "网络请求失败" : "Network error"); setBusy(false); }
+  }
+
+  async function confirmNotDuplicate() {
+    if (!note.trim()) { setError(zh ? "请填写说明" : "Please explain why"); return; }
+    setBusy(true); setError("");
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/${resource.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ duplicateNote: note.trim() }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => null);
+        setError(d?.error ?? (zh ? "提交失败" : "Failed to submit"));
+        setBusy(false);
+        return;
+      }
+      onResolved();
+    } catch { setError(zh ? "网络请求失败" : "Network error"); setBusy(false); }
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1.5">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "疑似重复的资源" : "Possible duplicates"}</p>
+        {candidates.map((c) => (
+          <button key={c.candidateResourceId} type="button" onClick={() => openCandidate(c.candidateResourceId)}
+            className="w-full text-left p-2.5 rounded-lg border border-border hover:border-primary/40 transition-colors">
+            <p className="text-xs font-medium text-foreground line-clamp-2">{c.title}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {c.authors.join("; ")}{c.publishedDate && ` · ${c.publishedDate}`}
+            </p>
+          </button>
+        ))}
+      </div>
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      {!showNoteInput ? (
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={withdraw} disabled={busy}
+            className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50">
+            {zh ? "确认是重复，撤回此提交" : "Confirm it's a duplicate — withdraw"}
+          </button>
+          <button type="button" onClick={() => setShowNoteInput(true)} disabled={busy}
+            className="px-3 py-1.5 text-xs rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50">
+            {zh ? "不是重复，说明后重新提交" : "Not a duplicate — explain & resubmit"}
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3}
+            placeholder={zh ? "简短说明为什么这不是重复资源" : "Briefly explain why this isn't a duplicate"}
+            className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none placeholder:text-muted-foreground" />
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => setShowNoteInput(false)} disabled={busy}
+              className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+              {zh ? "取消" : "Cancel"}
+            </button>
+            <button type="button" onClick={confirmNotDuplicate} disabled={busy || !note.trim()}
+              className="px-3 py-1.5 text-xs rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50">
+              {zh ? "提交" : "Submit"}
+            </button>
+          </div>
+        </div>
+      )}
+      {viewingCandidate && (
+        <ResourceDetailModal resource={viewingCandidate} language={language} onClose={() => setViewingCandidate(null)} />
+      )}
+    </div>
+  );
 }
 
 // ── Shared editable review/confirm step — used by all three upload tabs ───────

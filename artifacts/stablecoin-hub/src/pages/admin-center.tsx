@@ -22,6 +22,14 @@ interface ReviewLogEntry {
   submitterEmail: string | null; createdAt: string; reviewedAt: string | null; reviewerEmail: string | null;
   rejectionReasonId: number | null; rejectionNote: string | null;
 }
+/** docs/planning/19 §19.3 */
+interface DuplicateCandidateInfo {
+  candidateResourceId: number;
+  matchType: "exact_doi" | "exact_url" | "fuzzy_title";
+  title: string;
+  authors: string[];
+  publishedDate: string | null;
+}
 
 function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
@@ -259,6 +267,10 @@ function ApprovalsPanel({ token, language, isAdmin }: { token: string; language:
   const [rejecting, setRejecting] = useState<Resource | null>(null);
   const [editing, setEditing] = useState<Resource | null>(null);
   const [busy, setBusy] = useState(false);
+  // docs/planning/19 §19.3 — when a pending resource carries a duplicateNote, it got here via the
+  // "confirm not a duplicate" resubmission path; show the admin the same original matches the
+  // submitter saw, next to their explanation, so the final call isn't made blind.
+  const [duplicateCandidates, setDuplicateCandidates] = useState<DuplicateCandidateInfo[]>([]);
 
   const fetchPending = useCallback(() => {
     setLoading(true);
@@ -293,6 +305,13 @@ function ApprovalsPanel({ token, language, isAdmin }: { token: string; language:
   function openDetail(r: Resource) {
     setViewing(r);
     fetchVerifyReport(r.id);
+    setDuplicateCandidates([]);
+    if (r.duplicateNote) {
+      fetch(`${apiBase()}/api/resources/${r.id}/duplicate-candidates`, { headers: { Authorization: `Bearer ${token}` } })
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => setDuplicateCandidates(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    }
   }
 
   /** docs/planning/16 §16.1 — the only place this page re-runs the live DOI/URL network checks; everywhere else just reads the cached column. */
@@ -415,6 +434,22 @@ function ApprovalsPanel({ token, language, isAdmin }: { token: string; language:
                 </>
               ) : (
                 <p className="text-xs text-muted-foreground py-2">{zh ? "尚无核对报告——点击“重新核验”生成一份。" : "No verification report yet — click \"Re-verify\" to generate one."}</p>
+              )}
+              {viewing.duplicateNote && (
+                <div className="pt-2 space-y-1.5">
+                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "提交者说明（原判定为疑似重复）" : "Submitter's explanation (originally flagged as a possible duplicate)"}</h3>
+                  <p className="text-xs text-foreground/90 leading-relaxed">{viewing.duplicateNote}</p>
+                  {duplicateCandidates.length > 0 && (
+                    <div className="space-y-1">
+                      {duplicateCandidates.map((c) => (
+                        <div key={c.candidateResourceId} className="p-2 rounded-lg border border-border">
+                          <p className="text-xs font-medium text-foreground line-clamp-2">{c.title}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{c.authors.join("; ")}{c.publishedDate && ` · ${c.publishedDate}`}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           }
