@@ -205,7 +205,7 @@ export default function MyContributionsPage() {
                   <button type="button" onClick={() => setSuggesting(viewing)}
                     className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
                     <Tag className="h-3 w-3" />
-                    {zh ? "建议修改标签/关键词" : "Suggest tag/keyword edit"}
+                    {zh ? "建议修改" : "Suggest an edit"}
                   </button>
                 </div>
               )

@@ -594,17 +594,40 @@ function ReviewLogPanel({ token, language }: { token: string; language: string }
 }
 
 // ── Tag/Keyword Suggestions Panel (docs/planning/18 §18.4 step 2) ────────────
-interface SuggestionTagRef { id: number; slug: string; nameEn: string; nameZh: string; facet: "theme" | "jurisdiction" | "asset" }
-interface TagKeywordSuggestion {
+// docs/planning/20 §20.1 — generalized from tags/keywords-only to any suggestible field
+// (title/authors/publishedDate/abstract/url/doi/keywords/theme·jurisdiction·asset tags). `current`
+// and `proposed` only ever contain the keys that were actually part of a given suggestion — a
+// title-only suggestion's diff has nothing to show for tags/keywords at all.
+interface EditSuggestionTagRef { id: number; slug: string; nameEn: string; nameZh: string; facet: "theme" | "jurisdiction" | "asset" }
+interface EditSuggestionFieldSet {
+  title?: string; authors?: string[]; publishedDate?: string | null; abstract?: string | null;
+  url?: string | null; doi?: string | null; keywords?: string[];
+  themeTagRefs?: EditSuggestionTagRef[]; jurisdictionTagRefs?: EditSuggestionTagRef[]; assetTagRefs?: EditSuggestionTagRef[];
+}
+interface ResourceEditSuggestion {
   id: number; resourceId: number; resourceTitle: string;
   submittedBy: number; submitterEmail: string; submittedAt: string;
   status: "pending" | "approved" | "rejected";
   reviewedBy: number | null; reviewedAt: string | null; reviewNote: string | null;
-  current: { themeTags: SuggestionTagRef[]; jurisdictionTags: SuggestionTagRef[]; assetTags: SuggestionTagRef[]; keywords: string[] };
-  proposed: { themeTags: SuggestionTagRef[]; jurisdictionTags: SuggestionTagRef[]; assetTags: SuggestionTagRef[]; keywords: string[] };
+  current: EditSuggestionFieldSet;
+  proposed: EditSuggestionFieldSet;
 }
 
-function TagChips({ tags, zh, emptyLabel }: { tags: SuggestionTagRef[]; zh: boolean; emptyLabel: string }) {
+const SUGGESTION_FIELD_LABELS: Record<string, { en: string; zh: string }> = {
+  title: { en: "Title", zh: "标题" },
+  authors: { en: "Authors", zh: "作者" },
+  publishedDate: { en: "Published Date", zh: "发表日期" },
+  abstract: { en: "Abstract", zh: "摘要" },
+  url: { en: "URL", zh: "URL" },
+  doi: { en: "DOI", zh: "DOI" },
+  keywords: { en: "Keywords", zh: "关键词" },
+  themeTagRefs: { en: "Theme", zh: "主题" },
+  jurisdictionTagRefs: { en: "Jurisdiction", zh: "辖区" },
+  assetTagRefs: { en: "Asset", zh: "币种" },
+};
+const SUGGESTION_FIELD_ORDER = ["title", "authors", "publishedDate", "abstract", "url", "doi", "keywords", "themeTagRefs", "jurisdictionTagRefs", "assetTagRefs"];
+
+function TagChips({ tags, zh, emptyLabel }: { tags: EditSuggestionTagRef[]; zh: boolean; emptyLabel: string }) {
   if (tags.length === 0) return <span className="text-xs text-muted-foreground/60">{emptyLabel}</span>;
   return (
     <div className="flex flex-wrap gap-1">
@@ -617,15 +640,31 @@ function TagChips({ tags, zh, emptyLabel }: { tags: SuggestionTagRef[]; zh: bool
   );
 }
 
-function KeywordChips({ keywords, zh, emptyLabel }: { keywords: string[]; zh: boolean; emptyLabel: string }) {
+/** docs/planning/20 §20.0.6 — plain text, not pills, so it isn't visually confused with the tag system. */
+function KeywordText({ keywords, zh, emptyLabel }: { keywords: string[]; zh: boolean; emptyLabel: string }) {
   if (keywords.length === 0) return <span className="text-xs text-muted-foreground/60">{emptyLabel}</span>;
-  return (
-    <div className="flex flex-wrap gap-1">
-      {keywords.map((k) => (
-        <span key={k} className="text-xs px-2 py-0.5 bg-muted/60 rounded-full text-muted-foreground border border-border/60">{k}</span>
-      ))}
-    </div>
-  );
+  return <span className="text-xs text-foreground/90">{keywords.join("；")}</span>;
+}
+
+/** Renders one field's value in the diff view, dispatching by field key since the value shapes differ (tag refs / string array / plain scalar). */
+function SuggestionFieldValue({ fieldKey, value, zh }: { fieldKey: string; value: unknown; zh: boolean }) {
+  const emptyLabel = zh ? "无" : "None";
+  if (fieldKey === "themeTagRefs" || fieldKey === "jurisdictionTagRefs" || fieldKey === "assetTagRefs") {
+    return <TagChips tags={(value as EditSuggestionTagRef[] | undefined) ?? []} zh={zh} emptyLabel={emptyLabel} />;
+  }
+  if (fieldKey === "keywords") {
+    return <KeywordText keywords={(value as string[] | undefined) ?? []} zh={zh} emptyLabel={emptyLabel} />;
+  }
+  if (fieldKey === "authors") {
+    const authors = value as string[] | undefined;
+    return authors && authors.length > 0
+      ? <span className="text-xs text-foreground/90">{authors.join("; ")}</span>
+      : <span className="text-xs text-muted-foreground/60">{emptyLabel}</span>;
+  }
+  const text = value as string | null | undefined;
+  return text
+    ? <span className="text-xs text-foreground/90 whitespace-pre-wrap">{text}</span>
+    : <span className="text-xs text-muted-foreground/60">{emptyLabel}</span>;
 }
 
 /** One "current vs proposed" row inside the diff view — shared across theme/jurisdiction/asset/keywords. */
@@ -640,16 +679,16 @@ function DiffRow({ label, children }: { label: string; children: React.ReactNode
 
 function TagSuggestionsPanel({ token, language }: { token: string; language: string }) {
   const zh = language === "zh";
-  const [suggestions, setSuggestions] = useState<TagKeywordSuggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<ResourceEditSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewing, setViewing] = useState<TagKeywordSuggestion | null>(null);
+  const [viewing, setViewing] = useState<ResourceEditSuggestion | null>(null);
   const [rejectNote, setRejectNote] = useState("");
   const [rejecting, setRejecting] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const fetchPending = useCallback(() => {
     setLoading(true);
-    fetch(`${apiBase()}/api/admin/tag-suggestions?status=pending`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${apiBase()}/api/admin/edit-suggestions?status=pending`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => setSuggestions(Array.isArray(data) ? data : []))
       .catch(() => setSuggestions([]))
@@ -661,7 +700,7 @@ function TagSuggestionsPanel({ token, language }: { token: string; language: str
   async function review(id: number, action: "approve" | "reject", reviewNote?: string) {
     setBusy(true);
     try {
-      const res = await fetch(`${apiBase()}/api/admin/tag-suggestions/${id}/review`, {
+      const res = await fetch(`${apiBase()}/api/admin/edit-suggestions/${id}/review`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ action, reviewNote }),
@@ -689,9 +728,9 @@ function TagSuggestionsPanel({ token, language }: { token: string; language: str
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-base font-semibold">{zh ? "标签/关键词修改建议" : "Tag/Keyword Suggestions"}</h2>
+        <h2 className="text-base font-semibold">{zh ? "编辑建议" : "Edit Suggestions"}</h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {zh ? "普通用户提交的标签与关键词修改建议，需要管理员审核后才会生效。" : "Non-admin tag/keyword edit proposals — reviewed here before they take effect."}
+          {zh ? "普通用户提交的资源修改建议（任意字段），需要管理员审核后才会生效。" : "Non-admin edit proposals for any resource field — reviewed here before they take effect."}
         </p>
       </div>
 
@@ -744,20 +783,22 @@ function TagSuggestionsPanel({ token, language }: { token: string; language: str
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? "当前" : "Current"}</p>
                 <div className="space-y-2 rounded-lg border border-border p-3">
-                  <DiffRow label={zh ? "主题" : "Theme"}><TagChips tags={viewing.current.themeTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
-                  <DiffRow label={zh ? "辖区" : "Jurisdiction"}><TagChips tags={viewing.current.jurisdictionTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
-                  <DiffRow label={zh ? "币种" : "Asset"}><TagChips tags={viewing.current.assetTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
-                  <DiffRow label={zh ? "关键词" : "Keywords"}><KeywordChips keywords={viewing.current.keywords} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
+                  {SUGGESTION_FIELD_ORDER.filter((k) => k in viewing.proposed).map((k) => (
+                    <DiffRow key={k} label={zh ? SUGGESTION_FIELD_LABELS[k].zh : SUGGESTION_FIELD_LABELS[k].en}>
+                      <SuggestionFieldValue fieldKey={k} value={(viewing.current as Record<string, unknown>)[k]} zh={zh} />
+                    </DiffRow>
+                  ))}
                 </div>
               </div>
 
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-widest text-primary">{zh ? "提议修改为" : "Proposed"}</p>
                 <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
-                  <DiffRow label={zh ? "主题" : "Theme"}><TagChips tags={viewing.proposed.themeTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
-                  <DiffRow label={zh ? "辖区" : "Jurisdiction"}><TagChips tags={viewing.proposed.jurisdictionTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
-                  <DiffRow label={zh ? "币种" : "Asset"}><TagChips tags={viewing.proposed.assetTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
-                  <DiffRow label={zh ? "关键词" : "Keywords"}><KeywordChips keywords={viewing.proposed.keywords} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
+                  {SUGGESTION_FIELD_ORDER.filter((k) => k in viewing.proposed).map((k) => (
+                    <DiffRow key={k} label={zh ? SUGGESTION_FIELD_LABELS[k].zh : SUGGESTION_FIELD_LABELS[k].en}>
+                      <SuggestionFieldValue fieldKey={k} value={(viewing.proposed as Record<string, unknown>)[k]} zh={zh} />
+                    </DiffRow>
+                  ))}
                 </div>
               </div>
 
@@ -920,7 +961,7 @@ export default function AdminCenter() {
           </TabsTrigger>
           <TabsTrigger value="tag-suggestions" className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm">
             <Tag className="h-3.5 w-3.5" />
-            {zh ? "标签建议" : "Tag Suggestions"}
+            {zh ? "编辑建议" : "Edit Suggestions"}
           </TabsTrigger>
           <TabsTrigger value="cms" className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm">
             <FileText className="h-3.5 w-3.5" />

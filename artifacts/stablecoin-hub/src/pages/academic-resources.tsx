@@ -669,18 +669,33 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
   );
 }
 
-// ── Tag/keyword edit suggestion (docs/planning/18 §18.4) — any logged-in user can propose a
-// Theme/Jurisdiction/Asset tag change and a keyword change on an APPROVED resource. Unlike EditModal,
-// this never writes directly: it lands in tag_keyword_edit_suggestions as status='pending' until an
-// admin reviews it (see admin-center.tsx's Tag Suggestions tab). Kept as a separate modal rather than
-// folded into EditModal's admin/owner-resubmission permission gate, so that well-tested flow stays
-// untouched.
+/** Order-insensitive array equality (for authors/keywords/tag-id diffing) — same content regardless of order counts as "unchanged". */
+function sameItems<T>(a: T[], b: T[]): boolean {
+  if (a.length !== b.length) return false;
+  const as = [...a].sort(); const bs = [...b].sort();
+  return as.every((v, i) => v === bs[i]);
+}
+
+// ── Full-field edit suggestion (docs/planning/20 §20.1 — generalizes doc 18.4's tag/keyword-only
+// scope) — any logged-in user can propose a change to any of title/authors/publishedDate/abstract/
+// url/doi/themeTags/jurisdictionTags/assetTags/keywords on an APPROVED resource. Unlike EditModal,
+// this never writes directly: it lands in resource_edit_suggestions as status='pending' until an
+// admin reviews it. Mirrors EditModal's field layout (minus sourceType, which isn't in the
+// suggestible-fields list) but only submits the fields that actually differ from the resource's
+// current values — an untouched field never appears in the proposal at all.
 export function SuggestEditModal({ resource, token, language, onClose, onSubmitted }: {
   resource: Resource; token: string; language: string; onClose: () => void; onSubmitted: () => void;
 }) {
   const zh = language === "zh";
-  const [tagIds, setTagIds] = useState<number[]>((resource.facetedTags ?? []).map((t) => t.id));
+  const [title, setTitle] = useState(resource.title);
+  const [authors, setAuthors] = useState(resource.authors);
+  const [url, setUrl] = useState(resource.url ?? "");
+  const [doi, setDoi] = useState(resource.doi ?? "");
+  const [abstract, setAbstract] = useState(resource.abstract ?? "");
+  const [publishedDate, setPublishedDate] = useState(resource.publishedDate ?? "");
   const [keywords, setKeywords] = useState(resource.keywords);
+  const [tagIds, setTagIds] = useState<number[]>((resource.facetedTags ?? []).map((t) => t.id));
+  const [editingTags, setEditingTags] = useState(false);
   const [vocab, setVocab] = useState<TagSummary[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -699,10 +714,32 @@ export function SuggestEditModal({ resource, token, language, onClose, onSubmitt
       const themeTagIds = tagIds.filter((id) => byId.get(id)?.facet === "theme");
       const jurisdictionTagIds = tagIds.filter((id) => byId.get(id)?.facet === "jurisdiction");
       const assetTagIds = tagIds.filter((id) => byId.get(id)?.facet === "asset");
-      const res = await fetch(`${apiBase()}/api/resources/${resource.id}/tag-keyword-suggestions`, {
+      const originalTheme = (resource.facetedTags ?? []).filter((t) => t.facet === "theme").map((t) => t.id);
+      const originalJurisdiction = (resource.facetedTags ?? []).filter((t) => t.facet === "jurisdiction").map((t) => t.id);
+      const originalAsset = (resource.facetedTags ?? []).filter((t) => t.facet === "asset").map((t) => t.id);
+
+      const body: Record<string, unknown> = {};
+      if (title.trim() !== resource.title) body.title = title.trim();
+      if (!sameItems(authors, resource.authors)) body.authors = authors;
+      if ((publishedDate.trim() || null) !== (resource.publishedDate ?? null)) body.publishedDate = publishedDate.trim() || null;
+      if (abstract.trim() !== (resource.abstract ?? "")) body.abstract = abstract.trim();
+      if ((url.trim() || null) !== resource.url) body.url = url.trim() || null;
+      if ((doi.trim() || null) !== resource.doi) body.doi = doi.trim() || null;
+      if (!sameItems(keywords, resource.keywords)) body.keywords = keywords;
+      if (!sameItems(themeTagIds, originalTheme)) body.themeTags = themeTagIds;
+      if (!sameItems(jurisdictionTagIds, originalJurisdiction)) body.jurisdictionTags = jurisdictionTagIds;
+      if (!sameItems(assetTagIds, originalAsset)) body.assetTags = assetTagIds;
+
+      if (Object.keys(body).length === 0) {
+        setError(zh ? "没有检测到任何改动" : "No changes detected");
+        setSubmitting(false);
+        return;
+      }
+
+      const res = await fetch(`${apiBase()}/api/resources/${resource.id}/edit-suggestions`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ themeTagIds, jurisdictionTagIds, assetTagIds, keywords }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const d = await res.json().catch(() => null);
@@ -720,8 +757,8 @@ export function SuggestEditModal({ resource, token, language, onClose, onSubmitt
       <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Tag className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold">{zh ? "建议修改标签/关键词" : "Suggest Tag/Keyword Edit"}</h2>
+            <Pencil className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold">{zh ? "建议修改" : "Suggest an Edit"}</h2>
           </div>
           <button onClick={onClose} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted">
             <X className="h-4 w-4" />
@@ -733,7 +770,34 @@ export function SuggestEditModal({ resource, token, language, onClose, onSubmitt
               ? "你的修改建议将提交给管理员审核，通过后才会生效；审核期间该资源的公开展示内容不受影响。"
               : "Your suggestion goes to an admin for review and only takes effect once approved — the resource's public display is unaffected while it's pending."}
           </p>
-          <FacetTagPicker selectedIds={tagIds} onChange={setTagIds} language={language} />
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "标题" : "Title"}</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          </div>
+          <AuthorPicker authors={authors} onChange={setAuthors} language={language} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">URL</label>
+              <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..."
+                className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DOI</label>
+              <input value={doi} onChange={(e) => setDoi(e.target.value)} placeholder="10.xxxx/xxxxx"
+                className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发表日期" : "Published Date"}</label>
+            <input value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)} placeholder="2021 or 2021-07-20"
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
+            <textarea value={abstract} onChange={(e) => setAbstract(e.target.value)} rows={4}
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+          </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "关键词" : "Keywords"}</label>
             <input value={keywords.join("；")}
@@ -742,12 +806,21 @@ export function SuggestEditModal({ resource, token, language, onClose, onSubmitt
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
             <KeywordCountHint count={keywords.length} language={language} />
           </div>
+          {editingTags ? (
+            <FacetTagPicker selectedIds={tagIds} onChange={setTagIds} language={language} />
+          ) : (
+            <button type="button" onClick={() => setEditingTags(true)}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+              <Tag className="h-3 w-3" />
+              {zh ? `编辑分类标签（当前 ${tagIds.length} 个）` : `Edit facet tags (${tagIds.length} selected)`}
+            </button>
+          )}
           {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
           <div className="flex justify-end gap-2 pt-1">
             <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
               {zh ? "取消" : "Cancel"}
             </button>
-            <button onClick={handleSubmit} disabled={submitting}
+            <button onClick={handleSubmit} disabled={submitting || !title.trim()}
               className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
               {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
               {zh ? "提交建议" : "Submit Suggestion"}
@@ -759,20 +832,20 @@ export function SuggestEditModal({ resource, token, language, onClose, onSubmitt
   );
 }
 
-interface MyTagSuggestion { status: "pending" | "approved" | "rejected" }
+interface MySuggestionStatus { status: "pending" | "approved" | "rejected" }
 
-/** docs/planning/18 §18.4 — "your edit is pending review" indicator, visible only to the submitter. */
+/** docs/planning/20 §20.1 — "your edit is pending review" indicator, visible only to the submitter. */
 export function MySuggestionBadge({ resourceId, token, language, refreshKey }: {
   resourceId: number; token: string; language: string;
   /** Bump this to force a refetch right after a new suggestion is submitted. */
   refreshKey?: number;
 }) {
   const zh = language === "zh";
-  const [suggestion, setSuggestion] = useState<MyTagSuggestion | null>(null);
+  const [suggestion, setSuggestion] = useState<MySuggestionStatus | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${apiBase()}/api/resources/${resourceId}/tag-keyword-suggestions/mine`, {
+    fetch(`${apiBase()}/api/resources/${resourceId}/edit-suggestions/mine`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => (r.ok ? r.json() : null))
@@ -785,7 +858,7 @@ export function MySuggestionBadge({ resourceId, token, language, refreshKey }: {
   return (
     <div className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800">
       <Clock className="h-3.5 w-3.5 shrink-0" />
-      {zh ? "你对该资源标签/关键词的修改建议正在等待管理员审核。" : "Your tag/keyword edit suggestion for this resource is pending admin review."}
+      {zh ? "你对该资源的修改建议正在等待管理员审核。" : "Your edit suggestion for this resource is pending admin review."}
     </div>
   );
 }
@@ -2473,7 +2546,7 @@ export default function AcademicResources() {
                   <button type="button" onClick={() => setSuggestingResource(detailResource)}
                     className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
                     <Tag className="h-3 w-3" />
-                    {zh ? "建议修改标签/关键词" : "Suggest tag/keyword edit"}
+                    {zh ? "建议修改" : "Suggest an edit"}
                   </button>
                 </div>
               )
