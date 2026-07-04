@@ -5,7 +5,7 @@ import { useLanguage } from "@/lib/language-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Shield, Users, CheckSquare, FileText, Settings as SettingsIcon,
-  Clock, Check, X, Loader2, ChevronRight, Database, Mail, Sparkles, History, Pencil, RefreshCw,
+  Clock, Check, X, Loader2, ChevronRight, Database, Mail, Sparkles, History, Pencil, RefreshCw, Tag,
 } from "lucide-react";
 import {
   ResourceDetailModal, RejectDialog, EditModal, VerifyReportList,
@@ -558,6 +558,206 @@ function ReviewLogPanel({ token, language }: { token: string; language: string }
   );
 }
 
+// ── Tag/Keyword Suggestions Panel (docs/planning/18 §18.4 step 2) ────────────
+interface SuggestionTagRef { id: number; slug: string; nameEn: string; nameZh: string; facet: "theme" | "jurisdiction" | "asset" }
+interface TagKeywordSuggestion {
+  id: number; resourceId: number; resourceTitle: string;
+  submittedBy: number; submitterEmail: string; submittedAt: string;
+  status: "pending" | "approved" | "rejected";
+  reviewedBy: number | null; reviewedAt: string | null; reviewNote: string | null;
+  current: { themeTags: SuggestionTagRef[]; jurisdictionTags: SuggestionTagRef[]; assetTags: SuggestionTagRef[]; keywords: string[] };
+  proposed: { themeTags: SuggestionTagRef[]; jurisdictionTags: SuggestionTagRef[]; assetTags: SuggestionTagRef[]; keywords: string[] };
+}
+
+function TagChips({ tags, zh, emptyLabel }: { tags: SuggestionTagRef[]; zh: boolean; emptyLabel: string }) {
+  if (tags.length === 0) return <span className="text-xs text-muted-foreground/60">{emptyLabel}</span>;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {tags.map((t) => (
+        <span key={t.id} className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60">
+          {zh ? t.nameZh : t.nameEn}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function KeywordChips({ keywords, zh, emptyLabel }: { keywords: string[]; zh: boolean; emptyLabel: string }) {
+  if (keywords.length === 0) return <span className="text-xs text-muted-foreground/60">{emptyLabel}</span>;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {keywords.map((k) => (
+        <span key={k} className="text-xs px-2 py-0.5 bg-muted/60 rounded-full text-muted-foreground border border-border/60">{k}</span>
+      ))}
+    </div>
+  );
+}
+
+/** One "current vs proposed" row inside the diff view — shared across theme/jurisdiction/asset/keywords. */
+function DiffRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[80px_1fr] gap-2 items-start">
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+function TagSuggestionsPanel({ token, language }: { token: string; language: string }) {
+  const zh = language === "zh";
+  const [suggestions, setSuggestions] = useState<TagKeywordSuggestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [viewing, setViewing] = useState<TagKeywordSuggestion | null>(null);
+  const [rejectNote, setRejectNote] = useState("");
+  const [rejecting, setRejecting] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const fetchPending = useCallback(() => {
+    setLoading(true);
+    fetch(`${apiBase()}/api/admin/tag-suggestions?status=pending`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((data) => setSuggestions(Array.isArray(data) ? data : []))
+      .catch(() => setSuggestions([]))
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  useEffect(() => { fetchPending(); }, [fetchPending]);
+
+  async function review(id: number, action: "approve" | "reject", reviewNote?: string) {
+    setBusy(true);
+    try {
+      await fetch(`${apiBase()}/api/admin/tag-suggestions/${id}/review`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action, reviewNote }),
+      });
+      setViewing(null);
+      setRejecting(false);
+      setRejectNote("");
+      fetchPending();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-base font-semibold">{zh ? "标签/关键词修改建议" : "Tag/Keyword Suggestions"}</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {zh ? "普通用户提交的标签与关键词修改建议，需要管理员审核后才会生效。" : "Non-admin tag/keyword edit proposals — reviewed here before they take effect."}
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-16 gap-2 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="text-sm">{zh ? "加载中…" : "Loading…"}</span>
+        </div>
+      ) : suggestions.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+          <Check className="h-10 w-10 text-emerald-400/50" />
+          <p className="text-sm font-medium text-muted-foreground">{zh ? "当前无待审核建议" : "No pending suggestions"}</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {suggestions.map((s) => (
+            <button key={s.id} onClick={() => setViewing(s)}
+              className="w-full flex items-center justify-between gap-4 p-4 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-950/20 hover:bg-amber-100/50 dark:hover:bg-amber-950/40 transition-colors text-left">
+              <div className="flex items-start gap-3 min-w-0">
+                <Tag className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground line-clamp-1">{s.resourceTitle}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {s.submitterEmail} · {new Date(s.submittedAt).toLocaleDateString(zh ? "zh-CN" : "en-US", { month: "short", day: "numeric" })}
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {viewing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) setViewing(null); }}>
+          <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+              <h3 className="text-sm font-semibold line-clamp-1">{viewing.resourceTitle}</h3>
+              <button onClick={() => setViewing(null)} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted shrink-0">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4 overflow-y-auto">
+              <p className="text-xs text-muted-foreground">
+                {zh ? "提交人：" : "Submitted by: "}{viewing.submitterEmail}
+                {" · "}{new Date(viewing.submittedAt).toLocaleString(zh ? "zh-CN" : "en-US")}
+              </p>
+
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? "当前" : "Current"}</p>
+                <div className="space-y-2 rounded-lg border border-border p-3">
+                  <DiffRow label={zh ? "主题" : "Theme"}><TagChips tags={viewing.current.themeTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
+                  <DiffRow label={zh ? "辖区" : "Jurisdiction"}><TagChips tags={viewing.current.jurisdictionTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
+                  <DiffRow label={zh ? "币种" : "Asset"}><TagChips tags={viewing.current.assetTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
+                  <DiffRow label={zh ? "关键词" : "Keywords"}><KeywordChips keywords={viewing.current.keywords} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-widest text-primary">{zh ? "提议修改为" : "Proposed"}</p>
+                <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+                  <DiffRow label={zh ? "主题" : "Theme"}><TagChips tags={viewing.proposed.themeTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
+                  <DiffRow label={zh ? "辖区" : "Jurisdiction"}><TagChips tags={viewing.proposed.jurisdictionTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
+                  <DiffRow label={zh ? "币种" : "Asset"}><TagChips tags={viewing.proposed.assetTags} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
+                  <DiffRow label={zh ? "关键词" : "Keywords"}><KeywordChips keywords={viewing.proposed.keywords} zh={zh} emptyLabel={zh ? "无" : "None"} /></DiffRow>
+                </div>
+              </div>
+
+              {rejecting && (
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "驳回理由（可选）" : "Reject note (optional)"}</label>
+                  <textarea value={rejectNote} onChange={(e) => setRejectNote(e.target.value)} rows={2}
+                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+                </div>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-border shrink-0 flex justify-end gap-2">
+              {rejecting ? (
+                <>
+                  <button onClick={() => { setRejecting(false); setRejectNote(""); }}
+                    className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+                    {zh ? "取消" : "Cancel"}
+                  </button>
+                  <button disabled={busy} onClick={() => review(viewing.id, "reject", rejectNote.trim() || undefined)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+                    {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+                    {zh ? "确认驳回" : "Confirm Reject"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button disabled={busy} onClick={() => setRejecting(true)}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-950/70 transition-colors disabled:opacity-50">
+                    <X className="h-3 w-3" />
+                    {zh ? "驳回" : "Reject"}
+                  </button>
+                  <button disabled={busy} onClick={() => review(viewing.id, "approve")}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-950/70 transition-colors disabled:opacity-50">
+                    {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                    {zh ? "通过" : "Approve"}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Content CMS Panel ─────────────────────────────────────────────────────────
 function ContentCMSPanel({ language }: { language: string }) {
   const zh = language === "zh";
@@ -672,6 +872,10 @@ export default function AdminCenter() {
             <History className="h-3.5 w-3.5" />
             {zh ? "审核记录" : "Review Log"}
           </TabsTrigger>
+          <TabsTrigger value="tag-suggestions" className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm">
+            <Tag className="h-3.5 w-3.5" />
+            {zh ? "标签建议" : "Tag Suggestions"}
+          </TabsTrigger>
           <TabsTrigger value="cms" className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm">
             <FileText className="h-3.5 w-3.5" />
             {zh ? "内容管理" : "Content CMS"}
@@ -692,6 +896,10 @@ export default function AdminCenter() {
 
         <TabsContent value="review-log" className="mt-6">
           <ReviewLogPanel token={token!} language={language} />
+        </TabsContent>
+
+        <TabsContent value="tag-suggestions" className="mt-6">
+          <TagSuggestionsPanel token={token!} language={language} />
         </TabsContent>
 
         <TabsContent value="cms" className="mt-6">

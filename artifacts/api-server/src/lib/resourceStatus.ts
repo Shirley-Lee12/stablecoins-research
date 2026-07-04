@@ -1,5 +1,7 @@
+import { eq } from "drizzle-orm";
+import { db, resourcesTable, resourceTagsTable, tagsTable } from "@workspace/db";
 import type { VerifyReport } from "./verify";
-import type { DuplicateSignal } from "./duplicateCheck";
+import { checkDuplicate, type DuplicateSignal } from "./duplicateCheck";
 
 export type SelfServiceStatus = "incomplete" | "disputed" | "off_topic" | "duplicate";
 export type DeterminedStatus = SelfServiceStatus | "pending";
@@ -57,4 +59,32 @@ export function classifyStatus(input: {
   if (!input.hasThemeTag) return "off_topic";
   if (hasMismatch(input.report)) return "disputed";
   return "pending";
+}
+
+/**
+ * Recomputes `status` after a tag/keyword-only change — an admin's direct edit via PATCH
+ * /resources/:id, or an approved non-admin suggestion (docs/planning/18 §18.4). Completeness,
+ * duplicate, and theme-tag-presence are all recalculated fresh (tags/keywords can newly satisfy or
+ * break any of those), but the verify agent is deliberately NOT re-run — the resource's already-
+ * cached `verificationReport` (docs/planning/16 §16.1) is reused for the mismatch check instead.
+ * This is the "skip re-verify" vs. "still recalc status" split §18.4 requires; the two must not be
+ * conflated into one if-branch, since skipping the network verify call is not the same decision as
+ * freezing status in place.
+ */
+export async function recomputeStatusAfterTagKeywordEdit(resourceId: number): Promise<DeterminedStatus> {
+  const [r] = await db.select().from(resourcesTable).where(eq(resourcesTable.id, resourceId)).limit(1);
+  if (!r) throw new Error(`Resource ${resourceId} not found`);
+
+  const year = r.publishedDate?.match(/^\d{4}/)?.[0] ? Number(r.publishedDate.match(/^\d{4}/)![0]) : null;
+  const missingFields = missingSixElements({ title: r.title, authors: r.authors, year, abstract: r.abstract, url: r.url, doi: r.doi, keywords: r.keywords });
+  const duplicateSignal = await checkDuplicate({ title: r.title, doi: r.doi, url: r.url, year }, resourceId);
+  const themeRows = await db
+    .select({ facet: tagsTable.facet })
+    .from(resourceTagsTable)
+    .innerJoin(tagsTable, eq(resourceTagsTable.tagId, tagsTable.id))
+    .where(eq(resourceTagsTable.resourceId, resourceId));
+  const hasThemeTag = themeRows.some((t) => t.facet === "theme");
+  const report = (r.verificationReport as VerifyReport | null) ?? { checks: [], hasFailure: false, hasWarning: false };
+
+  return classifyStatus({ duplicateSignal, missingFields, hasThemeTag, report });
 }
