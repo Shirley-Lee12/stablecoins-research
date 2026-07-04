@@ -83,6 +83,14 @@ export const resourcesTable = pgTable("resources", {
   // never as a side effect of merely viewing the resource.
   verificationReport: jsonb("verification_report"),
   verifiedAt: timestamp("verified_at", { withTimezone: true }),
+  // docs/planning/19 §19.2 — a natural-language explanation of why a resource was flagged
+  // off_topic (e.g. "this paper studies X, which doesn't directly engage stablecoins or their
+  // underlying theory/technology"), generated once via a lightweight LLM call at the moment
+  // off_topic is first determined (persistConfirmedDraft — the only place that can happen, since
+  // §19.1 means resubmission never re-runs theme-relevance detection). Cached here for the same
+  // reason verificationReport is: never regenerate on every view. Null for anything that was never
+  // off_topic, and for off_topic rows that predate this column.
+  offTopicExplanation: text("off_topic_explanation"),
 });
 
 export const insertResourceSchema = createInsertSchema(resourcesTable).omit({

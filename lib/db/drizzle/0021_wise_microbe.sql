@@ -1,0 +1,1 @@
+ALTER TABLE "resources" ADD COLUMN "off_topic_explanation" text;
