@@ -253,7 +253,7 @@ export default function HomeOverview() {
             <p className="text-sm font-semibold text-foreground">{t("Zhejiang University International Business School (ZIBS)", "浙江大学国际联合商学院（ZIBS）")}</p>
             <p className="text-xs text-muted-foreground mt-1">{t("Haining, Zhejiang, China · intl.zju.edu.cn/zibs", "中国浙江海宁 · intl.zju.edu.cn/zibs")}</p>
           </div>
-          <p className="text-xs text-muted-foreground">{t("© 2025 ZIBS Stablecoin Research Hub", "© 2025 浙大ZIBS稳定币研究中心")}</p>
+          <p className="text-xs text-muted-foreground">{t(`© ${new Date().getFullYear()} ZIBS Stablecoin Research Hub`, `© ${new Date().getFullYear()} 浙大ZIBS稳定币研究中心`)}</p>
         </div>
       </div>
 

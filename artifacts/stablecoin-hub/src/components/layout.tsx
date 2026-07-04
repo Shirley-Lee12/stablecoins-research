@@ -309,7 +309,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Footer */}
         <div className="p-3 border-t border-sidebar-border text-xs text-sidebar-foreground/35 px-5">
-          {t("© 2025 ZJU ZIBS", "© 2025 浙大ZIBS")}
+          {t(`© ${new Date().getFullYear()} ZJU ZIBS`, `© ${new Date().getFullYear()} 浙大ZIBS`)}
         </div>
       </aside>
 
