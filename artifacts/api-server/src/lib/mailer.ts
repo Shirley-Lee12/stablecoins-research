@@ -1,18 +1,87 @@
 import { logger } from "./logger";
 import { env } from "../config";
 
-const BREVO_FROM_NAME = "ZIBS Stablecoin Hub";
+const FROM_NAME = "ZIBS Stablecoin Hub";
+const MICROSOFT_TOKEN_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
+const MICROSOFT_SEND_URL = "https://graph.microsoft.com/v1.0/me/sendMail";
 
-/**
- * Sends via Brevo's HTTP API instead of SMTP. Root cause of every previous attempt (163.com, then
- * Outlook/Microsoft 365) failing from Render: Render's free-tier instances have blocked all
- * outbound SMTP ports (25/465/587) since September 2025 — no SMTP provider was ever going to work
- * from this host, regardless of credentials or DNS-resolution workarounds. An HTTP API call sends
- * over normal port 443, sidestepping that block entirely. Chose Brevo specifically because it sends
- * to real recipients on the free tier without requiring a verified custom sending domain first
- * (unlike Resend, whose shared test domain is sandboxed to the account's own verified addresses).
- */
-export async function sendMail(to: string, subject: string, html: string) {
+let microsoftTokenCache: {
+  accessToken: string;
+  expiresAt: number;
+  refreshToken: string;
+} | null = null;
+
+function providerError(provider: string, statusCode: number, detail: string) {
+  const error = new Error(`${provider} API request failed (${statusCode}): ${detail}`);
+  Object.assign(error, { provider, statusCode });
+  return error;
+}
+
+async function getMicrosoftAccessToken(): Promise<string> {
+  if (microsoftTokenCache && microsoftTokenCache.expiresAt > Date.now() + 60_000) {
+    return microsoftTokenCache.accessToken;
+  }
+
+  const refreshToken = microsoftTokenCache?.refreshToken || env.MICROSOFT_REFRESH_TOKEN;
+  const body = new URLSearchParams({
+    client_id: env.MICROSOFT_CLIENT_ID,
+    client_secret: env.MICROSOFT_CLIENT_SECRET,
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+    scope: "offline_access https://graph.microsoft.com/Mail.Send",
+  });
+  const res = await fetch(MICROSOFT_TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw providerError("microsoft_graph_token", res.status, detail);
+  }
+
+  const token = await res.json() as {
+    access_token?: string;
+    expires_in?: number;
+    refresh_token?: string;
+  };
+  if (!token.access_token) {
+    throw providerError("microsoft_graph_token", 502, "The token response did not include an access token");
+  }
+  microsoftTokenCache = {
+    accessToken: token.access_token,
+    expiresAt: Date.now() + Math.max(token.expires_in ?? 3_600, 60) * 1_000,
+    refreshToken: token.refresh_token || refreshToken,
+  };
+  return microsoftTokenCache.accessToken;
+}
+
+async function sendWithMicrosoftGraph(to: string, subject: string, html: string) {
+  const accessToken = await getMicrosoftAccessToken();
+  const res = await fetch(MICROSOFT_SEND_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: {
+        subject,
+        body: { contentType: "HTML", content: html },
+        toRecipients: [{ emailAddress: { address: to } }],
+      },
+      saveToSentItems: true,
+    }),
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw providerError("microsoft_graph", res.status, detail);
+  }
+}
+
+async function sendWithBrevo(to: string, subject: string, html: string) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
@@ -21,7 +90,7 @@ export async function sendMail(to: string, subject: string, html: string) {
       Accept: "application/json",
     },
     body: JSON.stringify({
-      sender: { name: BREVO_FROM_NAME, email: env.BREVO_FROM_EMAIL },
+      sender: { name: FROM_NAME, email: env.BREVO_FROM_EMAIL },
       to: [{ email: to }],
       subject,
       htmlContent: html,
@@ -30,10 +99,16 @@ export async function sendMail(to: string, subject: string, html: string) {
   });
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    const error = new Error(`Brevo API request failed (${res.status}): ${detail}`);
-    Object.assign(error, { provider: "brevo", statusCode: res.status });
-    throw error;
+    throw providerError("brevo", res.status, detail);
   }
+}
+
+export async function sendMail(to: string, subject: string, html: string) {
+  if (env.EMAIL_PROVIDER === "microsoft_graph") {
+    await sendWithMicrosoftGraph(to, subject, html);
+    return;
+  }
+  await sendWithBrevo(to, subject, html);
 }
 
 function verificationEmailHtml(code: string, verificationUrl?: string) {

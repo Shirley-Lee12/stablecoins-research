@@ -24,7 +24,7 @@ scripts/            工具脚本
 - `src/lib/llm.ts` 封装 LLM 调用（按 `env.LLM_PROVIDER` 切换供应商，目前只实现 `gemini`）：`generateJson()`/`generateJsonFromPdf()` 用于内容抽取；`embedText()` 用于标签打标的 embedding 相似度匹配（Gemini `gemini-embedding-001`）；`generateJsonWithSearch()` 用 Gemini 内置 Google Search grounding 做兜底网页搜索（上传管线反查链接用，无需额外搜索 API）。
 - `src/lib/scholar/` 封装学术检索（U.1）：`crossref.ts`/`openalex.ts`/`semanticscholar.ts`/`doi.ts`/`unpaywall.ts` 各自包一个学术 API，统一返回 `ScholarResult`；`matching.ts` 提供标题/作者匹配的共享算法；`resolveLink.ts`（U.2）是反查链接的编排层。
 - `src/lib/tagging.ts` 的 `computeTagsForText()`（核心打标函数）+ `retagResources()`（可重跑的全库打标）；`src/lib/verify.ts` 的 `verifyResource()`（U.4 核对）；`src/lib/resourceStatus.ts` 的 `determineResourceStatus()`（U.5 状态判定）；`src/lib/pdfExtract.ts` 的 `extractPdfText()`（本地 `pdf-parse` 抽字，OCR 兜底暂未启用）。详细管线设计见 [`api-design.md`](./api-design.md) "新版上传管线"。
-- `src/lib/mailer.ts` 通过 Brevo HTTPS API 发信，避免部署平台封锁 SMTP 端口。以上所有 lib 模块都只读 `config.ts` 的 `env`，不查数据库配置表。
+- `src/lib/mailer.ts` 根据 `EMAIL_PROVIDER` 通过 Brevo 或 Microsoft Graph HTTPS API 发信，避免部署平台封锁 SMTP 端口。以上所有 lib 模块都只读 `config.ts` 的 `env`，不查数据库配置表。
 - 鉴权中间件（定义在 `src/routes/auth.ts`，被其他路由文件导入）：
   - `requireAuth` —— 校验 Bearer JWT，401 if 无效/缺失。
   - `optionalAuth` —— 有 token 则解析挂到 `req.user`，无 token 不报错（用于按角色区分可见性的接口，如 `GET /api/resources`）。
@@ -96,7 +96,9 @@ scripts/            工具脚本
 | `ADMIN_BOOTSTRAP_EMAILS` | 逗号分隔邮箱列表，命中则注册时自动给 `admin` 角色 |
 | `LLM_PROVIDER` | `gemini`（已实现）\| `anthropic`（占位，未实现） |
 | `LLM_API_KEY` / `LLM_MODEL` | AI 辅助导入用的模型 key / 模型名 |
-| `BREVO_API_KEY` / `BREVO_FROM_EMAIL` | 注册验证码 / 密码重置邮件的 Brevo HTTPS API 配置 |
+| `EMAIL_PROVIDER` | 注册验证码 / 密码重置邮件提供商：`brevo` 或 `microsoft_graph` |
+| `BREVO_API_KEY` / `BREVO_FROM_EMAIL` | Brevo 模式的 HTTPS API 配置 |
+| `MICROSOFT_CLIENT_ID` / `MICROSOFT_CLIENT_SECRET` / `MICROSOFT_REFRESH_TOKEN` / `MICROSOFT_FROM_EMAIL` | Microsoft Graph 模式的 Outlook OAuth 配置 |
 | `SCHOLAR_CONTACT_EMAIL` | Crossref/OpenAlex 礼貌池 + Unpaywall 必填的联系邮箱（上传管线 U.1 用，见 [`api-design.md`](./api-design.md)） |
 | `SEMANTIC_SCHOLAR_API_KEY` | 可选，提升 Semantic Scholar 限流额度，不填用免费档 |
 | `FRONTEND_URL` | 拼装邮件里的链接（如密码重置链接）用 |

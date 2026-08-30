@@ -16,6 +16,7 @@ const THEME_CATEGORIES = ["types_mechanisms", "stability_risk", "regulation_poli
 
 /** Shows only that a secret is set, plus its last 4 characters — never the full value. */
 function maskSecret(value: string): string {
+  if (!value) return "not configured";
   return value.length <= 4 ? "••••" : `••••${value.slice(-4)}`;
 }
 
@@ -35,9 +36,11 @@ router.get("/admin/settings/status", requireAuth, requireAdmin, (_req, res) => {
       apiKey: maskSecret(env.LLM_API_KEY),
     },
     email: {
-      provider: "brevo",
-      from: env.BREVO_FROM_EMAIL,
-      apiKey: maskSecret(env.BREVO_API_KEY),
+      provider: env.EMAIL_PROVIDER,
+      from: env.EMAIL_PROVIDER === "microsoft_graph" ? env.MICROSOFT_FROM_EMAIL : env.BREVO_FROM_EMAIL,
+      credential: env.EMAIL_PROVIDER === "microsoft_graph"
+        ? maskSecret(env.MICROSOFT_CLIENT_ID)
+        : maskSecret(env.BREVO_API_KEY),
     },
     frontendUrl: env.FRONTEND_URL,
   });

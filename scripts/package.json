@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
+    "microsoft-mail-oauth": "tsx ./src/microsoft-mail-oauth.ts",
     "seed-tags": "tsx ./src/seed-tags.ts",
     "consolidate-tags": "tsx ./src/consolidate-tags.ts",
     "backfill-author-names": "tsx ./src/backfill-author-names.ts",

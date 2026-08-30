@@ -178,13 +178,12 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
 }
 
 // ── Settings Panel (read-only — all configuration lives in server .env) ───────
-// Mirrors the actual shape GET /api/admin/settings/status returns (artifacts/api-server/src/routes/
-// admin.ts) — email is Brevo (HTTP API), not SMTP, since the SMTP->Brevo migration.
+// Mirrors the actual shape returned by GET /api/admin/settings/status.
 interface SettingsStatus {
   database: { configured: boolean };
   auth: { jwtSecret: string };
   llm: { provider: string; model: string; apiKey: string };
-  email: { provider: string; from: string; apiKey: string };
+  email: { provider: string; from: string; credential: string };
   frontendUrl: string;
 }
 
@@ -249,11 +248,11 @@ function SettingsPanel({ token, language }: { token: string; language: string })
       <div className="rounded-xl border border-border p-5 space-y-1">
         <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
           <Mail className="h-4 w-4 text-primary" />
-          {zh ? "邮件发送（Brevo API）" : "Email Sending (Brevo API)"}
+          {zh ? "邮件发送（HTTPS API）" : "Email Sending (HTTPS API)"}
         </h3>
         <StatusRow label={zh ? "服务商" : "Provider"} value={status.email.provider} />
         <StatusRow label={zh ? "发件邮箱" : "Sender Email"} value={status.email.from} />
-        <StatusRow label="API Key" value={status.email.apiKey} />
+        <StatusRow label={zh ? "凭据" : "Credential"} value={status.email.credential} />
       </div>
 
       <div className="rounded-xl border border-border p-5 space-y-1">
