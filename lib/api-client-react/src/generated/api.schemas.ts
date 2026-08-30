@@ -9,6 +9,190 @@ export interface HealthStatus {
   status: string;
 }
 
+export type ResourceSubscriptionInputFrequency = typeof ResourceSubscriptionInputFrequency[keyof typeof ResourceSubscriptionInputFrequency];
+
+
+export const ResourceSubscriptionInputFrequency = {
+  daily: 'daily',
+  weekly: 'weekly',
+} as const;
+
+export interface ResourceSubscriptionInput {
+  name: string;
+  query: string;
+  frequency?: ResourceSubscriptionInputFrequency;
+  active?: boolean;
+}
+
+export interface CandidateImportInput {
+  /** @maxItems 100 */
+  candidateIds: number[];
+}
+
+export interface ReenrichJobsInput {
+  /** @maxItems 100 */
+  jobIds?: number[];
+}
+
+export interface UploadJobIdsInput {
+  /**
+     * @minItems 1
+     * @maxItems 100
+     */
+  jobIds: number[];
+}
+
+export type ReviewLogEntryStatus = typeof ReviewLogEntryStatus[keyof typeof ReviewLogEntryStatus];
+
+
+export const ReviewLogEntryStatus = {
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface ReviewLogEntry {
+  id: number;
+  title: string;
+  status: ReviewLogEntryStatus;
+  /** @nullable */
+  submitterEmail?: string | null;
+  createdAt: string;
+  /** @nullable */
+  reviewedAt?: string | null;
+  /** @nullable */
+  reviewerEmail?: string | null;
+  /** @nullable */
+  rejectionReasonId?: number | null;
+  /** @nullable */
+  rejectionNote?: string | null;
+}
+
+export interface UploadJobAccepted {
+  batchId: string;
+  /** @nullable */
+  folderImportId?: string | null;
+  jobIds: number[];
+}
+
+export interface ReferenceListUploadForm {
+  file: Blob;
+  sourceType?: string;
+  folderImportId?: string;
+}
+
+export interface AiPreReviewInput {
+  /**
+     * @minItems 1
+     * @maxItems 100
+     */
+  resourceIds: number[];
+  force?: boolean;
+}
+
+export interface ApplyLatestRulesInput {
+  /**
+     * @minItems 1
+     * @maxItems 100
+     */
+  resourceIds: number[];
+}
+
+export type BackgroundTaskStatus = typeof BackgroundTaskStatus[keyof typeof BackgroundTaskStatus];
+
+
+export const BackgroundTaskStatus = {
+  queued: 'queued',
+  processing: 'processing',
+  waiting_external: 'waiting_external',
+  completed: 'completed',
+  failed: 'failed',
+} as const;
+
+export type BackgroundTaskPayload = { [key: string]: unknown };
+
+/**
+ * @nullable
+ */
+export type BackgroundTaskResult = { [key: string]: unknown } | null;
+
+export interface BackgroundTask {
+  id: number;
+  type: string;
+  status: BackgroundTaskStatus;
+  payload: BackgroundTaskPayload;
+  /** @nullable */
+  result?: BackgroundTaskResult;
+  /** @nullable */
+  error?: string | null;
+  total: number;
+  processed: number;
+  createdBy: number;
+  createdAt: string;
+  updatedAt: string;
+  /** @nullable */
+  completedAt?: string | null;
+}
+
+export type BulkResourceReviewInputAction = typeof BulkResourceReviewInputAction[keyof typeof BulkResourceReviewInputAction];
+
+
+export const BulkResourceReviewInputAction = {
+  approve: 'approve',
+  reject: 'reject',
+} as const;
+
+export interface BulkResourceReviewInput {
+  /**
+     * @minItems 1
+     * @maxItems 100
+     */
+  resourceIds: number[];
+  action: BulkResourceReviewInputAction;
+  rejectionReasonId?: number;
+  /** @maxLength 2000 */
+  rejectionNote?: string;
+}
+
+export type ResourceSubscription = ResourceSubscriptionInput & ({
+  id: number;
+  sources: string[];
+  /** @nullable */
+  lastCheckedAt?: string | null;
+  nextRunAt: string;
+  /** @nullable */
+  lastError?: string | null;
+  createdAt: string;
+  updatedAt: string;
+});
+
+export type SubscriptionCandidateStatus = typeof SubscriptionCandidateStatus[keyof typeof SubscriptionCandidateStatus];
+
+
+export const SubscriptionCandidateStatus = {
+  new: 'new',
+  imported: 'imported',
+  dismissed: 'dismissed',
+} as const;
+
+export interface SubscriptionCandidate {
+  id: number;
+  subscriptionId: number;
+  externalKey: string;
+  source: string;
+  title: string;
+  authors: string[];
+  /** @nullable */
+  year?: number | null;
+  /** @nullable */
+  abstract?: string | null;
+  /** @nullable */
+  doi?: string | null;
+  /** @nullable */
+  url?: string | null;
+  status: SubscriptionCandidateStatus;
+  discoveredAt: string;
+}
+
 export type ResourceResourceType = typeof ResourceResourceType[keyof typeof ResourceResourceType];
 
 
@@ -22,6 +206,23 @@ export const ResourceResourceType = {
   forum: 'forum',
   video: 'video',
 } as const;
+
+export type ResourceAiReviewStatus = typeof ResourceAiReviewStatus[keyof typeof ResourceAiReviewStatus];
+
+
+export const ResourceAiReviewStatus = {
+  not_started: 'not_started',
+  processing: 'processing',
+  safe: 'safe',
+  needs_verification: 'needs_verification',
+  high_risk: 'high_risk',
+  failed: 'failed',
+} as const;
+
+/**
+ * @nullable
+ */
+export type ResourceAiReviewDetails = { [key: string]: unknown } | null;
 
 export interface Resource {
   id: number;
@@ -45,6 +246,13 @@ export interface Resource {
   /** @nullable */
   journal?: string | null;
   created_at: string;
+  aiReviewStatus?: ResourceAiReviewStatus;
+  /** @nullable */
+  aiReviewSummary?: string | null;
+  /** @nullable */
+  aiReviewDetails?: ResourceAiReviewDetails;
+  /** @nullable */
+  aiReviewedAt?: string | null;
 }
 
 export interface ResourceInput {
@@ -75,6 +283,8 @@ export interface ResourceUpdate {
   tags?: string[];
   published_date?: string;
   journal?: string;
+  /** Treat an owner's edit as a resubmission even when the owner is also an administrator. */
+  resubmit?: boolean;
 }
 
 export type ExtractionInputSourceType = typeof ExtractionInputSourceType[keyof typeof ExtractionInputSourceType];
@@ -193,17 +403,21 @@ export interface Tag {
   count: number;
 }
 
-export type AuthorSummaryResourceTypesItem = {
-  type: string;
-  count: number;
-};
-
 export interface AuthorSummary {
+  id: number;
   name: string;
-  institution?: string;
-  resource_count: number;
-  top_tags: string[];
-  resource_types: AuthorSummaryResourceTypesItem[];
+  /** @nullable */
+  researchInterests?: string[] | null;
+  /** @nullable */
+  bio?: string | null;
+  /** @nullable */
+  institutionId?: number | null;
+  /** @nullable */
+  institutionName?: string | null;
+  resourceCount: number;
+  publicationYears: number[];
+  chineseResourceCount: number;
+  englishResourceCount: number;
 }
 
 export type AuthorProfileResourceTypesItem = {
@@ -253,6 +467,39 @@ export type ListRecentResourcesParams = {
 limit?: number;
 };
 
+export type ListAdminBackgroundTasksParams = {
+type?: string;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+limit?: number;
+};
+
+export type ListAdminReviewLogParams = {
+status?: ListAdminReviewLogStatus;
+reviewedBy?: number;
+from?: string;
+to?: string;
+order?: ListAdminReviewLogOrder;
+};
+
+export type ListAdminReviewLogStatus = typeof ListAdminReviewLogStatus[keyof typeof ListAdminReviewLogStatus];
+
+
+export const ListAdminReviewLogStatus = {
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type ListAdminReviewLogOrder = typeof ListAdminReviewLogOrder[keyof typeof ListAdminReviewLogOrder];
+
+
+export const ListAdminReviewLogOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
 export type ListRegulatoryEntriesParams = {
 country?: string;
 category?: string;
@@ -266,5 +513,9 @@ lang?: string;
 
 export type ListAuthorsParams = {
 search?: string;
+};
+
+export type ListSubscriptionCandidatesParams = {
+status?: string;
 };
 

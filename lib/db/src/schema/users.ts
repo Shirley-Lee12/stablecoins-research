@@ -11,6 +11,15 @@ export const usersTable = pgTable("users", {
   // Defaults to true so existing accounts (created before email verification existed) aren't locked out.
   // New registrations explicitly set this to false until the code is confirmed.
   emailVerified: boolean("email_verified").notNull().default(true),
+  institution: text("institution"),
+  title: text("title"),
+  bio: text("bio"),
+  locale: text("locale").notNull().default("zh"),
+  themePreference: text("theme_preference").notNull().default("system"),
+  fontScale: text("font_scale").notNull().default("medium"),
+  notificationInApp: boolean("notification_in_app").notNull().default(true),
+  notificationEmail: boolean("notification_email").notNull().default(true),
+  notificationDigest: text("notification_digest").notNull().default("weekly"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

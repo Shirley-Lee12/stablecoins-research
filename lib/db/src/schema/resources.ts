@@ -96,6 +96,13 @@ export const resourcesTable = pgTable("resources", {
   // never as a side effect of merely viewing the resource.
   verificationReport: jsonb("verification_report"),
   verifiedAt: timestamp("verified_at", { withTimezone: true }),
+  // Admin-facing second pass performed shortly before review. This is deliberately separate from
+  // verificationReport: verification checks individual metadata fields, while this assessment
+  // visits the public destination and summarizes source/link risk for fast table review.
+  aiReviewStatus: text("ai_review_status").notNull().default("not_started"),
+  aiReviewSummary: text("ai_review_summary"),
+  aiReviewDetails: jsonb("ai_review_details"),
+  aiReviewedAt: timestamp("ai_reviewed_at", { withTimezone: true }),
   // docs/planning/19 §19.2 — a natural-language explanation of why a resource was flagged
   // off_topic (e.g. "this paper studies X, which doesn't directly engage stablecoins or their
   // underlying theory/technology"), generated once via a lightweight LLM call at the moment

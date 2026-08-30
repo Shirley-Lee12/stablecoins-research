@@ -1,0 +1,1783 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-28T01:20:32+00:00",
+  "comparabilityRules": [
+    "Do not place market-cap stocks and transaction flows on the same quantitative scale.",
+    "Compare application shares only when they use the same date, denominator and category rules.",
+    "Keep published observations separate from model estimates and label confidence explicitly.",
+    "Do not silently normalize rounded source percentages to 100%.",
+    "Do not extend a historical cross-border series with a newer benchmark when source vintages differ."
+  ],
+  "datasets": {
+    "marketCap": {
+      "metric": "market_cap",
+      "frequency": "month_end",
+      "unit": "usd_billions",
+      "coverage": {
+        "coins": [
+          "USDT",
+          "USDC",
+          "USDS",
+          "USD1",
+          "USDE",
+          "Other stablecoins"
+        ],
+        "start": "2019-01-31",
+        "end": "2026-05-29",
+        "scope": "Five named stablecoins plus all other stablecoins in BIS Graph 2."
+      },
+      "observations": [
+        {
+          "USDT": 2.056126,
+          "USDC": 0.325852,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.368475,
+          "date": "2019-01-31",
+          "totalCovered": 2.750453
+        },
+        {
+          "USDT": 2.062399,
+          "USDC": 0.237794,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.348131,
+          "date": "2019-02-28",
+          "totalCovered": 2.648324
+        },
+        {
+          "USDT": 2.059187,
+          "USDC": 0.247483,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.348897,
+          "date": "2019-03-31",
+          "totalCovered": 2.655567
+        },
+        {
+          "USDT": 2.043146,
+          "USDC": 0.295235,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.395016,
+          "date": "2019-04-30",
+          "totalCovered": 2.733397
+        },
+        {
+          "USDT": 2.062918,
+          "USDC": 0.340666,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.446775,
+          "date": "2019-05-31",
+          "totalCovered": 2.850359
+        },
+        {
+          "USDT": 3.56192,
+          "USDC": 0.367746,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.412055,
+          "date": "2019-06-30",
+          "totalCovered": 4.341721
+        },
+        {
+          "USDT": 3.560098,
+          "USDC": 0.435922,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.459785,
+          "date": "2019-07-31",
+          "totalCovered": 4.455805
+        },
+        {
+          "USDT": 3.566661,
+          "USDC": 0.453399,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.426904,
+          "date": "2019-08-31",
+          "totalCovered": 4.446964
+        },
+        {
+          "USDT": 3.565873,
+          "USDC": 0.428917,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.469236,
+          "date": "2019-09-30",
+          "totalCovered": 4.464026
+        },
+        {
+          "USDT": 4.290571,
+          "USDC": 0.468122,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.461012,
+          "date": "2019-10-31",
+          "totalCovered": 5.219705
+        },
+        {
+          "USDT": 4.286772,
+          "USDC": 0.457192,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.432923,
+          "date": "2019-11-30",
+          "totalCovered": 5.176887
+        },
+        {
+          "USDT": 4.281012,
+          "USDC": 0.521145,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.44817,
+          "date": "2019-12-31",
+          "totalCovered": 5.250327
+        },
+        {
+          "USDT": 4.2779,
+          "USDC": 0.442467,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.501872,
+          "date": "2020-01-31",
+          "totalCovered": 5.222239
+        },
+        {
+          "USDT": 4.284584,
+          "USDC": 0.444737,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.509902,
+          "date": "2020-02-29",
+          "totalCovered": 5.239223
+        },
+        {
+          "USDT": 4.303567,
+          "USDC": 0.691238,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.536553,
+          "date": "2020-03-31",
+          "totalCovered": 5.531358
+        },
+        {
+          "USDT": 7.692069,
+          "USDC": 0.726001,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.796393,
+          "date": "2020-04-30",
+          "totalCovered": 9.214463
+        },
+        {
+          "USDT": 9.107846,
+          "USDC": 0.747124,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.798845,
+          "date": "2020-05-31",
+          "totalCovered": 10.653815
+        },
+        {
+          "USDT": 9.628668,
+          "USDC": 0.981974,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 0.830097,
+          "date": "2020-06-30",
+          "totalCovered": 11.440739
+        },
+        {
+          "USDT": 10.707864,
+          "USDC": 1.145335,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 1.178475,
+          "date": "2020-07-31",
+          "totalCovered": 13.031674
+        },
+        {
+          "USDT": 13.324009,
+          "USDC": 1.474977,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 1.627847,
+          "date": "2020-08-31",
+          "totalCovered": 16.426833
+        },
+        {
+          "USDT": 15.466016,
+          "USDC": 2.537998,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 2.388943,
+          "date": "2020-09-30",
+          "totalCovered": 20.392957
+        },
+        {
+          "USDT": 16.532184,
+          "USDC": 2.886046,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 2.642078,
+          "date": "2020-10-31",
+          "totalCovered": 22.060308
+        },
+        {
+          "USDT": 19.127804,
+          "USDC": 2.969655,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 2.774032,
+          "date": "2020-11-30",
+          "totalCovered": 24.871491
+        },
+        {
+          "USDT": 20.920739,
+          "USDC": 3.705248,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 3.303245,
+          "date": "2020-12-31",
+          "totalCovered": 27.929232
+        },
+        {
+          "USDT": 26.260606,
+          "USDC": 5.835792,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 5.130421,
+          "date": "2021-01-31",
+          "totalCovered": 37.226819
+        },
+        {
+          "USDT": 35.019018,
+          "USDC": 8.973027,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 7.622341,
+          "date": "2021-02-28",
+          "totalCovered": 51.614386
+        },
+        {
+          "USDT": 40.730247,
+          "USDC": 10.90352,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 10.571579,
+          "date": "2021-03-31",
+          "totalCovered": 62.205346
+        },
+        {
+          "USDT": 51.252931,
+          "USDC": 14.603753,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 18.200408,
+          "date": "2021-04-30",
+          "totalCovered": 84.057092
+        },
+        {
+          "USDT": 61.799687,
+          "USDC": 22.426128,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 20.798295,
+          "date": "2021-05-31",
+          "totalCovered": 105.02411
+        },
+        {
+          "USDT": 62.662682,
+          "USDC": 25.227094,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 22.160783,
+          "date": "2021-06-30",
+          "totalCovered": 110.050559
+        },
+        {
+          "USDT": 62.114781,
+          "USDC": 27.488456,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 24.762986,
+          "date": "2021-07-31",
+          "totalCovered": 114.366223
+        },
+        {
+          "USDT": 65.8982,
+          "USDC": 27.379051,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 25.967661,
+          "date": "2021-08-31",
+          "totalCovered": 119.244912
+        },
+        {
+          "USDT": 69.575416,
+          "USDC": 31.495887,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 28.806884,
+          "date": "2021-09-30",
+          "totalCovered": 129.878187
+        },
+        {
+          "USDT": 71.422334,
+          "USDC": 33.228774,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 32.304733,
+          "date": "2021-10-31",
+          "totalCovered": 136.955841
+        },
+        {
+          "USDT": 74.25112,
+          "USDC": 38.505522,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 40.626272,
+          "date": "2021-11-30",
+          "totalCovered": 153.382914
+        },
+        {
+          "USDT": 78.44157,
+          "USDC": 42.428767,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 46.623527,
+          "date": "2021-12-31",
+          "totalCovered": 167.493864
+        },
+        {
+          "USDT": 78.198382,
+          "USDC": 49.794512,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 48.161494,
+          "date": "2022-01-31",
+          "totalCovered": 176.154388
+        },
+        {
+          "USDT": 79.854422,
+          "USDC": 53.56996,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 52.36517,
+          "date": "2022-02-28",
+          "totalCovered": 185.789552
+        },
+        {
+          "USDT": 81.930453,
+          "USDC": 52.132453,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 54.750681,
+          "date": "2022-03-31",
+          "totalCovered": 188.813587
+        },
+        {
+          "USDT": 83.229249,
+          "USDC": 49.286152,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 56.635142,
+          "date": "2022-04-30",
+          "totalCovered": 189.150543
+        },
+        {
+          "USDT": 72.546424,
+          "USDC": 53.82686,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 32.823338,
+          "date": "2022-05-31",
+          "totalCovered": 159.196622
+        },
+        {
+          "USDT": 66.515976,
+          "USDC": 55.645129,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 31.892468,
+          "date": "2022-06-30",
+          "totalCovered": 154.053573
+        },
+        {
+          "USDT": 65.998757,
+          "USDC": 54.486022,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 32.34983,
+          "date": "2022-07-31",
+          "totalCovered": 152.834609
+        },
+        {
+          "USDT": 67.519668,
+          "USDC": 52.328535,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 33.170759,
+          "date": "2022-08-31",
+          "totalCovered": 153.018962
+        },
+        {
+          "USDT": 68.018937,
+          "USDC": 48.516414,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 34.195174,
+          "date": "2022-09-30",
+          "totalCovered": 150.730525
+        },
+        {
+          "USDT": 69.094359,
+          "USDC": 43.65095,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 34.017122,
+          "date": "2022-10-31",
+          "totalCovered": 146.762431
+        },
+        {
+          "USDT": 65.366405,
+          "USDC": 43.289159,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 33.725697,
+          "date": "2022-11-30",
+          "totalCovered": 142.381261
+        },
+        {
+          "USDT": 66.279044,
+          "USDC": 44.523298,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 28.014782,
+          "date": "2022-12-31",
+          "totalCovered": 138.817124
+        },
+        {
+          "USDT": 67.779797,
+          "USDC": 42.731331,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 27.481772,
+          "date": "2023-01-31",
+          "totalCovered": 137.9929
+        },
+        {
+          "USDT": 70.918517,
+          "USDC": 42.555162,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 22.280877,
+          "date": "2023-02-28",
+          "totalCovered": 135.754556
+        },
+        {
+          "USDT": 79.708195,
+          "USDC": 32.875147,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 20.161319,
+          "date": "2023-03-31",
+          "totalCovered": 132.744661
+        },
+        {
+          "USDT": 81.811659,
+          "USDC": 30.517473,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 18.778274,
+          "date": "2023-04-30",
+          "totalCovered": 131.107406
+        },
+        {
+          "USDT": 83.178633,
+          "USDC": 28.960554,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 17.751011,
+          "date": "2023-05-31",
+          "totalCovered": 129.890198
+        },
+        {
+          "USDT": 83.395956,
+          "USDC": 27.953686,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 17.175618,
+          "date": "2023-06-30",
+          "totalCovered": 128.52526
+        },
+        {
+          "USDT": 83.823744,
+          "USDC": 26.538645,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 15.748411,
+          "date": "2023-07-31",
+          "totalCovered": 126.1108
+        },
+        {
+          "USDT": 82.830657,
+          "USDC": 26.144887,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 14.974721,
+          "date": "2023-08-31",
+          "totalCovered": 123.950265
+        },
+        {
+          "USDT": 83.267971,
+          "USDC": 25.054613,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 14.383009,
+          "date": "2023-09-30",
+          "totalCovered": 122.705593
+        },
+        {
+          "USDT": 84.560721,
+          "USDC": 24.933126,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 13.948616,
+          "date": "2023-10-31",
+          "totalCovered": 123.442463
+        },
+        {
+          "USDT": 89.084951,
+          "USDC": 24.430396,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 15.604315,
+          "date": "2023-11-30",
+          "totalCovered": 129.119662
+        },
+        {
+          "USDT": 91.696771,
+          "USDC": 24.659691,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.0,
+          "Other stablecoins": 14.780579,
+          "date": "2023-12-31",
+          "totalCovered": 131.137041
+        },
+        {
+          "USDT": 95.993659,
+          "USDC": 26.705654,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.135247,
+          "Other stablecoins": 13.645569,
+          "date": "2024-01-31",
+          "totalCovered": 136.480129
+        },
+        {
+          "USDT": 98.408639,
+          "USDC": 28.70885,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 0.51961,
+          "Other stablecoins": 14.117642,
+          "date": "2024-02-29",
+          "totalCovered": 141.754741
+        },
+        {
+          "USDT": 104.53835,
+          "USDC": 32.460742,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 1.533053,
+          "Other stablecoins": 12.373253,
+          "date": "2024-03-31",
+          "totalCovered": 150.905398
+        },
+        {
+          "USDT": 110.513524,
+          "USDC": 33.307409,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 2.33907,
+          "Other stablecoins": 14.472534,
+          "date": "2024-04-30",
+          "totalCovered": 160.632537
+        },
+        {
+          "USDT": 111.910137,
+          "USDC": 32.375964,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 2.96902,
+          "Other stablecoins": 13.361925,
+          "date": "2024-05-31",
+          "totalCovered": 160.617046
+        },
+        {
+          "USDT": 112.627263,
+          "USDC": 32.264498,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 3.597546,
+          "Other stablecoins": 12.281961,
+          "date": "2024-06-30",
+          "totalCovered": 160.771268
+        },
+        {
+          "USDT": 114.429758,
+          "USDC": 33.470598,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 3.206416,
+          "Other stablecoins": 12.409313,
+          "date": "2024-07-31",
+          "totalCovered": 163.516085
+        },
+        {
+          "USDT": 118.222,
+          "USDC": 34.747704,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 2.838717,
+          "Other stablecoins": 14.051143,
+          "date": "2024-08-31",
+          "totalCovered": 169.859564
+        },
+        {
+          "USDT": 119.508804,
+          "USDC": 36.242038,
+          "USDS": 0.0,
+          "USD1": 0.0,
+          "USDE": 2.542194,
+          "Other stablecoins": 14.143722,
+          "date": "2024-09-30",
+          "totalCovered": 172.436758
+        },
+        {
+          "USDT": 120.380627,
+          "USDC": 35.044235,
+          "USDS": 5.603826,
+          "USD1": 0.0,
+          "USDE": 2.717423,
+          "Other stablecoins": 11.689033,
+          "date": "2024-10-31",
+          "totalCovered": 175.435144
+        },
+        {
+          "USDT": 133.558625,
+          "USDC": 39.807121,
+          "USDS": 5.180875,
+          "USD1": 0.0,
+          "USDE": 4.361358,
+          "Other stablecoins": 11.985364,
+          "date": "2024-11-30",
+          "totalCovered": 194.893343
+        },
+        {
+          "USDT": 138.763095,
+          "USDC": 43.803323,
+          "USDS": 5.318735,
+          "USD1": 0.0,
+          "USDE": 5.866891,
+          "Other stablecoins": 13.731536,
+          "date": "2024-12-31",
+          "totalCovered": 207.48358
+        },
+        {
+          "USDT": 139.418116,
+          "USDC": 53.108113,
+          "USDS": 6.924024,
+          "USD1": 0.0,
+          "USDE": 5.926716,
+          "Other stablecoins": 13.111445,
+          "date": "2025-01-31",
+          "totalCovered": 218.488414
+        },
+        {
+          "USDT": 142.16794,
+          "USDC": 55.583498,
+          "USDS": 7.506454,
+          "USD1": 0.0,
+          "USDE": 5.873601,
+          "Other stablecoins": 13.344424,
+          "date": "2025-02-28",
+          "totalCovered": 224.475917
+        },
+        {
+          "USDT": 144.151836,
+          "USDC": 60.187903,
+          "USDS": 7.633859,
+          "USD1": 0.0,
+          "USDE": 5.247802,
+          "Other stablecoins": 14.173999,
+          "date": "2025-03-31",
+          "totalCovered": 231.395399
+        },
+        {
+          "USDT": 148.006012,
+          "USDC": 62.142665,
+          "USDS": 7.642602,
+          "USD1": 2.124151,
+          "USDE": 4.670178,
+          "Other stablecoins": 13.535426,
+          "date": "2025-04-30",
+          "totalCovered": 238.121034
+        },
+        {
+          "USDT": 153.119221,
+          "USDC": 61.040432,
+          "USDS": 7.0403,
+          "USD1": 2.174071,
+          "USDE": 5.358318,
+          "Other stablecoins": 14.663083,
+          "date": "2025-05-31",
+          "totalCovered": 243.395425
+        },
+        {
+          "USDT": 157.596199,
+          "USDC": 61.672471,
+          "USDS": 7.079,
+          "USD1": 2.204097,
+          "USDE": 5.30255,
+          "Other stablecoins": 16.010638,
+          "date": "2025-06-30",
+          "totalCovered": 249.864955
+        },
+        {
+          "USDT": 163.743256,
+          "USDC": 64.00338,
+          "USDS": 7.71554,
+          "USD1": 2.174626,
+          "USDE": 8.162031,
+          "Other stablecoins": 17.3025,
+          "date": "2025-07-31",
+          "totalCovered": 263.101333
+        },
+        {
+          "USDT": 167.62303,
+          "USDC": 71.538548,
+          "USDS": 7.99502,
+          "USD1": 2.484043,
+          "USDE": 12.329933,
+          "Other stablecoins": 19.615034,
+          "date": "2025-08-31",
+          "totalCovered": 281.585608
+        },
+        {
+          "USDT": 174.459825,
+          "USDC": 73.503912,
+          "USDS": 7.768227,
+          "USD1": 2.691649,
+          "USDE": 14.481718,
+          "Other stablecoins": 22.593489,
+          "date": "2025-09-30",
+          "totalCovered": 295.49882
+        },
+        {
+          "USDT": 183.366211,
+          "USDC": 75.95006,
+          "USDS": 9.059334,
+          "USD1": 2.980181,
+          "USDE": 9.550648,
+          "Other stablecoins": 25.500468,
+          "date": "2025-10-31",
+          "totalCovered": 306.406902
+        },
+        {
+          "USDT": 184.678013,
+          "USDC": 76.543536,
+          "USDS": 9.419468,
+          "USD1": 2.717338,
+          "USDE": 7.208586,
+          "Other stablecoins": 25.897106,
+          "date": "2025-11-30",
+          "totalCovered": 306.464047
+        },
+        {
+          "USDT": 187.154085,
+          "USDC": 76.008223,
+          "USDS": 9.261691,
+          "USD1": 3.312893,
+          "USDE": 6.293044,
+          "Other stablecoins": 25.806852,
+          "date": "2025-12-31",
+          "totalCovered": 307.836788
+        },
+        {
+          "USDT": 185.572421,
+          "USDC": 70.048084,
+          "USDS": 9.241426,
+          "USD1": 5.058125,
+          "USDE": 6.572857,
+          "Other stablecoins": 28.638264,
+          "date": "2026-01-31",
+          "totalCovered": 305.131177
+        },
+        {
+          "USDT": 183.548842,
+          "USDC": 75.227319,
+          "USDS": 9.989728,
+          "USD1": 4.715148,
+          "USDE": 6.062452,
+          "Other stablecoins": 28.753511,
+          "date": "2026-02-28",
+          "totalCovered": 308.297
+        },
+        {
+          "USDT": 184.077685,
+          "USDC": 77.43765,
+          "USDS": 11.832304,
+          "USD1": 4.390196,
+          "USDE": 5.878243,
+          "Other stablecoins": 28.364396,
+          "date": "2026-03-31",
+          "totalCovered": 311.980474
+        },
+        {
+          "USDT": 189.52223,
+          "USDC": 77.272124,
+          "USDS": 10.53726,
+          "USD1": 4.459314,
+          "USDE": 3.807388,
+          "Other stablecoins": 30.060645,
+          "date": "2026-04-30",
+          "totalCovered": 315.658961
+        },
+        {
+          "USDT": 189.326644,
+          "USDC": 76.200257,
+          "USDS": 11.082101,
+          "USD1": 4.743789,
+          "USDE": 4.49062,
+          "Other stablecoins": 30.712088,
+          "date": "2026-05-29",
+          "totalCovered": 316.555499
+        }
+      ],
+      "source": {
+        "publisher": "Bank for International Settlements",
+        "title": "Annual Economic Report 2026, Chapter III, Graph 2 underlying data",
+        "url": "https://www.bis.org/statistics/ar2026stats.htm",
+        "workbookUrl": "https://www.bis.org/statistics/ar2026stats/ar2026e3_stats.xlsx",
+        "workbookSheet": "Graph 2",
+        "sourceNote": "Kosse et al (2023); CoinGecko; BIS."
+      },
+      "quality": {
+        "classification": "published_observation",
+        "confidence": "high",
+        "limitations": [
+          "Named-project coverage changes over time; the remainder is retained as Other stablecoins.",
+          "Month-end values are the last available daily observation in each calendar month."
+        ]
+      }
+    },
+    "historicalCrossBorderFlows": {
+      "metric": "cross_border_flow",
+      "frequency": "quarterly",
+      "unit": "usd_billions",
+      "coverage": {
+        "coins": [
+          "USDC",
+          "USDT"
+        ],
+        "start": "2017-Q1",
+        "end": "2024-Q2",
+        "scope": "Estimated cross-border flows for USDC and Tether across 184 countries."
+      },
+      "observations": [
+        {
+          "period": "2017-Q1",
+          "USDC": 0.0,
+          "USDT": 0.0,
+          "totalCovered": 0.0
+        },
+        {
+          "period": "2017-Q2",
+          "USDC": 0.0,
+          "USDT": 0.0,
+          "totalCovered": 0.0
+        },
+        {
+          "period": "2017-Q3",
+          "USDC": 0.0,
+          "USDT": 0.0,
+          "totalCovered": 0.0
+        },
+        {
+          "period": "2017-Q4",
+          "USDC": 0.0,
+          "USDT": 0.0,
+          "totalCovered": 0.0
+        },
+        {
+          "period": "2018-Q1",
+          "USDC": 0.0,
+          "USDT": 0.106674,
+          "totalCovered": 0.106674
+        },
+        {
+          "period": "2018-Q2",
+          "USDC": 0.0,
+          "USDT": 0.10013,
+          "totalCovered": 0.10013
+        },
+        {
+          "period": "2018-Q3",
+          "USDC": 0.0,
+          "USDT": 0.045017,
+          "totalCovered": 0.045017
+        },
+        {
+          "period": "2018-Q4",
+          "USDC": 0.374927,
+          "USDT": 0.049752,
+          "totalCovered": 0.424679
+        },
+        {
+          "period": "2019-Q1",
+          "USDC": 0.900506,
+          "USDT": 0.021142,
+          "totalCovered": 0.921648
+        },
+        {
+          "period": "2019-Q2",
+          "USDC": 1.384918,
+          "USDT": 0.921353,
+          "totalCovered": 2.306271
+        },
+        {
+          "period": "2019-Q3",
+          "USDC": 1.492668,
+          "USDT": 4.821704,
+          "totalCovered": 6.314372
+        },
+        {
+          "period": "2019-Q4",
+          "USDC": 1.940644,
+          "USDT": 6.943974,
+          "totalCovered": 8.884618
+        },
+        {
+          "period": "2020-Q1",
+          "USDC": 3.416246,
+          "USDT": 10.11649,
+          "totalCovered": 13.532736
+        },
+        {
+          "period": "2020-Q2",
+          "USDC": 3.69487,
+          "USDT": 13.79503,
+          "totalCovered": 17.4899
+        },
+        {
+          "period": "2020-Q3",
+          "USDC": 8.377422,
+          "USDT": 25.86663,
+          "totalCovered": 34.244052
+        },
+        {
+          "period": "2020-Q4",
+          "USDC": 14.5951,
+          "USDT": 41.19138,
+          "totalCovered": 55.78648
+        },
+        {
+          "period": "2021-Q1",
+          "USDC": 54.08305,
+          "USDT": 118.5056,
+          "totalCovered": 172.58865
+        },
+        {
+          "period": "2021-Q2",
+          "USDC": 92.15973,
+          "USDT": 234.7164,
+          "totalCovered": 326.87613
+        },
+        {
+          "period": "2021-Q3",
+          "USDC": 70.72698,
+          "USDT": 211.9714,
+          "totalCovered": 282.69838
+        },
+        {
+          "period": "2021-Q4",
+          "USDC": 95.76933,
+          "USDT": 332.9566,
+          "totalCovered": 428.72593
+        },
+        {
+          "period": "2022-Q1",
+          "USDC": 99.45078,
+          "USDT": 234.1961,
+          "totalCovered": 333.64688
+        },
+        {
+          "period": "2022-Q2",
+          "USDC": 164.8623,
+          "USDT": 262.061,
+          "totalCovered": 426.9233
+        },
+        {
+          "period": "2022-Q3",
+          "USDC": 88.66747,
+          "USDT": 159.7753,
+          "totalCovered": 248.44277
+        },
+        {
+          "period": "2022-Q4",
+          "USDC": 136.6134,
+          "USDT": 180.12,
+          "totalCovered": 316.7334
+        },
+        {
+          "period": "2023-Q1",
+          "USDC": 149.0494,
+          "USDT": 195.0789,
+          "totalCovered": 344.1283
+        },
+        {
+          "period": "2023-Q2",
+          "USDC": 53.63165,
+          "USDT": 201.8057,
+          "totalCovered": 255.43735
+        },
+        {
+          "period": "2023-Q3",
+          "USDC": 57.16693,
+          "USDT": 209.9984,
+          "totalCovered": 267.16533
+        },
+        {
+          "period": "2023-Q4",
+          "USDC": 66.73907,
+          "USDT": 277.3563,
+          "totalCovered": 344.09537
+        },
+        {
+          "period": "2024-Q1",
+          "USDC": 108.757,
+          "USDT": 370.3181,
+          "totalCovered": 479.0751
+        },
+        {
+          "period": "2024-Q2",
+          "USDC": 105.4746,
+          "USDT": 300.8915,
+          "totalCovered": 406.3661
+        }
+      ],
+      "source": {
+        "publisher": "Bank for International Settlements",
+        "title": "Annual Economic Report 2025, Chapter III, Graph 2 underlying data",
+        "url": "https://www.bis.org/statistics/ar2025stats.htm",
+        "workbookUrl": "https://www.bis.org/statistics/ar2025stats/ar2025e3_stats.xlsx",
+        "workbookSheet": "Ch3_Graph 2",
+        "sourceNote": "Auer et al (2025b); Chainalysis."
+      },
+      "quality": {
+        "classification": "published_model_estimate",
+        "confidence": "medium",
+        "limitations": [
+          "Cross-border location is inferred and is not equivalent to a complete payments ledger.",
+          "The series covers USDC and USDT only and should not be compared directly with market-cap stocks."
+        ]
+      }
+    },
+    "latestCrossBorderBenchmark": {
+      "metric": "gross_cross_border_flow",
+      "period": "2025-Q1",
+      "value": 316,
+      "unit": "usd_billions",
+      "coverage": {
+        "coins": [
+          "USDC",
+          "USDT"
+        ]
+      },
+      "source": {
+        "publisher": "International Monetary Fund",
+        "title": "Global Financial Stability Report, April 2026, Chapter 2",
+        "url": "https://www.elibrary.imf.org/abstract/book/9798229035910/CH002.xml"
+      },
+      "quality": {
+        "classification": "published_model_estimate",
+        "confidence": "medium",
+        "limitations": [
+          "The underlying Chainalysis data use proprietary wallet attribution and web-traffic-based country allocation.",
+          "This is retained as a separate latest benchmark because the published BIS historical series has a different data vintage."
+        ]
+      }
+    },
+    "fiatStablecoinNetInflows": {
+      "metric": "cumulative_net_fiat_to_stablecoin_inflows",
+      "frequency": "monthly",
+      "unit": "usd_billions",
+      "coverage": {
+        "stablecoins": [
+          "USDT",
+          "USDC",
+          "DAI",
+          "BUSD"
+        ],
+        "sourceCurrencies": [
+          "USD",
+          "EUR",
+          "Other fiat currencies"
+        ],
+        "start": "2021-01",
+        "end": "2025-12",
+        "scope": "Cumulative net exchange inflows from fiat currencies into four USD-pegged stablecoins."
+      },
+      "observations": [
+        {
+          "period": "2021-01",
+          "USD": 0.286189,
+          "EUR": 0.48332,
+          "otherFiat": 0.12957,
+          "total": 0.899078
+        },
+        {
+          "period": "2021-02",
+          "USD": 0.132298,
+          "EUR": 1.112417,
+          "otherFiat": 0.663145,
+          "total": 1.90786
+        },
+        {
+          "period": "2021-03",
+          "USD": 0.052844,
+          "EUR": 1.72234,
+          "otherFiat": 1.268997,
+          "total": 3.044181
+        },
+        {
+          "period": "2021-04",
+          "USD": -0.054143,
+          "EUR": 2.455048,
+          "otherFiat": 2.231838,
+          "total": 4.632743
+        },
+        {
+          "period": "2021-05",
+          "USD": -0.027133,
+          "EUR": 3.465169,
+          "otherFiat": 3.324928,
+          "total": 6.762964
+        },
+        {
+          "period": "2021-06",
+          "USD": 0.439969,
+          "EUR": 3.498405,
+          "otherFiat": 3.667489,
+          "total": 7.605863
+        },
+        {
+          "period": "2021-07",
+          "USD": 0.35944,
+          "EUR": 3.620091,
+          "otherFiat": 3.899114,
+          "total": 7.878645
+        },
+        {
+          "period": "2021-08",
+          "USD": -0.205576,
+          "EUR": 3.77504,
+          "otherFiat": 4.149443,
+          "total": 7.718907
+        },
+        {
+          "period": "2021-09",
+          "USD": 0.15367,
+          "EUR": 3.952531,
+          "otherFiat": 4.728877,
+          "total": 8.835078
+        },
+        {
+          "period": "2021-10",
+          "USD": 0.328657,
+          "EUR": 4.321012,
+          "otherFiat": 4.934681,
+          "total": 9.58435
+        },
+        {
+          "period": "2021-11",
+          "USD": -0.575117,
+          "EUR": 4.549068,
+          "otherFiat": 5.713135,
+          "total": 9.687086
+        },
+        {
+          "period": "2021-12",
+          "USD": 0.007159,
+          "EUR": 4.617844,
+          "otherFiat": 6.124421,
+          "total": 10.749424
+        },
+        {
+          "period": "2022-01",
+          "USD": -0.30937,
+          "EUR": 4.745826,
+          "otherFiat": 6.678763,
+          "total": 11.115219
+        },
+        {
+          "period": "2022-02",
+          "USD": -0.135881,
+          "EUR": 4.801677,
+          "otherFiat": 7.081064,
+          "total": 11.74686
+        },
+        {
+          "period": "2022-03",
+          "USD": -0.682097,
+          "EUR": 5.132666,
+          "otherFiat": 7.418867,
+          "total": 11.869436
+        },
+        {
+          "period": "2022-04",
+          "USD": -0.724743,
+          "EUR": 5.493765,
+          "otherFiat": 8.057066,
+          "total": 12.826087
+        },
+        {
+          "period": "2022-05",
+          "USD": -0.24123,
+          "EUR": 5.866094,
+          "otherFiat": 8.72241,
+          "total": 14.347275
+        },
+        {
+          "period": "2022-06",
+          "USD": -0.100616,
+          "EUR": 6.084325,
+          "otherFiat": 9.044626,
+          "total": 15.028335
+        },
+        {
+          "period": "2022-07",
+          "USD": -0.353894,
+          "EUR": 6.190683,
+          "otherFiat": 9.25897,
+          "total": 15.095759
+        },
+        {
+          "period": "2022-08",
+          "USD": -0.355279,
+          "EUR": 6.359785,
+          "otherFiat": 9.628012,
+          "total": 15.632518
+        },
+        {
+          "period": "2022-09",
+          "USD": -0.372944,
+          "EUR": 6.601953,
+          "otherFiat": 9.956271,
+          "total": 16.18528
+        },
+        {
+          "period": "2022-10",
+          "USD": -0.239743,
+          "EUR": 6.677334,
+          "otherFiat": 10.2219,
+          "total": 16.659491
+        },
+        {
+          "period": "2022-11",
+          "USD": -0.414534,
+          "EUR": 6.893763,
+          "otherFiat": 10.47888,
+          "total": 16.958109
+        },
+        {
+          "period": "2022-12",
+          "USD": -0.395334,
+          "EUR": 6.989699,
+          "otherFiat": 10.66507,
+          "total": 17.259435
+        },
+        {
+          "period": "2023-01",
+          "USD": 0.357746,
+          "EUR": 7.124621,
+          "otherFiat": 10.92893,
+          "total": 18.411297
+        },
+        {
+          "period": "2023-02",
+          "USD": 1.14127,
+          "EUR": 7.252753,
+          "otherFiat": 11.07129,
+          "total": 19.465313
+        },
+        {
+          "period": "2023-03",
+          "USD": 1.803885,
+          "EUR": 7.434384,
+          "otherFiat": 11.20706,
+          "total": 20.445329
+        },
+        {
+          "period": "2023-04",
+          "USD": 1.852015,
+          "EUR": 7.660847,
+          "otherFiat": 11.54389,
+          "total": 21.056752
+        },
+        {
+          "period": "2023-05",
+          "USD": 2.23162,
+          "EUR": 7.872216,
+          "otherFiat": 11.89765,
+          "total": 22.001486
+        },
+        {
+          "period": "2023-06",
+          "USD": 2.360156,
+          "EUR": 8.042988,
+          "otherFiat": 12.37132,
+          "total": 22.774464
+        },
+        {
+          "period": "2023-07",
+          "USD": 2.555378,
+          "EUR": 8.207431,
+          "otherFiat": 12.84947,
+          "total": 23.612279
+        },
+        {
+          "period": "2023-08",
+          "USD": 1.968654,
+          "EUR": 8.360306,
+          "otherFiat": 13.79518,
+          "total": 24.12414
+        },
+        {
+          "period": "2023-09",
+          "USD": 1.858335,
+          "EUR": 8.564889,
+          "otherFiat": 14.56085,
+          "total": 24.984074
+        },
+        {
+          "period": "2023-10",
+          "USD": 1.986413,
+          "EUR": 8.811158,
+          "otherFiat": 15.41022,
+          "total": 26.207791
+        },
+        {
+          "period": "2023-11",
+          "USD": 2.617319,
+          "EUR": 9.062968,
+          "otherFiat": 16.2213,
+          "total": 27.901587
+        },
+        {
+          "period": "2023-12",
+          "USD": 3.322281,
+          "EUR": 9.571485,
+          "otherFiat": 17.29593,
+          "total": 30.189696
+        },
+        {
+          "period": "2024-01",
+          "USD": 5.471551,
+          "EUR": 10.43246,
+          "otherFiat": 17.89603,
+          "total": 33.800041
+        },
+        {
+          "period": "2024-02",
+          "USD": 6.480236,
+          "EUR": 11.04785,
+          "otherFiat": 18.97222,
+          "total": 36.500306
+        },
+        {
+          "period": "2024-03",
+          "USD": 8.202344,
+          "EUR": 11.74534,
+          "otherFiat": 20.87268,
+          "total": 40.820364
+        },
+        {
+          "period": "2024-04",
+          "USD": 9.370862,
+          "EUR": 12.41294,
+          "otherFiat": 23.27289,
+          "total": 45.056692
+        },
+        {
+          "period": "2024-05",
+          "USD": 8.725284,
+          "EUR": 12.53261,
+          "otherFiat": 24.58358,
+          "total": 45.841474
+        },
+        {
+          "period": "2024-06",
+          "USD": 9.269451,
+          "EUR": 12.85861,
+          "otherFiat": 26.32608,
+          "total": 48.454141
+        },
+        {
+          "period": "2024-07",
+          "USD": 10.38881,
+          "EUR": 13.34034,
+          "otherFiat": 28.10955,
+          "total": 51.8387
+        },
+        {
+          "period": "2024-08",
+          "USD": 12.99123,
+          "EUR": 13.92368,
+          "otherFiat": 30.88062,
+          "total": 57.79553
+        },
+        {
+          "period": "2024-09",
+          "USD": 14.6947,
+          "EUR": 14.28086,
+          "otherFiat": 32.32264,
+          "total": 61.2982
+        },
+        {
+          "period": "2024-10",
+          "USD": 16.43845,
+          "EUR": 14.98491,
+          "otherFiat": 34.67985,
+          "total": 66.10321
+        },
+        {
+          "period": "2024-11",
+          "USD": 21.43849,
+          "EUR": 15.13677,
+          "otherFiat": 36.79699,
+          "total": 73.37225
+        },
+        {
+          "period": "2024-12",
+          "USD": 23.03822,
+          "EUR": 15.58112,
+          "otherFiat": 38.98114,
+          "total": 77.60048
+        },
+        {
+          "period": "2025-01",
+          "USD": 24.23066,
+          "EUR": 16.23243,
+          "otherFiat": 42.15444,
+          "total": 82.61753
+        },
+        {
+          "period": "2025-02",
+          "USD": 28.02047,
+          "EUR": 16.50919,
+          "otherFiat": 44.77302,
+          "total": 89.30268
+        },
+        {
+          "period": "2025-03",
+          "USD": 28.27141,
+          "EUR": 16.91172,
+          "otherFiat": 47.03825,
+          "total": 92.22138
+        },
+        {
+          "period": "2025-04",
+          "USD": 29.9713,
+          "EUR": 17.62544,
+          "otherFiat": 47.88989,
+          "total": 95.48663
+        },
+        {
+          "period": "2025-05",
+          "USD": 30.96771,
+          "EUR": 18.58534,
+          "otherFiat": 48.80213,
+          "total": 98.35518
+        },
+        {
+          "period": "2025-06",
+          "USD": 31.70155,
+          "EUR": 20.07833,
+          "otherFiat": 50.01208,
+          "total": 101.79196
+        },
+        {
+          "period": "2025-07",
+          "USD": 28.63057,
+          "EUR": 20.8634,
+          "otherFiat": 50.3853,
+          "total": 99.87927
+        },
+        {
+          "period": "2025-08",
+          "USD": 28.03617,
+          "EUR": 21.92615,
+          "otherFiat": 51.21099,
+          "total": 101.17331
+        },
+        {
+          "period": "2025-09",
+          "USD": 30.06581,
+          "EUR": 22.86205,
+          "otherFiat": 52.36298,
+          "total": 105.29084
+        },
+        {
+          "period": "2025-10",
+          "USD": 32.47258,
+          "EUR": 23.5414,
+          "otherFiat": 54.86068,
+          "total": 110.87466
+        },
+        {
+          "period": "2025-11",
+          "USD": 34.73884,
+          "EUR": 24.59233,
+          "otherFiat": 56.46591,
+          "total": 115.79708
+        },
+        {
+          "period": "2025-12",
+          "USD": 35.85093,
+          "EUR": 25.04141,
+          "otherFiat": 56.83862,
+          "total": 117.73096
+        }
+      ],
+      "source": {
+        "publisher": "Bank for International Settlements",
+        "title": "Annual Economic Report 2026, Chapter III, Graph 8 underlying data",
+        "url": "https://www.bis.org/statistics/ar2026stats.htm",
+        "workbookUrl": "https://www.bis.org/statistics/ar2026stats/ar2026e3_stats.xlsx",
+        "workbookSheet": "Graph 8",
+        "sourceNote": "Aldasoro, Beltran and Grinberg (2026); BIS."
+      },
+      "quality": {
+        "classification": "published_model_estimate",
+        "confidence": "medium",
+        "limitations": [
+          "This measures fiat-to-stablecoin exchange flows, not all wallet-to-wallet cross-border transfers.",
+          "Exchange coverage comprises four stablecoins, 27 fiat currencies and 64 exchanges."
+        ]
+      }
+    },
+    "applicationStockBenchmark": {
+      "metric": "estimated_market_cap_allocation",
+      "period": "2025-11",
+      "unit": "percent_and_usd_billions",
+      "denominator": {
+        "value": 300.5,
+        "unit": "usd_billions",
+        "description": "Total stablecoin market capitalisation used by the source study."
+      },
+      "categories": [
+        {
+          "id": "exchanges",
+          "label": "Exchange trading and liquidity",
+          "reportedSharePercent": 26.4,
+          "impliedStockUsdBillions": 79.332,
+          "confidence": "high"
+        },
+        {
+          "id": "finance",
+          "label": "On-chain finance",
+          "reportedSharePercent": 17.2,
+          "impliedStockUsdBillions": 51.686,
+          "confidence": "high"
+        },
+        {
+          "id": "infrastructure",
+          "label": "Bridges and supporting infrastructure",
+          "reportedSharePercent": 5.1,
+          "impliedStockUsdBillions": 15.3255,
+          "confidence": "medium"
+        },
+        {
+          "id": "transfers",
+          "label": "Transfers between externally owned accounts",
+          "reportedSharePercent": 29.3,
+          "impliedStockUsdBillions": 88.0465,
+          "confidence": "low"
+        },
+        {
+          "id": "idle",
+          "label": "Idle balances",
+          "reportedSharePercent": 21.2,
+          "impliedStockUsdBillions": 63.706,
+          "confidence": "medium"
+        },
+        {
+          "id": "payments",
+          "label": "Payments for goods and services",
+          "reportedSharePercent": 0.7,
+          "impliedStockUsdBillions": 2.1035,
+          "confidence": "low"
+        }
+      ],
+      "reportedShareSumPercent": 99.9,
+      "roundingResidualPercent": 0.1,
+      "source": {
+        "publisher": "Federal Reserve Bank of Kansas City",
+        "title": "What Are Stablecoins Used for Today? Estimating the Distribution of Stablecoins",
+        "publicationDate": "2026-04-10",
+        "url": "https://www.kansascityfed.org/research/payments-system-research-briefings/what-are-stablecoins-used-for-today-estimating-the-distribution-of-stablecoins/"
+      },
+      "quality": {
+        "classification": "published_model_estimate",
+        "confidence": "mixed",
+        "limitations": [
+          "The categories partition a stock at one reference date; they are not transaction-volume shares.",
+          "Transfers and payments rely on stronger behavioral assumptions than observable protocol balances.",
+          "Reported percentages sum to 99.9% because the source rounds each category independently."
+        ]
+      }
+    },
+    "applicationTransactionValue2024": {
+      "metric": "estimated_transaction_value_allocation",
+      "period": "2024",
+      "unit": "percent",
+      "categories": [
+        {
+          "id": "on_chain_trading",
+          "label": "On-chain trading",
+          "sharePercent": 88.0
+        },
+        {
+          "id": "payments",
+          "label": "Payments",
+          "sharePercent": 5.0
+        },
+        {
+          "id": "on_off_ramping",
+          "label": "On-/off-ramping",
+          "sharePercent": 4.0
+        },
+        {
+          "id": "tokenised_asset_settlement",
+          "label": "Tokenised asset settlement",
+          "sharePercent": 3.0
+        }
+      ],
+      "reportedShareSumPercent": 100.0,
+      "source": {
+        "publisher": "Bank for International Settlements",
+        "title": "Annual Economic Report 2026, Chapter III, Graph 1 underlying data",
+        "url": "https://www.bis.org/statistics/ar2026stats.htm",
+        "workbookUrl": "https://www.bis.org/statistics/ar2026stats/ar2026e3_stats.xlsx",
+        "workbookSheet": "Graph 1",
+        "sourceNote": "Boston Consulting Group; individual stablecoin filing reports; BIS."
+      },
+      "quality": {
+        "classification": "published_model_estimate",
+        "confidence": "medium",
+        "limitations": [
+          "The latest official split is published in 2026 but refers to estimated 2024 transaction value.",
+          "Transaction-value shares are flows and are not comparable with the 2025 market-cap allocation stock."
+        ]
+      }
+    },
+    "annualTransactionBenchmark2025": {
+      "metric": "annual_stablecoin_transaction_value",
+      "period": "2025",
+      "unit": "usd_trillions",
+      "broadAdjustedEstimate": 28,
+      "economicallyAdjustedEstimate": 0.39,
+      "economicallyAdjustedSharePercent": 1.392857,
+      "source": {
+        "publisher": "Bank for International Settlements",
+        "title": "Annual Economic Report 2026, Chapter III",
+        "url": "https://www.bis.org/publ/arpdf/ar2026e3.htm",
+        "sourceNote": "Broad estimate from Chainalysis; economically adjusted estimate from Visa data cited by BIS."
+      },
+      "quality": {
+        "classification": "published_model_estimate",
+        "confidence": "low",
+        "limitations": [
+          "The two estimates apply different adjustment methods and should be shown as a measurement range, not competing observations.",
+          "Neither estimate is a complete measure of cross-border payments or end-user purchases."
+        ]
+      }
+    }
+  },
+  "measurementNotes": [
+    {
+      "finding": "Nearly 60% of stablecoin transfer events in the BIS 2025 Ethereum sample were embedded in complex transactions.",
+      "implication": "Raw transfer-event counts should not be presented as user payment counts without transaction-level reconstruction.",
+      "source": {
+        "publisher": "Bank for International Settlements",
+        "title": "Anatomy of stablecoin transactions",
+        "url": "https://www.bis.org/publ/work1359.htm"
+      }
+    }
+  ]
+}

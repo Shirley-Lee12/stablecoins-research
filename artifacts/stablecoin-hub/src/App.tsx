@@ -11,6 +11,11 @@ import NotFound from "@/pages/not-found";
 import HomeOverview from "@/pages/home-overview";
 import Dashboard from "@/pages/dashboard";
 import About from "@/pages/about";
+import AboutHistoryPage from "@/pages/about-history";
+import AboutTypesPage from "@/pages/about-types";
+import AboutApplicationsPage from "@/pages/about-applications";
+import StablecoinMechanismPage from "@/pages/stablecoin-mechanism";
+import AboutRegulatoryEvolutionPage from "@/pages/about-regulatory-evolution";
 import Research from "@/pages/research";
 import AcademicResources from "@/pages/academic-resources";
 import Experts from "@/pages/experts";
@@ -21,20 +26,20 @@ import Quantitative from "@/pages/quantitative";
 import ResetPassword from "@/pages/reset-password";
 import AdminCenter from "@/pages/admin-center";
 import MyContributionsPage from "@/pages/my-contributions";
+import ProfilePage from "@/pages/profile";
+import ChangePasswordPage from "@/pages/change-password";
 import {
-  AboutHistory,
-  AboutTypes,
-  AboutApplications,
-  AboutRegulatoryEvolution,
   QuantDimensionA,
   QuantDimensionB,
   MarketPriceTracking,
   MarketTradingVolume,
-  ProfilePage,
-  ChangePasswordPage,
 } from "@/pages/placeholder";
 
 const queryClient = new QueryClient();
+
+function ExpertsPage() {
+  return <Experts />;
+}
 
 function Router() {
   return (
@@ -46,7 +51,7 @@ function Router() {
         <Route path="/about-stablecoins" component={About} />
         <Route path="/research" component={Research} />
         <Route path="/academic-resources" component={AcademicResources} />
-        <Route path="/experts" component={Experts} />
+        <Route path="/experts" component={ExpertsPage} />
         <Route path="/authors/:name" component={AuthorPage} />
         <Route path="/regulatory" component={Regulatory} />
         <Route path="/market-data" component={MarketData} />
@@ -55,10 +60,11 @@ function Router() {
         <Route path="/admin" component={AdminCenter} />
 
         {/* About Stablecoins sub-pages */}
-        <Route path="/about-stablecoins/history" component={AboutHistory} />
-        <Route path="/about-stablecoins/types" component={AboutTypes} />
-        <Route path="/about-stablecoins/applications" component={AboutApplications} />
-        <Route path="/about-stablecoins/regulatory-evolution" component={AboutRegulatoryEvolution} />
+        <Route path="/about-stablecoins/history" component={AboutHistoryPage} />
+        <Route path="/about-stablecoins/types/:mechanism" component={StablecoinMechanismPage} />
+        <Route path="/about-stablecoins/types" component={AboutTypesPage} />
+        <Route path="/about-stablecoins/applications" component={AboutApplicationsPage} />
+        <Route path="/about-stablecoins/regulatory-evolution" component={AboutRegulatoryEvolutionPage} />
 
         {/* Quantitative sub-pages */}
         <Route path="/quantitative/dimension-a" component={QuantDimensionA} />

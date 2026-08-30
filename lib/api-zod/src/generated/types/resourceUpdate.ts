@@ -19,4 +19,6 @@ export interface ResourceUpdate {
   tags?: string[];
   published_date?: string;
   journal?: string;
+  /** Treat an owner's edit as a resubmission even when the owner is also an administrator. */
+  resubmit?: boolean;
 }

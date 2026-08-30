@@ -5,6 +5,7 @@ type Theme = 'light' | 'dark';
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -30,10 +31,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     try { localStorage.setItem('app-theme', theme); } catch {}
   }, [theme]);
 
+  useEffect(() => {
+    const scale = localStorage.getItem('app-font-scale');
+    document.documentElement.style.fontSize = scale === 'small' ? '15px' : scale === 'large' ? '18px' : '16px';
+  }, []);
+
   const toggleTheme = () => setTheme(t => (t === 'light' ? 'dark' : 'light'));
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

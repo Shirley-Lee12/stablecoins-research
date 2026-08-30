@@ -42,7 +42,11 @@ export const ListResourcesResponseItem = zod.object({
   "tags": zod.array(zod.string()).optional(),
   "published_date": zod.string().nullish(),
   "journal": zod.string().nullish(),
-  "created_at": zod.string()
+  "created_at": zod.string(),
+  "aiReviewStatus": zod.enum(['not_started', 'processing', 'safe', 'needs_verification', 'high_risk', 'failed']).optional(),
+  "aiReviewSummary": zod.string().nullish(),
+  "aiReviewDetails": zod.record(zod.string(), zod.unknown()).nullish(),
+  "aiReviewedAt": zod.coerce.date().nullish()
 })
 export const ListResourcesResponse = zod.array(ListResourcesResponseItem)
 
@@ -87,7 +91,11 @@ export const ListRecentResourcesResponseItem = zod.object({
   "tags": zod.array(zod.string()).optional(),
   "published_date": zod.string().nullish(),
   "journal": zod.string().nullish(),
-  "created_at": zod.string()
+  "created_at": zod.string(),
+  "aiReviewStatus": zod.enum(['not_started', 'processing', 'safe', 'needs_verification', 'high_risk', 'failed']).optional(),
+  "aiReviewSummary": zod.string().nullish(),
+  "aiReviewDetails": zod.record(zod.string(), zod.unknown()).nullish(),
+  "aiReviewedAt": zod.coerce.date().nullish()
 })
 export const ListRecentResourcesResponse = zod.array(ListRecentResourcesResponseItem)
 
@@ -134,7 +142,11 @@ export const GetResourceResponse = zod.object({
   "tags": zod.array(zod.string()).optional(),
   "published_date": zod.string().nullish(),
   "journal": zod.string().nullish(),
-  "created_at": zod.string()
+  "created_at": zod.string(),
+  "aiReviewStatus": zod.enum(['not_started', 'processing', 'safe', 'needs_verification', 'high_risk', 'failed']).optional(),
+  "aiReviewSummary": zod.string().nullish(),
+  "aiReviewDetails": zod.record(zod.string(), zod.unknown()).nullish(),
+  "aiReviewedAt": zod.coerce.date().nullish()
 })
 
 
@@ -157,7 +169,8 @@ export const UpdateResourceBody = zod.object({
   "resource_type": zod.string().optional(),
   "tags": zod.array(zod.string()).optional(),
   "published_date": zod.string().optional(),
-  "journal": zod.string().optional()
+  "journal": zod.string().optional(),
+  "resubmit": zod.boolean().optional().describe('Treat an owner\'s edit as a resubmission even when the owner is also an administrator.')
 })
 
 export const UpdateResourceResponse = zod.object({
@@ -174,7 +187,11 @@ export const UpdateResourceResponse = zod.object({
   "tags": zod.array(zod.string()).optional(),
   "published_date": zod.string().nullish(),
   "journal": zod.string().nullish(),
-  "created_at": zod.string()
+  "created_at": zod.string(),
+  "aiReviewStatus": zod.enum(['not_started', 'processing', 'safe', 'needs_verification', 'high_risk', 'failed']).optional(),
+  "aiReviewSummary": zod.string().nullish(),
+  "aiReviewDetails": zod.record(zod.string(), zod.unknown()).nullish(),
+  "aiReviewedAt": zod.coerce.date().nullish()
 })
 
 
@@ -184,6 +201,114 @@ export const UpdateResourceResponse = zod.object({
 export const DeleteResourceParams = zod.object({
   "id": zod.coerce.number()
 })
+
+
+/**
+ * @summary Queue public-link and AI pre-review for pending resources
+ */
+export const queueResourceAiPreReviewBodyResourceIdsMax = 100;
+
+export const queueResourceAiPreReviewBodyForceDefault = false;
+
+export const QueueResourceAiPreReviewBody = zod.object({
+  "resourceIds": zod.array(zod.number()).min(1).max(queueResourceAiPreReviewBodyResourceIdsMax),
+  "force": zod.boolean().default(queueResourceAiPreReviewBodyForceDefault)
+})
+
+
+/**
+ * Preserves manually entered fields and manual tag links while replacing auto-generated tag links.
+ * @summary Re-run current classification, tagging, and AI pre-review rules for selected pending resources
+ */
+export const applyLatestRulesToPendingResourcesBodyResourceIdsMax = 100;
+
+
+
+export const ApplyLatestRulesToPendingResourcesBody = zod.object({
+  "resourceIds": zod.array(zod.number()).min(1).max(applyLatestRulesToPendingResourcesBodyResourceIdsMax)
+})
+
+
+/**
+ * @summary List durable background tasks created by the current administrator
+ */
+export const listAdminBackgroundTasksQueryLimitDefault = 10;
+export const listAdminBackgroundTasksQueryLimitMax = 50;
+
+
+
+export const ListAdminBackgroundTasksQueryParams = zod.object({
+  "type": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().min(1).max(listAdminBackgroundTasksQueryLimitMax).default(listAdminBackgroundTasksQueryLimitDefault)
+})
+
+export const ListAdminBackgroundTasksResponseItem = zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "status": zod.enum(['queued', 'processing', 'waiting_external', 'completed', 'failed']),
+  "payload": zod.record(zod.string(), zod.unknown()),
+  "result": zod.record(zod.string(), zod.unknown()).nullish(),
+  "error": zod.string().nullish(),
+  "total": zod.number(),
+  "processed": zod.number(),
+  "createdBy": zod.number(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "completedAt": zod.coerce.date().nullish()
+})
+export const ListAdminBackgroundTasksResponse = zod.array(ListAdminBackgroundTasksResponseItem)
+
+
+/**
+ * @summary Retry a failed or externally paused background task
+ */
+export const RetryAdminBackgroundTaskParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Approve or reject selected pending resources
+ */
+export const bulkReviewResourcesBodyResourceIdsMax = 100;
+
+export const bulkReviewResourcesBodyRejectionNoteMax = 2000;
+
+
+
+export const BulkReviewResourcesBody = zod.object({
+  "resourceIds": zod.array(zod.number()).min(1).max(bulkReviewResourcesBodyResourceIdsMax),
+  "action": zod.enum(['approve', 'reject']),
+  "rejectionReasonId": zod.number().optional(),
+  "rejectionNote": zod.string().max(bulkReviewResourcesBodyRejectionNoteMax).optional()
+})
+
+
+/**
+ * @summary List completed administrator review decisions
+ */
+export const listAdminReviewLogQueryOrderDefault = `desc`;
+
+export const ListAdminReviewLogQueryParams = zod.object({
+  "status": zod.enum(['approved', 'rejected']).optional(),
+  "reviewedBy": zod.coerce.number().optional(),
+  "from": zod.date().optional(),
+  "to": zod.date().optional(),
+  "order": zod.enum(['asc', 'desc']).default(listAdminReviewLogQueryOrderDefault)
+})
+
+export const ListAdminReviewLogResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "status": zod.enum(['approved', 'rejected']),
+  "submitterEmail": zod.string().email().nullish(),
+  "createdAt": zod.coerce.date(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "reviewerEmail": zod.string().email().nullish(),
+  "rejectionReasonId": zod.number().nullish(),
+  "rejectionNote": zod.string().nullish()
+})
+export const ListAdminReviewLogResponse = zod.array(ListAdminReviewLogResponseItem)
 
 
 /**
@@ -377,14 +502,16 @@ export const ListAuthorsQueryParams = zod.object({
 })
 
 export const ListAuthorsResponseItem = zod.object({
+  "id": zod.number(),
   "name": zod.string(),
-  "institution": zod.string().optional(),
-  "resource_count": zod.number(),
-  "top_tags": zod.array(zod.string()),
-  "resource_types": zod.array(zod.object({
-  "type": zod.string(),
-  "count": zod.number()
-}))
+  "researchInterests": zod.array(zod.string()).nullish(),
+  "bio": zod.string().nullish(),
+  "institutionId": zod.number().nullish(),
+  "institutionName": zod.string().nullish(),
+  "resourceCount": zod.number(),
+  "publicationYears": zod.array(zod.number()),
+  "chineseResourceCount": zod.number(),
+  "englishResourceCount": zod.number()
 })
 export const ListAuthorsResponse = zod.array(ListAuthorsResponseItem)
 
@@ -420,7 +547,11 @@ export const GetAuthorResponse = zod.object({
   "tags": zod.array(zod.string()).optional(),
   "published_date": zod.string().nullish(),
   "journal": zod.string().nullish(),
-  "created_at": zod.string()
+  "created_at": zod.string(),
+  "aiReviewStatus": zod.enum(['not_started', 'processing', 'safe', 'needs_verification', 'high_risk', 'failed']).optional(),
+  "aiReviewSummary": zod.string().nullish(),
+  "aiReviewDetails": zod.record(zod.string(), zod.unknown()).nullish(),
+  "aiReviewedAt": zod.coerce.date().nullish()
 }))
 })
 
@@ -461,7 +592,11 @@ export const UpdateAuthorProfileResponse = zod.object({
   "tags": zod.array(zod.string()).optional(),
   "published_date": zod.string().nullish(),
   "journal": zod.string().nullish(),
-  "created_at": zod.string()
+  "created_at": zod.string(),
+  "aiReviewStatus": zod.enum(['not_started', 'processing', 'safe', 'needs_verification', 'high_risk', 'failed']).optional(),
+  "aiReviewSummary": zod.string().nullish(),
+  "aiReviewDetails": zod.record(zod.string(), zod.unknown()).nullish(),
+  "aiReviewedAt": zod.coerce.date().nullish()
 }))
 })
 
@@ -483,6 +618,169 @@ export const GetStatsResponse = zod.object({
   "name_zh": zod.string().nullish(),
   "count": zod.number()
 })).optional()
+})
+
+
+/**
+ * @summary List literature subscriptions
+ */
+export const listResourceSubscriptionsResponseOneFrequencyDefault = `weekly`;
+export const listResourceSubscriptionsResponseOneActiveDefault = true;
+
+export const ListResourceSubscriptionsResponseItem = zod.object({
+  "name": zod.string(),
+  "query": zod.string(),
+  "frequency": zod.enum(['daily', 'weekly']).default(listResourceSubscriptionsResponseOneFrequencyDefault),
+  "active": zod.boolean().default(listResourceSubscriptionsResponseOneActiveDefault)
+}).and(zod.object({
+  "id": zod.number(),
+  "sources": zod.array(zod.string()),
+  "lastCheckedAt": zod.coerce.date().nullish(),
+  "nextRunAt": zod.coerce.date(),
+  "lastError": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}))
+export const ListResourceSubscriptionsResponse = zod.array(ListResourceSubscriptionsResponseItem)
+
+
+/**
+ * @summary Create a literature subscription
+ */
+export const createResourceSubscriptionBodyFrequencyDefault = `weekly`;
+export const createResourceSubscriptionBodyActiveDefault = true;
+
+export const CreateResourceSubscriptionBody = zod.object({
+  "name": zod.string(),
+  "query": zod.string(),
+  "frequency": zod.enum(['daily', 'weekly']).default(createResourceSubscriptionBodyFrequencyDefault),
+  "active": zod.boolean().default(createResourceSubscriptionBodyActiveDefault)
+})
+
+
+/**
+ * @summary Update a literature subscription
+ */
+export const UpdateResourceSubscriptionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const updateResourceSubscriptionBodyFrequencyDefault = `weekly`;
+export const updateResourceSubscriptionBodyActiveDefault = true;
+
+export const UpdateResourceSubscriptionBody = zod.object({
+  "name": zod.string(),
+  "query": zod.string(),
+  "frequency": zod.enum(['daily', 'weekly']).default(updateResourceSubscriptionBodyFrequencyDefault),
+  "active": zod.boolean().default(updateResourceSubscriptionBodyActiveDefault)
+})
+
+
+/**
+ * @summary Delete a literature subscription and its candidates
+ */
+export const DeleteResourceSubscriptionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Run one subscription immediately
+ */
+export const RunResourceSubscriptionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary List private literature candidates
+ */
+export const listSubscriptionCandidatesQueryStatusDefault = `new`;
+
+export const ListSubscriptionCandidatesQueryParams = zod.object({
+  "status": zod.coerce.string().default(listSubscriptionCandidatesQueryStatusDefault)
+})
+
+export const ListSubscriptionCandidatesResponseItem = zod.object({
+  "id": zod.number(),
+  "subscriptionId": zod.number(),
+  "externalKey": zod.string(),
+  "source": zod.string(),
+  "title": zod.string(),
+  "authors": zod.array(zod.string()),
+  "year": zod.number().nullish(),
+  "abstract": zod.string().nullish(),
+  "doi": zod.string().nullish(),
+  "url": zod.string().nullish(),
+  "status": zod.enum(['new', 'imported', 'dismissed']),
+  "discoveredAt": zod.coerce.date()
+})
+export const ListSubscriptionCandidatesResponse = zod.array(ListSubscriptionCandidatesResponseItem)
+
+
+/**
+ * @summary Send selected candidates to the AI upload queue
+ */
+export const importSubscriptionCandidatesBodyCandidateIdsMax = 100;
+
+
+
+export const ImportSubscriptionCandidatesBody = zod.object({
+  "candidateIds": zod.array(zod.number()).max(importSubscriptionCandidatesBodyCandidateIdsMax)
+})
+
+
+/**
+ * @summary Retry missing AI and scholarly metadata for upload jobs
+ */
+export const reenrichUploadJobsBodyJobIdsMax = 100;
+
+
+
+export const ReenrichUploadJobsBody = zod.object({
+  "jobIds": zod.array(zod.number()).max(reenrichUploadJobsBodyJobIdsMax).optional()
+})
+
+
+/**
+ * @summary Retry one failed upload job from its persisted source
+ */
+export const RetryUploadJobParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Retry selected failed upload jobs
+ */
+export const retryFailedUploadJobsBodyJobIdsMax = 100;
+
+
+
+export const RetryFailedUploadJobsBody = zod.object({
+  "jobIds": zod.array(zod.number()).min(1).max(retryFailedUploadJobsBodyJobIdsMax)
+})
+
+
+/**
+ * @summary Delete review jobs confirmed by a live check to duplicate library resources
+ */
+export const deleteDuplicateUploadJobsBodyJobIdsMax = 100;
+
+
+
+export const DeleteDuplicateUploadJobsBody = zod.object({
+  "jobIds": zod.array(zod.number()).min(1).max(deleteDuplicateUploadJobsBodyJobIdsMax)
+})
+
+
+/**
+ * @summary Queue a Word or Markdown bibliography for background decomposition
+ */
+export const QueueReferenceListUploadBody = zod.object({
+  "file": zod.instanceof(File),
+  "sourceType": zod.string().optional(),
+  "folderImportId": zod.string().uuid().optional()
 })
 
 

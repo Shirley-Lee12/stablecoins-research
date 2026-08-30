@@ -5,15 +5,15 @@ import {
   ResourceDetailModal, EditModal, JobQueuePanel,
   SuggestEditModal, MySuggestionBadge, SelfServiceStatusDetail, DuplicateCandidatesPanel,
   SELF_SERVICE_STATUSES, SELF_SERVICE_LABELS,
-  type Resource, type RejectionReason,
+  type Resource, type RejectionReason, type UploadJobSummary,
 } from "@/pages/academic-resources";
-import { Loader2, Inbox, ChevronRight, Shield, Tag, Pencil } from "lucide-react";
+import { Loader2, Inbox, ChevronRight, Shield, Tag, Pencil, Trash2 } from "lucide-react";
 
 function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
 }
 
-type FilterKey = "all" | "needs_action" | "pending" | "rejected" | "approved";
+type FilterKey = "all" | "processing" | "needs_action" | "pending" | "rejected" | "approved";
 
 const STATUS_BADGE: Record<string, { zh: string; en: string; cls: string }> = {
   pending:  { zh: "待审核", en: "Pending",  cls: "bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700" },
@@ -54,6 +54,7 @@ export default function MyContributionsPage() {
   const [rejectionReasons, setRejectionReasons] = useState<RejectionReason[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [jobSummary, setJobSummary] = useState<UploadJobSummary>({ total: 0, needsAction: 0, processing: 0 });
   const [viewing, setViewing] = useState<Resource | null>(null);
   const [editing, setEditing] = useState<Resource | null>(null);
   // docs/planning/18 §18.4 — owners of an already-approved resource propose tag/keyword edits
@@ -67,13 +68,14 @@ export default function MyContributionsPage() {
   // isAdmin=false regardless of the viewer's role, since resubmission behavior is keyed off the
   // resource's status, not who's editing it).
   const [adminEditing, setAdminEditing] = useState<Resource | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const fetchMine = useCallback(() => {
     if (!token || !user) return;
     setLoading(true);
     fetch(`${apiBase()}/api/resources`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
-      .then((data: Resource[]) => setResources(Array.isArray(data) ? data.filter((r) => r.createdBy === user.id) : []))
+      .then((data: Resource[]) => setResources(Array.isArray(data) ? data.filter((r) => r.createdBy === user.id && r.status !== "withdrawn") : []))
       .catch(() => setResources([]))
       .finally(() => setLoading(false));
   }, [token, user]);
@@ -86,18 +88,48 @@ export default function MyContributionsPage() {
       .catch(() => {});
   }, []);
 
+  async function deleteResource(resource: Resource) {
+    const confirmed = window.confirm(zh
+      ? `确定删除这条资源吗？\n${resource.title}`
+      : `Delete this resource?\n${resource.title}`);
+    if (!confirmed) return;
+    setDeletingId(resource.id);
+    try {
+      const response = await fetch(`${apiBase()}/api/resources/${resource.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        window.alert(data.error ?? (zh ? "删除失败" : "Delete failed"));
+        return;
+      }
+      if (viewing?.id === resource.id) setViewing(null);
+      fetchMine();
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
     for (const r of resources) c[r.status] = (c[r.status] ?? 0) + 1;
     return c;
   }, [resources]);
-  const needsActionCount = SELF_SERVICE_STATUSES.reduce((sum, s) => sum + (counts[s] ?? 0), 0);
+  const needsActionCount = SELF_SERVICE_STATUSES.reduce((sum, s) => sum + (counts[s] ?? 0), 0) + jobSummary.needsAction;
+  const totalCount = resources.length + jobSummary.total;
 
   const filtered = useMemo(() => {
     if (filter === "all") return resources;
+    if (filter === "processing") return [];
     if (filter === "needs_action") return resources.filter((r) => SELF_SERVICE_STATUSES.includes(r.status));
     return resources.filter((r) => r.status === filter);
   }, [resources, filter]);
+  const hasVisibleJobs = filter === "all"
+    ? jobSummary.total > 0
+    : filter === "processing"
+      ? jobSummary.processing > 0
+      : filter === "needs_action" && jobSummary.needsAction > 0;
 
   if (!user || !token) {
     return (
@@ -120,15 +152,31 @@ export default function MyContributionsPage() {
 
       {/* Summary stat bar (docs/planning/15 §2.1) */}
       <div className="flex flex-wrap gap-2">
-        <StatChip label={zh ? "共" : "Total"} count={resources.length} active={filter === "all"} onClick={() => setFilter("all")} />
+        <StatChip label={zh ? "共" : "Total"} count={totalCount} active={filter === "all"} onClick={() => setFilter("all")} />
+        <StatChip label={zh ? "后台处理" : "Processing"} count={jobSummary.processing} active={filter === "processing"} onClick={() => setFilter("processing")} />
         <StatChip label={zh ? "需处理" : "Needs action"} count={needsActionCount} active={filter === "needs_action"} color="amber" onClick={() => setFilter("needs_action")} />
         <StatChip label={zh ? "待审核" : "Pending"} count={counts.pending ?? 0} active={filter === "pending"} onClick={() => setFilter("pending")} />
         <StatChip label={zh ? "已拒绝" : "Rejected"} count={counts.rejected ?? 0} active={filter === "rejected"} onClick={() => setFilter("rejected")} />
         <StatChip label={zh ? "已通过" : "Approved"} count={counts.approved ?? 0} active={filter === "approved"} onClick={() => setFilter("approved")} />
       </div>
+      {jobSummary.processing > 0 && (
+        <div className="flex items-center gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+          <span>{zh ? "资料正在后台处理；离开此页面不会中断任务。" : "Resources are processing in the background; leaving this page will not interrupt them."}</span>
+        </div>
+      )}
 
       {/* Still-processing jobs (upload_jobs — not yet confirmed into a resources row) */}
-      <JobQueuePanel token={token} language={language} onSaved={fetchMine} />
+      {(filter === "all" || filter === "processing" || filter === "needs_action") && (
+        <JobQueuePanel
+          token={token}
+          language={language}
+          statusFilter={filter === "needs_action" ? "needs_action" : filter === "processing" ? "processing" : "all"}
+          contributionsView
+          onSummaryChange={setJobSummary}
+          onSaved={fetchMine}
+        />
+      )}
 
       {/* Confirmed resources, all statuses */}
       {loading ? (
@@ -136,7 +184,7 @@ export default function MyContributionsPage() {
           <Loader2 className="h-5 w-5 animate-spin" />
           <span className="text-sm">{zh ? "加载中…" : "Loading…"}</span>
         </div>
-      ) : filtered.length === 0 ? (
+      ) : filtered.length === 0 && !hasVisibleJobs ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
           <Inbox className="h-10 w-10 text-muted-foreground/30" />
           <p className="text-sm text-muted-foreground">{zh ? "这里还没有内容" : "Nothing here yet"}</p>
@@ -146,27 +194,38 @@ export default function MyContributionsPage() {
           {filtered.map((r) => {
             const badge = STATUS_BADGE[r.status];
             const rejectionReason = r.rejectionReasonId != null ? rejectionReasons.find((x) => x.id === r.rejectionReasonId) : undefined;
+            const canDelete = r.status !== "approved" || user.role === "admin";
             return (
-              <button key={r.id} onClick={() => setViewing(r)}
+              <div key={r.id}
                 className="w-full flex items-center justify-between gap-3 p-3.5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-sm transition-all text-left">
-                <div className="min-w-0 space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {badge && (
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${badge.cls}`}>
-                        {zh ? badge.zh : badge.en}
-                      </span>
+                <button type="button" onClick={() => setViewing(r)} className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left">
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {badge && (
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${badge.cls}`}>
+                          {zh ? badge.zh : badge.en}
+                        </span>
+                      )}
+                      <span className="text-sm font-medium text-foreground line-clamp-1">{r.title}</span>
+                    </div>
+                    {r.status === "rejected" && (
+                      <p className="text-xs text-red-600/80 dark:text-red-400/80">
+                        {rejectionReason ? (zh ? rejectionReason.nameZh : rejectionReason.nameEn) : (zh ? "未说明理由" : "No reason specified")}
+                        {r.rejectionNote && ` — ${r.rejectionNote}`}
+                      </p>
                     )}
-                    <span className="text-sm font-medium text-foreground line-clamp-1">{r.title}</span>
                   </div>
-                  {r.status === "rejected" && (
-                    <p className="text-xs text-red-600/80 dark:text-red-400/80">
-                      {rejectionReason ? (zh ? rejectionReason.nameZh : rejectionReason.nameEn) : (zh ? "未说明理由" : "No reason specified")}
-                      {r.rejectionNote && ` — ${r.rejectionNote}`}
-                    </p>
-                  )}
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              </button>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                </button>
+                {canDelete && (
+                  <button type="button" onClick={() => void deleteResource(r)} disabled={deletingId === r.id}
+                    title={zh ? "删除资源" : "Delete resource"}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border px-2 py-1.5 text-xs text-muted-foreground hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-950/30">
+                    {deletingId === r.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                    {zh ? "删除" : "Delete"}
+                  </button>
+                )}
+              </div>
             );
           })}
         </div>

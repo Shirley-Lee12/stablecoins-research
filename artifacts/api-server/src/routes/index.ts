@@ -8,6 +8,10 @@ import adminRouter from "./admin";
 import uploadRouter from "./upload";
 import tagsRouter from "./tags";
 import resourceEditSuggestionsRouter from "./resourceEditSuggestions";
+import regulatoryRouter from "./regulatory";
+import resourceSubscriptionsRouter from "./resourceSubscriptions";
+import stablecoinMarketRouter from "./stablecoinMarket";
+import accountRouter from "./account";
 
 const router: IRouter = Router();
 
@@ -20,5 +24,9 @@ router.use(adminRouter);
 router.use(uploadRouter);
 router.use(tagsRouter);
 router.use(resourceEditSuggestionsRouter);
+router.use(regulatoryRouter);
+router.use(resourceSubscriptionsRouter);
+router.use(stablecoinMarketRouter);
+router.use(accountRouter);
 
 export default router;

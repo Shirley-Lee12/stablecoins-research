@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/lib/language-context";
-import { useAuth } from "@/lib/auth-context";
+import { authenticatedFetch, useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,11 +14,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
-  User, BookOpen, ExternalLink, Link as LinkIcon,
-  Calendar, ArrowLeft, Building2, Pencil,
+  User, BookOpen, Link as LinkIcon,
+  Calendar, ArrowLeft, Building2, Pencil, UserPlus, UserCheck,
 } from "lucide-react";
 import { sourceTypeLabel } from "@/lib/source-types";
-import { TagSummaryList, type TagSummary } from "@/pages/academic-resources";
+import { normalizeAbstractForDisplay, TagSummaryList, type TagSummary } from "@/pages/academic-resources";
 
 interface ApiResource {
   id: number;
@@ -28,6 +28,7 @@ interface ApiResource {
   url?: string | null;
   doi?: string | null;
   abstract?: string | null;
+  publishedDate?: string | null;
   createdAt?: string;
   facetedTags?: TagSummary[];
 }
@@ -73,6 +74,8 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [followingAuthor, setFollowingAuthor] = useState(false);
+  const [followingInstitution, setFollowingInstitution] = useState(false);
 
   const loadAuthor = () => {
     setIsLoading(true);
@@ -102,6 +105,36 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
       cancelled = true;
     };
   }, [authorName]);
+
+  useEffect(() => {
+    if (!token || !author) { setFollowingAuthor(false); setFollowingInstitution(false); return; }
+    authenticatedFetch(`${apiBase()}/api/account/follows`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((response) => response.ok ? response.json() : [])
+      .then((rows) => {
+        setFollowingAuthor(rows.some((row: any) => row.targetType === "author" && row.targetKey === String(author.id)));
+        setFollowingInstitution(!!author.institutionId && rows.some((row: any) => row.targetType === "institution" && row.targetKey === String(author.institutionId)));
+      }).catch(() => undefined);
+  }, [author, token]);
+
+  async function toggleFollow(targetType: "author" | "institution") {
+    if (!token || !author) {
+      toast({ title: t("Sign in required", "请先登录"), description: t("Sign in to follow experts and institutions.", "登录后可关注专家学者与机构。") });
+      return;
+    }
+    const isInstitution = targetType === "institution";
+    const targetKey = isInstitution ? String(author.institutionId) : String(author.id);
+    const targetLabel = isInstitution ? author.institutionName : author.name;
+    if (!targetKey || targetKey === "null" || !targetLabel) return;
+    const following = isInstitution ? followingInstitution : followingAuthor;
+    const response = await authenticatedFetch(`${apiBase()}/api/account/follows${following ? `/${targetType}/${encodeURIComponent(targetKey)}` : ""}`, {
+      method: following ? "DELETE" : "POST",
+      headers: { Authorization: `Bearer ${token}`, ...(following ? {} : { "Content-Type": "application/json" }) },
+      ...(following ? {} : { body: JSON.stringify({ targetType, targetKey, targetLabel }) }),
+    });
+    if (!response.ok) return;
+    if (isInstitution) setFollowingInstitution(!following); else setFollowingAuthor(!following);
+    toast({ title: following ? t("Unfollowed", "已取消关注") : t("Following", "已关注"), description: targetLabel });
+  }
 
   const editForm = useForm<z.infer<typeof editFormSchema>>({
     resolver: zodResolver(editFormSchema),
@@ -195,7 +228,7 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
         </div>
       ) : (
         <>
-          <Card className="border-primary/10 bg-gradient-to-br from-primary/3 to-transparent">
+          <Card className="rounded-none border-x-0 border-t-0 border-b border-primary/15 bg-transparent shadow-none">
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row items-start gap-6">
                 <div className="shrink-0 w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
@@ -212,6 +245,14 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                       </h1>
                     </div>
 
+                    <div className="flex flex-wrap justify-end gap-2">
+                    <Button variant={followingAuthor ? "default" : "outline"} size="sm" onClick={() => void toggleFollow("author")}>
+                      {followingAuthor ? <UserCheck className="mr-2 h-3.5 w-3.5" /> : <UserPlus className="mr-2 h-3.5 w-3.5" />}
+                      {followingAuthor ? t("Following", "已关注") : t("Follow expert", "关注专家")}
+                    </Button>
+                    {author.institutionId && author.institutionName && <Button variant={followingInstitution ? "default" : "outline"} size="sm" onClick={() => void toggleFollow("institution")}>
+                      <Building2 className="mr-2 h-3.5 w-3.5" />{followingInstitution ? t("Institution followed", "已关注机构") : t("Follow institution", "关注机构")}
+                    </Button>}
                     {user?.role === "admin" && (
                       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                         <DialogTrigger asChild>
@@ -278,6 +319,7 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                         </DialogContent>
                       </Dialog>
                     )}
+                    </div>
                   </div>
                   {author.institutionName && (
                     <p className="text-muted-foreground mt-1 flex items-center gap-1.5">
@@ -321,11 +363,11 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
               </span>
             </h2>
 
-            <div className="space-y-4">
+            <div className="divide-y divide-border border-y border-border">
               {(author.resources ?? []).map((resource) => (
                 <Card
                   key={resource.id}
-                  className="shadow-sm hover:border-primary/20 hover:shadow-md transition-all"
+                  className="rounded-none border-0 bg-transparent shadow-none transition-colors hover:bg-primary/[0.025]"
                   data-testid={`card-resource-${resource.id}`}
                 >
                   <CardHeader className="pb-2">
@@ -335,28 +377,20 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                           <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${TYPE_COLORS[resource.sourceType ?? ""] ?? "bg-muted text-muted-foreground"}`}>
                             {resource.sourceType ? sourceTypeLabel(resource.sourceType, language === "zh") : "Resource"}
                           </span>
-                          {resource.createdAt && (
+                          {resource.publishedDate && (
                             <span className="text-xs text-muted-foreground flex items-center">
                               <Calendar className="h-3 w-3 mr-1" />
-                              {resource.createdAt.slice(0, 10)}
+                              {resource.publishedDate}
                             </span>
                           )}
                         </div>
                         <CardTitle className="text-lg leading-tight group">
-                          {resource.url ? (
-                            <a
-                              href={resource.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="hover:text-primary transition-colors flex items-start gap-2"
-                              data-testid={`link-resource-${resource.id}`}
-                            >
-                              {resource.title}
-                              <ExternalLink className="h-4 w-4 mt-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </a>
-                          ) : (
-                            resource.title
-                          )}
+                          <button type="button"
+                            onClick={() => setLocation(`/academic-resources?id=${resource.id}`)}
+                            className="w-full text-left transition-colors hover:text-primary hover:underline"
+                            data-testid={`link-resource-${resource.id}`}>
+                            {resource.title}
+                          </button>
                         </CardTitle>
                         {Array.isArray(resource.authors) && resource.authors.length > 0 && (
                           <CardDescription className="mt-1">
@@ -369,7 +403,7 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                   <CardContent>
                     {resource.abstract && (
                       <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-3">
-                        {resource.abstract}
+                        {normalizeAbstractForDisplay(resource.abstract)}
                       </p>
                     )}
                     {resource.facetedTags && resource.facetedTags.length > 0 && (

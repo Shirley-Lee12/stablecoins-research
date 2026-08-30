@@ -6,3 +6,4 @@ export * from "./semanticscholar";
 export * from "./doi";
 export * from "./unpaywall";
 export * from "./resolveLink";
+export * from "./authorNames";

@@ -5,6 +5,8 @@
  * Stablecoin Research Hub API
  * OpenAPI spec version: 0.1.0
  */
+import type { ResourceAiReviewDetails } from './resourceAiReviewDetails';
+import type { ResourceAiReviewStatus } from './resourceAiReviewStatus';
 import type { ResourceResourceType } from './resourceResourceType';
 
 export interface Resource {
@@ -29,4 +31,11 @@ export interface Resource {
   /** @nullable */
   journal?: string | null;
   created_at: string;
+  aiReviewStatus?: ResourceAiReviewStatus;
+  /** @nullable */
+  aiReviewSummary?: string | null;
+  /** @nullable */
+  aiReviewDetails?: ResourceAiReviewDetails;
+  /** @nullable */
+  aiReviewedAt?: Date | null;
 }

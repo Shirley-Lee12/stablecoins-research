@@ -3,15 +3,14 @@ import { usersTable } from "./users";
 
 // "citation" = the 4th entry point (docs/planning/06/14): one citation-export file (RefWorks/
 // EndNote/NoteExpress) fans out into one job per parsed record, sharing a batchId like PDF/url-batch.
-// "title" = folder-import's unstructured-reference-list sub-flow (docs/planning/14 §3.3): an entry
-// the LLM decomposed but that has no URL/DOI of its own, so it needs resolveLink()'s title-search
-// path rather than fetching a page — everything-else about it (tag/verify/confirm) is identical to
-// a PDF-derived draft, hence riding the same "requireUrlOrDoi=false" branch at confirm time.
+// "title" = either a no-URL reference that needs title search, or a short-lived Word/Markdown
+// parent task marked by input.taskKind="reference_list". The worker atomically replaces the latter
+// with one url/title child job per parsed reference, avoiding a database enum migration.
 export const uploadJobTypeEnum = pgEnum("upload_job_type", ["pdf", "url", "citation", "title"]);
 export const uploadJobStatusEnum = pgEnum("upload_job_status", ["queued", "processing", "ready_for_review", "failed"]);
 
 /**
- * Tracks batch/PDF upload pipeline progress so it survives a closed tab (resumable, pollable) —
+ * Tracks PDF/Word/citation/batch upload progress so it survives a closed tab (resumable, pollable) —
  * NOT a place AI-parsed resource content becomes visible/queryable as a real resource. Only once
  * the user reviews a 'ready_for_review' job's `result` and explicitly confirms does a real row get
  * written to `resources` (see CLAUDE.md's parse -> confirm -> persist rule). Single DOI/URL uploads
@@ -31,13 +30,19 @@ export const uploadJobsTable = pgTable("upload_jobs", {
   folderImportId: uuid("folder_import_id"),
   type: uploadJobTypeEnum("type").notNull(),
   status: uploadJobStatusEnum("status").notNull().default("queued"),
-  // Original input, e.g. { fileName, sourceTypeHint } or { url, sourceTypeHint }. PDF bytes are
-  // never persisted here or anywhere (memory-only, same rule as the existing /import/pdf route).
+  // Original input, e.g. URL, parsed citation, or bounded extracted text. PDF/Word bytes are never
+  // persisted here; reference-list parents keep only extracted text until they fan out.
   input: jsonb("input").notNull(),
   // Populated once the pipeline finishes: extracted six-elements + resolveLink result + computed
   // tags + verify report. Null while queued/processing.
   result: jsonb("result"),
   error: text("error"),
+  // Retry bookkeeping is persisted so transient AI/scholar-API failures can be resumed after a
+  // server restart. The original PDF/archive is deliberately not retained; `input` contains only
+  // the bounded extracted text or parsed citation payload needed to continue.
+  attempts: integer("attempts").notNull().default(0),
+  nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
   createdBy: integer("created_by").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

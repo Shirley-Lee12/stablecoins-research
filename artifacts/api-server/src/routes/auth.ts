@@ -6,11 +6,26 @@ import { eq, and, gt } from "drizzle-orm";
 import crypto from "node:crypto";
 import { sendVerificationCodeEmail, sendPasswordResetEmail } from "../lib/mailer";
 import { env } from "../config";
+import { createRateLimiter, ipAndEmailKey } from "../lib/rateLimit";
 
 const router = Router();
 
+const authIpLimiter = createRateLimiter({ windowMs: 15 * 60_000, max: 60 });
+const loginLimiter = createRateLimiter({ windowMs: 15 * 60_000, max: 10, key: ipAndEmailKey });
+const registrationLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 5, key: ipAndEmailKey });
+const verificationLimiter = createRateLimiter({ windowMs: 10 * 60_000, max: 8, key: ipAndEmailKey });
+const resendLimiter = createRateLimiter({ windowMs: 15 * 60_000, max: 3, key: ipAndEmailKey });
+const passwordRequestLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 5, key: ipAndEmailKey });
+const passwordResetLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 5 });
+
+router.use("/auth", (req, res, next) => req.method === "POST" ? authIpLimiter(req, res, next) : next());
+
 function generateSixDigitCode(): string {
   return crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
+}
+
+function hashSingleUseSecret(value: string): string {
+  return crypto.createHmac("sha256", env.JWT_SECRET).update(value).digest("hex");
 }
 
 function getSecret() {
@@ -34,7 +49,7 @@ function isBootstrapAdminEmail(email: string): boolean {
 async function signToken(payload: { userId: number; email: string; name: string; role: string }) {
   return new SignJWT(payload as Record<string, unknown>)
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("30d")
+    .setExpirationTime(env.JWT_EXPIRES_IN)
     .setIssuedAt()
     .sign(getSecret());
 }
@@ -53,10 +68,16 @@ export async function requireAuth(req: any, res: any, next: any) {
     }
     const token = auth.slice(7);
     const payload = await verifyToken(token);
-    req.user = payload;
+    const [currentUser] = await db
+      .select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role })
+      .from(usersTable)
+      .where(eq(usersTable.id, payload.userId))
+      .limit(1);
+    if (!currentUser) { res.status(401).json({ error: "Unauthorized" }); return; }
+    req.user = { userId: currentUser.id, email: currentUser.email, name: currentUser.name, role: currentUser.role };
     next();
   } catch {
-    res.status(401).json({ error: "Invalid or expired token" });
+    res.status(401).json({ error: "Session expired. Please sign in again.", code: "AUTH_SESSION_EXPIRED" });
   }
 }
 
@@ -66,21 +87,37 @@ export async function optionalAuth(req: any, _res: any, next: any) {
     const auth = req.headers["authorization"];
     if (auth?.startsWith("Bearer ")) {
       const payload = await verifyToken(auth.slice(7));
-      req.user = payload;
+      const [currentUser] = await db
+        .select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role })
+        .from(usersTable)
+        .where(eq(usersTable.id, payload.userId))
+        .limit(1);
+      if (currentUser) req.user = { userId: currentUser.id, email: currentUser.email, name: currentUser.name, role: currentUser.role };
     }
   } catch { /* ignore */ }
   next();
 }
 
-export function requireAdmin(req: any, res: any, next: any) {
-  if (req.user?.role !== "admin") {
-    res.status(403).json({ error: "Admin access required" });
-    return;
+export async function requireAdmin(req: any, res: any, next: any) {
+  try {
+    const [user] = await db
+      .select({ role: usersTable.role })
+      .from(usersTable)
+      .where(eq(usersTable.id, req.user?.userId))
+      .limit(1);
+    if (!user || user.role !== "admin") {
+      res.status(403).json({ error: "Admin access required" });
+      return;
+    }
+    req.user.role = user.role;
+    next();
+  } catch (err) {
+    req.log?.error(err);
+    res.status(500).json({ error: "Failed to verify admin access" });
   }
-  next();
 }
 
-router.post("/auth/register", async (req, res): Promise<void> => {
+router.post("/auth/register", registrationLimiter, async (req, res): Promise<void> => {
   try {
     const { email, name, password } = req.body as { email?: string; name?: string; password?: string };
     if (!email || !name || !password) {
@@ -109,7 +146,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
 
     const code = generateSixDigitCode();
     const expiresAt = new Date(Date.now() + 1000 * 60 * 10);
-    await db.insert(emailVerificationCodesTable).values({ userId: user.id, code, expiresAt });
+    await db.insert(emailVerificationCodesTable).values({ userId: user.id, code: hashSingleUseSecret(code), expiresAt });
 
     try {
       await sendVerificationCodeEmail(user.email, code);
@@ -126,7 +163,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
   }
 });
 
-router.post("/auth/verify-email", async (req, res): Promise<void> => {
+router.post("/auth/verify-email", verificationLimiter, async (req, res): Promise<void> => {
   try {
     const { email, code } = req.body as { email?: string; code?: string };
     if (!email || !code) {
@@ -149,7 +186,7 @@ router.post("/auth/verify-email", async (req, res): Promise<void> => {
       .from(emailVerificationCodesTable)
       .where(and(
         eq(emailVerificationCodesTable.userId, user.id),
-        eq(emailVerificationCodesTable.code, code),
+        eq(emailVerificationCodesTable.code, hashSingleUseSecret(code)),
         eq(emailVerificationCodesTable.used, false),
         gt(emailVerificationCodesTable.expiresAt, new Date()),
       ));
@@ -159,8 +196,17 @@ router.post("/auth/verify-email", async (req, res): Promise<void> => {
       return;
     }
 
-    await db.update(usersTable).set({ emailVerified: true, updatedAt: new Date() }).where(eq(usersTable.id, user.id));
-    await db.update(emailVerificationCodesTable).set({ used: true }).where(eq(emailVerificationCodesTable.id, codeRow.id));
+    const verified = await db.transaction(async (tx) => {
+      const [claimedCode] = await tx
+        .update(emailVerificationCodesTable)
+        .set({ used: true })
+        .where(and(eq(emailVerificationCodesTable.id, codeRow.id), eq(emailVerificationCodesTable.used, false)))
+        .returning({ id: emailVerificationCodesTable.id });
+      if (!claimedCode) return false;
+      await tx.update(usersTable).set({ emailVerified: true, updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+      return true;
+    });
+    if (!verified) { res.status(400).json({ error: "Invalid or expired verification code" }); return; }
 
     const token = await signToken({ userId: user.id, email: user.email, name: user.name, role: user.role });
     res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
@@ -170,7 +216,7 @@ router.post("/auth/verify-email", async (req, res): Promise<void> => {
   }
 });
 
-router.post("/auth/resend-verification", async (req, res): Promise<void> => {
+router.post("/auth/resend-verification", resendLimiter, async (req, res): Promise<void> => {
   try {
     const { email } = req.body as { email?: string };
     if (!email) {
@@ -186,7 +232,10 @@ router.post("/auth/resend-verification", async (req, res): Promise<void> => {
 
     const code = generateSixDigitCode();
     const expiresAt = new Date(Date.now() + 1000 * 60 * 10);
-    await db.insert(emailVerificationCodesTable).values({ userId: user.id, code, expiresAt });
+    await db.transaction(async (tx) => {
+      await tx.update(emailVerificationCodesTable).set({ used: true }).where(and(eq(emailVerificationCodesTable.userId, user.id), eq(emailVerificationCodesTable.used, false)));
+      await tx.insert(emailVerificationCodesTable).values({ userId: user.id, code: hashSingleUseSecret(code), expiresAt });
+    });
     await sendVerificationCodeEmail(user.email, code);
 
     res.json({ message: "If this account needs verification, a new code has been sent." });
@@ -196,7 +245,7 @@ router.post("/auth/resend-verification", async (req, res): Promise<void> => {
   }
 });
 
-router.post("/auth/login", async (req, res): Promise<void> => {
+router.post("/auth/login", loginLimiter, async (req, res): Promise<void> => {
   try {
     const { email, password } = req.body as { email?: string; password?: string };
     if (!email || !password) {
@@ -246,7 +295,7 @@ router.get("/auth/me", requireAuth, async (req: any, res): Promise<void> => {
   }
 });
 
-router.post("/auth/forgot-password", async (req, res): Promise<void> => {
+router.post("/auth/forgot-password", passwordRequestLimiter, async (req, res): Promise<void> => {
   try {
     const { email } = req.body as { email?: string };
     if (!email) {
@@ -262,7 +311,7 @@ router.post("/auth/forgot-password", async (req, res): Promise<void> => {
 
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
-    await db.insert(passwordResetTokensTable).values({ userId: user.id, token, expiresAt });
+    await db.insert(passwordResetTokensTable).values({ userId: user.id, token: hashSingleUseSecret(token), expiresAt });
 
     const frontendBase = env.FRONTEND_URL.replace(/\/$/, "");
     await sendPasswordResetEmail(email.toLowerCase(), `${frontendBase}/reset-password?token=${token}`);
@@ -274,7 +323,7 @@ router.post("/auth/forgot-password", async (req, res): Promise<void> => {
   }
 });
 
-router.post("/auth/reset-password", async (req, res): Promise<void> => {
+router.post("/auth/reset-password", passwordResetLimiter, async (req, res): Promise<void> => {
   try {
     const { token, password } = req.body as { token?: string; password?: string };
     if (!token || !password) {
@@ -290,7 +339,7 @@ router.post("/auth/reset-password", async (req, res): Promise<void> => {
       .select()
       .from(passwordResetTokensTable)
       .where(and(
-        eq(passwordResetTokensTable.token, token),
+        eq(passwordResetTokensTable.token, hashSingleUseSecret(token)),
         eq(passwordResetTokensTable.used, false),
         gt(passwordResetTokensTable.expiresAt, new Date()),
       ));
@@ -301,13 +350,44 @@ router.post("/auth/reset-password", async (req, res): Promise<void> => {
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-    await db.update(usersTable).set({ passwordHash, updatedAt: new Date() }).where(eq(usersTable.id, resetRow.userId));
-    await db.update(passwordResetTokensTable).set({ used: true }).where(eq(passwordResetTokensTable.id, resetRow.id));
+    const resetCompleted = await db.transaction(async (tx) => {
+      const [claimedToken] = await tx
+        .update(passwordResetTokensTable)
+        .set({ used: true })
+        .where(and(eq(passwordResetTokensTable.id, resetRow.id), eq(passwordResetTokensTable.used, false)))
+        .returning({ id: passwordResetTokensTable.id });
+      if (!claimedToken) return false;
+      await tx.update(usersTable).set({ passwordHash, updatedAt: new Date() }).where(eq(usersTable.id, resetRow.userId));
+      return true;
+    });
+    if (!resetCompleted) { res.status(400).json({ error: "Invalid or expired reset token" }); return; }
 
     res.json({ message: "Password has been reset successfully." });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to reset password" });
+  }
+});
+
+router.post("/auth/change-password", requireAuth, async (req: any, res): Promise<void> => {
+  try {
+    const { currentPassword, newPassword } = req.body as { currentPassword?: string; newPassword?: string };
+    if (!currentPassword || !newPassword) { res.status(400).json({ error: "Both passwords are required" }); return; }
+    if (!isValidPassword(newPassword)) {
+      res.status(400).json({ error: "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a digit" });
+      return;
+    }
+    const [user] = await db.select({ id: usersTable.id, passwordHash: usersTable.passwordHash })
+      .from(usersTable).where(eq(usersTable.id, req.user.userId)).limit(1);
+    if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
+      res.status(400).json({ error: "Current password is incorrect" }); return;
+    }
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await db.update(usersTable).set({ passwordHash, updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to update password" });
   }
 });
 

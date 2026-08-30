@@ -6,3 +6,7 @@ export * from "./tags";
 export * from "./upload_jobs";
 export * from "./rejectionReasons";
 export * from "./resourceEditSuggestions";
+export * from "./regulatory";
+export * from "./resourceSubscriptions";
+export * from "./backgroundTasks";
+export * from "./userExperience";

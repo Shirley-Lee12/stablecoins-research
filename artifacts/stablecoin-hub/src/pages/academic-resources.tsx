@@ -5,9 +5,10 @@ import { useAuth } from "@/lib/auth-context";
 import { SOURCE_TYPES, sourceTypeLabel, type SourceType } from "@/lib/source-types";
 import {
   Search, ExternalLink, FileText, BookOpen, Newspaper,
-  Tag, Users, ChevronRight, Loader2, Plus, X, Upload, AlertCircle,
-  Check, Clock, XCircle, Pencil, List, LayoutGrid, Sparkles,
-  Presentation, GraduationCap, ScrollText, Landmark,
+  Tag, ChevronLeft, ChevronRight, Loader2, Plus, X, Upload, AlertCircle,
+  Check, CheckCheck, Clock, XCircle, Pencil, List, Sparkles,
+  Presentation, GraduationCap, ScrollText, Landmark, RefreshCw,
+  SlidersHorizontal, Trash2,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -38,11 +39,22 @@ export const MISSING_FIELD_LABELS: Record<string, { zh: string; en: string }> = 
   url_doi: { zh: "URL 或 DOI", en: "URL or DOI" },
   keywords: { zh: "关键词", en: "Keywords" },
 };
-type FilterType = SourceType | "Expert" | "All";
+type FilterType = SourceType | "All";
+type PublicationLanguageFilter = "all" | "zh" | "en";
 
 // docs/planning/15 §5.2 — mirrors lib/db's KeywordsSource (frontend has no direct DB import, same
 // hand-mirrored pattern as TagSummary below).
 export type KeywordsSource = "extracted" | "generated" | "manual";
+export type AiReviewStatus = "not_started" | "processing" | "safe" | "needs_verification" | "high_risk" | "failed";
+export interface AiReviewDetails {
+  verdict: "safe" | "needs_verification" | "high_risk" | "failed";
+  confidence: number;
+  summaryZh: string;
+  summaryEn: string;
+  reasonsZh: string[];
+  reasonsEn: string[];
+  link?: { status: string; hostname: string | null; httpStatus: number | null; note: string };
+}
 
 export interface Resource {
   id: number;
@@ -68,6 +80,10 @@ export interface Resource {
   missingFields?: string[];
   /** docs/planning/16 §16.1 — cached field-by-field check, reused by 19.2's disputed-reason display. */
   verificationReport?: VerifyReport | null;
+  aiReviewStatus?: AiReviewStatus;
+  aiReviewSummary?: string | null;
+  aiReviewDetails?: AiReviewDetails | null;
+  aiReviewedAt?: string | null;
   /** docs/planning/19 §19.2 — cached natural-language explanation, generated once when off_topic is first determined. */
   offTopicExplanation?: string | null;
   /** docs/planning/19 §19.3 — the submitter's own explanation when confirming a duplicate-flagged resource isn't actually one. */
@@ -105,7 +121,6 @@ export const SOURCE_TYPE_COLORS: Record<SourceType, string> = {
 const FILTER_TYPES: { value: FilterType; labelEn: string; labelZh: string; icon: React.ElementType }[] = [
   { value: "All", labelEn: "All Types", labelZh: "全部类型", icon: BookOpen },
   ...SOURCE_TYPES.map((t) => ({ value: t.value, labelEn: t.nameEn, labelZh: t.nameZh, icon: SOURCE_TYPE_ICONS[t.value] })),
-  { value: "Expert", labelEn: "Experts & Scholars", labelZh: "专家学者", icon: Users },
 ];
 
 const BADGE_COLORS = SOURCE_TYPE_COLORS;
@@ -115,13 +130,30 @@ export function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
 }
 
-// ── Resource Card ─────────────────────────────────────────────────────────────
-// Minimal by design (docs/planning/15 §6.1) — only title/authors/year/one primary tag. Only ever
-// rendered for status='approved' resources (the public Resources list, per §0.1's "approved is the
-// only status that appears publicly" rule), so there's no status badge, edit, or approve/reject
-// affordance here; those belong to My Contributions and /admin (AdminCenter) respectively. The
-// direct-link button and the full tag set live on the detail page instead (§6.2/§6.3).
-function ResourceCard({ r, language, onOpenDetail }: {
+export function normalizeAbstractForDisplay(value: string): string {
+  const parser = new DOMParser();
+  const decodedMarkup = parser.parseFromString(value, "text/html").documentElement.textContent ?? value;
+  const markupWithBreaks = decodedMarkup
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p\s*>/gi, "\n");
+  const plainText = parser.parseFromString(markupWithBreaks, "text/html").body.textContent ?? markupWithBreaks;
+  let normalized = plainText.replace(/\r\n?/g, "\n").trim();
+  let previous = "";
+  while (previous !== normalized) {
+    previous = normalized;
+    normalized = normalized.replace(/([\u3400-\u9fff])\s*\n\s*([\u3400-\u9fff])/g, "$1$2");
+  }
+  return normalized
+    .replace(/([A-Za-z])-[ \t]*\n[ \t]*([a-z])/g, "$1$2")
+    .replace(/[ \t]*\n+[ \t]*/g, " ")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
+// ── Resource Directory Row ───────────────────────────────────────────────────
+// Public browsing is a comparison task: stable columns make a growing library much easier to scan
+// than equal-sized cards. Abstracts and the complete tag set remain in the detail view.
+function ResourceRow({ r, language, onOpenDetail }: {
   r: Resource; language: string;
   onOpenDetail?: (r: Resource) => void;
 }) {
@@ -131,15 +163,17 @@ function ResourceCard({ r, language, onOpenDetail }: {
     ?? new Date(r.createdAt).toLocaleDateString(zh ? "zh-CN" : "en-US", { year: "numeric" });
   const primaryTag = pickPrimaryThemeTag(r.facetedTags);
   const primaryCategory = primaryTag?.category ? THEME_CATEGORY_LABELS[primaryTag.category] : undefined;
+  const href = r.url ?? (r.doi ? `https://doi.org/${r.doi}` : null);
 
   return (
-    <div className="group flex flex-col bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:border-primary/40 hover:shadow-md p-5 gap-2">
-      <h3 onClick={() => onOpenDetail?.(r)}
-        className="text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-3 cursor-pointer">
+    <div className="group border-b border-border px-3 py-4 transition-colors hover:bg-muted/40 xl:grid xl:grid-cols-[minmax(220px,2fr)_minmax(145px,1.15fr)_64px_110px_minmax(110px,.8fr)_52px] xl:items-start xl:gap-4">
+      <button type="button" onClick={() => onOpenDetail?.(r)}
+        className="block w-full text-left text-sm font-semibold leading-6 text-foreground transition-colors group-hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
         {r.title}
-      </h3>
-      {r.authors.length > 0 && (
-        <p className="text-xs text-muted-foreground line-clamp-1 font-medium">
+      </button>
+      <div className="mt-1 text-xs leading-5 text-muted-foreground xl:mt-0">
+        {r.authors.length > 0 ? (
+          <p className="line-clamp-2">
           {r.authors.map((a, i) => (
             <React.Fragment key={a}>
               {i > 0 && "; "}
@@ -148,15 +182,24 @@ function ResourceCard({ r, language, onOpenDetail }: {
               </Link>
             </React.Fragment>
           ))}
-        </p>
-      )}
-      <div className="flex items-center gap-2 pt-1">
-        <span className="text-xs text-muted-foreground tabular-nums">{year}</span>
-        {primaryCategory && (
-          <span className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground border border-border/60">
-            {zh ? primaryCategory.zh : primaryCategory.en}
-          </span>
-        )}
+          </p>
+        ) : <span>—</span>}
+      </div>
+      <span className="mt-2 mr-3 inline-block text-xs tabular-nums text-muted-foreground xl:mt-0 xl:mr-0">{year}</span>
+      <span className="mt-2 mr-3 inline-block text-xs text-muted-foreground xl:mt-0 xl:mr-0">{sourceTypeLabel(r.sourceType, zh)}</span>
+      <span className="mt-2 mr-3 inline-block text-xs text-muted-foreground xl:mt-0 xl:mr-0">
+        {primaryCategory ? (zh ? primaryCategory.zh : primaryCategory.en) : "—"}
+      </span>
+      <div className="mt-3 flex xl:mt-0 xl:justify-center">
+        {href ? (
+          <a href={href} target="_blank" rel="noopener noreferrer"
+            title={zh ? "打开原文" : "Open source"}
+            aria-label={zh ? `打开《${r.title}》原文` : `Open source for ${r.title}`}
+            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-border px-2 text-xs text-primary transition-colors hover:border-primary/40 hover:bg-primary/5">
+            <ExternalLink className="h-3.5 w-3.5" />
+            <span className="xl:hidden">{zh ? "原文" : "Source"}</span>
+          </a>
+        ) : <span className="text-xs text-muted-foreground">—</span>}
       </div>
     </div>
   );
@@ -177,11 +220,13 @@ export function ResourceDetailModal({ resource, language, onClose, onFacetTagCli
   const date  = resource.publishedDate
     || new Date(resource.createdAt).toLocaleDateString(zh ? "zh-CN" : "en-US", { year: "numeric", month: "long", day: "numeric" });
   const dateLabel = resource.publishedDate ? (zh ? "发表于" : "Published") : (zh ? "添加于" : "Added");
+  const primaryTag = pickPrimaryThemeTag(resource.facetedTags);
+  const primaryCategory = primaryTag?.category ? THEME_CATEGORY_LABELS[primaryTag.category] : undefined;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div className="w-full max-w-3xl bg-card border border-border rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border ${color}`}>
             <Icon className="h-3 w-3" />{sourceTypeLabel(resource.sourceType, zh)}
@@ -190,8 +235,8 @@ export function ResourceDetailModal({ resource, language, onClose, onFacetTagCli
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="p-6 space-y-4 overflow-y-auto">
-          <h2 className="text-lg font-serif font-bold text-foreground leading-snug">{resource.title}</h2>
+        <div className="p-6 sm:p-8 space-y-5 overflow-y-auto">
+          <h2 className="text-xl font-serif font-bold text-foreground leading-8">{resource.title}</h2>
 
           {resource.authors.length > 0 && (
             <p className="text-sm text-muted-foreground">
@@ -206,29 +251,31 @@ export function ResourceDetailModal({ resource, language, onClose, onFacetTagCli
             </p>
           )}
 
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <Clock className="h-3 w-3" />{dateLabel}: {date}
-          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{dateLabel}: {date}</span>
+            <span>{sourceTypeLabel(resource.sourceType, zh)}</span>
+            {primaryCategory && <span>{zh ? primaryCategory.zh : primaryCategory.en}</span>}
+            {href && (
+              <a href={href} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-medium text-primary hover:underline">
+                {zh ? "查看原文" : "View source"}<ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
+          </div>
 
           {/* Body order per docs/planning/15 §6.2: abstract -> keywords -> direct link -> full tag set (tags last, unfolded). */}
           {resource.abstract && (
-            <div className="space-y-1">
+            <section className="space-y-2 border-t border-border pt-5">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</h3>
-              <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{resource.abstract}</p>
-            </div>
+              <p className="text-sm text-foreground/90 leading-7">{normalizeAbstractForDisplay(resource.abstract)}</p>
+            </section>
           )}
 
           <KeywordsBlock keywords={resource.keywords} keywordsSource={resource.keywordsSource} language={language} />
 
-          {(href || resource.doi) && (
+          {resource.doi && (
             <div className="space-y-1">
-              {href && (
-                <a href={href} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
-                  {zh ? "查看原文" : "View Source"}<ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              )}
-              {resource.doi && <p className="text-xs text-muted-foreground">DOI: {resource.doi}</p>}
+              <p className="text-xs text-muted-foreground break-all">DOI: {resource.doi}</p>
             </div>
           )}
 
@@ -306,29 +353,6 @@ export function RejectDialog({ resource, reasons, language, onClose, onSubmit }:
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-// ── Expert Redirect Panel ─────────────────────────────────────────────────────
-function ExpertPanel({ language }: { language: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-      <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-        <Users className="h-8 w-8 text-primary" />
-      </div>
-      <div className="space-y-1.5">
-        <p className="font-semibold text-foreground">{language === "zh" ? "专家学者名录" : "Experts & Scholars Directory"}</p>
-        <p className="text-sm text-muted-foreground max-w-xs">
-          {language === "zh" ? "访问专家学者数据库，浏览全球稳定币领域顶级研究人员的学术主页与研究方向。"
-            : "Browse the directory of leading global stablecoin researchers, their profiles, and areas of expertise."}
-        </p>
-      </div>
-      <Link href="/experts">
-        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors cursor-pointer">
-          {language === "zh" ? "浏览专家学者" : "Browse Experts"}<ChevronRight className="h-4 w-4" />
-        </span>
-      </Link>
     </div>
   );
 }
@@ -557,6 +581,7 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
           url: url.trim() || null, doi: doi.trim() || null,
           abstract: abstract.trim(), keywords,
           publishedDate: publishedDate.trim() || null,
+          resubmit: !isAdmin,
           ...(isAdmin && { tagIds }),
         }),
       });
@@ -618,8 +643,9 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发表日期" : "Published Date"}</label>
-            <input value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)} placeholder="2021 or 2021-07-20"
+            <input value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)} placeholder={zh ? "2021 / 2021-07 / 2021-07-20" : "2021 / 2021-07 / 2021-07-20"}
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+            <PublicationDateHint language={language} />
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
@@ -628,9 +654,9 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "关键词" : "Keywords"}</label>
-            <input value={keywords.join("；")}
-              onChange={(e) => setKeywords(e.target.value.split(/[;；]/).map((k) => k.trim()).filter(Boolean))}
-              placeholder={zh ? "多个关键词用分号（；）分隔" : "Semicolon (;) separated keywords"}
+            <input value={keywords.join(", ")}
+              onChange={(e) => setKeywords(parseKeywordInput(e.target.value))}
+              placeholder={zh ? "多个关键词用逗号分隔" : "Comma-separated keywords"}
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
             <KeywordCountHint count={keywords.length} language={language} />
           </div>
@@ -660,7 +686,7 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
             <button onClick={handleSave} disabled={saving || !title.trim()}
               className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
               {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-              {zh ? "保存" : "Save"}
+              {isAdmin ? (zh ? "保存" : "Save") : (zh ? "重新提交" : "Resubmit")}
             </button>
           </div>
         </div>
@@ -790,8 +816,9 @@ export function SuggestEditModal({ resource, token, language, onClose, onSubmitt
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发表日期" : "Published Date"}</label>
-            <input value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)} placeholder="2021 or 2021-07-20"
+            <input value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)} placeholder={zh ? "2021 / 2021-07 / 2021-07-20" : "2021 / 2021-07 / 2021-07-20"}
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+            <PublicationDateHint language={language} />
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "摘要" : "Abstract"}</label>
@@ -800,9 +827,9 @@ export function SuggestEditModal({ resource, token, language, onClose, onSubmitt
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "关键词" : "Keywords"}</label>
-            <input value={keywords.join("；")}
-              onChange={(e) => setKeywords(e.target.value.split(/[;；]/).map((k) => k.trim()).filter(Boolean))}
-              placeholder={zh ? "多个关键词用分号（；）分隔" : "Semicolon (;) separated keywords"}
+            <input value={keywords.join(", ")}
+              onChange={(e) => setKeywords(parseKeywordInput(e.target.value))}
+              placeholder={zh ? "多个关键词用逗号分隔" : "Comma-separated keywords"}
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
             <KeywordCountHint count={keywords.length} language={language} />
           </div>
@@ -866,8 +893,10 @@ export function MySuggestionBadge({ resourceId, token, language, refreshKey }: {
 // ── Upload Center shared types (mirror artifacts/api-server/src/routes/upload.ts) ─
 export interface DraftData {
   title: string; authors: string[]; year: number | null; abstract: string;
+  publishedDate?: string | null;
   doi: string | null; url: string | null; sourceType: string;
   keywords: string[]; keywordsSource: KeywordsSource | null;
+  manualTagIds?: number[];
 }
 export interface TagSummary {
   id: number; slug: string; nameEn: string; nameZh: string;
@@ -881,18 +910,87 @@ export interface TagSummary {
 }
 export interface FieldCheck { field: string; status: "✅" | "⚠️" | "❌"; detail: string }
 export interface VerifyReport { checks: FieldCheck[]; hasFailure: boolean; hasWarning: boolean }
-interface PipelineResultLike { draft: DraftData; tags: TagSummary[]; report: VerifyReport; foundInScholarlyDb: boolean; missingRequired: string[] }
+export interface DuplicatePreview {
+  candidateResourceId: number;
+  matchType: "exact_doi" | "exact_url" | "fuzzy_title";
+  title: string;
+  authors: string[];
+  publishedDate: string | null;
+  status: string;
+}
+interface PipelineResultLike {
+  draft: DraftData;
+  tags: TagSummary[];
+  report: VerifyReport;
+  foundInScholarlyDb: boolean;
+  missingRequired: string[];
+  duplicateCandidates?: DuplicatePreview[];
+  confirmationId?: string;
+}
 export type UploadJobType = "pdf" | "url" | "citation" | "title";
 export interface UploadJob {
   id: number; batchId: string | null; folderImportId?: string | null; type: UploadJobType; status: "queued" | "processing" | "ready_for_review" | "failed";
-  input: { fileName?: string; url?: string; title?: string; sourceTypeHint?: string };
-  result: PipelineResultLike | null; error: string | null; createdAt: string;
+  input: { fileName?: string; url?: string; title?: string; sourceTypeHint?: string; reference?: { title?: string } };
+  result: PipelineResultLike | null; error: string | null; createdAt: string; nextAttemptAt?: string | null;
+}
+export interface UploadJobSummary {
+  total: number;
+  needsAction: number;
+  processing: number;
+}
+
+function uploadJobNeedsAction(job: UploadJob): boolean {
+  if (job.status === "failed") return true;
+  return job.status === "ready_for_review"
+    && (((job.result?.missingRequired?.length ?? 0) > 0)
+      || !!job.result?.report?.hasFailure
+      || !job.result?.tags?.some((tag) => tag.facet === "theme")
+      || (job.result?.duplicateCandidates?.length ?? 0) > 0);
+}
+
+function normalizeUrlOrDoi(value: string): string {
+  const trimmed = value.trim();
+  if (/^10\.\d{4,9}\//i.test(trimmed)) return `https://doi.org/${trimmed}`;
+  if (/^chrome-extension:\/\//i.test(trimmed)) {
+    try {
+      const viewerUrl = new URL(trimmed);
+      const nested = viewerUrl.searchParams.get("file")
+        ?? viewerUrl.searchParams.get("url")
+        ?? viewerUrl.pathname.replace(/^\/+/, "");
+      const decoded = decodeURIComponent(nested);
+      const publicUrl = decoded.match(/https?:\/\/.+$/i)?.[0];
+      if (publicUrl) return new URL(publicUrl).toString();
+    } catch {
+      // The API repeats this normalization and returns a clear validation error if needed.
+    }
+  }
+  return trimmed;
+}
+
+function parseKeywordInput(value: string): string[] {
+  return [...new Set(value.split(/[;,；，]/).map((keyword) => keyword.trim()).filter(Boolean))];
+}
+
+function publicationYearFromInput(value: string): number | null {
+  const match = value.trim().match(/^(\d{4})/);
+  return match ? Number(match[1]) : null;
+}
+
+function PublicationDateHint({ language }: { language: string }) {
+  return <p className="text-xs text-muted-foreground">{language === "zh"
+    ? "支持年、年月或年月日；可用 - 或 / 连接，例如 2026、2026/08、2026-08-19。"
+    : "Use a year, year-month, or full date with - or /, e.g. 2026, 2026/08, or 2026-08-19."}</p>;
+}
+
+async function responseError(response: Response): Promise<string> {
+  const data = await response.json().catch(() => ({}));
+  return typeof data?.error === "string" ? data.error : `Request failed (${response.status})`;
 }
 
 const FACET_LABELS: Record<TagSummary["facet"], { en: string; zh: string }> = {
   theme: { en: "Theme", zh: "主题" },
   jurisdiction: { en: "Jurisdiction", zh: "辖区" },
-  asset: { en: "Asset", zh: "币种" },
+  asset: { en: "Stablecoin Projects", zh: "稳定币项目" },
 };
 
 // Six-group folding tree over the theme facet (docs/planning/15 §3.2/§3.3/§3.4).
@@ -906,6 +1004,74 @@ const THEME_CATEGORY_LABELS: Record<string, { en: string; zh: string }> = {
   tech_infrastructure: { en: "Tech & Infrastructure", zh: "技术与基础设施" },
 };
 
+const TAG_FILTER_PREVIEW_LIMIT = 5;
+
+// Appendix 2's seven comparative jurisdictions, plus China (Mainland) because the public library
+// already has substantial Chinese-language coverage. Other jurisdictions stay in the controlled
+// vocabulary and automatically become public once an approved resource uses them.
+const CORE_PUBLIC_JURISDICTION_SLUGS = new Set([
+  "united-states",
+  "european-union",
+  "united-kingdom",
+  "hong-kong",
+  "singapore",
+  "japan",
+  "uae",
+  "china-mainland",
+]);
+
+function CompactFilterTagList({ tags, usageBySlug, selectedSlug, language, onSelect, forceExpanded = false }: {
+  tags: TagSummary[];
+  usageBySlug: Map<string, number>;
+  selectedSlug: string | null;
+  language: string;
+  onSelect: (slug: string) => void;
+  forceExpanded?: boolean;
+}) {
+  const zh = language === "zh";
+  const [showAll, setShowAll] = useState(false);
+  const orderedTags = useMemo(() => [...tags].sort((a, b) => {
+    const usageDifference = (usageBySlug.get(b.slug) ?? 0) - (usageBySlug.get(a.slug) ?? 0);
+    if (usageDifference !== 0) return usageDifference;
+    const aName = zh ? a.nameZh : a.nameEn;
+    const bName = zh ? b.nameZh : b.nameEn;
+    return aName.localeCompare(bName, zh ? "zh-CN" : "en");
+  }), [tags, usageBySlug, zh]);
+
+  const selectedTag = orderedTags.find((tag) => tag.slug === selectedSlug);
+  const previewTags = selectedTag && orderedTags.indexOf(selectedTag) >= TAG_FILTER_PREVIEW_LIMIT
+    ? [selectedTag, ...orderedTags.filter((tag) => tag.slug !== selectedTag.slug)].slice(0, TAG_FILTER_PREVIEW_LIMIT)
+    : orderedTags.slice(0, TAG_FILTER_PREVIEW_LIMIT);
+  const displayedTags = forceExpanded || showAll ? orderedTags : previewTags;
+
+  return (
+    <div className="space-y-0.5 py-1 pl-4">
+      {displayedTags.map((tag) => {
+        const selected = selectedSlug === tag.slug;
+        return (
+          <button key={tag.id} type="button" onClick={() => onSelect(tag.slug)} aria-pressed={selected}
+            className={`flex w-full items-start gap-2 border-l-2 py-1 pl-2 pr-1 text-left text-xs leading-4 transition-colors ${
+              selected
+                ? "border-primary bg-primary/5 font-medium text-primary"
+                : "border-transparent text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground"
+            }`}>
+            <span className="min-w-0 flex-1">{zh ? tag.nameZh : tag.nameEn}</span>
+            <span className="shrink-0 tabular-nums text-muted-foreground/70">{usageBySlug.get(tag.slug) ?? 0}</span>
+          </button>
+        );
+      })}
+      {!forceExpanded && orderedTags.length > TAG_FILTER_PREVIEW_LIMIT && (
+        <button type="button" onClick={() => setShowAll((current) => !current)}
+          className="px-2 py-1 text-xs font-medium text-primary hover:underline">
+          {showAll
+            ? (zh ? "收起" : "Show less")
+            : (zh ? `显示全部 ${orderedTags.length} 个` : `Show all ${orderedTags.length}`)}
+        </button>
+      )}
+    </div>
+  );
+}
+
 /**
  * Picks the resource list page's single "primary" theme tag (docs/planning/15 §3.6) — the
  * highest-scoring matched theme tag, used to show one representative category badge instead of
@@ -913,7 +1079,7 @@ const THEME_CATEGORY_LABELS: Record<string, { en: string; zh: string }> = {
  * accepted per §3.6 — the complete tag list still shows in full on the detail page (§6.2).
  */
 export function pickPrimaryThemeTag(facetedTags: TagSummary[] | undefined): TagSummary | null {
-  const themeTags = (facetedTags ?? []).filter((t) => t.facet === "theme" && t.score != null);
+  const themeTags = (facetedTags ?? []).filter((t) => t.facet === "theme");
   if (themeTags.length === 0) return null;
   return themeTags.reduce((best, t) => ((t.score ?? -Infinity) > (best.score ?? -Infinity) ? t : best));
 }
@@ -1183,16 +1349,76 @@ export function DuplicateCandidatesPanel({ resource, token, language, onResolved
 }
 
 // ── Shared editable review/confirm step — used by all three upload tabs ───────
-function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm, onCancel, onBack, missingRequired }: {
+function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm, onCancel, onBack, onDiscard, missingRequired, duplicateCandidates = [] }: {
   draft: DraftData; tags: TagSummary[]; report: VerifyReport; language: string; saving: boolean;
   onChange: (d: DraftData) => void; onConfirm: () => void; onCancel: () => void; onBack?: () => void;
+  onDiscard?: () => void;
   /** Structured "which of title/authors/year/url_doi are absent" (docs/planning/12 §1) — informational, doesn't disable Confirm here (the server decides whether it's actually enforced for this entry kind). */
   missingRequired?: string[];
+  duplicateCandidates?: DuplicatePreview[];
 }) {
   const zh = language === "zh";
+  const topRef = useRef<HTMLDivElement>(null);
   const missingUrlDoi = missingRequired?.includes("url_doi") ?? false;
+  const isOffTopic = !tags.some((tag) => tag.facet === "theme");
+  useEffect(() => {
+    topRef.current?.scrollIntoView({ block: "start" });
+  }, []);
   return (
-    <div className="space-y-4">
+    <div ref={topRef} className="space-y-4">
+      {duplicateCandidates.length > 0 && (
+        <div className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-3 text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-sm font-semibold">
+                {zh ? "资源库中已有相同题目和作者的条目" : "A matching title and author already exists in the library"}
+              </p>
+              <p className="text-xs">
+                {zh ? "无需继续补充当前上传任务，可以直接删除。" : "You can discard this upload instead of filling in the remaining fields."}
+              </p>
+            </div>
+          </div>
+          <div className="space-y-1 pl-6">
+            {duplicateCandidates.map((candidate) => (
+              <Link key={candidate.candidateResourceId} href={`/academic-resources?id=${candidate.candidateResourceId}`}>
+                <span className="block text-xs font-medium underline underline-offset-2 cursor-pointer">
+                  {candidate.title}{candidate.authors.length ? ` · ${candidate.authors.join("; ")}` : ""}{candidate.publishedDate ? ` · ${candidate.publishedDate.slice(0, 4)}` : ""}
+                </span>
+              </Link>
+            ))}
+          </div>
+          {onDiscard && (
+            <button type="button" onClick={onDiscard}
+              className="ml-6 inline-flex items-center gap-1.5 rounded-md border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 dark:border-red-800 dark:bg-transparent dark:text-red-300 dark:hover:bg-red-950/40">
+              <Trash2 className="h-3.5 w-3.5" />
+              {zh ? "删除此上传任务" : "Delete this upload"}
+            </button>
+          )}
+        </div>
+      )}
+      {isOffTopic && (
+        <div className="space-y-2 rounded-lg border border-red-300 bg-red-50 px-3 py-3 text-red-800 dark:border-red-800 dark:bg-red-950/30 dark:text-red-200">
+          <div className="flex items-start gap-2">
+            <XCircle className="h-4 w-4 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-sm font-semibold">
+                {zh ? "系统判断这项资料可能与稳定币无关" : "This resource may be unrelated to stablecoins"}
+              </p>
+              <p className="text-xs">
+                {zh ? "它不会直接进入审核或公开资源库。若判断正确，请删除；若是 AI 误判，可先保留，再到 My Contributions 填写说明并重新提交。" : "It will not enter review or the public library directly. Delete it if the decision is correct; if AI misclassified it, keep it and appeal from My Contributions."}
+              </p>
+            </div>
+          </div>
+          {onDiscard && (
+            <button type="button" onClick={onDiscard}
+              className="ml-6 inline-flex items-center gap-1.5 rounded-md border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-transparent dark:text-red-300 dark:hover:bg-red-950/50">
+              <Trash2 className="h-3.5 w-3.5" />
+              {zh ? "删除此上传任务" : "Delete this upload"}
+            </button>
+          )}
+        </div>
+      )}
       {report.hasFailure && (
         <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-300">
           <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
@@ -1220,9 +1446,12 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
       <AuthorPicker authors={draft.authors} onChange={(a) => onChange({ ...draft, authors: a })} language={language} />
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "年份" : "Year"}</label>
-          <input type="number" value={draft.year ?? ""} onChange={(e) => onChange({ ...draft, year: e.target.value ? Number(e.target.value) : null })}
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发布日期" : "Publication date"}</label>
+          <input type="text" value={draft.publishedDate ?? (draft.year != null ? String(draft.year) : "")}
+            onChange={(e) => onChange({ ...draft, publishedDate: e.target.value || null, year: publicationYearFromInput(e.target.value) })}
+            placeholder={zh ? "年 / 年-月 / 年-月-日" : "YYYY / YYYY-MM / YYYY-MM-DD"}
             className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <PublicationDateHint language={language} />
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DOI</label>
@@ -1254,9 +1483,9 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
             </span>
           )}
         </label>
-        <input value={(draft.keywords ?? []).join("；")}
-          onChange={(e) => onChange({ ...draft, keywords: e.target.value.split(/[;；]/).map((k) => k.trim()).filter(Boolean), keywordsSource: "manual" })}
-          placeholder={zh ? "多个关键词用分号（；）分隔（原文没有的话可以自己填，或留空由 AI 从摘要提炼）" : "Semicolon (;) separated — leave blank to let AI suggest some from the abstract"}
+        <input value={(draft.keywords ?? []).join(", ")}
+          onChange={(e) => onChange({ ...draft, keywords: parseKeywordInput(e.target.value), keywordsSource: "manual" })}
+          placeholder={zh ? "多个关键词用逗号分隔（原文没有的话可以自己填，或留空由 AI 从摘要提炼）" : "Comma-separated — leave blank to let AI suggest some from the abstract"}
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
         <KeywordCountHint count={(draft.keywords ?? []).length} language={language} />
       </div>
@@ -1281,7 +1510,7 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
         <button onClick={onConfirm} disabled={saving || !draft.title.trim()}
           className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
           {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-          {zh ? "确认入库" : "Confirm & Save"}
+          {isOffTopic ? (zh ? "保留，稍后申诉" : "Keep for appeal") : (zh ? "确认提交" : "Confirm & Submit")}
         </button>
       </div>
     </div>
@@ -1294,8 +1523,10 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
   const [step, setStep] = useState<"input" | "checking" | "review" | "saving">("input");
   const [title, setTitle] = useState("");
   const [authors, setAuthors] = useState<string[]>([]);
-  const [year, setYear] = useState<number | null>(null);
+  const [publishedDate, setPublishedDate] = useState("");
   const [abstract, setAbstract] = useState("");
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [manualTagIds, setManualTagIds] = useState<number[]>([]);
   const [url, setUrl] = useState("");
   const [doi, setDoi] = useState("");
   const [sourceType, setSourceType] = useState<SourceType>("journal_article");
@@ -1303,6 +1534,8 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
   const [tags, setTags] = useState<TagSummary[]>([]);
   const [report, setReport] = useState<VerifyReport | null>(null);
   const [missingRequired, setMissingRequired] = useState<string[]>([]);
+  const [duplicateCandidates, setDuplicateCandidates] = useState<DuplicatePreview[]>([]);
+  const [confirmationId, setConfirmationId] = useState("");
   const [error, setError] = useState("");
 
   async function handleCheck() {
@@ -1311,11 +1544,17 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
       const res = await fetch(`${apiBase()}/api/resources/upload/manual`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ title: title.trim(), authors, year, abstract: abstract.trim(), url: url.trim() || undefined, doi: doi.trim() || undefined, sourceType }),
+        body: JSON.stringify({
+          title: title.trim(), authors,
+          publishedDate: publishedDate.trim() || null,
+          year: publicationYearFromInput(publishedDate),
+          abstract: abstract.trim(), keywords, tagIds: manualTagIds,
+          url: url.trim() || undefined, doi: doi.trim() || undefined, sourceType,
+        }),
       });
       const data = await res.json();
       if (!res.ok) { setError((data.error ?? "Failed") + (data.detail ? ` (${data.detail})` : "")); setStep("input"); return; }
-      setDraft(data.draft); setTags(data.tags); setReport(data.report); setMissingRequired(data.missingRequired ?? []); setStep("review");
+      setDraft(data.draft); setTags(data.tags); setReport(data.report); setMissingRequired(data.missingRequired ?? []); setDuplicateCandidates(data.duplicateCandidates ?? []); setConfirmationId(data.confirmationId ?? ""); setStep("review");
     } catch { setError(zh ? "网络请求失败" : "Network error"); setStep("input"); }
   }
 
@@ -1326,7 +1565,7 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
       const res = await fetch(`${apiBase()}/api/resources/upload/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ...draft, tagIds: tags.map((t) => t.id), tagScores: tagScoresPayload(tags) }),
+        body: JSON.stringify({ ...draft, confirmationId, tagIds: tags.map((t) => t.id), tagScores: tagScoresPayload(tags) }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); setStep("review"); return; }
       onSaved(); onClose();
@@ -1337,8 +1576,8 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
     return (
       <div className="space-y-2">
         {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
-        <ReviewForm draft={draft} tags={tags} report={report} language={language} saving={step === "saving"} missingRequired={missingRequired}
-          onChange={setDraft} onConfirm={handleConfirm} onCancel={onClose} onBack={() => setStep("input")} />
+        <ReviewForm draft={draft} tags={tags} report={report} language={language} saving={step === "saving"} missingRequired={missingRequired} duplicateCandidates={duplicateCandidates}
+          onChange={setDraft} onConfirm={handleConfirm} onCancel={onClose} onBack={() => setStep("input")} onDiscard={onClose} />
       </div>
     );
   }
@@ -1360,9 +1599,11 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
       <AuthorPicker authors={authors} onChange={setAuthors} language={language} />
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "年份" : "Year"}</label>
-          <input type="number" value={year ?? ""} onChange={(e) => setYear(e.target.value ? Number(e.target.value) : null)}
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "发布日期" : "Publication date"}</label>
+          <input type="text" value={publishedDate} onChange={(e) => setPublishedDate(e.target.value)}
+            placeholder={zh ? "2026 / 2026-08 / 2026-08-19" : "2026 / 2026-08 / 2026-08-19"}
             className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <PublicationDateHint language={language} />
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DOI</label>
@@ -1383,6 +1624,14 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
         <textarea value={abstract} onChange={(e) => setAbstract(e.target.value)} rows={4}
           className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
       </div>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "关键词" : "Keywords"}</label>
+        <input value={keywords.join(", ")} onChange={(e) => setKeywords(parseKeywordInput(e.target.value))}
+          placeholder={zh ? "多个关键词用逗号分隔；留空时由 AI 根据摘要补充" : "Comma-separated; leave blank for AI suggestions"}
+          className="w-full px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground" />
+        <KeywordCountHint count={keywords.length} language={language} />
+      </div>
+      <FacetTagPicker selectedIds={manualTagIds} onChange={setManualTagIds} language={language} />
       {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
       <div className="flex justify-end gap-2 pt-1">
         <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
@@ -1402,8 +1651,15 @@ function ManualTab({ token, language, onClose, onSaved }: { token: string; langu
 // Filters either by a single job `type` (existing per-entry tabs) or by `folderImportId` (folder
 // import's combined "this submission" progress view, docs/planning/14 §3.4) — exactly one of the
 // two should be passed.
-export function JobQueuePanel({ token, language, type, folderImportId, onSaved }: {
-  token: string; language: string; type?: UploadJobType; folderImportId?: string; onSaved: () => void;
+export function JobQueuePanel({ token, language, type, folderImportId, statusFilter = "all", contributionsView = false, onSummaryChange, onSaved }: {
+  token: string;
+  language: string;
+  type?: UploadJobType;
+  folderImportId?: string;
+  statusFilter?: "all" | "needs_action" | "processing";
+  contributionsView?: boolean;
+  onSummaryChange?: (summary: UploadJobSummary) => void;
+  onSaved: () => void;
 }) {
   const zh = language === "zh";
   const [jobs, setJobs] = useState<UploadJob[]>([]);
@@ -1411,23 +1667,63 @@ export function JobQueuePanel({ token, language, type, folderImportId, onSaved }
   const [reviewDraft, setReviewDraft] = useState<DraftData | null>(null);
   const [reviewTags, setReviewTags] = useState<TagSummary[]>([]);
   const [confirming, setConfirming] = useState(false);
+  const [bulkConfirming, setBulkConfirming] = useState(false);
+  const [reenriching, setReenriching] = useState(false);
+  const [retryingJobId, setRetryingJobId] = useState<number | null>(null);
+  const [bulkRetrying, setBulkRetrying] = useState(false);
+  const [deletingDuplicates, setDeletingDuplicates] = useState(false);
+  const [bulkMessage, setBulkMessage] = useState("");
+  const [reviewError, setReviewError] = useState("");
 
-  const fetchJobs = useCallback(() => {
+  const fetchJobs = useCallback(async (): Promise<boolean> => {
     const query = folderImportId ? `?folderImportId=${folderImportId}` : "";
-    fetch(`${apiBase()}/api/resources/upload/jobs${query}`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data: UploadJob[]) => setJobs(Array.isArray(data) ? data.filter((j) => (type ? j.type === type : true)) : []))
-      .catch(() => {});
-  }, [token, type, folderImportId]);
+    try {
+      const response = await fetch(`${apiBase()}/api/resources/upload/jobs${query}`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = response.ok ? await response.json() as UploadJob[] : [];
+      const scopedJobs = Array.isArray(data) ? data.filter((j) => (type ? j.type === type : true)) : [];
+      const hasActiveJobs = scopedJobs.some((job) => job.status === "queued" || job.status === "processing");
+      onSummaryChange?.({
+        total: scopedJobs.length,
+        needsAction: scopedJobs.filter(uploadJobNeedsAction).length,
+        processing: scopedJobs.filter((job) => job.status === "queued" || job.status === "processing").length,
+      });
+      setJobs(statusFilter === "needs_action"
+        ? scopedJobs.filter(uploadJobNeedsAction)
+        : statusFilter === "processing"
+          ? scopedJobs.filter((job) => job.status === "queued" || job.status === "processing")
+          : scopedJobs);
+      return hasActiveJobs;
+    } catch {
+      return false;
+    }
+  }, [token, type, folderImportId, statusFilter, onSummaryChange]);
 
   useEffect(() => {
-    fetchJobs();
-    const interval = setInterval(fetchJobs, 3000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const poll = async () => {
+      const hasActiveJobs = await fetchJobs();
+      if (cancelled) return;
+      const delay = document.hidden ? 15_000 : hasActiveJobs ? 3_000 : 30_000;
+      timeout = setTimeout(poll, delay);
+    };
+    const refreshWhenVisible = () => {
+      if (document.hidden) return;
+      if (timeout) clearTimeout(timeout);
+      void poll();
+    };
+    void poll();
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      cancelled = true;
+      if (timeout) clearTimeout(timeout);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
   }, [fetchJobs]);
 
   function openReview(job: UploadJob) {
     if (!job.result) return;
+    setReviewError("");
     setReviewingId(job.id);
     setReviewDraft(job.result.draft);
     setReviewTags(job.result.tags);
@@ -1436,6 +1732,7 @@ export function JobQueuePanel({ token, language, type, folderImportId, onSaved }
   async function handleConfirmReview() {
     if (reviewingId == null || !reviewDraft) return;
     setConfirming(true);
+    setReviewError("");
     try {
       const res = await fetch(`${apiBase()}/api/resources/upload/jobs/${reviewingId}/confirm`, {
         method: "POST",
@@ -1443,42 +1740,234 @@ export function JobQueuePanel({ token, language, type, folderImportId, onSaved }
         body: JSON.stringify({ ...reviewDraft, tagIds: reviewTags.map((t) => t.id), tagScores: tagScoresPayload(reviewTags) }),
       });
       if (res.ok) { setReviewingId(null); onSaved(); fetchJobs(); }
+      else setReviewError(await responseError(res));
+    } catch {
+      setReviewError(zh ? "提交失败，请稍后重试" : "Submission failed. Please try again.");
     } finally {
       setConfirming(false);
     }
   }
 
-  async function handleDiscard(id: number) {
+  async function handleDiscard(id: number, title?: string) {
+    const confirmed = window.confirm(zh
+      ? `确定删除这个上传任务吗？${title ? `\n${title}` : ""}`
+      : `Delete this upload task?${title ? `\n${title}` : ""}`);
+    if (!confirmed) return;
     await fetch(`${apiBase()}/api/resources/upload/jobs/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    if (reviewingId === id) { setReviewingId(null); setReviewDraft(null); }
     fetchJobs();
+  }
+
+  const completeJobs = jobs.filter((job) => {
+    const draft = job.result?.draft;
+    return job.status === "ready_for_review"
+      && !!draft?.title?.trim()
+      && (draft.authors?.length ?? 0) > 0
+      && draft.year != null
+      && !!draft.abstract?.trim()
+      && (!!draft.url || !!draft.doi)
+      && (draft.keywords?.length ?? 0) > 0
+      && !job.result?.report?.hasFailure
+      && !!job.result?.tags?.some((tag) => tag.facet === "theme")
+      && (job.result?.duplicateCandidates?.length ?? 0) === 0;
+  });
+  const incompleteJobs = jobs.filter((job) => job.status === "ready_for_review"
+    && (job.result?.missingRequired?.length ?? 0) > 0
+    && (job.result?.duplicateCandidates?.length ?? 0) === 0);
+  const failedJobs = jobs.filter((job) => job.status === "failed");
+  const duplicateJobs = jobs.filter((job) => job.status === "ready_for_review"
+    && (job.result?.duplicateCandidates?.length ?? 0) > 0);
+
+  async function retryJobs(jobIds: number[], singleJobId?: number) {
+    if (jobIds.length === 0) return;
+    if (singleJobId != null) setRetryingJobId(singleJobId);
+    else setBulkRetrying(true);
+    setBulkMessage("");
+    try {
+      const chunks = singleJobId != null
+        ? [[singleJobId]]
+        : Array.from({ length: Math.ceil(jobIds.length / 100) }, (_, index) => jobIds.slice(index * 100, (index + 1) * 100));
+      let queuedCount = 0;
+      let skippedCount = 0;
+      for (const chunk of chunks) {
+        const endpoint = singleJobId != null
+          ? `${apiBase()}/api/resources/upload/jobs/${singleJobId}/retry`
+          : `${apiBase()}/api/resources/upload/jobs/retry-failed`;
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify(singleJobId != null ? {} : { jobIds: chunk }),
+        });
+        if (!res.ok) { setBulkMessage(await responseError(res)); return; }
+        const data = await res.json();
+        queuedCount += Array.isArray(data.queued) ? data.queued.length : 0;
+        skippedCount += Array.isArray(data.skipped) ? data.skipped.length : 0;
+      }
+      setBulkMessage(zh
+        ? `已重新排队 ${queuedCount} 条${skippedCount ? `；${skippedCount} 条原文件已不可恢复，需要重新上传` : ""}`
+        : `${queuedCount} queued again${skippedCount ? `; ${skippedCount} need the original file uploaded again` : ""}`);
+      fetchJobs();
+    } catch {
+      setBulkMessage(zh ? "重试请求失败，请稍后再试" : "Retry request failed. Please try again.");
+    } finally {
+      setRetryingJobId(null);
+      setBulkRetrying(false);
+    }
+  }
+
+  async function handleDeleteDuplicates() {
+    if (duplicateJobs.length === 0) return;
+    const confirmed = window.confirm(zh
+      ? `确定删除已匹配到资源库的 ${duplicateJobs.length} 个重复上传任务吗？资源库中的原条目不会被删除。`
+      : `Delete ${duplicateJobs.length} upload tasks already matched to the library? Existing library resources will not be deleted.`);
+    if (!confirmed) return;
+    setDeletingDuplicates(true);
+    setBulkMessage("");
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/upload/jobs/delete-duplicates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ jobIds: duplicateJobs.slice(0, 100).map((job) => job.id) }),
+      });
+      if (!res.ok) { setBulkMessage(await responseError(res)); return; }
+      const data = await res.json();
+      const deletedCount = Array.isArray(data.deleted) ? data.deleted.length : 0;
+      const skippedCount = Array.isArray(data.skipped) ? data.skipped.length : 0;
+      setBulkMessage(zh
+        ? `已删除 ${deletedCount} 个重复任务${skippedCount ? `；${skippedCount} 个经实时核验后不再判定为重复，已保留` : ""}`
+        : `Deleted ${deletedCount} duplicate tasks${skippedCount ? `; ${skippedCount} were retained after a live recheck` : ""}`);
+      fetchJobs();
+    } catch {
+      setBulkMessage(zh ? "批量删除失败，请稍后重试" : "Bulk deletion failed. Please try again.");
+    } finally {
+      setDeletingDuplicates(false);
+    }
+  }
+
+  async function handleReenrich() {
+    if (incompleteJobs.length === 0) return;
+    setReenriching(true);
+    setBulkMessage("");
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/upload/jobs/reenrich`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ jobIds: incompleteJobs.slice(0, 100).map((job) => job.id) }),
+      });
+      if (!res.ok) { setBulkMessage(await responseError(res)); return; }
+      const data = await res.json();
+      const count = Array.isArray(data.queued) ? data.queued.length : 0;
+      setBulkMessage(zh ? `已将 ${count} 条交给后台自动补全` : `${count} items queued for automatic enrichment`);
+      fetchJobs();
+    } finally {
+      setReenriching(false);
+    }
+  }
+
+  async function handleConfirmComplete() {
+    if (completeJobs.length === 0) return;
+    setBulkConfirming(true);
+    setBulkMessage("");
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/upload/jobs/confirm-complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ jobIds: completeJobs.slice(0, 100).map((job) => job.id) }),
+      });
+      if (!res.ok) { setBulkMessage(await responseError(res)); return; }
+      const data = await res.json();
+      const confirmedCount = Array.isArray(data.confirmed) ? data.confirmed.length : 0;
+      const skipped: { reason?: string }[] = Array.isArray(data.skipped) ? data.skipped : [];
+      const reasonCounts = skipped.reduce<Record<string, number>>((counts, item) => {
+        const reason = item.reason?.startsWith("missing:") ? "missing" : (item.reason ?? "unknown");
+        counts[reason] = (counts[reason] ?? 0) + 1;
+        return counts;
+      }, {});
+      const reasonLabels: Record<string, string> = zh
+        ? { duplicate: "与资源库重复", off_topic: "疑似无关", verification_failed: "验证未通过", missing: "信息不完整", confirmation_failed: "提交失败", not_ready: "状态已变化", unknown: "需要核对" }
+        : { duplicate: "duplicates", off_topic: "off topic", verification_failed: "verification failed", missing: "missing fields", confirmation_failed: "submission failed", not_ready: "status changed", unknown: "need review" };
+      const reasonSummary = Object.entries(reasonCounts).map(([reason, count]) => `${reasonLabels[reason] ?? reason} ${count}`).join(zh ? "、" : ", ");
+      setBulkMessage(zh
+        ? `已提交 ${confirmedCount} 条${skipped.length ? `；未提交 ${skipped.length} 条（${reasonSummary}）` : ""}`
+        : `Submitted ${confirmedCount}${skipped.length ? `; ${skipped.length} not submitted (${reasonSummary})` : ""}`);
+      if (confirmedCount > 0) onSaved();
+      fetchJobs();
+    } catch {
+      setBulkMessage(zh ? "批量提交失败，请稍后重试" : "Bulk submission failed. Please try again.");
+    } finally {
+      setBulkConfirming(false);
+    }
   }
 
   const reviewingJob = jobs.find((j) => j.id === reviewingId);
   if (reviewingJob && reviewDraft) {
     const report = reviewingJob.result?.report ?? { checks: [], hasFailure: false, hasWarning: false };
     return (
-      <ReviewForm draft={reviewDraft} tags={reviewTags} report={report} language={language} saving={confirming}
-        missingRequired={reviewingJob.result?.missingRequired ?? []}
-        onChange={setReviewDraft} onConfirm={handleConfirmReview} onCancel={() => setReviewingId(null)} onBack={() => setReviewingId(null)} />
+      <div className="space-y-2">
+        {reviewError && <p className="text-xs text-red-600 dark:text-red-400">{reviewError}</p>}
+        <ReviewForm draft={reviewDraft} tags={reviewTags} report={report} language={language} saving={confirming}
+          missingRequired={reviewingJob.result?.missingRequired ?? []}
+          duplicateCandidates={reviewingJob.result?.duplicateCandidates ?? []}
+          onDiscard={() => handleDiscard(reviewingJob.id, reviewingJob.result?.draft.title)}
+          onChange={setReviewDraft} onConfirm={handleConfirmReview} onCancel={() => setReviewingId(null)} onBack={() => setReviewingId(null)} />
+      </div>
     );
   }
 
   if (jobs.length === 0) return null;
 
-  // Group by batchId (jobs from the same submission share one) so a multi-file/multi-URL
-  // submission shows one "N/total done" progress line, surviving a closed/refreshed tab since
-  // it's server data, not anything kept in page memory. Jobs without a batchId (shouldn't happen
-  // going forward, but tolerate stale rows) each get their own solo group.
+  // Folder imports are split into five-PDF transport requests, but they are one user action. Group
+  // those chunks by folderImportId so My Contributions shows one coherent progress block.
   const batches = new Map<string, UploadJob[]>();
   for (const job of jobs) {
-    const key = job.batchId ?? `solo-${job.id}`;
+    const key = job.folderImportId ?? job.batchId ?? `solo-${job.id}`;
     if (!batches.has(key)) batches.set(key, []);
     batches.get(key)!.push(job);
   }
 
   return (
     <div className="space-y-3 pt-3 border-t border-border">
-      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{zh ? "处理队列" : "Queue"}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {contributionsView
+            ? (zh ? "后台处理与待确认" : "Background Processing & Review")
+            : (zh ? "处理队列" : "Queue")}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {zh
+            ? `等待处理 ${jobs.filter((job) => job.status === "queued").length} · AI解析中 ${jobs.filter((job) => job.status === "processing").length}`
+            : `${jobs.filter((job) => job.status === "queued").length} waiting · ${jobs.filter((job) => job.status === "processing").length} being parsed by AI`}
+        </p>
+        {failedJobs.length > 0 && (
+          <button onClick={() => retryJobs(failedJobs.map((job) => job.id))} disabled={bulkRetrying}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-foreground text-xs font-medium hover:bg-muted disabled:opacity-50 transition-colors">
+            <RefreshCw className={`h-3.5 w-3.5 ${bulkRetrying ? "animate-spin" : ""}`} />
+            {zh ? `重试失败任务（${failedJobs.length}）` : `Retry failed (${failedJobs.length})`}
+          </button>
+        )}
+        {duplicateJobs.length > 0 && (
+          <button onClick={handleDeleteDuplicates} disabled={deletingDuplicates}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-amber-300 bg-card text-amber-800 text-xs font-medium hover:bg-amber-50 disabled:opacity-50 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-950/30 transition-colors">
+            {deletingDuplicates ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+            {zh ? `删除重复任务（${duplicateJobs.length}）` : `Delete duplicates (${duplicateJobs.length})`}
+          </button>
+        )}
+        {completeJobs.length > 0 && (
+          <button onClick={handleConfirmComplete} disabled={bulkConfirming}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+            {bulkConfirming ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCheck className="h-3.5 w-3.5" />}
+            {zh ? `提交全部完整条目（${completeJobs.length}）` : `Submit all complete (${completeJobs.length})`}
+          </button>
+        )}
+        {incompleteJobs.length > 0 && (
+          <button onClick={handleReenrich} disabled={reenriching}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-foreground text-xs font-medium hover:bg-muted disabled:opacity-50 transition-colors">
+            <RefreshCw className={`h-3.5 w-3.5 ${reenriching ? "animate-spin" : ""}`} />
+            {zh ? `自动补全缺项（${incompleteJobs.length}）` : `Fill missing fields (${incompleteJobs.length})`}
+          </button>
+        )}
+      </div>
+      {bulkMessage && <p className="text-xs text-muted-foreground">{bulkMessage}</p>}
       {[...batches.values()].map((batchJobs) => {
         const doneCount = batchJobs.filter((j) => j.status === "ready_for_review" || j.status === "failed").length;
         return (
@@ -1489,25 +1978,68 @@ export function JobQueuePanel({ token, language, type, folderImportId, onSaved }
               </p>
             )}
             {batchJobs.map((job) => {
-              const label = job.input?.fileName ?? job.input?.url ?? job.input?.title ?? `#${job.id}`;
+              const label = job.result?.draft?.title
+                ?? job.input?.reference?.title
+                ?? job.input?.title
+                ?? job.input?.fileName
+                ?? job.input?.url
+                ?? `#${job.id}`;
+              const duplicates = job.result?.duplicateCandidates ?? [];
+              const isOffTopic = job.status === "ready_for_review" && !job.result?.tags?.some((tag) => tag.facet === "theme");
               return (
-                <div key={job.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-border bg-card text-xs">
-                  <div className="flex items-center gap-2 min-w-0">
-                    {job.status === "queued" && <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-                    {job.status === "processing" && <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />}
-                    {job.status === "ready_for_review" && <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />}
-                    {job.status === "failed" && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
-                    <span className="truncate text-foreground">{job.result?.draft?.title || label}</span>
+                <div key={job.id} className={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg border bg-card text-xs ${isOffTopic ? "border-red-300 dark:border-red-800" : duplicates.length ? "border-amber-300 dark:border-amber-700" : "border-border"}`}>
+                  <div className="flex items-start gap-2 min-w-0 flex-1">
+                    {job.status === "queued" && <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />}
+                    {job.status === "processing" && <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0 mt-0.5" />}
+                    {job.status === "ready_for_review" && <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />}
+                    {job.status === "failed" && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />}
+                    <div className="min-w-0 space-y-0.5">
+                      <p className="truncate text-foreground">{job.result?.draft?.title || label}</p>
+                      {job.status === "queued" && (
+                        <p className="text-muted-foreground">
+                          {job.nextAttemptAt
+                            ? (zh ? "等待自动重试" : "Waiting for an automatic retry")
+                            : (zh ? "等待后台处理" : "Waiting for background processing")}
+                        </p>
+                      )}
+                      {job.status === "processing" && (
+                        <p className="text-primary">{zh ? "AI正在解析文档与补充信息" : "AI is parsing the document and enriching metadata"}</p>
+                      )}
+                      {duplicates.length > 0 && (
+                        <p className="text-amber-700 dark:text-amber-300">
+                          {zh ? `资源库已有同题同作者条目：${duplicates[0].title}` : `Matching title and author already in library: ${duplicates[0].title}`}
+                        </p>
+                      )}
+                      {isOffTopic && (
+                        <p className="text-red-700 dark:text-red-300">
+                          {zh ? "疑似超出稳定币、加密资产、DeFi 与区块链研究范围，请核对" : "Possibly outside the stablecoin, crypto-asset, DeFi, and blockchain research scope; please review"}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {job.status === "ready_for_review" && (
                       <button onClick={() => openReview(job)} className="px-2.5 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                        {zh ? "核对" : "Review"}
+                        {contributionsView ? (zh ? "核对并提交" : "Review & Submit") : (zh ? "核对" : "Review")}
                       </button>
                     )}
-                    {job.status === "failed" && <span className="text-red-600 dark:text-red-400 max-w-[160px] truncate" title={job.error ?? ""}>{job.error}</span>}
-                    <button onClick={() => handleDiscard(job.id)} className="text-muted-foreground hover:text-red-500 transition-colors">
-                      <X className="h-3.5 w-3.5" />
+                    {job.status === "failed" && (
+                      <>
+                        <span className="text-red-600 dark:text-red-400 max-w-[160px] truncate" title={job.error ?? ""}>{job.error}</span>
+                        <button onClick={() => retryJobs([job.id], job.id)} disabled={retryingJobId === job.id || bulkRetrying}
+                          title={zh ? "使用已保存的资料重新处理" : "Process again using the saved source"}
+                          className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-foreground hover:bg-muted disabled:opacity-50 transition-colors">
+                          <RefreshCw className={`h-3.5 w-3.5 ${retryingJobId === job.id ? "animate-spin" : ""}`} />
+                          <span>{zh ? "重试" : "Retry"}</span>
+                        </button>
+                      </>
+                    )}
+                    <button onClick={() => handleDiscard(job.id, job.result?.draft?.title || label)}
+                      title={zh ? "删除上传任务" : "Delete upload task"}
+                      aria-label={zh ? "删除上传任务" : "Delete upload task"}
+                      className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-muted-foreground hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 transition-colors">
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span>{zh ? "删除" : "Delete"}</span>
                     </button>
                   </div>
                 </div>
@@ -1533,11 +2065,14 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
   const [tags, setTags] = useState<TagSummary[]>([]);
   const [report, setReport] = useState<VerifyReport | null>(null);
   const [missingRequired, setMissingRequired] = useState<string[]>([]);
+  const [duplicateCandidates, setDuplicateCandidates] = useState<DuplicatePreview[]>([]);
+  const [confirmationId, setConfirmationId] = useState("");
   const [error, setError] = useState("");
 
   // batch (async/jobs)
   const [batchText, setBatchText] = useState("");
   const [submittingBatch, setSubmittingBatch] = useState(false);
+  const [batchSubmitted, setBatchSubmitted] = useState(false);
 
   async function handleParseSingle() {
     if (!singleUrl.trim()) return;
@@ -1550,7 +2085,7 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
       });
       const data = await res.json();
       if (!res.ok) { setError((data.error ?? "Failed") + (data.detail ? ` (${data.detail})` : "")); setStep("input"); return; }
-      setDraft(data.draft); setTags(data.tags); setReport(data.report); setMissingRequired(data.missingRequired ?? []); setStep("review");
+      setDraft(data.draft); setTags(data.tags); setReport(data.report); setMissingRequired(data.missingRequired ?? []); setDuplicateCandidates(data.duplicateCandidates ?? []); setConfirmationId(data.confirmationId ?? ""); setStep("review");
     } catch { setError(zh ? "网络请求失败" : "Network error"); setStep("input"); }
   }
 
@@ -1561,7 +2096,7 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
       const res = await fetch(`${apiBase()}/api/resources/upload/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ...draft, tagIds: tags.map((t) => t.id), tagScores: tagScoresPayload(tags) }),
+        body: JSON.stringify({ ...draft, confirmationId, tagIds: tags.map((t) => t.id), tagScores: tagScoresPayload(tags) }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); setStep("review"); return; }
       onSaved(); onClose();
@@ -1569,16 +2104,20 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
   }
 
   async function handleSubmitBatch() {
-    const urls = [...new Set(batchText.split("\n").map((u) => u.trim()).filter((u) => u.startsWith("http")))].slice(0, 20);
+    const urls = [...new Set(batchText.split("\n").map(normalizeUrlOrDoi).filter((u) => u.startsWith("http")))].slice(0, 20);
     if (urls.length === 0) return;
-    setSubmittingBatch(true);
+    setSubmittingBatch(true); setError(""); setBatchSubmitted(false);
     try {
-      await fetch(`${apiBase()}/api/resources/upload/jobs/url-batch`, {
+      const res = await fetch(`${apiBase()}/api/resources/upload/jobs/url-batch`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ urls, sourceType }),
       });
+      if (!res.ok) { setError(await responseError(res)); return; }
       setBatchText("");
+      setBatchSubmitted(true);
+    } catch {
+      setError(zh ? "网络请求失败" : "Network error");
     } finally {
       setSubmittingBatch(false);
     }
@@ -1588,8 +2127,8 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
     return (
       <div className="space-y-2">
         {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
-        <ReviewForm draft={draft} tags={tags} report={report} language={language} saving={step === "saving"} missingRequired={missingRequired}
-          onChange={setDraft} onConfirm={handleConfirmSingle} onCancel={onClose} onBack={() => setStep("input")} />
+        <ReviewForm draft={draft} tags={tags} report={report} language={language} saving={step === "saving"} missingRequired={missingRequired} duplicateCandidates={duplicateCandidates}
+          onChange={setDraft} onConfirm={handleConfirmSingle} onCancel={onClose} onBack={() => setStep("input")} onDiscard={onClose} />
       </div>
     );
   }
@@ -1641,12 +2180,17 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "URL 列表（每行一个，最多 20 条）" : "URLs (one per line, up to 20)"}</label>
             <textarea value={batchText} onChange={(e) => setBatchText(e.target.value)} rows={6}
-              placeholder={"https://...\nhttps://..."}
+              placeholder={"https://...\n10.xxxx/xxxxx"}
               className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none font-mono placeholder:text-muted-foreground" />
           </div>
           <p className="text-xs text-muted-foreground">
             {zh ? "提交后将在后台逐条处理，可关闭此窗口，稍后在下方队列中查看进度与核对。" : "Submitted URLs process in the background — you can close this dialog and check progress in the queue below later."}
           </p>
+          {batchSubmitted && (
+            <p className="text-xs text-emerald-700 dark:text-emerald-300">
+              {zh ? "上传成功，已进入后台队列。可在“我的贡献”中继续查看进度。" : "Uploaded successfully and queued. You can continue tracking it in My Contributions."}
+            </p>
+          )}
           <div className="flex justify-end gap-2">
             <button onClick={handleSubmitBatch} disabled={submittingBatch || !batchText.trim()}
               className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
@@ -1663,6 +2207,7 @@ function UrlTab({ token, language, onClose, onSaved }: { token: string; language
 
 // ── PDF tab — always async (upload_jobs-backed), even for a single file ────────
 const PDF_MAX_SIZE_MB = 50;
+const PDF_MAX_FILES = 5;
 
 function PdfTab({ token, language, onSaved }: { token: string; language: string; onSaved: () => void }) {
   const zh = language === "zh";
@@ -1670,11 +2215,12 @@ function PdfTab({ token, language, onSaved }: { token: string; language: string;
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [submittedCount, setSubmittedCount] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   /** Rejects oversized files at selection time (matches the server's PDF_MAX_SIZE_MB) instead of letting the user wait through an upload that's guaranteed to fail. */
   function handleFilesSelected(selected: File[]) {
-    const withinLimit = selected.filter((f) => f.size <= PDF_MAX_SIZE_MB * 1024 * 1024).slice(0, 20);
+    const withinLimit = selected.filter((f) => f.size <= PDF_MAX_SIZE_MB * 1024 * 1024).slice(0, PDF_MAX_FILES);
     const tooLarge = selected.filter((f) => f.size > PDF_MAX_SIZE_MB * 1024 * 1024);
     setFiles(withinLimit);
     setError(tooLarge.length > 0
@@ -1685,7 +2231,7 @@ function PdfTab({ token, language, onSaved }: { token: string; language: string;
 
   async function handleSubmit() {
     if (files.length === 0) return;
-    setSubmitting(true); setError("");
+    setSubmitting(true); setError(""); setSubmittedCount(0);
     try {
       const form = new FormData();
       files.forEach((f) => form.append("files", f));
@@ -1696,6 +2242,7 @@ function PdfTab({ token, language, onSaved }: { token: string; language: string;
         body: form,
       });
       if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed"); return; }
+      setSubmittedCount(files.length);
       setFiles([]);
       if (inputRef.current) inputRef.current.value = "";
     } catch {
@@ -1715,7 +2262,7 @@ function PdfTab({ token, language, onSaved }: { token: string; language: string;
         </select>
       </div>
       <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? `PDF 文件（可多选，单个最大 ${PDF_MAX_SIZE_MB}MB，最多 20 个）` : `PDF files (multi-select, ${PDF_MAX_SIZE_MB}MB max each, up to 20)`}</label>
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? `PDF 文件（可多选，单个最大 ${PDF_MAX_SIZE_MB}MB，最多 ${PDF_MAX_FILES} 个）` : `PDF files (multi-select, ${PDF_MAX_SIZE_MB}MB max each, up to ${PDF_MAX_FILES})`}</label>
         <input ref={inputRef} type="file" accept="application/pdf" multiple
           onChange={(e) => handleFilesSelected(Array.from(e.target.files ?? []))}
           className="w-full text-xs text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-border file:bg-muted file:text-foreground file:text-xs file:font-medium hover:file:bg-muted/80 file:cursor-pointer cursor-pointer" />
@@ -1726,10 +2273,15 @@ function PdfTab({ token, language, onSaved }: { token: string; language: string;
         )}
       </div>
       <p className="text-xs text-muted-foreground">
-        {zh ? "上传后将在后台逐个处理（先尝试本地文字提取，扫描件 OCR 暂未启用），可关闭此窗口，稍后在下方队列中查看进度与核对。"
-            : "Uploaded files process in the background (text extraction first; OCR for scanned PDFs isn't enabled yet) — you can close this dialog and check progress in the queue below later."}
+        {zh ? "上传后将在后台逐个处理（先尝试本地文字提取，扫描件会自动使用 OCR），可关闭此窗口，稍后在下方队列中查看进度与核对。"
+            : "Uploaded files process in the background (local text extraction first, then OCR for scanned PDFs) — you can close this dialog and check progress in the queue below later."}
       </p>
       {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      {submittedCount > 0 && (
+        <p className="text-xs text-emerald-700 dark:text-emerald-300">
+          {zh ? `已上传 ${submittedCount} 个 PDF，正在后台处理。可关闭窗口并在“我的贡献”中查看进度。` : `${submittedCount} PDF(s) uploaded and processing in the background. Track progress in My Contributions.`}
+        </p>
+      )}
       <div className="flex justify-end gap-2">
         <button onClick={handleSubmit} disabled={submitting || files.length === 0}
           className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
@@ -1743,12 +2295,11 @@ function PdfTab({ token, language, onSaved }: { token: string; language: string;
 }
 
 // ── Folder import tab (docs/planning/14 §3) ─────────────────────────────────────
-// select folder -> classify by extension -> (auto) decompose any unstructured reference-list files
-// -> file-level summary/confirm (§3.4, gate 1) -> entry-level editable table for decomposed rows
-// only (§3.3 point 3, gate 2) -> submit each bucket into its existing pipeline, all sharing one
-// folderImportId -> combined progress view.
+// select folder -> classify by extension -> file-level summary/confirm -> persist every selected
+// input immediately. Word/Markdown decomposition then runs inside the same recoverable queue as
+// PDF/citation processing, all sharing one folderImportId for a combined progress view.
 
-type FolderFileCategory = "pdf" | "citation" | "unstructured" | "ignored";
+type FolderFileCategory = "pdf" | "citation" | "unstructured" | "archive" | "ignored";
 interface ClassifiedFile { file: File; relativePath: string; category: FolderFileCategory }
 
 function classifyFolderFile(file: File): FolderFileCategory {
@@ -1757,17 +2308,8 @@ function classifyFolderFile(file: File): FolderFileCategory {
   if (ext === "pdf") return "pdf";
   if (["txt", "ent", "enw", "es6"].includes(ext)) return "citation";
   if (["md", "docx", "doc", "wps"].includes(ext)) return "unstructured";
+  if (ext === "zip") return "archive";
   return "ignored";
-}
-
-interface UnstructuredEntry {
-  id: string;
-  title: string;
-  authorsText: string; // edited as a single "; "-joined string, split on submit
-  year: string; // edited as text, parsed on submit
-  urlOrDoi: string;
-  sourceFile: string;
-  included: boolean;
 }
 
 function FolderImportTab({ token, language, onSaved }: { token: string; language: string; onSaved: () => void }) {
@@ -1779,7 +2321,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
   // when webkitRelativePath isn't present, which is exactly the case for a non-folder selection.
   const filesInputRef = useRef<HTMLInputElement>(null);
   const [webkitdirSupported] = useState(() => "webkitdirectory" in document.createElement("input"));
-  const [stage, setStage] = useState<"select" | "extracting" | "summary" | "unstructuredReview" | "progress">("select");
+  const [stage, setStage] = useState<"select" | "summary" | "progress">("select");
   // Unset by default (not "journal_article") — this is only a fallback default for whichever files
   // a sub-pipeline genuinely can't determine a type for on its own (PDF/URL trust the LLM reading
   // the actual text; citation files trust their own RT/Reference Type field; title-search entries
@@ -1789,8 +2331,6 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
   const [showStructureHint, setShowStructureHint] = useState(false);
   const [classified, setClassified] = useState<ClassifiedFile[]>([]);
   const [checked, setChecked] = useState<Set<number>>(new Set());
-  const [unstructuredEntries, setUnstructuredEntries] = useState<UnstructuredEntry[]>([]);
-  const [unstructuredErrors, setUnstructuredErrors] = useState<string[]>([]);
   const [folderImportId, setFolderImportId] = useState<string | null>(null);
   // Bumped every time we return to the "select" stage — used as the <input>'s React `key` so a
   // brand-new DOM node (with no possible memory of a prior selection) is guaranteed on every
@@ -1798,6 +2338,10 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
   const [pickerGeneration, setPickerGeneration] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const submissionLockRef = useRef(false);
+  const folderImportIdRef = useRef<string | null>(null);
+  const submittedFileKeysRef = useRef(new Set<string>());
+  const [uploadSummary, setUploadSummary] = useState({ accepted: 0, duplicates: 0, handled: 0, total: 0 });
 
   // webkitdirectory/directory aren't in React's DOM attribute typings (non-standard but
   // universally supported) — set them imperatively instead of fighting the JSX typing. Must be a
@@ -1814,7 +2358,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
     }
   }, []);
 
-  async function handleFolderSelected(fileList: FileList | null) {
+  function handleFolderSelected(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
     setError("");
     const files = Array.from(fileList).map((f) => ({
@@ -1824,59 +2368,11 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
     }));
     setClassified(files);
     setChecked(new Set(files.map((_, i) => i).filter((i) => files[i].category !== "ignored")));
-
-    const unstructuredFiles = files.filter((f) => f.category === "unstructured");
-    if (unstructuredFiles.length === 0) {
-      setStage("summary");
-      return;
-    }
-
-    setStage("extracting");
-    const pooled: UnstructuredEntry[] = [];
-    const errors: string[] = [];
-    // Each call is a real ~15-25s LLM decomposition — running them sequentially with `for...await`
-    // meant total wait time was the SUM across every unstructured file (over a minute with just 2-3
-    // files), which looked indistinguishable from a genuine hang. Running them concurrently caps the
-    // wait at roughly the slowest single file instead.
-    await Promise.all(unstructuredFiles.map(async (f) => {
-      try {
-        const form = new FormData();
-        form.append("file", f.file);
-        const res = await fetch(`${apiBase()}/api/resources/upload/jobs/unstructured-list/preview`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: form,
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          // docs/planning/20 §20.0.1 — the backend already returns a specific `detail` (e.g. the
-          // actual LLM/parsing error) alongside the generic `error` label; this used to drop it.
-          const message = data.error ?? (zh ? "解析失败" : "failed");
-          errors.push(`${f.relativePath}: ${message}${data.detail ? ` (${data.detail})` : ""}`);
-          return;
-        }
-        (data.entries ?? []).forEach((e: { title?: string; authors?: string[]; year?: number | null; urlOrDoi?: string | null }, idx: number) => {
-          pooled.push({
-            id: `${f.relativePath}-${idx}`,
-            title: e.title ?? "",
-            authorsText: Array.isArray(e.authors) ? e.authors.join("; ") : "",
-            year: e.year != null ? String(e.year) : "",
-            urlOrDoi: e.urlOrDoi ?? "",
-            sourceFile: f.relativePath,
-            included: true,
-          });
-        });
-      } catch {
-        errors.push(`${f.relativePath}: ${zh ? "网络请求失败" : "network error"}`);
-      }
-    }));
-    setUnstructuredEntries(pooled);
-    setUnstructuredErrors(errors);
     setStage("summary");
   }
 
   const counts = useMemo(() => {
-    const c = { pdf: 0, citation: 0, unstructured: 0, ignored: 0 };
+    const c = { pdf: 0, citation: 0, unstructured: 0, archive: 0, ignored: 0 };
     for (const f of classified) c[f.category]++;
     return c;
   }, [classified]);
@@ -1897,100 +2393,96 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
     });
   }
 
-  /** Bare DOI (e.g. "10.1016/j.frl.2020.101867") -> a fetchable URL, since the existing url-batch pipeline this reuses does fetch(url) and can't fetch a bare DOI string. Already a URL -> unchanged. */
-  function normalizeUrlOrDoi(value: string): string {
-    const v = value.trim();
-    if (!v) return v;
-    if (/^10\.\d{4,9}\//.test(v)) return `https://doi.org/${v}`;
-    return v;
-  }
-
   async function handleConfirmSummary() {
+    if (submissionLockRef.current) return;
+    submissionLockRef.current = true;
     setSubmitting(true);
     setError("");
-    const newFolderImportId = crypto.randomUUID();
+    const newFolderImportId = folderImportIdRef.current ?? crypto.randomUUID();
+    folderImportIdRef.current = newFolderImportId;
     try {
       const selectedFiles = classified.filter((_, i) => checked.has(i));
-      const pdfFiles = selectedFiles.filter((f) => f.category === "pdf");
-      const citationFiles = selectedFiles.filter((f) => f.category === "citation");
-      // Files whose parsed entries came from an unchecked-at-summary-stage source file are dropped
-      // from the pool here too — unchecking the file should un-pool its already-decomposed rows.
-      const includedSourceFiles = new Set(selectedFiles.filter((f) => f.category === "unstructured").map((f) => f.relativePath));
-      setUnstructuredEntries((prev) => prev.filter((e) => includedSourceFiles.has(e.sourceFile)));
+      const fileKey = (item: ClassifiedFile) => `${item.category}:${item.relativePath}:${item.file.size}:${item.file.lastModified}`;
+      const remainingFiles = selectedFiles.filter((item) => !submittedFileKeysRef.current.has(fileKey(item)));
+      const pdfFiles = remainingFiles.filter((f) => f.category === "pdf");
+      const citationFiles = remainingFiles.filter((f) => f.category === "citation");
+      const unstructuredFiles = remainingFiles.filter((f) => f.category === "unstructured");
+      const archiveFiles = remainingFiles.filter((f) => f.category === "archive");
+      setUploadSummary((previous) => ({ ...previous, total: selectedFiles.length }));
+
+      async function acceptResponse(res: Response, submittedItems: ClassifiedFile[]) {
+        if (!res.ok) {
+          const failedNames = submittedItems.map((item) => item.file.name).join(", ");
+          throw new Error(`${await responseError(res)}${failedNames ? ` (${failedNames})` : ""}`);
+        }
+        const payload = await res.json().catch(() => ({})) as { acceptedCount?: number; duplicateCount?: number };
+        submittedItems.forEach((item) => submittedFileKeysRef.current.add(fileKey(item)));
+        setUploadSummary((previous) => ({
+          total: selectedFiles.length,
+          handled: submittedFileKeysRef.current.size,
+          accepted: previous.accepted + (payload.acceptedCount ?? submittedItems.length),
+          duplicates: previous.duplicates + (payload.duplicateCount ?? 0),
+        }));
+      }
 
       if (pdfFiles.length > 0) {
-        const form = new FormData();
-        pdfFiles.forEach((f) => form.append("files", f.file));
-        if (sourceType) form.append("sourceType", sourceType);
-        form.append("folderImportId", newFolderImportId);
-        await fetch(`${apiBase()}/api/resources/upload/jobs/pdf`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+        for (let i = 0; i < pdfFiles.length; i += PDF_MAX_FILES) {
+          const chunk = pdfFiles.slice(i, i + PDF_MAX_FILES);
+          const form = new FormData();
+          chunk.forEach((f) => form.append("files", f.file));
+          if (sourceType) form.append("sourceType", sourceType);
+          form.append("folderImportId", newFolderImportId);
+          const res = await fetch(`${apiBase()}/api/resources/upload/jobs/pdf`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+          await acceptResponse(res, chunk);
+        }
       }
       for (const f of citationFiles) {
         const form = new FormData();
         form.append("file", f.file);
         form.append("folderImportId", newFolderImportId);
-        await fetch(`${apiBase()}/api/resources/upload/jobs/citation`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+        const res = await fetch(`${apiBase()}/api/resources/upload/jobs/citation`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+        await acceptResponse(res, [f]);
+      }
+      for (const f of unstructuredFiles) {
+        const form = new FormData();
+        form.append("file", f.file);
+        if (sourceType) form.append("sourceType", sourceType);
+        form.append("folderImportId", newFolderImportId);
+        const res = await fetch(`${apiBase()}/api/resources/upload/jobs/reference-list`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+        await acceptResponse(res, [f]);
+      }
+      for (const f of archiveFiles) {
+        const form = new FormData();
+        form.append("file", f.file);
+        if (sourceType) form.append("sourceType", sourceType);
+        const res = await fetch(`${apiBase()}/api/resources/upload/jobs/archive`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+        await acceptResponse(res, [f]);
       }
 
       setFolderImportId(newFolderImportId);
-      const hasPooledEntries = unstructuredEntries.some((e) => includedSourceFiles.has(e.sourceFile));
-      setStage(hasPooledEntries ? "unstructuredReview" : "progress");
-    } catch {
-      setError(zh ? "网络请求失败" : "Network error");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  function updateEntry(id: string, patch: Partial<UnstructuredEntry>) {
-    setUnstructuredEntries((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
-  }
-  function removeEntry(id: string) {
-    setUnstructuredEntries((prev) => prev.filter((e) => e.id !== id));
-  }
-
-  async function handleConfirmUnstructured() {
-    if (!folderImportId) return;
-    setSubmitting(true);
-    setError("");
-    try {
-      const included = unstructuredEntries.filter((e) => e.included && e.title.trim());
-      const withLink = included.filter((e) => e.urlOrDoi.trim());
-      const withoutLink = included.filter((e) => !e.urlOrDoi.trim());
-
-      if (withLink.length > 0) {
-        await fetch(`${apiBase()}/api/resources/upload/jobs/url-batch`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ urls: withLink.map((e) => normalizeUrlOrDoi(e.urlOrDoi)), sourceType: sourceType || undefined, folderImportId }),
-        });
-      }
-      if (withoutLink.length > 0) {
-        await fetch(`${apiBase()}/api/resources/upload/jobs/title-batch`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            entries: withoutLink.map((e) => ({
-              title: e.title,
-              authors: e.authorsText.split(";").map((a) => a.trim()).filter(Boolean),
-              year: e.year.trim() ? Number(e.year.trim()) : null,
-            })),
-            sourceType: sourceType || undefined,
-            folderImportId,
-          }),
-        });
-      }
       setStage("progress");
-    } catch {
-      setError(zh ? "网络请求失败" : "Network error");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : (zh ? "网络请求失败" : "Network error");
+      const handled = submittedFileKeysRef.current.size;
+      setError(handled > 0
+        ? (zh ? `已接收 ${handled} 个文件；其余文件尚未创建任务。${message}` : `${handled} files were accepted; the remaining files have not created jobs. ${message}`)
+        : message);
+      if (handled > 0) {
+        setFolderImportId(newFolderImportId);
+        setStage("progress");
+      }
     } finally {
       setSubmitting(false);
+      submissionLockRef.current = false;
     }
   }
 
   function resetAll() {
-    setStage("select"); setClassified([]); setChecked(new Set()); setUnstructuredEntries([]);
-    setUnstructuredErrors([]); setFolderImportId(null); setError("");
+    setStage("select"); setClassified([]); setChecked(new Set());
+    setFolderImportId(null); setError("");
+    folderImportIdRef.current = null;
+    submittedFileKeysRef.current = new Set();
+    setUploadSummary({ accepted: 0, duplicates: 0, handled: 0, total: 0 });
     setPickerGeneration((g) => g + 1);
   }
 
@@ -2031,7 +2523,7 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
           </div>
           <input key={`folder-${pickerGeneration}`} ref={setFolderInputRef} type="file" multiple disabled={!webkitdirSupported}
             onChange={(e) => handleFolderSelected(e.target.files)} className="hidden" />
-          <input key={`files-${pickerGeneration}`} ref={filesInputRef} type="file" multiple
+          <input key={`files-${pickerGeneration}`} ref={filesInputRef} type="file" multiple accept=".pdf,.docx,.md,.txt,.ent,.enw,.zip"
             onChange={(e) => handleFolderSelected(e.target.files)} className="hidden" />
         </div>
         <div>
@@ -2061,37 +2553,20 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
     );
   }
 
-  if (stage === "extracting") {
-    const n = classified.filter((f) => f.category === "unstructured").length;
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 py-10 text-sm text-muted-foreground">
-        <Loader2 className="h-5 w-5 animate-spin text-primary" />
-        <p>{zh ? `正在解析 ${n} 份参考文献列表文件…` : `Parsing ${n} reference-list file(s)…`}</p>
-        <p className="text-xs">{zh ? "每份文件的 AI 解析大约需要 15–25 秒，请耐心等待。" : "AI parsing takes roughly 15–25 seconds per file — this can take a bit."}</p>
-      </div>
-    );
-  }
-
   if (stage === "summary") {
-    const pooledCount = unstructuredEntries.length;
     const categories: { key: FolderFileCategory; labelZh: string; labelEn: string }[] = [
       { key: "pdf", labelZh: "PDF", labelEn: "PDF" },
       { key: "citation", labelZh: "题录文件", labelEn: "Citation files" },
       { key: "unstructured", labelZh: "参考文献列表", labelEn: "Reference lists" },
+      { key: "archive", labelZh: "ZIP 压缩包", labelEn: "ZIP archives" },
     ];
     return (
       <div className="space-y-5">
         <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
           {zh
-            ? `识别到 ${counts.pdf} 个 PDF、${counts.citation} 个题录文件、${counts.unstructured} 份参考文献列表（共解析出 ${pooledCount} 条待人工确认）、已忽略 ${counts.ignored} 个不支持的文件。`
-            : `Found ${counts.pdf} PDF(s), ${counts.citation} citation file(s), ${counts.unstructured} reference list(s) (${pooledCount} entries parsed, pending confirmation), ignored ${counts.ignored} unsupported file(s).`}
+            ? `识别到 ${counts.pdf} 个 PDF、${counts.citation} 个题录文件、${counts.unstructured} 份参考文献列表、${counts.archive} 个 ZIP，已忽略 ${counts.ignored} 个文件。参考文献列表将在提交后由后台自动拆分。`
+            : `Found ${counts.pdf} PDF(s), ${counts.citation} citation file(s), ${counts.unstructured} reference list(s), and ${counts.archive} ZIP archive(s); ignored ${counts.ignored} file(s). Reference lists will be split automatically in the background after submission.`}
         </div>
-
-        {unstructuredErrors.length > 0 && (
-          <div className="text-xs text-amber-600 dark:text-amber-400 space-y-0.5">
-            {unstructuredErrors.map((e, i) => <p key={i}>⚠️ {e}</p>)}
-          </div>
-        )}
 
         {categories.map(({ key, labelZh, labelEn }) => {
           const items = classified.map((f, i) => ({ f, i })).filter(({ f }) => f.category === key);
@@ -2143,64 +2618,31 @@ function FolderImportTab({ token, language, onSaved }: { token: string; language
     );
   }
 
-  if (stage === "unstructuredReview") {
-    return (
-      <div className="space-y-4">
-        <p className="text-xs text-muted-foreground">
-          {zh ? "以下是从参考文献列表里自动拆解出的条目，AI 解析结果可能有误，请逐条核对/编辑后再提交——这一步是必须的，不会跳过。"
-              : "These entries were auto-decomposed from the reference-list file(s). AI extraction can be wrong — review/edit each row before submitting; this step can't be skipped."}
-        </p>
-        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-          {unstructuredEntries.map((entry) => (
-            <div key={entry.id} className={`rounded-lg border p-2.5 space-y-1.5 ${entry.included ? "border-border bg-card" : "border-border/50 bg-muted/30 opacity-60"}`}>
-              <div className="flex items-center justify-between gap-2">
-                <label className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
-                  <input type="checkbox" checked={entry.included} onChange={(e) => updateEntry(entry.id, { included: e.target.checked })} />
-                  <span className="truncate">{entry.sourceFile}</span>
-                </label>
-                <button onClick={() => removeEntry(entry.id)} className="text-muted-foreground hover:text-red-500 transition-colors shrink-0">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-              <input value={entry.title} onChange={(e) => updateEntry(entry.id, { title: e.target.value })}
-                placeholder={zh ? "标题" : "Title"}
-                className="w-full px-2 py-1 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <div className="grid grid-cols-3 gap-1.5">
-                <input value={entry.authorsText} onChange={(e) => updateEntry(entry.id, { authorsText: e.target.value })}
-                  placeholder={zh ? "作者（用；分隔）" : "Authors (; separated)"}
-                  className="col-span-1 px-2 py-1 text-xs rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-                <input value={entry.year} onChange={(e) => updateEntry(entry.id, { year: e.target.value })}
-                  placeholder={zh ? "年份" : "Year"}
-                  className="col-span-1 px-2 py-1 text-xs rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-                <input value={entry.urlOrDoi} onChange={(e) => updateEntry(entry.id, { urlOrDoi: e.target.value })}
-                  placeholder={zh ? "URL 或 DOI（可空）" : "URL or DOI (optional)"}
-                  className="col-span-1 px-2 py-1 text-xs rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              </div>
-            </div>
-          ))}
-          {unstructuredEntries.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-4">{zh ? "没有可确认的条目" : "No entries to confirm"}</p>
-          )}
-        </div>
-        {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
-        <div className="flex justify-end gap-2">
-          <button onClick={resetAll} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
-            {zh ? "取消" : "Cancel"}
-          </button>
-          <button onClick={handleConfirmUnstructured} disabled={submitting}
-            className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
-            {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-            {zh ? "确认提交" : "Confirm & Submit"}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // stage === "progress"
   return (
     <div className="space-y-4">
-      <p className="text-sm text-foreground">{zh ? "已提交，正在后台处理——可关闭此窗口，稍后回来查看进度与核对。" : "Submitted — processing in the background. You can close this dialog and check progress later."}</p>
+      <div className="border border-border bg-muted/30 px-3 py-2.5 text-sm space-y-1">
+        <p className="font-medium text-foreground">
+          {zh ? `已处理上传请求 ${uploadSummary.handled}/${uploadSummary.total}` : `Upload requests handled: ${uploadSummary.handled}/${uploadSummary.total}`}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {zh
+            ? `新建任务 ${uploadSummary.accepted} 个；重复文件已跳过 ${uploadSummary.duplicates} 个。`
+            : `${uploadSummary.accepted} new jobs; ${uploadSummary.duplicates} duplicate files skipped.`}
+        </p>
+      </div>
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      <p className="text-sm text-foreground">{zh ? "已接收的任务正在后台分批处理。可以关闭此窗口，并在“我的贡献 > 后台处理”中继续查看。" : "Accepted jobs are processing in the background. You can close this dialog and continue tracking them under My Contributions > Background Processing."}</p>
+      {uploadSummary.handled < uploadSummary.total && (
+        <button onClick={handleConfirmSummary} disabled={submitting}
+          className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-md border border-border bg-card hover:bg-muted disabled:opacity-50">
+          {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+          {zh ? `仅重试尚未创建的 ${uploadSummary.total - uploadSummary.handled} 个文件` : `Retry only ${uploadSummary.total - uploadSummary.handled} files not yet created`}
+        </button>
+      )}
+      <Link href="/my-contributions" className="inline-flex text-xs text-primary hover:underline">
+        {zh ? "前往我的贡献查看全部进度" : "View all progress in My Contributions"}
+      </Link>
       <button onClick={resetAll} className="text-xs text-primary hover:underline">{zh ? "导入另一个文件夹" : "Import another folder"}</button>
       {folderImportId && <JobQueuePanel token={token} language={language} folderImportId={folderImportId} onSaved={onSaved} />}
     </div>
@@ -2264,8 +2706,22 @@ export default function AcademicResources() {
   const zh = language === "zh";
 
   const [searchQuery,   setSearchQuery]   = useState("");
-  const [selectedType,  setSelectedType]  = useState<FilterType>("All");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "title">("newest");
+  const [publicationLanguage, setPublicationLanguage] = useState<PublicationLanguageFilter>("all");
+  const [yearFrom, setYearFrom] = useState("");
+  const [yearTo, setYearTo] = useState("");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] = useState(
+    () => window.localStorage.getItem("resource-filter-sidebar-collapsed") === "true",
+  );
+  const [selectedType, setSelectedType] = useState<FilterType>(() => {
+    const requestedType = new URLSearchParams(window.location.search).get("type");
+    return FILTER_TYPES.some(({ value }) => value === requestedType)
+      ? requestedType as FilterType
+      : "All";
+  });
   const [selectedFacetTag, setSelectedFacetTag] = useState<string | null>(() => new URLSearchParams(window.location.search).get("tag"));
+  const [tagSearchQuery, setTagSearchQuery] = useState("");
   const [facetTagVocab, setFacetTagVocab] = useState<TagSummary[]>([]);
   const [apiResources,  setApiResources]  = useState<Resource[] | null>(null);
   const [isLoading,     setIsLoading]     = useState(true);
@@ -2280,9 +2736,14 @@ export default function AcademicResources() {
   // an admin's own edit silently ended up as a pending suggestion instead of taking effect. This is
   // the actual admin-direct-edit modal, same one the admin review queue already uses.
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
-  // Theme facet's folding tree (docs/planning/15 §3.4) — all six categories start collapsed so the
-  // sidebar doesn't open already full of dozens of tags.
+  // The six theme categories render directly under Tags. Their individual vocabularies remain
+  // collapsed until selected or searched so the filter column stays compact.
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [expandedFacets, setExpandedFacets] = useState<Set<TagSummary["facet"]>>(new Set());
+
+  useEffect(() => {
+    window.localStorage.setItem("resource-filter-sidebar-collapsed", String(isFilterSidebarCollapsed));
+  }, [isFilterSidebarCollapsed]);
 
   useEffect(() => {
     fetch(`${apiBase()}/api/tags`)
@@ -2323,28 +2784,113 @@ export default function AcademicResources() {
   useEffect(() => { fetchResources(); }, [fetchResources]);
 
   const resources = apiResources ?? [];
+  const facetTagUsage = useMemo(() => {
+    const usage = new Map<string, number>();
+    for (const resource of resources) {
+      if (resource.status !== "approved") continue;
+      const resourceTagSlugs = new Set((resource.facetedTags ?? []).map((tag) => tag.slug));
+      for (const slug of resourceTagSlugs) usage.set(slug, (usage.get(slug) ?? 0) + 1);
+    }
+    return usage;
+  }, [resources]);
+  // Keep the public jurisdiction filter aligned with the research scope. The eight core entries are
+  // always visible (including zero counts); any other controlled jurisdiction appears automatically
+  // after at least one approved resource uses it. The full vocabulary remains available to the
+  // backend tagging pipeline and admin tag editor.
+  const visibleFacetTagVocab = useMemo(() => facetTagVocab.filter((tag) => (
+    tag.facet !== "jurisdiction"
+      || CORE_PUBLIC_JURISDICTION_SLUGS.has(tag.slug)
+      || (facetTagUsage.get(tag.slug) ?? 0) > 0
+  )), [facetTagVocab, facetTagUsage]);
+  const normalizedTagSearch = tagSearchQuery.trim().toLocaleLowerCase();
+  const searchedFacetTagVocab = useMemo(() => {
+    if (!normalizedTagSearch) return visibleFacetTagVocab;
+    return visibleFacetTagVocab.filter((tag) => [tag.nameEn, tag.nameZh, tag.slug]
+      .some((value) => value.toLocaleLowerCase().includes(normalizedTagSearch)));
+  }, [normalizedTagSearch, visibleFacetTagVocab]);
+  const themeTagsByCategory = useMemo(() => {
+    const grouped = new Map<string, TagSummary[]>();
+    for (const tag of searchedFacetTagVocab) {
+      if (tag.facet !== "theme") continue;
+      const category = tag.category ?? "";
+      if (!grouped.has(category)) grouped.set(category, []);
+      grouped.get(category)!.push(tag);
+    }
+    return grouped;
+  }, [searchedFacetTagVocab]);
+  const availableYears = useMemo(() => [...new Set(resources
+    .filter((resource) => resource.status === "approved")
+    .map((resource) => Number(resource.publishedDate?.match(/^\d{4}/)?.[0]))
+    .filter(Number.isFinite))].sort((a, b) => b - a), [resources]);
+
+  useEffect(() => {
+    if (!selectedFacetTag) return;
+    const selectedTag = facetTagVocab.find((tag) => tag.slug === selectedFacetTag);
+    if (!selectedTag) return;
+    if (selectedTag.facet !== "theme") {
+      setExpandedFacets((current) => new Set(current).add(selectedTag.facet));
+    }
+    if (selectedTag.facet === "theme" && selectedTag.category) {
+      setExpandedCategories((current) => new Set(current).add(selectedTag.category!));
+    }
+  }, [facetTagVocab, selectedFacetTag]);
+
+  const sourceTypeCounts = useMemo(() => {
+    const counts = Object.fromEntries(SOURCE_TYPES.map(({ value }) => [value, 0])) as Record<SourceType, number>;
+    let total = 0;
+    for (const resource of resources) {
+      if (resource.status !== "approved") continue;
+      const matchesFacet = !selectedFacetTag || (resource.facetedTags ?? []).some((tag) => tag.slug === selectedFacetTag);
+      const isChinese = /[\u3400-\u9fff]/u.test(resource.title);
+      const matchesLanguage = publicationLanguage === "all" || (publicationLanguage === "zh" ? isChinese : !isChinese);
+      const publicationYear = Number(resource.publishedDate?.match(/^\d{4}/)?.[0]);
+      const from = yearFrom ? Number(yearFrom) : null;
+      const to = yearTo ? Number(yearTo) : null;
+      const matchesYear = (!from && !to) || (Number.isFinite(publicationYear)
+        && (!from || publicationYear >= from) && (!to || publicationYear <= to));
+      const query = searchQuery.toLowerCase().trim();
+      const matchesSearch = !query || resource.title.toLowerCase().includes(query)
+        || resource.authors.some((author) => author.toLowerCase().includes(query));
+      if (!matchesFacet || !matchesLanguage || !matchesYear || !matchesSearch) continue;
+      total += 1;
+      counts[resource.sourceType] += 1;
+    }
+    return { All: total, ...counts } as Record<FilterType, number>;
+  }, [resources, searchQuery, selectedFacetTag, publicationLanguage, yearFrom, yearTo]);
 
   // Only 'approved' resources ever appear on this public browsing list (docs/planning/15 §0.1) — a
   // submitter's own pending/self-service-status resources live in My Contributions instead, and the
   // admin queue lives at /admin (AdminCenter). No adminView/own-resource carve-out here anymore.
   const filtered = useMemo(() => {
-    if (selectedType === "Expert") return [];
     return resources.filter((r) => {
       if (r.status !== "approved") return false;
       const matchType = selectedType === "All" || r.sourceType === selectedType;
       const matchFacetTag = !selectedFacetTag || (r.facetedTags ?? []).some((t) => t.slug === selectedFacetTag);
+      const isChinese = /[\u3400-\u9fff]/u.test(r.title);
+      const matchLanguage = publicationLanguage === "all" || (publicationLanguage === "zh" ? isChinese : !isChinese);
+      const publicationYear = Number(r.publishedDate?.match(/^\d{4}/)?.[0]);
+      const from = yearFrom ? Number(yearFrom) : null;
+      const to = yearTo ? Number(yearTo) : null;
+      const matchYear = (!from && !to) || (Number.isFinite(publicationYear)
+        && (!from || publicationYear >= from) && (!to || publicationYear <= to));
       const q = searchQuery.toLowerCase().trim();
       const matchSearch =
         !q || r.title.toLowerCase().includes(q) ||
-        (r.abstract ?? "").toLowerCase().includes(q) ||
-        r.authors.some((a) => a.toLowerCase().includes(q)) ||
-        r.keywords.some((k) => k.toLowerCase().includes(q));
-      return matchType && matchFacetTag && matchSearch;
+        r.authors.some((a) => a.toLowerCase().includes(q));
+      return matchType && matchFacetTag && matchLanguage && matchYear && matchSearch;
     });
-  }, [resources, searchQuery, selectedType, selectedFacetTag]);
+  }, [resources, searchQuery, selectedType, selectedFacetTag, publicationLanguage, yearFrom, yearTo]);
 
-  const showExperts = selectedType === "Expert";
-  const hasActiveFilters = selectedType !== "All" || !!selectedFacetTag || searchQuery;
+  const sortedResources = useMemo(() => [...filtered].sort((a, b) => {
+    if (sortOrder === "title") return a.title.localeCompare(b.title, language === "zh" ? "zh-CN" : "en");
+    const yearOf = (resource: Resource) => Number(resource.publishedDate?.match(/^\d{4}/)?.[0] ?? 0);
+    const yearDifference = yearOf(b) - yearOf(a);
+    if (yearDifference !== 0) return sortOrder === "newest" ? yearDifference : -yearDifference;
+    return sortOrder === "newest" ? b.id - a.id : a.id - b.id;
+  }), [filtered, language, sortOrder]);
+
+  const hasActiveFilters = selectedType !== "All" || !!selectedFacetTag || !!searchQuery
+    || publicationLanguage !== "all" || !!yearFrom || !!yearTo;
 
   return (
     <div className="max-w-screen-xl mx-auto space-y-6">
@@ -2381,117 +2927,171 @@ export default function AcademicResources() {
       <div className="relative max-w-xl">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
         <input type="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={t("Search by title, abstract, author or tag…", "按标题、摘要、作者或标签搜索…")}
+          placeholder={t("Search titles or authors…", "按标题或作者搜索…")}
           className="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors placeholder:text-muted-foreground" />
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <button type="button" onClick={() => setMobileFiltersOpen((open) => !open)}
+        className="flex h-9 w-full items-center justify-between rounded-md border border-border bg-card px-3 text-sm font-medium lg:hidden">
+        <span className="inline-flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" />{t("Filters", "筛选")}</span>
+        <ChevronRight className={`h-4 w-4 transition-transform ${mobileFiltersOpen ? "rotate-90" : ""}`} />
+      </button>
+
+      <div className={`flex flex-col lg:flex-row ${isFilterSidebarCollapsed ? "gap-3" : "gap-8"}`}>
         {/* ── Sidebar ── */}
-        <aside className="w-full lg:w-52 shrink-0 space-y-6">
-          <div className="space-y-1.5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground px-1">
-              {t("Resource Type", "资源类型")}
-            </p>
-            <div className="flex flex-col gap-0.5">
-              {FILTER_TYPES.map(({ value, labelEn, labelZh, icon: Icon }) => (
-                <button key={value} onClick={() => { setSelectedType(value); if (value !== "All") setSearchQuery(""); }}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left w-full ${
-                    selectedType === value ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted hover:text-foreground"
-                  }`}>
-                  <Icon className="h-4 w-4 shrink-0" />{zh ? labelZh : labelEn}
-                </button>
-              ))}
+        <aside className={`${mobileFiltersOpen ? "block" : "hidden"} relative w-full shrink-0 transition-[width] duration-200 lg:block ${isFilterSidebarCollapsed ? "lg:w-9" : "lg:w-52"}`}>
+          {isFilterSidebarCollapsed && (
+            <button type="button" onClick={() => setIsFilterSidebarCollapsed(false)}
+              className="hidden h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground lg:flex"
+              aria-label={t("Expand filters", "展开筛选")} title={t("Expand filters", "展开筛选")}>
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
+
+          <div className={`space-y-5 ${isFilterSidebarCollapsed ? "lg:hidden" : ""}`}>
+            <div className="hidden items-center justify-between px-1 lg:flex">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                {t("Filters", "筛选")}
+              </p>
+              <button type="button" onClick={() => setIsFilterSidebarCollapsed(true)}
+                className="hidden h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground lg:flex"
+                aria-label={t("Collapse filters", "收起筛选")} title={t("Collapse filters", "收起筛选")}>
+                <ChevronLeft className="h-4 w-4" />
+              </button>
             </div>
-          </div>
-          {!showExperts && facetTagVocab.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t("Filter by Tags", "按标签筛选")}</p>
-                {selectedFacetTag && (
-                  <button onClick={() => handleFacetTagClick(selectedFacetTag)} className="text-xs text-primary hover:underline">{t("Clear", "清除")}</button>
-                )}
+
+            <div className="space-y-2 border-b border-border pb-5">
+                <label className="block space-y-1 px-1 text-xs text-muted-foreground">
+                  <span>{zh ? "文献语言" : "Publication language"}</span>
+                  <select value={publicationLanguage} onChange={(event) => setPublicationLanguage(event.target.value as PublicationLanguageFilter)}
+                    className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground">
+                    <option value="all">{zh ? "全部语言" : "All languages"}</option>
+                    <option value="zh">中文</option>
+                    <option value="en">English</option>
+                  </select>
+                </label>
+                <div className="grid grid-cols-2 gap-2 px-1">
+                  <label className="space-y-1 text-xs text-muted-foreground">
+                    <span className="block">{zh ? "从" : "From"}</span>
+                    <select value={yearFrom} onChange={(event) => setYearFrom(event.target.value)}
+                      className="h-9 w-full rounded-md border border-border bg-background px-1.5 text-xs text-foreground">
+                      <option value="">{zh ? "不限" : "Any"}</option>
+                      {[...availableYears].reverse().map((year) => <option key={year} value={year}>{year}</option>)}
+                    </select>
+                  </label>
+                  <label className="space-y-1 text-xs text-muted-foreground">
+                    <span className="block">{zh ? "至" : "To"}</span>
+                    <select value={yearTo} onChange={(event) => setYearTo(event.target.value)}
+                      className="h-9 w-full rounded-md border border-border bg-background px-1.5 text-xs text-foreground">
+                      <option value="">{zh ? "不限" : "Any"}</option>
+                      {availableYears.map((year) => <option key={year} value={year}>{year}</option>)}
+                    </select>
+                  </label>
+                </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground px-1">
+                {t("Type", "类型")}
+              </p>
+              <div className="flex flex-col gap-0.5">
+                {FILTER_TYPES.map(({ value, labelEn, labelZh, icon: Icon }) => (
+                  <button key={value} onClick={() => {
+                    setSelectedType(value);
+                    setMobileFiltersOpen(false);
+                    if (value !== "All") setSearchQuery("");
+                  }}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left w-full ${
+                      selectedType === value ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted hover:text-foreground"
+                    }`}>
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="min-w-0 flex-1 leading-tight">{zh ? labelZh : labelEn}</span>
+                    <span className={`shrink-0 text-xs font-normal ${selectedType === value ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                      {sourceTypeCounts[value] ?? 0}
+                    </span>
+                  </button>
+                ))}
               </div>
-              <div className="space-y-2.5">
-                {(["theme", "jurisdiction", "asset"] as const).map((facet) => {
-                  const tagsInFacet = facetTagVocab.filter((t) => t.facet === facet);
-                  if (tagsInFacet.length === 0) return null;
-                  // Theme facet gets a two-level folding tree (docs/planning/15 §3.4): category
-                  // headers are the top level, individual tags only show once expanded.
-                  // jurisdiction/asset stay flat pill lists, same as before.
-                  if (facet === "theme") {
-                    const byCategory = new Map<string, TagSummary[]>();
-                    for (const tg of tagsInFacet) {
-                      const cat = tg.category ?? "";
-                      if (!byCategory.has(cat)) byCategory.set(cat, []);
-                      byCategory.get(cat)!.push(tg);
-                    }
-                    const categorySlugs = THEME_CATEGORY_ORDER.filter((c) => byCategory.has(c));
+            </div>
+
+            {visibleFacetTagVocab.length > 0 && (
+              <div className="space-y-1.5 border-t border-border pt-5">
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t("Tags", "标签")}</p>
+                  {selectedFacetTag && (
+                    <button onClick={() => handleFacetTagClick(selectedFacetTag)} className="text-xs text-primary hover:underline">{t("Clear", "清除")}</button>
+                  )}
+                </div>
+                <label className="relative block px-1">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <input type="search" value={tagSearchQuery} onChange={(event) => setTagSearchQuery(event.target.value)}
+                    placeholder={t("Search tags…", "搜索标签…")} aria-label={t("Search tags", "搜索标签")}
+                    className="h-8 w-full rounded-md border border-border bg-background pl-8 pr-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                </label>
+                <div className="space-y-0.5">
+                  {THEME_CATEGORY_ORDER.filter((category) => themeTagsByCategory.has(category)).map((category) => {
+                    const categoryExpanded = !!normalizedTagSearch || expandedCategories.has(category);
+                    const tagsInCategory = themeTagsByCategory.get(category)!;
                     return (
-                      <div key={facet} className="space-y-1">
-                        <p className="text-xs text-muted-foreground/70 px-1">{zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}</p>
-                        <div className="space-y-0.5">
-                          {categorySlugs.map((cat) => {
-                            const expanded = expandedCategories.has(cat);
-                            const tagsInCategory = byCategory.get(cat)!;
-                            return (
-                              <div key={cat}>
-                                <button
-                                  onClick={() => setExpandedCategories((prev) => {
-                                    const next = new Set(prev);
-                                    if (next.has(cat)) next.delete(cat); else next.add(cat);
-                                    return next;
-                                  })}
-                                  className="flex items-center gap-1 w-full px-1 py-1 text-sm font-semibold text-foreground/85 hover:text-foreground text-left transition-colors">
-                                  <ChevronRight className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? "rotate-90" : ""}`} />
-                                  {zh ? THEME_CATEGORY_LABELS[cat]?.zh ?? cat : THEME_CATEGORY_LABELS[cat]?.en ?? cat}
-                                </button>
-                                {expanded && (
-                                  <div className="flex flex-wrap gap-1.5 pl-4 pt-1 pb-1.5">
-                                    {tagsInCategory.map((tg) => (
-                                      <button key={tg.id} onClick={() => handleFacetTagClick(tg.slug)}
-                                        className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                                          selectedFacetTag === tg.slug ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
-                                        }`}>
-                                        <Tag className="h-2.5 w-2.5" />{zh ? tg.nameZh : tg.nameEn}
-                                      </button>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
+                      <div key={category}>
+                        <button type="button" onClick={() => setExpandedCategories((current) => {
+                          const next = new Set(current);
+                          if (next.has(category)) next.delete(category); else next.add(category);
+                          return next;
+                        })}
+                          className="flex w-full items-center gap-1 px-1 py-1.5 text-left text-sm font-semibold text-foreground/85 transition-colors hover:text-foreground">
+                          <ChevronRight className={`h-3.5 w-3.5 shrink-0 transition-transform ${categoryExpanded ? "rotate-90" : ""}`} />
+                          <span className="flex-1">{zh ? THEME_CATEGORY_LABELS[category]?.zh ?? category : THEME_CATEGORY_LABELS[category]?.en ?? category}</span>
+                          <span className="text-xs font-normal text-muted-foreground">{tagsInCategory.length}</span>
+                        </button>
+                        {categoryExpanded && (
+                          <CompactFilterTagList tags={tagsInCategory} usageBySlug={facetTagUsage}
+                            selectedSlug={selectedFacetTag} language={language} onSelect={handleFacetTagClick}
+                            forceExpanded={!!normalizedTagSearch} />
+                        )}
                       </div>
                     );
-                  }
-                  return (
-                    <div key={facet} className="space-y-1">
-                      <p className="text-xs text-muted-foreground/70 px-1">{zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en}</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {tagsInFacet.map((tg) => (
-                          <button key={tg.id} onClick={() => handleFacetTagClick(tg.slug)}
-                            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                              selectedFacetTag === tg.slug ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
-                            }`}>
-                            <Tag className="h-2.5 w-2.5" />{zh ? tg.nameZh : tg.nameEn}
-                          </button>
-                        ))}
+                  })}
+
+                  {(["jurisdiction", "asset"] as const).map((facet) => {
+                    const tagsInFacet = searchedFacetTagVocab.filter((tag) => tag.facet === facet);
+                    if (tagsInFacet.length === 0) return null;
+                    const facetExpanded = !!normalizedTagSearch || expandedFacets.has(facet);
+                    const facetLabel = zh ? FACET_LABELS[facet].zh : FACET_LABELS[facet].en;
+                    return (
+                      <div key={facet} className={facet === "jurisdiction" ? "mt-2 border-t border-border pt-2" : ""}>
+                        <button type="button" onClick={() => setExpandedFacets((current) => {
+                          const next = new Set(current);
+                          if (next.has(facet)) next.delete(facet); else next.add(facet);
+                          return next;
+                        })}
+                          className="flex w-full items-center gap-1 px-1 py-1.5 text-left text-sm font-semibold text-foreground/85 transition-colors hover:text-foreground">
+                          <ChevronRight className={`h-3.5 w-3.5 shrink-0 transition-transform ${facetExpanded ? "rotate-90" : ""}`} />
+                          <span className="flex-1">{facetLabel}</span>
+                          <span className="text-xs font-normal text-muted-foreground">{tagsInFacet.length}</span>
+                        </button>
+                        {facetExpanded && (
+                          <CompactFilterTagList tags={tagsInFacet} usageBySlug={facetTagUsage}
+                            selectedSlug={selectedFacetTag} language={language} onSelect={handleFacetTagClick}
+                            forceExpanded={!!normalizedTagSearch} />
+                        )}
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+
+                  {normalizedTagSearch && searchedFacetTagVocab.length === 0 && (
+                    <p className="px-2 py-3 text-xs text-muted-foreground">{t("No matching tags", "没有匹配的标签")}</p>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </aside>
 
         {/* ── Results ── */}
         <div className="flex-1 min-w-0 space-y-4">
-          {showExperts && <ExpertPanel language={language} />}
-
-          {!showExperts && (
-            <>
-              <div className="flex items-center justify-between h-6">
+          <>
+              <div className="flex flex-wrap items-center justify-between gap-3 min-h-9">
                 {isLoading ? (
                   <span className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />{t("Loading…", "加载中…")}
@@ -2501,10 +3101,25 @@ export default function AcademicResources() {
                     {zh ? `共 ${filtered.length} 条结果` : `${filtered.length} result${filtered.length !== 1 ? "s" : ""}`}
                   </p>
                 )}
-                {hasActiveFilters && (
-                  <button onClick={() => { setSelectedType("All"); setSearchQuery(""); if (selectedFacetTag) handleFacetTagClick(selectedFacetTag); }}
-                    className="text-xs text-primary hover:underline">{t("Reset filters", "重置筛选")}</button>
-                )}
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{zh ? "排序" : "Sort"}</span>
+                    <select value={sortOrder} onChange={(event) => setSortOrder(event.target.value as typeof sortOrder)}
+                      className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground">
+                      <option value="newest">{zh ? "年份：新到旧" : "Year: newest"}</option>
+                      <option value="oldest">{zh ? "年份：旧到新" : "Year: oldest"}</option>
+                      <option value="title">{zh ? "标题" : "Title"}</option>
+                    </select>
+                  </label>
+                  {hasActiveFilters && (
+                    <button onClick={() => {
+                      setSelectedType("All"); setSearchQuery(""); setPublicationLanguage("all");
+                      setYearFrom(""); setYearTo("");
+                      if (selectedFacetTag) handleFacetTagClick(selectedFacetTag);
+                    }}
+                      className="text-xs text-primary hover:underline">{t("Reset filters", "重置筛选")}</button>
+                  )}
+                </div>
               </div>
 
               {!isLoading && filtered.length === 0 ? (
@@ -2512,14 +3127,21 @@ export default function AcademicResources() {
                   <Search className="h-10 w-10 text-muted-foreground/30" /><p className="font-medium text-muted-foreground">{t("No resources found", "未找到相关资源")}</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {filtered.map((r) => (
-                    <ResourceCard key={r.id} r={r} language={language} onOpenDetail={setDetailResource} />
+                <div className="overflow-hidden rounded-md border border-border bg-card">
+                  <div className="hidden border-b border-border bg-muted/60 px-3 py-2.5 text-xs font-semibold text-muted-foreground xl:grid xl:grid-cols-[minmax(220px,2fr)_minmax(145px,1.15fr)_64px_110px_minmax(110px,.8fr)_52px] xl:gap-4">
+                    <span>{zh ? "标题" : "Title"}</span>
+                    <span>{zh ? "作者" : "Authors"}</span>
+                    <span>{zh ? "年份" : "Year"}</span>
+                    <span>{zh ? "类型" : "Type"}</span>
+                    <span>{zh ? "主题分类" : "Category"}</span>
+                    <span className="text-center">{zh ? "直达" : "Link"}</span>
+                  </div>
+                  {sortedResources.map((r) => (
+                    <ResourceRow key={r.id} r={r} language={language} onOpenDetail={setDetailResource} />
                   ))}
                 </div>
               )}
-            </>
-          )}
+          </>
         </div>
       </div>
 

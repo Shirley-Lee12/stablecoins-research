@@ -5,6 +5,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
+  JWT_EXPIRES_IN: z.string().regex(/^\d+[smhd]$/, "JWT_EXPIRES_IN must look like 30m, 8h, or 7d").default("8h"),
   LLM_PROVIDER: z.enum(["gemini", "anthropic"]).default("gemini"),
   LLM_API_KEY: z.string().min(1, "LLM_API_KEY is required"),
   LLM_MODEL: z.string().default("gemini-2.5-flash"),

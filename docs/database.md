@@ -5,6 +5,7 @@ Drizzle ORM，连接 Supabase Postgres（`DATABASE_URL`）。Schema 源文件在
 ## 表结构
 
 ### `users`（`users.ts`）
+
 ```
 id              serial PRIMARY KEY
 email           text UNIQUE NOT NULL
@@ -15,9 +16,11 @@ email_verified  boolean NOT NULL DEFAULT true
 created_at      timestamptz NOT NULL DEFAULT now()
 updated_at      timestamptz NOT NULL DEFAULT now()
 ```
+
 新注册用户 `email_verified` 初始为 `false`，登录前必须通过验证码校验（见下方 `email_verification_codes`）；default `true` 是为了让历史/手动插入的用户行不被追溯性锁住。
 
 ### `password_reset_tokens`（`users.ts`）
+
 ```
 id         serial PRIMARY KEY
 user_id    integer REFERENCES users(id) ON DELETE CASCADE
@@ -26,9 +29,11 @@ expires_at timestamptz NOT NULL
 used       boolean NOT NULL DEFAULT false
 created_at timestamptz NOT NULL DEFAULT now()
 ```
+
 重置 token 有效期 1 小时，通过邮件（`src/lib/mailer.ts` → `sendPasswordResetEmail`）发送重置链接，不在 API 响应体里直接返回 token。
 
 ### `email_verification_codes`（`users.ts`）
+
 ```
 id         serial PRIMARY KEY
 user_id    integer NOT NULL REFERENCES users(id) ON DELETE CASCADE
@@ -37,9 +42,11 @@ expires_at timestamptz NOT NULL
 used       boolean NOT NULL DEFAULT false
 created_at timestamptz NOT NULL DEFAULT now()
 ```
+
 验证码有效期 10 分钟，通过邮件（`sendVerificationCodeEmail`）发送。注册时若发信失败会回滚刚插入的 `users` 行，让用户能干净地重新注册。
 
 ### `resources`（`resources.ts`）—— 全球文献库
+
 ```
 id                  serial PRIMARY KEY
 title               text NOT NULL
@@ -62,6 +69,7 @@ admin_edited        boolean NOT NULL DEFAULT false          -- 管理员是否�
 verification_report jsonb                                   -- lib/verify.ts 的 VerifyReport，逐字段核对结果缓存（docs/planning/16 §16.1）
 verified_at         timestamptz                              -- verification_report 的生成时间
 ```
+
 `keywords`/`keywords_source`（docs/planning/15 §5）：题录导入(CNKI K1/EndNote %K/NoteExpress Keywords) 与 PDF/URL 抽取的"关键词:"/"Keywords:"章节 → `extracted`；用户手填或事后编辑（`PATCH /api/resources/:id` 带 `keywords` 字段，无论编辑者是所有者还是管理员）→ `manual`；原文没有关键词章节且用户没手填时，允许（非强制）LLM 从摘要提炼 3-5 个 → `generated`，前端必须给 `generated` 来源打上明显的"AI生成"标注。六要素完整性判定里，`keywords` 只要非空就算满足，不区分来源。`verify.ts` 的核对报告里也有一项关键词数量校验（3-5 个建议区间），超出/不足只标 ⚠️，不算失败，不强制。
 
 `verification_report`/`verified_at`（docs/planning/16 §16.1）：核对报告只在两处写入——`persistConfirmedDraft()`（首次入库）和 `PATCH /api/resources/:id` 的所有者重新提交全套检查路径（docs/planning/15 §0.7）——都是本来就要算一次核对报告的地方，顺手缓存下来。`GET /api/admin/resources/:id/verify-report` 改成纯读这两列，不再每次打开详情页都重新调用 DOI 解析/URL 可达性检查；如果管理员确实想强制刷新，走显式的 `POST /api/admin/resources/:id/reverify`（会重新调用外部接口并覆盖这两列，前端要求二次确认）。管理员编辑资源字段（`isAdmin` 分支）不触发这条路径，报告保持不变——这是仿照 §2.4"管理员编辑不重新核对"的既有原则。
@@ -69,17 +77,52 @@ verified_at         timestamptz                              -- verification_rep
 **`tags` 字段已删除（docs/planning/18 §18.2）**：旧版"Research Tags（最多3个，固定12项列表）+ Additional Tag（最多1个自由文本）"系统，从未纳入 T.1–T.5 的受控词表规划。逻辑几乎全嵌在已废弃的 `/resources/import*` 死路由里（迁移到 upload.ts 新管线后无调用方，见 §18.2 step a），真正的活写入路径是 `PATCH /resources/:id`（`EditModal` 的 `TagEditor` UI，已随本次一并下线）。删除前确认线上库里该列全部是空数组，无需数据迁移。资源标签的唯一入口现在是 `tags`/`resource_tags` 表（theme/jurisdiction/asset facet）。
 
 ### `our_research`（`our_research.ts`）—— ZIBS 自有研究
+
 ```
 id               serial PRIMARY KEY
 title            text NOT NULL
+title_zh         text
 file_url         text
 abstract         text
+abstract_zh      text
+authors          text[] NOT NULL DEFAULT '{}'
 key_innovations  text[] NOT NULL DEFAULT '{}'
+key_innovations_zh text[] NOT NULL DEFAULT '{}'
 tags             text[] NOT NULL DEFAULT '{}'
+published_date   date
 uploaded_at      timestamptz NOT NULL DEFAULT now()
 ```
 
+### `regulatory_entries`（`regulatory.ts`）—— 全球监管时间线
+
+```
+id               serial PRIMARY KEY
+country          text NOT NULL
+region           text
+authority        text
+title            text NOT NULL
+title_zh         text
+summary          text
+summary_zh       text
+document_url     text
+effective_date   date NOT NULL
+category         text
+created_by       integer REFERENCES users(id) ON DELETE SET NULL
+created_at       timestamptz NOT NULL DEFAULT now()
+updated_at       timestamptz NOT NULL DEFAULT now()
+```
+
+### `regulatory_resources`（`regulatory.ts`）—— 监管记录 ↔ 文献关联
+
+```
+id                  serial PRIMARY KEY
+regulatory_entry_id integer NOT NULL REFERENCES regulatory_entries(id) ON DELETE CASCADE
+resource_id         integer NOT NULL REFERENCES resources(id) ON DELETE CASCADE
+UNIQUE (regulatory_entry_id, resource_id)
+```
+
 ### `institutions`（`authors.ts`）
+
 ```
 id         serial PRIMARY KEY
 name       text UNIQUE NOT NULL
@@ -88,6 +131,7 @@ created_at timestamptz NOT NULL DEFAULT now()
 ```
 
 ### `authors`（`authors.ts`）—— 学者档案
+
 ```
 id                  serial PRIMARY KEY
 name                text NOT NULL
@@ -99,6 +143,7 @@ UNIQUE (name, institution_id)
 ```
 
 ### `resource_authors`（`authors.ts`）—— resources ↔ authors 多对多关联表
+
 ```
 id          serial PRIMARY KEY
 resource_id integer NOT NULL REFERENCES resources(id) ON DELETE CASCADE
@@ -107,6 +152,7 @@ UNIQUE (resource_id, author_id)
 ```
 
 ### `tags`（`tags.ts`）—— 结构化标签（唯一的资源标签系统，已下线的旧版 Research Tags/Additional Tag 曾经用过 `resources.tags` 自由文本数组，该列已删除，见上方 §18.2 说明）
+
 ```
 id         serial PRIMARY KEY
 slug       text UNIQUE NOT NULL
@@ -114,16 +160,18 @@ name_en    text NOT NULL
 name_zh    text NOT NULL
 facet      tag_facet_enum NOT NULL    -- 'theme' | 'jurisdiction' | 'asset'
 definition text                       -- 定义句，theme facet 做 embedding 相似度匹配用
-region     text                       -- 'Americas'|'Europe'|'APAC'|'Middle East'|'Africa'|'Global'，仅 jurisdiction facet 使用
+region     text                       -- 'Americas'|'Europe'|'APAC'|'Middle East'|'Africa'，仅 jurisdiction facet 使用
 category   text                       -- 六大类 slug（如 types_mechanisms），仅 theme facet 使用，见 docs/planning/15 §3.2/§3.3
 status     tag_status_enum NOT NULL DEFAULT 'active'   -- 'active' | 'candidate'
 created_at timestamptz NOT NULL DEFAULT now()
 ```
-种子数据：`scripts/src/seed-tags.ts`（`pnpm --filter @workspace/scripts run seed-tags`，按 slug 幂等），37 个 theme + 16 个 jurisdiction + 15 个 asset，全部 `status=active`。`candidate` 状态的行由 `retagResources()`（见下）在打标时自动创建，不在种子脚本里。theme 标签的 `category` 由 `scripts/src/backfill-tag-categories.ts` 一次性回填（`pnpm --filter @workspace/scripts run backfill-tag-categories`，按 slug 幂等，只更新 `category IS NULL` 的行）。
 
-理论背景标签（docs/planning/16）：33 个稳定币专属主题标签之外，另加 4 个理论背景标签——`shadow-banking`/`money-market-funds`（归入 `types_mechanisms`）、`crypto-asset-foundations`/`blockchain-foundations`（归入 `tech_infrastructure`），theme 总数 33→37。背景：`off_topic` 判定只看"主题标签有没有命中"，稳定币研究大量借鉴影子银行/货币市场基金/加密资产/区块链基础理论，这类背景文献天然命中不了原来 33 个稳定币专属标签，会被误判跑题；修法不是放宽 `off_topic` 阈值，是承认这四类背景领域本身该是正式标签。`off_topic` 判定逻辑本身没有改动——`loadTagVocabulary()`/`computeTagsForText()` 全程从 `tags` 表动态读取 `facet='theme' AND status='active'` 的行，没有任何地方硬编码标签数量，词表扩大后自动生效。
+种子数据：`scripts/src/seed-tags.ts`（`pnpm --filter @workspace/scripts run seed-tags`，按 slug 幂等更新），33 个 theme + 33 个 jurisdiction + 33 个 asset。主题和辖区全部启用；稳定币实体中 16 个作为公共核心词，17 个小众实体保留为后台候选。`candidate` 状态也可由 `retagResources()`（见下）在发现新实体时自动创建。历史重复主题和实体别名由 `scripts/src/consolidate-tags.ts` 合并。theme 标签的 `category` 使用六个稳定顶层类别。公共筛选按资源数从大到小排序；司法辖区固定显示 Appendix 2 的 7 个比较对象（美国、欧盟、英国、中国香港、新加坡、日本、阿联酋）及中国大陆，其他辖区仅在至少关联一条已审核通过资源后自动出现。核心辖区即使暂无资源也显示计数 `0`，完整辖区词表仍供后台与自动打标使用。州、省等次级辖区归并到所属国家（例如 New York State 归入 United States），不与国家并列展示。`Global / International` 属于研究范围而非司法辖区，不进入 jurisdiction 词表。
+
+历史方案曾把 4 个理论背景词单独加入主题词表；本轮精简已将它们合并到更稳定的规范主题中，当前 active theme 总数固定为 33。`off_topic` 与自动打标仍从数据库动态读取 active 主题，不硬编码标签数量。
 
 ### `resource_tags`（`tags.ts`）—— resources ↔ tags 多对多关联表
+
 ```
 id          serial PRIMARY KEY
 resource_id integer NOT NULL REFERENCES resources(id) ON DELETE CASCADE
@@ -132,23 +180,26 @@ source      resource_tag_source_enum NOT NULL DEFAULT 'auto'   -- 'auto' | 'manu
 score       numeric(5,4)             -- 加权（标题60%+摘要40%）后的相似度分数，仅 theme facet 的 auto 行有值；从未计算过分数的 manual 行为 null（auto 行被管理员改成 manual 后分数保留，不清空）。用于列表页选取"最核心一级标签"，见 docs/planning/15 §3.5/§3.6
 UNIQUE (resource_id, tag_id)
 ```
+
 `source='manual'` 的行（管理员手动加的标签）永远不会被 `retagResources()` 重跑覆盖；重跑只清空重建 `source='auto'` 的行。由于 `(resource_id, tag_id)` 是唯一约束（不区分 source），同一对资源-标签只能存在一条记录——manual 优先于 auto：重跑时如果某个 auto 匹配命中的标签已经有 manual 记录，insert 会因唯一冲突被 `onConflictDoNothing` 跳过，manual 记录原样保留。
 
 > **当前状态（2026-07-04）**：表结构 + 种子数据已就绪，T.5（前端按 facet 渲染）已完成，`GET /api/resources`/`GET /api/resources/:id` 已返回 `facetedTags`（含 `category`/`score`）。新上传管线（U.6）每次确认入库都会写入 `resource_tags`（`source='auto'`）。`retagResources()`/`POST /api/admin/tags/retag` 用于词表变更后的全库重打标，目前库里还没有真实资源数据，尚未实际触发过。`resources.tags`（旧版自由文本兜底）已随 doc 18 §18.2 删除——`tags`/`resource_tags` 是现在唯一的标签系统，不再有回退分支。主题标签相似度打分改为标题+摘要加权（`TITLE_WEIGHT`/`ABSTRACT_WEIGHT` 常量，`artifacts/api-server/src/lib/tagging.ts`），资源列表侧边栏的 theme facet 改为按 `category` 折叠的两级树（默认全部折叠）。
 
-### `upload_jobs`（`upload_jobs.ts`）—— 批量/PDF 上传的异步进度记录（不是已导入的资源）
+### `upload_jobs`（`upload_jobs.ts`）—— PDF、Word、题录和批量上传的异步进度记录（不是已导入的资源）
+
 ```
 id         serial PRIMARY KEY
-type       upload_job_type_enum NOT NULL      -- 'pdf' | 'url'
+type       upload_job_type_enum NOT NULL      -- 'pdf' | 'url' | 'citation' | 'title'
 status     upload_job_status_enum NOT NULL DEFAULT 'queued'   -- 'queued' | 'processing' | 'ready_for_review' | 'failed'
-input      jsonb NOT NULL    -- { fileName, sourceTypeHint } 或 { url, sourceTypeHint }；PDF 二进制从不写入这里
+input      jsonb NOT NULL    -- URL、解析后题录或受限长度抽取文本；PDF/Word 原文件从不写入这里
 result     jsonb             -- 流水线跑完后的候选数据（draft + tags + 核对报告），处理中为 null
 error      text
 created_by integer NOT NULL REFERENCES users(id) ON DELETE CASCADE
 created_at timestamptz NOT NULL DEFAULT now()
 updated_at timestamptz NOT NULL DEFAULT now()
 ```
-**这张表不受"AI 解析结果不允许直接写库"规则约束的对象始终不是 `resources`**——`upload_jobs` 只是给批量/PDF 这种"耗时且可能关闭页面"的场景提供进度持久化（前端轮询 `GET /api/resources/upload/jobs`），`result` 里的候选数据只有用户在确认弹窗里点击确认（`POST /api/resources/upload/jobs/:id/confirm`）后才会变成真正的 `resources` 行，随后该 `upload_jobs` 行被删除。单条手填/DOI·URL 走纯内存同步流水线，完全不经过这张表。
+
+**这张表不受"AI 解析结果不允许直接写库"规则约束的对象始终不是 `resources`**——`upload_jobs` 只是给 PDF、Word、题录和批量 URL 这种"耗时且可能关闭页面"的场景提供进度持久化（前端轮询 `GET /api/resources/upload/jobs`）。Word/Markdown 先以 `type='title'`、`input.taskKind='reference_list'` 保存为父任务，后台 AI 拆分完成后在同一事务中以逐条 `url/title` 子任务替换父任务。`result` 里的候选数据只有用户点击确认（`POST /api/resources/upload/jobs/:id/confirm`）后才会变成真正的 `resources` 行，随后该任务行被删除。单条手填/DOI·URL 仍走同步流水线。
 
 ## ER 关系图（文字版）
 
@@ -160,21 +211,23 @@ users 1───* upload_jobs           (upload_jobs.created_by)
 institutions 1───* authors        (authors.institution_id)
 resources *───* authors            via resource_authors
 resources *───* tags               via resource_tags
+regulatory_entries *───* resources via regulatory_resources
+users 1───* regulatory_entries      (regulatory_entries.created_by)
 our_research                      （独立表，不与其他表关联）
 ```
 
 ## 枚举全集
 
-| 枚举 | 取值 | 用途 |
-|---|---|---|
-| `source_type` | `journal_article`、`working_paper`、`conference_paper`、`thesis`、`report`、`gov_document`、`news` | `resources.source_type`，语言无关 slug，**必须精确使用这些字符串**；前端按当前语言映射 nameZh/nameEn 展示，详见 [`08-sourceType最终枚举.md`](./planning/08-sourceType最终枚举.md) |
-| `resource_status` | `incomplete`、`disputed`、`off_topic`、`duplicate`、`pending`、`approved`、`rejected` | `resources.status`，七值状态机（docs/planning/15 §0.9），只有 `approved` 出现在公开 Resources 页面，详见 [`database.md`](#resources-resourcests--全球文献库) 上方表定义和 [`requirements.md`](./requirements.md) |
-| `user_role` | `user`、`admin` | `users.role`，权限模型 |
-| `upload_job_type` | `pdf`、`url`、`citation`、`title` | `upload_jobs.type`——`citation` 是题录导入(docs/planning/06/14)，`title` 是文件夹批量导入里没有 URL/DOI、走标题搜索路径的条目(docs/planning/14 §3.3) |
-| `upload_job_status` | `queued`、`processing`、`ready_for_review`、`failed` | `upload_jobs.status`，与 `resource_status` 是两套独立枚举，不要混用 |
-| `tag_facet` | `theme`、`jurisdiction`、`asset` | `tags.facet`，标签三大分面，详见 [`roadmap.md`](./roadmap.md) Part 3 |
-| `tag_status` | `active`、`candidate` | `tags.status`，`active` 进正式聚合，`candidate` 是 AI 打标时映射不进任何 active 标签的候选词，等人工审核 |
-| `resource_tag_source` | `auto`、`manual` | `resource_tags.source`，区分 AI 重打标生成的关联 vs 管理员手动添加的关联，重跑时只覆盖 `auto` |
+| 枚举                  | 取值                                                                                               | 用途                                                                                                                                                                                                             |
+| --------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source_type`         | `journal_article`、`working_paper`、`conference_paper`、`thesis`、`report`、`gov_document`、`news` | `resources.source_type`，语言无关 slug，**必须精确使用这些字符串**；前端按当前语言映射 nameZh/nameEn 展示，详见 [`08-sourceType最终枚举.md`](./planning/08-sourceType最终枚举.md)                                |
+| `resource_status`     | `incomplete`、`disputed`、`off_topic`、`duplicate`、`pending`、`approved`、`rejected`              | `resources.status`，七值状态机（docs/planning/15 §0.9），只有 `approved` 出现在公开 Resources 页面，详见 [`database.md`](#resources-resourcests--全球文献库) 上方表定义和 [`requirements.md`](./requirements.md) |
+| `user_role`           | `user`、`admin`                                                                                    | `users.role`，权限模型                                                                                                                                                                                           |
+| `upload_job_type`     | `pdf`、`url`、`citation`、`title`                                                                  | `upload_jobs.type`——`citation` 是题录导入；`title` 既用于无 URL/DOI 的标题检索子任务，也临时承载 `taskKind='reference_list'` 的 Word/Markdown 父任务，避免新增数据库枚举迁移                                                          |
+| `upload_job_status`   | `queued`、`processing`、`ready_for_review`、`failed`                                               | `upload_jobs.status`，与 `resource_status` 是两套独立枚举，不要混用                                                                                                                                              |
+| `tag_facet`           | `theme`、`jurisdiction`、`asset`                                                                   | `tags.facet`，标签三大分面，详见 [`roadmap.md`](./roadmap.md) Part 3                                                                                                                                             |
+| `tag_status`          | `active`、`candidate`                                                                              | `tags.status`，`active` 进正式聚合，`candidate` 是 AI 打标时映射不进任何 active 标签的候选词，等人工审核                                                                                                         |
+| `resource_tag_source` | `auto`、`manual`                                                                                   | `resource_tags.source`，区分 AI 重打标生成的关联 vs 管理员手动添加的关联，重跑时只覆盖 `auto`                                                                                                                    |
 
 ## `resources.authors` ↔ `authors` 表的同步机制
 

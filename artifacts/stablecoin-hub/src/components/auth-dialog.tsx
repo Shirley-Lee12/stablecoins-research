@@ -17,9 +17,10 @@ interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialView?: View;
+  loginNotice?: string | null;
 }
 
-export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDialogProps) {
+export function AuthDialog({ open, onOpenChange, initialView = "login", loginNotice }: AuthDialogProps) {
   const { t } = useLanguage();
   const { login, register, verifyEmail, resendVerification, forgotPassword } = useAuth();
   const [view, setView] = useState<View>(initialView);
@@ -138,6 +139,12 @@ export function AuthDialog({ open, onOpenChange, initialView = "login" }: AuthDi
               <DialogTitle className="font-serif text-xl">{t("Sign In", "登录")}</DialogTitle>
               <DialogDescription>{t("Welcome back to ZIBS Stablecoins Research Hub.", "欢迎回到浙大ZIBS稳定币研究中心。")}</DialogDescription>
             </DialogHeader>
+            {loginNotice && (
+              <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{loginNotice}</span>
+              </div>
+            )}
             <form onSubmit={handleLogin} className="space-y-4 mt-2">
               <div className="space-y-2">
                 <Label htmlFor="login-email">{t("Email", "邮箱")}</Label>

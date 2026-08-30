@@ -5,6 +5,8 @@ export interface ScholarResult {
   title: string;
   authors: string[];
   year: number | null;
+  /** Abstract supplied by the scholarly index itself; null when that index has no abstract. */
+  abstract: string | null;
   doi: string | null;
   canonicalUrl: string | null;
   fulltextUrl: string | null;

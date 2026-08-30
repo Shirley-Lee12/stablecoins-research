@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/lib/language-context";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
-import { FileText, Globe, BookOpen, BarChart3, Clock, ChevronRight, Tags, Users } from "lucide-react";
+import { FileText, Globe, BookOpen, BarChart3, Clock, ChevronRight, Tags, Users, Network, Layers3, ShieldCheck } from "lucide-react";
 import { format } from "date-fns";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   LineChart, Line,
 } from "recharts";
+import { OFFICIAL_DOCUMENTS, PRIMARY_FRAMEWORKS } from "@/pages/regulatory";
+import { sourceTypeLabel } from "@/lib/source-types";
 
 interface ApiResource {
   id: number;
@@ -43,7 +44,7 @@ function apiBase() {
 }
 
 export default function Dashboard() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentResources, setRecentResources] = useState<ApiResource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,13 +55,17 @@ export default function Dashboard() {
     async function load() {
       setLoading(true);
       try {
-        const [resourcesRes, authorsRes] = await Promise.all([
+        const [resourcesRes, authorsRes, regulatoryRes, countriesRes] = await Promise.all([
           fetch(`${apiBase()}/api/resources`),
           fetch(`${apiBase()}/api/authors`),
+          fetch(`${apiBase()}/api/regulatory-entries`),
+          fetch(`${apiBase()}/api/regulatory-entries/country-stats`),
         ]);
 
         const resourcesJson = resourcesRes.ok ? await resourcesRes.json() : [];
         const authorsJson = authorsRes.ok ? await authorsRes.json() : [];
+        const regulatoryJson = regulatoryRes.ok ? await regulatoryRes.json() : [];
+        const countriesJson = countriesRes.ok ? await countriesRes.json() : [];
         const resources: ApiResource[] = Array.isArray(resourcesJson) ? resourcesJson : [];
         const authors: ApiAuthor[] = Array.isArray(authorsJson) ? authorsJson : [];
 
@@ -76,7 +81,7 @@ export default function Dashboard() {
               tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
             }
           }
-          const sourceType = resource.sourceType ?? "Unknown";
+          const sourceType = resource.sourceType ? sourceTypeLabel(resource.sourceType, language === "zh") : t("Unknown", "未分类");
           typeCounts.set(sourceType, (typeCounts.get(sourceType) ?? 0) + 1);
 
           if (resource.createdAt) {
@@ -115,8 +120,12 @@ export default function Dashboard() {
         setStats({
           total_resources: resources.length,
           total_authors: authors.length,
-          total_regulatory_entries: 0,
-          countries_covered: 0,
+          total_regulatory_entries: Array.isArray(regulatoryJson) && regulatoryJson.length > 0
+            ? regulatoryJson.length
+            : OFFICIAL_DOCUMENTS.reduce((total, group) => total + group.documents.length, 0),
+          countries_covered: Array.isArray(countriesJson) && countriesJson.length > 0
+            ? countriesJson.length
+            : PRIMARY_FRAMEWORKS.length,
           top_tags,
           by_type,
           growth_trend,
@@ -137,7 +146,7 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [language, t]);
 
   const maxAuthorCount = useMemo(
     () => Math.max(1, ...(stats?.top_authors.map((a) => a.count) ?? [1])),
@@ -146,103 +155,66 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-serif font-bold text-primary tracking-tight">
+      <div className="flex flex-col gap-2 border-b border-border pb-6">
+        <p className="text-xs font-semibold uppercase text-muted-foreground">{t("Research Hub", "研究中心")}</p>
+        <h1 className="text-3xl font-serif font-semibold text-foreground">
           {t("Platform Overview", "平台概览")}
-        </h2>
-        <p className="text-muted-foreground text-sm">
+        </h1>
+        <p className="max-w-3xl editorial-copy">
           {t("Real-time statistics and recently added resources in the research hub.", "实时统计数据和研究中心最新添加的资源。")}
         </p>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div key={i} className="border-t-4 border-primary/20 pt-5">
+              <div className="flex flex-row items-center justify-between pb-2">
                 <Skeleton className="h-4 w-1/2" />
                 <Skeleton className="h-4 w-4 rounded-full" />
-              </CardHeader>
-              <CardContent>
+              </div>
+              <div>
                 <Skeleton className="h-8 w-1/3 mb-1" />
                 <Skeleton className="h-3 w-2/3" />
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       ) : stats ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="shadow-sm border-primary/10 hover-elevate">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t("Total Resources", "总资源数")}
-              </CardTitle>
-              <BookOpen className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{stats.total_resources}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t("Across all categories", "跨所有类别")}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-primary/10 hover-elevate">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t("Authors & Scholars", "作者与学者")}
-              </CardTitle>
-              <Users className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{stats.total_authors}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t("Contributing to the library", "收录于资源库")}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-primary/10 hover-elevate">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t("Regulatory Entries", "监管条目")}
-              </CardTitle>
-              <Globe className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{stats.total_regulatory_entries}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t("Global regulations", "全球监管动态")}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-primary/10 hover-elevate">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t("Countries Covered", "覆盖国家")}
-              </CardTitle>
-              <BarChart3 className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{stats.countries_covered || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t("With regulatory data", "包含监管数据")}
-              </p>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: t("Total Resources", "总资源数"), value: stats.total_resources, note: t("Across all categories", "跨所有类别"), icon: BookOpen, color: "bg-chart-1", iconColor: "text-chart-1" },
+            { label: t("Authors & Scholars", "作者与学者"), value: stats.total_authors, note: t("Contributing to the library", "收录于资源库"), icon: Users, color: "bg-chart-2", iconColor: "text-chart-2" },
+            { label: t("Regulatory Entries", "监管条目"), value: stats.total_regulatory_entries, note: t("Official and policy records", "官方与政策记录"), icon: Globe, color: "bg-chart-3", iconColor: "text-chart-3" },
+            { label: t("Countries Covered", "覆盖国家"), value: stats.countries_covered, note: t("With regulatory data", "包含监管数据"), icon: BarChart3, color: "bg-chart-4", iconColor: "text-chart-4" },
+          ].map((metric) => <div key={metric.label} className="relative min-h-32 border-t-4 pt-5" style={{ borderTopColor: `hsl(var(--${metric.color.replace("bg-", "")}))` }}>
+            <div className="flex items-center justify-between gap-4"><p className="text-sm font-medium text-muted-foreground">{metric.label}</p><metric.icon className={`h-4 w-4 ${metric.iconColor}`} /></div>
+            <p className="mt-6 text-3xl font-semibold tabular-nums text-foreground">{metric.value}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{metric.note}</p>
+          </div>)}
         </div>
       ) : (
         <div className="text-sm text-muted-foreground">{t("Failed to load statistics.", "加载统计数据失败。")}</div>
       )}
 
+      <section className="relative overflow-hidden border-y border-border py-9">
+        <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_70%_50%,rgba(49,87,200,0.10),transparent_58%)]" />
+        <div className="relative grid gap-8 md:grid-cols-[1.2fr_repeat(3,0.6fr)] md:items-center">
+          <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("Research in context", "研究进展")}</p><h2 className="mt-2 font-serif text-2xl font-semibold text-primary">{t("A connected view of mechanisms, risk and regulation", "把机制、风险与监管放在同一研究框架中")}</h2><p className="mt-3 max-w-xl text-sm leading-6 text-foreground/68">{t("Move from the public dashboard into the underlying research, project taxonomy and verified regulatory sources.", "从公开数据概览进一步进入研究框架、稳定币分类与经核验的监管一手来源。")}</p></div>
+          {[{ n: "55", label: t("atomic risks", "项原子风险"), icon: Network, href: "/research" }, { n: "4", label: t("core mechanisms", "类核心机制"), icon: Layers3, href: "/about-stablecoins/types" }, { n: String(stats?.countries_covered ?? 7), label: t("jurisdictions mapped", "个监管辖区"), icon: ShieldCheck, href: "/regulatory" }].map((item) => <Link key={item.label} href={item.href} className="group border-l-2 border-primary/25 pl-5"><item.icon className="h-5 w-5 text-primary" /><strong className="mt-3 block text-4xl font-semibold tabular-nums text-foreground group-hover:text-primary">{item.n}</strong><span className="mt-1 block text-sm text-foreground/62">{item.label}</span></Link>)}
+        </div>
+      </section>
+
       {!loading && stats && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card className="shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center">
+        <div className="grid grid-cols-1 gap-10 border-t border-border pt-8 lg:grid-cols-2">
+          <section>
+            <div className="pb-2">
+              <h2 className="text-lg font-semibold flex items-center">
                 <BarChart3 className="h-4 w-4 mr-2 text-primary" />
                 {t("Resource Distribution by Type", "资源类型分布")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h2>
+            </div>
+            <div>
               {stats.by_type.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={stats.by_type} layout="vertical" margin={{ left: 16 }}>
@@ -256,17 +228,17 @@ export default function Dashboard() {
               ) : (
                 <p className="text-sm text-muted-foreground py-8 text-center">{t("No data yet.", "暂无数据。")}</p>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
-          <Card className="shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center">
+          <section>
+            <div className="pb-2">
+              <h2 className="text-lg font-semibold flex items-center">
                 <Clock className="h-4 w-4 mr-2 text-primary" />
                 {t("Resource Growth Trend (6 months)", "资源增长趋势（近6个月）")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h2>
+            </div>
+            <div>
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={stats.growth_trend}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -276,30 +248,29 @@ export default function Dashboard() {
                   <Line type="monotone" dataKey="count" stroke={CHART_COLOR} strokeWidth={2} dot={{ r: 3 }} isAnimationActive={false} />
                 </LineChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-serif font-semibold">{t("Recently Added Resources", "最新添加的资源")}</h3>
+            <h2 className="text-xl font-semibold">{t("Recently Added Resources", "最新添加的资源")}</h2>
             <Link href="/academic-resources" className="text-sm text-primary font-medium hover:underline flex items-center">
               {t("View All", "查看全部")} <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
           </div>
 
-          <div className="space-y-3">
+          <div className="divide-y divide-border border-y border-border">
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-24 w-full rounded-lg" />
               ))
             ) : recentResources.length > 0 ? (
               recentResources.map((resource) => (
-                <Card key={resource.id} className="hover:border-primary/30 transition-colors shadow-sm">
-                  <CardContent className="p-4 flex gap-4">
-                    <div className="mt-1 bg-primary/5 p-2 rounded-md h-fit">
+                <article key={resource.id} className="flex gap-4 py-5">
+                    <div className="mt-1 h-fit bg-primary/8 p-2">
                       <FileText className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -310,7 +281,7 @@ export default function Dashboard() {
                       </Link>
                       <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground flex-wrap">
                         <span className="inline-flex items-center rounded-sm bg-secondary/20 px-2 py-0.5 text-secondary-foreground font-medium uppercase tracking-wider">
-                          {(resource.sourceType ?? "Resource").replace(/_/g, " ")}
+                          {resource.sourceType ? sourceTypeLabel(resource.sourceType, language === "zh") : t("Resource", "资源")}
                         </span>
                         {Array.isArray(resource.authors) && resource.authors.length > 0 && (
                           <span className="truncate max-w-[200px]">{resource.authors.join(", ")}</span>
@@ -323,30 +294,27 @@ export default function Dashboard() {
                         )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                </article>
               ))
             ) : (
-              <Card>
-                <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center">
+                <div className="p-8 text-center text-muted-foreground flex flex-col items-center">
                   <BookOpen className="h-8 w-8 mb-2 opacity-20" />
                   <p>{t("No resources found.", "暂无资源。")}</p>
-                </CardContent>
-              </Card>
+                </div>
             )}
           </div>
         </div>
 
         <div className="space-y-6">
           {!loading && stats && stats.top_authors.length > 0 && (
-            <Card className="shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center">
+            <section className="border-t-2 border-primary/25 pt-5">
+              <div className="pb-3">
+                <h2 className="text-lg font-semibold flex items-center">
                   <Users className="h-4 w-4 mr-2 text-primary" />
                   {t("Author Statistics", "作者统计")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2.5">
+                </h2>
+              </div>
+              <div className="space-y-3">
                 {stats.top_authors.map((author) => (
                   <Link key={author.name} href={`/authors/${encodeURIComponent(author.name)}`}>
                     <div className="space-y-1 cursor-pointer group">
@@ -365,31 +333,31 @@ export default function Dashboard() {
                     </div>
                   </Link>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+            </section>
           )}
 
           {Array.isArray(stats?.top_tags) && stats.top_tags.length > 0 && (
-            <Card className="shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center">
+            <section className="border-t-2 border-chart-2 pt-5">
+              <div className="pb-3">
+                <h2 className="text-lg font-semibold flex items-center">
                   <Tags className="h-4 w-4 mr-2 text-primary" />
                   {t("Popular Topics", "热门话题")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </h2>
+              </div>
+              <div>
                 <div className="flex flex-wrap gap-2">
                   {stats.top_tags.map((tag) => (
                     <Link key={tag.name} href={`/academic-resources?tag=${encodeURIComponent(tag.name)}`}>
-                      <span className="inline-flex items-center rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground hover:bg-secondary/20 transition-colors cursor-pointer border border-secondary/20">
+                      <span className="inline-flex items-center border-b border-border px-1 py-1 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer">
                         {tag.name}
                         <span className="ml-1 opacity-50 text-[10px]">({tag.count})</span>
                       </span>
                     </Link>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </section>
           )}
         </div>
       </div>

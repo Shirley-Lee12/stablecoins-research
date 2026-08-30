@@ -1,5 +1,6 @@
 import { resolveDoi } from "./scholar/doi";
 import { titleOverlapScore, authorOverlapCount } from "./scholar/matching";
+import { safeFetch } from "./safeUrl";
 
 export type CheckStatus = "✅" | "⚠️" | "❌";
 
@@ -43,12 +44,14 @@ export interface VerifyReport {
 
 async function isUrlReachable(url: string): Promise<boolean> {
   try {
-    const res = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(8_000), redirect: "follow" });
+    const res = await safeFetch(url, { method: "HEAD", signal: AbortSignal.timeout(8_000) });
     if (res.ok) return true;
     // Some servers don't implement HEAD (405/403) — retry with GET before giving up.
     if (res.status === 405 || res.status === 403) {
-      const getRes = await fetch(url, { method: "GET", signal: AbortSignal.timeout(8_000), redirect: "follow" });
-      return getRes.ok;
+      const getRes = await safeFetch(url, { method: "GET", signal: AbortSignal.timeout(8_000) });
+      const ok = getRes.ok;
+      await getRes.body?.cancel();
+      return ok;
     }
     return false;
   } catch {
@@ -62,14 +65,63 @@ function checkTitle(input: VerifyInput): FieldCheck {
     : { field: "title", status: "❌", detail: "缺少标题", kind: "missing" };
 }
 
-async function checkDoi(input: VerifyInput): Promise<FieldCheck> {
+const DOI_SYNTAX = /^10\.\d{4,9}\/[-._;()/:A-Z0-9]+$/i;
+
+function normalizedTitleForContainment(title: string): string {
+  return title
+    .normalize("NFKC")
+    .toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * DOI registries can retain a paper's short/main title while the publisher page and PDF use a
+ * longer title with a subtitle. A short generic title still needs matching author/year evidence.
+ */
+function hasCompatibleDoiTitle(input: VerifyInput, resolved: NonNullable<Awaited<ReturnType<typeof resolveDoi>>>): boolean {
+  const inputTitle = normalizedTitleForContainment(input.title);
+  const resolvedTitle = normalizedTitleForContainment(resolved.title);
+  if (!inputTitle || !resolvedTitle) return false;
+  if (!inputTitle.includes(resolvedTitle) && !resolvedTitle.includes(inputTitle)) return false;
+
+  const shorter = inputTitle.length <= resolvedTitle.length ? inputTitle : resolvedTitle;
+  if (shorter.split(" ").filter(Boolean).length >= 2) return true;
+
+  return input.year !== null
+    && resolved.year !== null
+    && Math.abs(input.year - resolved.year) <= 1
+    && authorOverlapCount(input.authors, resolved.authors) > 0;
+}
+
+async function checkDoi(input: VerifyInput, resolved: Awaited<ReturnType<typeof resolveDoi>>): Promise<FieldCheck> {
   if (!input.doi) return { field: "doi", status: "⚠️", detail: "未提供 DOI", kind: "missing" };
-  const resolved = await resolveDoi(input.doi);
-  if (!resolved) return { field: "doi", status: "❌", detail: `DOI "${input.doi}" 无法解析（不存在或网络错误）`, kind: "mismatch" };
-  if (titleOverlapScore(input.title, resolved.title) < 0.5) {
+  if (!DOI_SYNTAX.test(input.doi)) return { field: "doi", status: "❌", detail: `DOI "${input.doi}" 格式不正确`, kind: "mismatch" };
+  if (!resolved) {
+    const reachable = await isUrlReachable(`https://doi.org/${input.doi}`);
+    return reachable
+      ? { field: "doi", status: "⚠️", detail: `DOI 可跳转，但暂时无法取得权威元数据，请人工核对` }
+      : { field: "doi", status: "⚠️", detail: `DOI 暂时无法解析或访问，可能未被公共接口收录，请人工核对` };
+  }
+  const titleScore = titleOverlapScore(input.title, resolved.title);
+  if (titleScore < 0.5 && !hasCompatibleDoiTitle(input, resolved)) {
+    if (/^10\.2139\/ssrn\./i.test(input.doi) && authorOverlapCount(input.authors, resolved.authors) > 0) {
+      return {
+        field: "doi",
+        status: "⚠️",
+        detail: `SSRN 论文修订后的标题可能与 DOI 注册时的初始标题不同；作者一致，已交由管理员核对`,
+      };
+    }
     return { field: "doi", status: "❌", detail: `DOI 解析出的标题（"${resolved.title}"）与卡片标题差异较大，可能贴错了 DOI`, kind: "mismatch" };
   }
-  return { field: "doi", status: "✅", detail: "DOI 已确认存在，且标题一致" };
+  return {
+    field: "doi",
+    status: "✅",
+    detail: titleScore < 0.5
+      ? "DOI 已确认存在；登记的简短标题与完整题名兼容"
+      : "DOI 已确认存在，且标题一致",
+  };
 }
 
 async function checkUrl(input: VerifyInput): Promise<FieldCheck> {
@@ -85,9 +137,12 @@ async function checkUrl(input: VerifyInput): Promise<FieldCheck> {
 }
 
 /** Cross-checks authors/year against the DOI's authoritative record when one is available. */
-async function checkAuthorsAndYear(input: VerifyInput): Promise<FieldCheck[]> {
+async function checkAuthorsAndYear(input: VerifyInput, resolved: Awaited<ReturnType<typeof resolveDoi>>): Promise<FieldCheck[]> {
   const checks: FieldCheck[] = [];
-  const resolved = input.doi ? await resolveDoi(input.doi) : null;
+  const versionedPreprintWithMatchingAuthor = !!input.doi
+    && /^(?:10\.2139\/ssrn\.|10\.48550\/arxiv\.)/i.test(input.doi)
+    && !!resolved
+    && authorOverlapCount(input.authors, resolved.authors) > 0;
 
   if (input.authors.length === 0) {
     checks.push({ field: "authors", status: "❌", detail: "未填写作者", kind: "missing" });
@@ -114,6 +169,8 @@ async function checkAuthorsAndYear(input: VerifyInput): Promise<FieldCheck[]> {
     checks.push(
       Math.abs(input.year - resolved.year) <= 1
         ? { field: "year", status: "✅", detail: "年份与 DOI 权威记录一致" }
+        : versionedPreprintWithMatchingAuthor
+          ? { field: "year", status: "⚠️", detail: `预印本可能同时存在首次发布年（${resolved.year}）与后续修订年（${input.year}）；作者一致，已交由管理员核对` }
         : { field: "year", status: "⚠️", detail: `年份（${input.year}）与 DOI 解析出的年份（${resolved.year}）对不上，请人工核对`, kind: "mismatch" },
     );
   } else {
@@ -145,7 +202,8 @@ function checkKeywords(input: VerifyInput): FieldCheck {
  * Read-only w.r.t. the database (only does DOI lookups / URL reachability checks over the network).
  */
 export async function verifyResource(input: VerifyInput): Promise<VerifyReport> {
-  const [doiCheck, urlCheck, authorYearChecks] = await Promise.all([checkDoi(input), checkUrl(input), checkAuthorsAndYear(input)]);
+  const resolved = input.doi ? await resolveDoi(input.doi) : null;
+  const [doiCheck, urlCheck, authorYearChecks] = await Promise.all([checkDoi(input, resolved), checkUrl(input), checkAuthorsAndYear(input, resolved)]);
   const checks = [checkTitle(input), doiCheck, urlCheck, ...authorYearChecks, checkAbstract(input), checkKeywords(input)];
   return {
     checks,

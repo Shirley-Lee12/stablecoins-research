@@ -4,7 +4,10 @@ import { eq, and, inArray, desc } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./auth";
 import { attachFacetedTags } from "../lib/tagging";
 import { recomputeResourceStatus } from "../lib/resourceStatus";
-import { syncResourceAuthors } from "./authors";
+import { syncResourceAuthors } from "../lib/resourceAuthors";
+import { normalizeResourceUrlInput } from "../lib/safeUrl";
+import { normalizeKeywordList } from "../lib/keywords";
+import { InvalidPublicationDateError, normalizePublicationDateInput } from "../lib/publicationDate";
 
 const router = Router();
 
@@ -59,7 +62,12 @@ router.post("/resources/:id/edit-suggestions", requireAuth, async (req: any, res
       previousFields.authors = resource.authors;
     }
     if (body.publishedDate === null || typeof body.publishedDate === "string") {
-      proposedFields.publishedDate = body.publishedDate;
+      try {
+        proposedFields.publishedDate = normalizePublicationDateInput(body.publishedDate);
+      } catch (error) {
+        if (error instanceof InvalidPublicationDateError) { res.status(400).json({ error: error.message }); return; }
+        throw error;
+      }
       previousFields.publishedDate = resource.publishedDate;
     }
     if (typeof body.abstract === "string") {
@@ -67,7 +75,7 @@ router.post("/resources/:id/edit-suggestions", requireAuth, async (req: any, res
       previousFields.abstract = resource.abstract;
     }
     if (body.url === null || typeof body.url === "string") {
-      proposedFields.url = body.url;
+      proposedFields.url = typeof body.url === "string" ? normalizeResourceUrlInput(body.url) : null;
       previousFields.url = resource.url;
     }
     if (body.doi === null || typeof body.doi === "string") {
@@ -75,7 +83,7 @@ router.post("/resources/:id/edit-suggestions", requireAuth, async (req: any, res
       previousFields.doi = resource.doi;
     }
     if (Array.isArray(body.keywords)) {
-      proposedFields.keywords = body.keywords.filter((k): k is string => typeof k === "string" && k.trim().length > 0).map((k) => k.trim());
+      proposedFields.keywords = normalizeKeywordList(body.keywords.filter((k): k is string => typeof k === "string"));
       previousFields.keywords = resource.keywords;
     }
 
@@ -244,18 +252,50 @@ router.get("/admin/edit-suggestions", requireAuth, requireAdmin, async (req: any
 
 /**
  * PATCH /api/admin/edit-suggestions/:id/review — admin only.
- * Body: { action: 'approve' | 'reject', reviewNote?: string }
- * Approve applies every field present in proposedFields (a full replacement per field, not a
- * merge — same semantics as the admin-direct-edit path), marks every kept/added facet tag link
- * 'manual' (T.4's protection scheme), recomputes `status` via recomputeResourceStatus()
- * (completeness/duplicate/theme-tag — NOT a fresh verify-agent run), and marks the suggestion
- * 'approved'. Reject only marks the suggestion 'rejected' — the resource's current display and
- * content are untouched either way until approval.
+ * Body: { action: 'approve' | 'reject', reviewNote?: string, force?: boolean }
+ *
+ * docs/planning/20 §20.1b — concurrent-suggestion conflict detection. Scenario: submitter A and B
+ * both propose changes based on the same version of a resource; an admin approves A (resource now
+ * updated); later approves B — if B's proposal were applied as a blind field replacement, it would
+ * silently overwrite A's already-applied change with B's now-stale snapshot. Scalar fields
+ * (title/publishedDate/abstract/url/doi) are checked by comparing the suggestion's previousFields
+ * snapshot against the resource's actual current value — any difference is a conflict. List fields
+ * (authors/keywords/themeTags/jurisdictionTags/assetTags) are checked per-element, not as whole
+ * arrays: A adding tag X and B adding tag Y don't conflict (different elements) even though both
+ * "touch" the same field; a conflict only exists when this suggestion's own added/removed elements
+ * overlap with elements that drifted (changed) between this suggestion's snapshot and the resource's
+ * current actual value. When a conflict exists and the request isn't `force: true`, nothing is
+ * applied and the suggestion stays 'pending' — the response is 409 with full per-field
+ * previous/current/proposed detail so the admin can decide (force through, reject, or go look at the
+ * resource first), never a silent overwrite.
+ *
+ * When applying (no conflict, or forced): scalar fields are a direct replacement (safe either way —
+ * if there was no drift it's a no-op distinction; if forced despite drift, the admin's approval is
+ * the explicit override). List fields apply via merge — this suggestion's own added/removed elements
+ * are applied onto the resource's CURRENT actual array, not onto the stale proposedFields snapshot —
+ * so an unrelated concurrent addition (like A's tag X above) is never dropped by B's approval.
+ *
+ * Every kept/added facet tag link is marked 'manual' (T.4's protection scheme); `status` is
+ * recomputed via recomputeResourceStatus() (completeness/duplicate/theme-tag — NOT a fresh
+ * verify-agent run). Reject only marks the suggestion 'rejected' — the resource's current display
+ * and content are untouched either way until approval.
  */
+const SCALAR_KEYS = ["title", "publishedDate", "abstract", "url", "doi"] as const;
+const LIST_KEYS = ["authors", "keywords", "themeTags", "jurisdictionTags", "assetTags"] as const;
+
+interface FieldConflict {
+  field: string;
+  /** Only present for list-type fields — the specific elements that conflict. */
+  elements?: (string | number)[];
+  previousValue: unknown;
+  currentValue: unknown;
+  proposedValue: unknown;
+}
+
 router.patch("/admin/edit-suggestions/:id/review", requireAuth, requireAdmin, async (req: any, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { action, reviewNote } = req.body as { action?: string; reviewNote?: string };
+    const { action, reviewNote, force } = req.body as { action?: string; reviewNote?: string; force?: boolean };
     if (action !== "approve" && action !== "reject") {
       res.status(400).json({ error: "action must be 'approve' or 'reject'" });
       return;
@@ -277,37 +317,92 @@ router.patch("/admin/edit-suggestions/:id/review", requireAuth, requireAdmin, as
 
     const { resourceId } = suggestion;
     const proposed = suggestion.proposedFields as SuggestibleResourceFields;
-    const [beforeEdit] = await db.select({ status: resourcesTable.status }).from(resourcesTable).where(eq(resourcesTable.id, resourceId)).limit(1);
-    if (!beforeEdit) { res.status(404).json({ error: "Resource not found" }); return; }
-    const previousStatus = beforeEdit.status;
+    const previous = suggestion.previousFields as SuggestibleResourceFields;
+    const [current] = await db.select().from(resourcesTable).where(eq(resourcesTable.id, resourceId)).limit(1);
+    if (!current) { res.status(404).json({ error: "Resource not found" }); return; }
+    const previousStatus = current.status;
+
+    const currentValues: SuggestibleResourceFields = {};
+    if (proposed.title !== undefined) currentValues.title = current.title;
+    if (proposed.authors !== undefined) currentValues.authors = current.authors;
+    if (proposed.publishedDate !== undefined) currentValues.publishedDate = current.publishedDate;
+    if (proposed.abstract !== undefined) currentValues.abstract = current.abstract;
+    if (proposed.url !== undefined) currentValues.url = current.url;
+    if (proposed.doi !== undefined) currentValues.doi = current.doi;
+    if (proposed.keywords !== undefined) currentValues.keywords = current.keywords;
+
+    const touchedFacets = FACET_KEYS.filter((k) => proposed[k] !== undefined);
+    const currentFacetLinks = touchedFacets.length > 0
+      ? await db.select({ tagId: resourceTagsTable.tagId, facet: tagsTable.facet })
+          .from(resourceTagsTable).innerJoin(tagsTable, eq(resourceTagsTable.tagId, tagsTable.id))
+          .where(eq(resourceTagsTable.resourceId, resourceId))
+      : [];
+    for (const key of touchedFacets) {
+      currentValues[key] = currentFacetLinks.filter((l) => l.facet === FACET_OF[key]).map((l) => l.tagId);
+    }
+
+    const conflicts: FieldConflict[] = [];
+    const mergedListValues: Record<string, (string | number)[]> = {};
+    for (const key of Object.keys(proposed) as (keyof SuggestibleResourceFields)[]) {
+      const proposedVal = proposed[key];
+      const previousVal = previous[key];
+      const currentVal = currentValues[key];
+      if ((SCALAR_KEYS as readonly string[]).includes(key)) {
+        if (JSON.stringify(previousVal ?? null) !== JSON.stringify(currentVal ?? null)) {
+          conflicts.push({ field: key, previousValue: previousVal ?? null, currentValue: currentVal ?? null, proposedValue: proposedVal ?? null });
+        }
+      } else if ((LIST_KEYS as readonly string[]).includes(key)) {
+        const prevArr = (previousVal as (string | number)[] | undefined) ?? [];
+        const propArr = (proposedVal as (string | number)[] | undefined) ?? [];
+        const currArr = (currentVal as (string | number)[] | undefined) ?? [];
+        const prevSet = new Set(prevArr);
+        const propSet = new Set(propArr);
+        const currSet = new Set(currArr);
+        const added = propArr.filter((e) => !prevSet.has(e));
+        const removed = prevArr.filter((e) => !propSet.has(e));
+        const driftAdded = currArr.filter((e) => !prevSet.has(e));
+        const driftRemoved = prevArr.filter((e) => !currSet.has(e));
+        const touched = new Set([...added, ...removed]);
+        const drifted = new Set([...driftAdded, ...driftRemoved]);
+        const conflictElements = [...touched].filter((e) => drifted.has(e));
+        if (conflictElements.length > 0) {
+          conflicts.push({ field: key, elements: conflictElements, previousValue: prevArr, currentValue: currArr, proposedValue: propArr });
+        }
+        const removedSet = new Set(removed);
+        mergedListValues[key] = [...currArr.filter((e) => !removedSet.has(e)), ...added.filter((e) => !currSet.has(e))];
+      }
+    }
+
+    if (conflicts.length > 0 && !force) {
+      res.status(409).json({ error: "This suggestion conflicts with changes made since it was submitted", conflicts });
+      return;
+    }
 
     const scalarUpdates: Record<string, unknown> = {};
     if (proposed.title !== undefined) scalarUpdates.title = proposed.title;
-    if (proposed.authors !== undefined) scalarUpdates.authors = proposed.authors;
     if (proposed.publishedDate !== undefined) scalarUpdates.publishedDate = proposed.publishedDate;
     if (proposed.abstract !== undefined) scalarUpdates.abstract = proposed.abstract;
     if (proposed.url !== undefined) scalarUpdates.url = proposed.url;
     if (proposed.doi !== undefined) scalarUpdates.doi = proposed.doi;
+    if (proposed.authors !== undefined) scalarUpdates.authors = mergedListValues.authors as string[];
     if (proposed.keywords !== undefined) {
-      scalarUpdates.keywords = proposed.keywords;
-      scalarUpdates.keywordsSource = proposed.keywords.length > 0 ? "manual" : null;
+      const mergedKeywords = mergedListValues.keywords as string[];
+      scalarUpdates.keywords = mergedKeywords;
+      scalarUpdates.keywordsSource = mergedKeywords.length > 0 ? "manual" : null;
     }
     if (Object.keys(scalarUpdates).length > 0) {
       await db.update(resourcesTable).set(scalarUpdates).where(eq(resourcesTable.id, resourceId));
     }
-    if (proposed.authors !== undefined) await syncResourceAuthors(resourceId, proposed.authors);
+    if (proposed.authors !== undefined) await syncResourceAuthors(resourceId, mergedListValues.authors as string[]);
 
     // Facet tags: only touch the facet(s) actually present in this suggestion — a suggestion that
-    // only proposed e.g. a title change must not disturb tags of any facet.
-    for (const key of FACET_KEYS) {
-      const proposedIds = proposed[key];
-      if (proposedIds === undefined) continue;
+    // only proposed e.g. a title change must not disturb tags of any facet. Applied via the merge
+    // result (current ∪ added, minus removed), not the raw proposed set.
+    for (const key of touchedFacets) {
       const facet = FACET_OF[key];
-      const currentLinks = await db.select({ tagId: resourceTagsTable.tagId })
-        .from(resourceTagsTable).innerJoin(tagsTable, eq(resourceTagsTable.tagId, tagsTable.id))
-        .where(and(eq(resourceTagsTable.resourceId, resourceId), eq(tagsTable.facet, facet)));
-      const currentIds = new Set(currentLinks.map((l) => l.tagId));
-      const newIds = new Set(proposedIds);
+      const mergedIds = mergedListValues[key] as number[];
+      const currentIds = new Set(currentFacetLinks.filter((l) => l.facet === facet).map((l) => l.tagId));
+      const newIds = new Set(mergedIds);
       const toRemove = [...currentIds].filter((tagId) => !newIds.has(tagId));
       if (toRemove.length > 0) {
         await db.delete(resourceTagsTable).where(and(eq(resourceTagsTable.resourceId, resourceId), inArray(resourceTagsTable.tagId, toRemove)));
@@ -338,6 +433,7 @@ router.patch("/admin/edit-suggestions/:id/review", requireAuth, requireAdmin, as
       ...(previousStatus !== result.status && {
         resourceStatusChangeReason: { missingFields: result.missingFields, hasThemeTag: result.hasThemeTag, duplicateSignal: result.duplicateSignal, hasMismatch: result.hasMismatch },
       }),
+      ...(conflicts.length > 0 && { forcedThroughConflicts: conflicts }),
     });
   } catch (err) {
     req.log.error(err);

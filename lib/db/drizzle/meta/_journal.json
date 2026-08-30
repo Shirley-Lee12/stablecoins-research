@@ -176,6 +176,48 @@
       "when": 1783155702184,
       "tag": "0024_boring_bloodstorm",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1787310442856,
+      "tag": "0025_steep_rhodey",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1787386811353,
+      "tag": "0026_wet_triton",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1787390684989,
+      "tag": "0027_romantic_rawhide_kid",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1787574322638,
+      "tag": "0028_damp_bromley",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1787918247995,
+      "tag": "0029_typical_prodigy",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1787927918518,
+      "tag": "0030_quiet_rictor",
+      "breakpoints": true
     }
   ]
 }

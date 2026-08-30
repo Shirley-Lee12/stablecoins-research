@@ -34,7 +34,10 @@ router.get("/our-research/:id", async (req, res) => {
       .from(ourResearchTable)
       .where(eq(ourResearchTable.id, id))
       .limit(1);
-    if (!row) { res.status(404).json({ error: "Not found" }); return; }
+    if (!row) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     res.json(row);
   } catch (err) {
     req.log.error(err);
@@ -44,17 +47,36 @@ router.get("/our-research/:id", async (req, res) => {
 
 router.post("/our-research", requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { title, fileUrl, abstract, keyInnovations, tags } = req.body;
-    if (!title) { res.status(400).json({ error: "title is required" }); return; }
+    const {
+      title,
+      titleZh,
+      fileUrl,
+      abstract,
+      abstractZh,
+      authors,
+      keyInnovations,
+      keyInnovationsZh,
+      tags,
+      publishedDate,
+    } = req.body;
+    if (!title) {
+      res.status(400).json({ error: "title is required" });
+      return;
+    }
 
     const [inserted] = await db
       .insert(ourResearchTable)
       .values({
         title,
+        titleZh: titleZh ?? null,
         fileUrl: fileUrl ?? null,
         abstract: abstract ?? null,
+        abstractZh: abstractZh ?? null,
+        authors: authors ?? [],
         keyInnovations: keyInnovations ?? [],
+        keyInnovationsZh: keyInnovationsZh ?? [],
         tags: tags ?? [],
+        publishedDate: publishedDate ?? null,
       })
       .returning();
 
@@ -65,15 +87,61 @@ router.post("/our-research", requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
-router.delete("/our-research/:id", requireAuth, requireAdmin, async (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    await db.delete(ourResearchTable).where(eq(ourResearchTable.id, id));
-    res.status(204).send();
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Failed to delete research item" });
-  }
-});
+router.patch(
+  "/our-research/:id",
+  requireAuth,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const allowedFields = [
+        "title",
+        "titleZh",
+        "fileUrl",
+        "abstract",
+        "abstractZh",
+        "authors",
+        "keyInnovations",
+        "keyInnovationsZh",
+        "tags",
+        "publishedDate",
+      ] as const;
+      const updates = Object.fromEntries(
+        allowedFields
+          .filter((field) => req.body[field] !== undefined)
+          .map((field) => [field, req.body[field]]),
+      );
+      const [updated] = await db
+        .update(ourResearchTable)
+        .set(updates)
+        .where(eq(ourResearchTable.id, id))
+        .returning();
+      if (!updated) {
+        res.status(404).json({ error: "Not found" });
+        return;
+      }
+      res.json(updated);
+    } catch (err) {
+      req.log.error(err);
+      res.status(500).json({ error: "Failed to update research item" });
+    }
+  },
+);
+
+router.delete(
+  "/our-research/:id",
+  requireAuth,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await db.delete(ourResearchTable).where(eq(ourResearchTable.id, id));
+      res.status(204).send();
+    } catch (err) {
+      req.log.error(err);
+      res.status(500).json({ error: "Failed to delete research item" });
+    }
+  },
+);
 
 export default router;

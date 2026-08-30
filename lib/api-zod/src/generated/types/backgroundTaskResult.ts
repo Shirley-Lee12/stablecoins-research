@@ -6,7 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type AuthorSummaryResourceTypesItem = {
-  type: string;
-  count: number;
-};
+/**
+ * @nullable
+ */
+export type BackgroundTaskResult = { [key: string]: unknown } | null;

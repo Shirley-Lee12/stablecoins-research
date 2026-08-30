@@ -102,7 +102,7 @@ export async function recomputeResourceStatus(resourceId: number): Promise<Statu
 
   const year = r.publishedDate?.match(/^\d{4}/)?.[0] ? Number(r.publishedDate.match(/^\d{4}/)![0]) : null;
   const missingFields = computeMissingFields(r);
-  const duplicateSignal = await checkDuplicate({ title: r.title, doi: r.doi, url: r.url, year }, resourceId);
+  const duplicateSignal = await checkDuplicate({ title: r.title, authors: r.authors, doi: r.doi, url: r.url, year }, resourceId);
   const themeRows = await db
     .select({ facet: tagsTable.facet })
     .from(resourceTagsTable)

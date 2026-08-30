@@ -43,10 +43,10 @@ pnpm run typecheck:libs
 # build（typecheck + build 全部包）
 pnpm run build
 
-# 运行 API server（端口 5000）
+# 运行 API server（默认端口 3000，读取根目录 .env）
 pnpm --filter @workspace/api-server run dev
 
-# 运行前端
+# 运行前端（默认 http://localhost:5173）
 pnpm --filter @workspace/stablecoin-hub run dev
 
 # 修改 lib/api-spec/openapi.yaml 后重新生成 hooks + Zod schema

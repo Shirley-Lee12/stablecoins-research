@@ -19,6 +19,7 @@ export async function resolveDoi(doi: string): Promise<ScholarResult | null> {
       title: typeof title === "string" ? title : "",
       authors,
       year: typeof year === "number" ? year : null,
+      abstract: typeof csl.abstract === "string" && csl.abstract.trim() ? csl.abstract.trim() : null,
       doi,
       canonicalUrl: `https://doi.org/${doi}`,
       fulltextUrl: null,

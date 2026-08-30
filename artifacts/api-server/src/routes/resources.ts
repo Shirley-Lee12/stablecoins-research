@@ -2,9 +2,13 @@ import { Router } from "express";
 import { db, resourcesTable, resourceTagsTable, duplicateCandidatesTable } from "@workspace/db";
 import { eq, ne, desc, ilike, or, sql, and, inArray } from "drizzle-orm";
 import { requireAuth, optionalAuth } from "./auth";
-import { syncResourceAuthors } from "./authors";
+import { syncResourceAuthors } from "../lib/resourceAuthors";
 import { missingSixElements, computeMissingFields, recomputeResourceStatus } from "../lib/resourceStatus";
 import { attachFacetedTags } from "../lib/tagging";
+import { verifyResource } from "../lib/verify";
+import { normalizeResourceUrlInput } from "../lib/safeUrl";
+import { normalizeKeywordList } from "../lib/keywords";
+import { InvalidPublicationDateError, normalizePublicationDateInput } from "../lib/publicationDate";
 
 const router = Router();
 
@@ -222,10 +226,25 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       return;
     }
 
-    const { title, authors, sourceType, url, doi, abstract, publishedDate, tagIds, keywords, duplicateNote } = req.body as {
+    const { title, authors, sourceType, url, doi, abstract, publishedDate, tagIds, keywords, duplicateNote, resubmit } = req.body as {
       title?: string; authors?: string[]; sourceType?: string; url?: string | null; doi?: string | null;
-      abstract?: string; publishedDate?: string | null; tagIds?: number[]; keywords?: string[]; duplicateNote?: string;
+      abstract?: string; publishedDate?: string | null; tagIds?: number[]; keywords?: string[]; duplicateNote?: string; resubmit?: boolean;
     };
+    // An admin can also be the submitter. The explicit marker keeps "edit my rejected item and
+    // resubmit" on the owner workflow instead of accidentally treating it as an immediate admin edit.
+    const isOwnerResubmission = isOwner && existing.status !== "approved" && (resubmit === true || !isAdmin);
+    const isAdminDirectEdit = isAdmin && !isOwnerResubmission;
+    const normalizedUrl = url === undefined || url === null ? url : normalizeResourceUrlInput(url);
+    const normalizedKeywords = keywords === undefined ? undefined : normalizeKeywordList(keywords);
+    let normalizedPublishedDate = publishedDate;
+    if (publishedDate !== undefined) {
+      try {
+        normalizedPublishedDate = normalizePublicationDateInput(publishedDate);
+      } catch (error) {
+        if (error instanceof InvalidPublicationDateError) { res.status(400).json({ error: error.message }); return; }
+        throw error;
+      }
+    }
 
     // docs/planning/18 §18.4 — for an APPROVED resource, tags/keywords are no longer directly
     // editable by a non-admin through this route: any logged-in user proposes those two fields via
@@ -234,30 +253,32 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
     // for a not-yet-approved resource — an owner fixing e.g. a missing-keywords 'incomplete' resource
     // must still be able to write keywords directly here, or they could never escape that status.
     const nonAdminCanEditKeywords = existing.status !== "approved";
+    const contentChanged = title !== undefined || authors !== undefined || url !== undefined || doi !== undefined || abstract !== undefined || publishedDate !== undefined || keywords !== undefined || duplicateNote !== undefined;
     const [updated] = await db
       .update(resourcesTable)
       .set({
         ...(title         !== undefined && { title }),
         ...(authors       !== undefined && { authors }),
         ...(sourceType    !== undefined && { sourceType: sourceType as any }),
-        ...(url           !== undefined && { url }),
+        ...(url           !== undefined && { url: normalizedUrl }),
         ...(doi           !== undefined && { doi }),
         ...(abstract      !== undefined && { abstract }),
         // Editing this field is inherently a human act (docs/planning/15 §5.3's "manual" source) —
         // not re-derived from wherever it started.
-        ...((isAdmin || nonAdminCanEditKeywords) && keywords !== undefined && { keywords, keywordsSource: keywords.length > 0 ? "manual" as const : null }),
-        ...(publishedDate !== undefined && { publishedDate }),
+        ...((isAdminDirectEdit || nonAdminCanEditKeywords) && normalizedKeywords !== undefined && { keywords: normalizedKeywords, keywordsSource: normalizedKeywords.length > 0 ? "manual" as const : null }),
+        ...(publishedDate !== undefined && { publishedDate: normalizedPublishedDate }),
         // docs/planning/19 §19.3 — only meaningful when resubmitting a 'duplicate'-flagged resource
         // to confirm it isn't actually one; harmless to accept otherwise.
         ...(duplicateNote !== undefined && { duplicateNote }),
-        ...(isAdmin && { adminEdited: true }),
+        ...(isAdminDirectEdit && { adminEdited: true }),
+        ...(contentChanged && { aiReviewStatus: "not_started", aiReviewSummary: null, aiReviewDetails: null, aiReviewedAt: null }),
       })
       .where(eq(resourcesTable.id, id))
       .returning();
 
     if (authors !== undefined) await syncResourceAuthors(id, updated.authors);
 
-    if (isAdmin) {
+    if (isAdminDirectEdit) {
       if (tagIds !== undefined) {
         const currentLinks = await db.select({ tagId: resourceTagsTable.tagId }).from(resourceTagsTable).where(eq(resourceTagsTable.resourceId, id));
         const currentIds = new Set(currentLinks.map((l) => l.tagId));
@@ -281,7 +302,13 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       // response always says what changed and why.
       const previousStatus = updated.status;
       const result = await recomputeResourceStatus(id);
-      const [reclassified] = await db.update(resourcesTable).set({ status: result.status }).where(eq(resourcesTable.id, id)).returning();
+      // An administrator's completed edit is the approval decision. When it moves an unapproved
+      // resource to approved, record the reviewer and exact approval time in the same write so the
+      // item cannot disappear from the queue without appearing in the review log.
+      const approvalTrail = result.status === "approved" && previousStatus !== "approved"
+        ? { reviewedBy: req.user.userId, reviewedAt: new Date(), rejectionReasonId: null, rejectionNote: null }
+        : {};
+      const [reclassified] = await db.update(resourcesTable).set({ status: result.status, ...approvalTrail }).where(eq(resourcesTable.id, id)).returning();
       res.json({
         ...reclassified,
         previousStatus,
@@ -293,24 +320,33 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       return;
     }
 
-    // Owner resubmission (docs/planning/19 §19.1 — supersedes the old "rerun the full check
-    // pipeline" rule from docs/planning/15 §0.7). off_topic/disputed/duplicate are automatic-
-    // detection signals; re-running that same detection on every resubmission trapped an owner who
-    // disagreed with the call (or made an unrelated fix) in a permanent loop, since nothing about
-    // the signal itself had changed. Resubmission now only re-checks completeness — the verify
-    // agent, theme-relevance retagging, and duplicate check each only ever run once, at initial
-    // submission (upload.ts's persistConfirmedDraft). From here on, an admin who can see the
-    // original flagged reason plus whatever the owner changed/explained makes the call, not another
-    // automatic pass. The resource's existing cached verificationReport/facet tags are left alone —
-    // they still reflect the last real check and remain the basis for 19.2's disputed-reason display.
-    const contentChanged = title !== undefined || authors !== undefined || url !== undefined || doi !== undefined || abstract !== undefined || publishedDate !== undefined || keywords !== undefined || duplicateNote !== undefined;
+    // Owner resubmission refreshes the verification evidence for the admin, but the automated report
+    // does not put the owner back into a disputed loop. A complete resubmission always goes to the
+    // human review queue; incomplete work stays self-service until all six elements are present.
     if (contentChanged) {
       const year = updated.publishedDate?.match(/^\d{4}/)?.[0] ? Number(updated.publishedDate.match(/^\d{4}/)![0]) : null;
       const missingFields = missingSixElements({ title: updated.title, authors: updated.authors, year, abstract: updated.abstract, url: updated.url, doi: updated.doi, keywords: updated.keywords });
       const newStatus = missingFields.length > 0 ? "incomplete" : "pending";
+      const verificationReport = await verifyResource({
+        title: updated.title,
+        authors: updated.authors,
+        year,
+        abstract: updated.abstract,
+        url: updated.url,
+        doi: updated.doi,
+        keywords: updated.keywords,
+      });
       const [reclassified] = await db
         .update(resourcesTable)
-        .set({ status: newStatus, rejectionReasonId: null, rejectionNote: null, reviewedBy: null, reviewedAt: null })
+        .set({
+          status: newStatus,
+          verificationReport,
+          verifiedAt: new Date(),
+          rejectionReasonId: null,
+          rejectionNote: null,
+          reviewedBy: null,
+          reviewedAt: null,
+        })
         .where(eq(resourcesTable.id, id))
         .returning();
       res.json(reclassified);
@@ -324,7 +360,7 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
   }
 });
 
-/** DELETE /api/resources/:id — admin or owner */
+/** DELETE /api/resources/:id — admins may hard-delete; owners may only soft-withdraw unapproved work. */
 router.delete("/resources/:id", requireAuth, async (req: any, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -338,8 +374,18 @@ router.delete("/resources/:id", requireAuth, async (req: any, res) => {
       return;
     }
 
-    await db.delete(resourcesTable).where(eq(resourcesTable.id, id));
-    res.status(204).send();
+    if (isAdmin) {
+      await db.delete(resourcesTable).where(eq(resourcesTable.id, id));
+      res.status(204).send();
+      return;
+    }
+    if (existing.status === "approved") {
+      res.status(403).json({ error: "Approved resources can only be removed by an administrator" });
+      return;
+    }
+
+    const [withdrawn] = await db.update(resourcesTable).set({ status: "withdrawn" }).where(eq(resourcesTable.id, id)).returning();
+    res.json(withdrawn);
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to delete resource" });

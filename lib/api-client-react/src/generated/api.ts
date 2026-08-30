@@ -20,18 +20,28 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AiPreReviewInput,
+  ApplyLatestRulesInput,
   AuthorProfile,
   AuthorSummary,
+  BackgroundTask,
+  BulkResourceReviewInput,
+  CandidateImportInput,
   CountryStat,
   ExtractionInput,
   ExtractionResult,
   GetRegulatoryTimelineParams,
   HealthStatus,
+  ListAdminBackgroundTasksParams,
+  ListAdminReviewLogParams,
   ListAuthorsParams,
   ListRecentResourcesParams,
   ListRegulatoryEntriesParams,
   ListResourcesParams,
+  ListSubscriptionCandidatesParams,
   PlatformStats,
+  ReenrichJobsInput,
+  ReferenceListUploadForm,
   RegulatoryEntry,
   RegulatoryEntryInput,
   RegulatoryTimelineYear,
@@ -39,9 +49,15 @@ import type {
   ResearchPaperInput,
   Resource,
   ResourceInput,
+  ResourceSubscription,
+  ResourceSubscriptionInput,
   ResourceUpdate,
+  ReviewLogEntry,
+  SubscriptionCandidate,
   Tag,
-  UpdateAuthorProfile
+  UpdateAuthorProfile,
+  UploadJobAccepted,
+  UploadJobIdsInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -661,6 +677,458 @@ export const useDeleteResource = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getDeleteResourceMutationOptions(options));
     }
+
+export const getQueueResourceAiPreReviewUrl = () => {
+
+
+
+
+  return `/api/admin/resources/pre-review`
+}
+
+/**
+ * @summary Queue public-link and AI pre-review for pending resources
+ */
+export const queueResourceAiPreReview = async (aiPreReviewInput: AiPreReviewInput, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getQueueResourceAiPreReviewUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      aiPreReviewInput,)
+  }
+);}
+
+
+
+
+export const getQueueResourceAiPreReviewMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof queueResourceAiPreReview>>, TError,{data: BodyType<AiPreReviewInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof queueResourceAiPreReview>>, TError,{data: BodyType<AiPreReviewInput>}, TContext> => {
+
+const mutationKey = ['queueResourceAiPreReview'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof queueResourceAiPreReview>>, {data: BodyType<AiPreReviewInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  queueResourceAiPreReview(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type QueueResourceAiPreReviewMutationResult = NonNullable<Awaited<ReturnType<typeof queueResourceAiPreReview>>>
+    export type QueueResourceAiPreReviewMutationBody = BodyType<AiPreReviewInput>
+    export type QueueResourceAiPreReviewMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Queue public-link and AI pre-review for pending resources
+ */
+export const useQueueResourceAiPreReview = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof queueResourceAiPreReview>>, TError,{data: BodyType<AiPreReviewInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof queueResourceAiPreReview>>,
+        TError,
+        {data: BodyType<AiPreReviewInput>},
+        TContext
+      > => {
+      return useMutation(getQueueResourceAiPreReviewMutationOptions(options));
+    }
+
+export const getApplyLatestRulesToPendingResourcesUrl = () => {
+
+
+
+
+  return `/api/admin/resources/apply-latest-rules`
+}
+
+/**
+ * Preserves manually entered fields and manual tag links while replacing auto-generated tag links.
+ * @summary Re-run current classification, tagging, and AI pre-review rules for selected pending resources
+ */
+export const applyLatestRulesToPendingResources = async (applyLatestRulesInput: ApplyLatestRulesInput, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getApplyLatestRulesToPendingResourcesUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      applyLatestRulesInput,)
+  }
+);}
+
+
+
+
+export const getApplyLatestRulesToPendingResourcesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof applyLatestRulesToPendingResources>>, TError,{data: BodyType<ApplyLatestRulesInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof applyLatestRulesToPendingResources>>, TError,{data: BodyType<ApplyLatestRulesInput>}, TContext> => {
+
+const mutationKey = ['applyLatestRulesToPendingResources'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof applyLatestRulesToPendingResources>>, {data: BodyType<ApplyLatestRulesInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  applyLatestRulesToPendingResources(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApplyLatestRulesToPendingResourcesMutationResult = NonNullable<Awaited<ReturnType<typeof applyLatestRulesToPendingResources>>>
+    export type ApplyLatestRulesToPendingResourcesMutationBody = BodyType<ApplyLatestRulesInput>
+    export type ApplyLatestRulesToPendingResourcesMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Re-run current classification, tagging, and AI pre-review rules for selected pending resources
+ */
+export const useApplyLatestRulesToPendingResources = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof applyLatestRulesToPendingResources>>, TError,{data: BodyType<ApplyLatestRulesInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof applyLatestRulesToPendingResources>>,
+        TError,
+        {data: BodyType<ApplyLatestRulesInput>},
+        TContext
+      > => {
+      return useMutation(getApplyLatestRulesToPendingResourcesMutationOptions(options));
+    }
+
+export const getListAdminBackgroundTasksUrl = (params?: ListAdminBackgroundTasksParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/background-tasks?${stringifiedParams}` : `/api/admin/background-tasks`
+}
+
+/**
+ * @summary List durable background tasks created by the current administrator
+ */
+export const listAdminBackgroundTasks = async (params?: ListAdminBackgroundTasksParams, options?: RequestInit): Promise<BackgroundTask[]> => {
+
+  return customFetch<BackgroundTask[]>(getListAdminBackgroundTasksUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAdminBackgroundTasksQueryKey = (params?: ListAdminBackgroundTasksParams,) => {
+    return [
+    `/api/admin/background-tasks`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAdminBackgroundTasksQueryOptions = <TData = Awaited<ReturnType<typeof listAdminBackgroundTasks>>, TError = ErrorType<unknown>>(params?: ListAdminBackgroundTasksParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminBackgroundTasks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminBackgroundTasksQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminBackgroundTasks>>> = ({ signal }) => listAdminBackgroundTasks(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminBackgroundTasks>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminBackgroundTasksQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminBackgroundTasks>>>
+export type ListAdminBackgroundTasksQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List durable background tasks created by the current administrator
+ */
+
+export function useListAdminBackgroundTasks<TData = Awaited<ReturnType<typeof listAdminBackgroundTasks>>, TError = ErrorType<unknown>>(
+ params?: ListAdminBackgroundTasksParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminBackgroundTasks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminBackgroundTasksQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getRetryAdminBackgroundTaskUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/background-tasks/${id}/retry`
+}
+
+/**
+ * @summary Retry a failed or externally paused background task
+ */
+export const retryAdminBackgroundTask = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getRetryAdminBackgroundTaskUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getRetryAdminBackgroundTaskMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryAdminBackgroundTask>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof retryAdminBackgroundTask>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['retryAdminBackgroundTask'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof retryAdminBackgroundTask>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  retryAdminBackgroundTask(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RetryAdminBackgroundTaskMutationResult = NonNullable<Awaited<ReturnType<typeof retryAdminBackgroundTask>>>
+
+    export type RetryAdminBackgroundTaskMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Retry a failed or externally paused background task
+ */
+export const useRetryAdminBackgroundTask = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryAdminBackgroundTask>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof retryAdminBackgroundTask>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getRetryAdminBackgroundTaskMutationOptions(options));
+    }
+
+export const getBulkReviewResourcesUrl = () => {
+
+
+
+
+  return `/api/admin/resources/bulk-review`
+}
+
+/**
+ * @summary Approve or reject selected pending resources
+ */
+export const bulkReviewResources = async (bulkResourceReviewInput: BulkResourceReviewInput, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getBulkReviewResourcesUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      bulkResourceReviewInput,)
+  }
+);}
+
+
+
+
+export const getBulkReviewResourcesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkReviewResources>>, TError,{data: BodyType<BulkResourceReviewInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof bulkReviewResources>>, TError,{data: BodyType<BulkResourceReviewInput>}, TContext> => {
+
+const mutationKey = ['bulkReviewResources'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bulkReviewResources>>, {data: BodyType<BulkResourceReviewInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  bulkReviewResources(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BulkReviewResourcesMutationResult = NonNullable<Awaited<ReturnType<typeof bulkReviewResources>>>
+    export type BulkReviewResourcesMutationBody = BodyType<BulkResourceReviewInput>
+    export type BulkReviewResourcesMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Approve or reject selected pending resources
+ */
+export const useBulkReviewResources = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkReviewResources>>, TError,{data: BodyType<BulkResourceReviewInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof bulkReviewResources>>,
+        TError,
+        {data: BodyType<BulkResourceReviewInput>},
+        TContext
+      > => {
+      return useMutation(getBulkReviewResourcesMutationOptions(options));
+    }
+
+export const getListAdminReviewLogUrl = (params?: ListAdminReviewLogParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/review-log?${stringifiedParams}` : `/api/admin/review-log`
+}
+
+/**
+ * @summary List completed administrator review decisions
+ */
+export const listAdminReviewLog = async (params?: ListAdminReviewLogParams, options?: RequestInit): Promise<ReviewLogEntry[]> => {
+
+  return customFetch<ReviewLogEntry[]>(getListAdminReviewLogUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAdminReviewLogQueryKey = (params?: ListAdminReviewLogParams,) => {
+    return [
+    `/api/admin/review-log`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAdminReviewLogQueryOptions = <TData = Awaited<ReturnType<typeof listAdminReviewLog>>, TError = ErrorType<unknown>>(params?: ListAdminReviewLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminReviewLog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminReviewLogQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminReviewLog>>> = ({ signal }) => listAdminReviewLog(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminReviewLog>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminReviewLogQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminReviewLog>>>
+export type ListAdminReviewLogQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List completed administrator review decisions
+ */
+
+export function useListAdminReviewLog<TData = Awaited<ReturnType<typeof listAdminReviewLog>>, TError = ErrorType<unknown>>(
+ params?: ListAdminReviewLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminReviewLog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminReviewLogQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export const getListResearchPapersUrl = () => {
 
@@ -1736,4 +2204,881 @@ export function useGetStats<TData = Awaited<ReturnType<typeof getStats>>, TError
 
 
 
+
+export const getListResourceSubscriptionsUrl = () => {
+
+
+
+
+  return `/api/admin/resource-subscriptions`
+}
+
+/**
+ * @summary List literature subscriptions
+ */
+export const listResourceSubscriptions = async ( options?: RequestInit): Promise<ResourceSubscription[]> => {
+
+  return customFetch<ResourceSubscription[]>(getListResourceSubscriptionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListResourceSubscriptionsQueryKey = () => {
+    return [
+    `/api/admin/resource-subscriptions`
+    ] as const;
+    }
+
+
+export const getListResourceSubscriptionsQueryOptions = <TData = Awaited<ReturnType<typeof listResourceSubscriptions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listResourceSubscriptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListResourceSubscriptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listResourceSubscriptions>>> = ({ signal }) => listResourceSubscriptions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listResourceSubscriptions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListResourceSubscriptionsQueryResult = NonNullable<Awaited<ReturnType<typeof listResourceSubscriptions>>>
+export type ListResourceSubscriptionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List literature subscriptions
+ */
+
+export function useListResourceSubscriptions<TData = Awaited<ReturnType<typeof listResourceSubscriptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listResourceSubscriptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListResourceSubscriptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateResourceSubscriptionUrl = () => {
+
+
+
+
+  return `/api/admin/resource-subscriptions`
+}
+
+/**
+ * @summary Create a literature subscription
+ */
+export const createResourceSubscription = async (resourceSubscriptionInput: ResourceSubscriptionInput, options?: RequestInit): Promise<ResourceSubscription> => {
+
+  return customFetch<ResourceSubscription>(getCreateResourceSubscriptionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      resourceSubscriptionInput,)
+  }
+);}
+
+
+
+
+export const getCreateResourceSubscriptionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createResourceSubscription>>, TError,{data: BodyType<ResourceSubscriptionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createResourceSubscription>>, TError,{data: BodyType<ResourceSubscriptionInput>}, TContext> => {
+
+const mutationKey = ['createResourceSubscription'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createResourceSubscription>>, {data: BodyType<ResourceSubscriptionInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createResourceSubscription(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateResourceSubscriptionMutationResult = NonNullable<Awaited<ReturnType<typeof createResourceSubscription>>>
+    export type CreateResourceSubscriptionMutationBody = BodyType<ResourceSubscriptionInput>
+    export type CreateResourceSubscriptionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a literature subscription
+ */
+export const useCreateResourceSubscription = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createResourceSubscription>>, TError,{data: BodyType<ResourceSubscriptionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createResourceSubscription>>,
+        TError,
+        {data: BodyType<ResourceSubscriptionInput>},
+        TContext
+      > => {
+      return useMutation(getCreateResourceSubscriptionMutationOptions(options));
+    }
+
+export const getUpdateResourceSubscriptionUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/resource-subscriptions/${id}`
+}
+
+/**
+ * @summary Update a literature subscription
+ */
+export const updateResourceSubscription = async (id: number,
+    resourceSubscriptionInput: ResourceSubscriptionInput, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getUpdateResourceSubscriptionUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      resourceSubscriptionInput,)
+  }
+);}
+
+
+
+
+export const getUpdateResourceSubscriptionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateResourceSubscription>>, TError,{id: number;data: BodyType<ResourceSubscriptionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateResourceSubscription>>, TError,{id: number;data: BodyType<ResourceSubscriptionInput>}, TContext> => {
+
+const mutationKey = ['updateResourceSubscription'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateResourceSubscription>>, {id: number;data: BodyType<ResourceSubscriptionInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateResourceSubscription(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateResourceSubscriptionMutationResult = NonNullable<Awaited<ReturnType<typeof updateResourceSubscription>>>
+    export type UpdateResourceSubscriptionMutationBody = BodyType<ResourceSubscriptionInput>
+    export type UpdateResourceSubscriptionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update a literature subscription
+ */
+export const useUpdateResourceSubscription = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateResourceSubscription>>, TError,{id: number;data: BodyType<ResourceSubscriptionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateResourceSubscription>>,
+        TError,
+        {id: number;data: BodyType<ResourceSubscriptionInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateResourceSubscriptionMutationOptions(options));
+    }
+
+export const getDeleteResourceSubscriptionUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/resource-subscriptions/${id}`
+}
+
+/**
+ * @summary Delete a literature subscription and its candidates
+ */
+export const deleteResourceSubscription = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteResourceSubscriptionUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteResourceSubscriptionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteResourceSubscription>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteResourceSubscription>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteResourceSubscription'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteResourceSubscription>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteResourceSubscription(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteResourceSubscriptionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteResourceSubscription>>>
+
+    export type DeleteResourceSubscriptionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a literature subscription and its candidates
+ */
+export const useDeleteResourceSubscription = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteResourceSubscription>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteResourceSubscription>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteResourceSubscriptionMutationOptions(options));
+    }
+
+export const getRunResourceSubscriptionUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/resource-subscriptions/${id}/run`
+}
+
+/**
+ * @summary Run one subscription immediately
+ */
+export const runResourceSubscription = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getRunResourceSubscriptionUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getRunResourceSubscriptionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof runResourceSubscription>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof runResourceSubscription>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['runResourceSubscription'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof runResourceSubscription>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  runResourceSubscription(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RunResourceSubscriptionMutationResult = NonNullable<Awaited<ReturnType<typeof runResourceSubscription>>>
+
+    export type RunResourceSubscriptionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Run one subscription immediately
+ */
+export const useRunResourceSubscription = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof runResourceSubscription>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof runResourceSubscription>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getRunResourceSubscriptionMutationOptions(options));
+    }
+
+export const getListSubscriptionCandidatesUrl = (params?: ListSubscriptionCandidatesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/subscription-candidates?${stringifiedParams}` : `/api/admin/subscription-candidates`
+}
+
+/**
+ * @summary List private literature candidates
+ */
+export const listSubscriptionCandidates = async (params?: ListSubscriptionCandidatesParams, options?: RequestInit): Promise<SubscriptionCandidate[]> => {
+
+  return customFetch<SubscriptionCandidate[]>(getListSubscriptionCandidatesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSubscriptionCandidatesQueryKey = (params?: ListSubscriptionCandidatesParams,) => {
+    return [
+    `/api/admin/subscription-candidates`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListSubscriptionCandidatesQueryOptions = <TData = Awaited<ReturnType<typeof listSubscriptionCandidates>>, TError = ErrorType<unknown>>(params?: ListSubscriptionCandidatesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSubscriptionCandidates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSubscriptionCandidatesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSubscriptionCandidates>>> = ({ signal }) => listSubscriptionCandidates(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSubscriptionCandidates>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListSubscriptionCandidatesQueryResult = NonNullable<Awaited<ReturnType<typeof listSubscriptionCandidates>>>
+export type ListSubscriptionCandidatesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List private literature candidates
+ */
+
+export function useListSubscriptionCandidates<TData = Awaited<ReturnType<typeof listSubscriptionCandidates>>, TError = ErrorType<unknown>>(
+ params?: ListSubscriptionCandidatesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSubscriptionCandidates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListSubscriptionCandidatesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getImportSubscriptionCandidatesUrl = () => {
+
+
+
+
+  return `/api/admin/subscription-candidates/import`
+}
+
+/**
+ * @summary Send selected candidates to the AI upload queue
+ */
+export const importSubscriptionCandidates = async (candidateImportInput: CandidateImportInput, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getImportSubscriptionCandidatesUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      candidateImportInput,)
+  }
+);}
+
+
+
+
+export const getImportSubscriptionCandidatesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importSubscriptionCandidates>>, TError,{data: BodyType<CandidateImportInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof importSubscriptionCandidates>>, TError,{data: BodyType<CandidateImportInput>}, TContext> => {
+
+const mutationKey = ['importSubscriptionCandidates'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof importSubscriptionCandidates>>, {data: BodyType<CandidateImportInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  importSubscriptionCandidates(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ImportSubscriptionCandidatesMutationResult = NonNullable<Awaited<ReturnType<typeof importSubscriptionCandidates>>>
+    export type ImportSubscriptionCandidatesMutationBody = BodyType<CandidateImportInput>
+    export type ImportSubscriptionCandidatesMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Send selected candidates to the AI upload queue
+ */
+export const useImportSubscriptionCandidates = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importSubscriptionCandidates>>, TError,{data: BodyType<CandidateImportInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof importSubscriptionCandidates>>,
+        TError,
+        {data: BodyType<CandidateImportInput>},
+        TContext
+      > => {
+      return useMutation(getImportSubscriptionCandidatesMutationOptions(options));
+    }
+
+export const getReenrichUploadJobsUrl = () => {
+
+
+
+
+  return `/api/resources/upload/jobs/reenrich`
+}
+
+/**
+ * @summary Retry missing AI and scholarly metadata for upload jobs
+ */
+export const reenrichUploadJobs = async (reenrichJobsInput?: ReenrichJobsInput, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getReenrichUploadJobsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      reenrichJobsInput,)
+  }
+);}
+
+
+
+
+export const getReenrichUploadJobsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reenrichUploadJobs>>, TError,{data?: BodyType<ReenrichJobsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reenrichUploadJobs>>, TError,{data?: BodyType<ReenrichJobsInput>}, TContext> => {
+
+const mutationKey = ['reenrichUploadJobs'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reenrichUploadJobs>>, {data?: BodyType<ReenrichJobsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  reenrichUploadJobs(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReenrichUploadJobsMutationResult = NonNullable<Awaited<ReturnType<typeof reenrichUploadJobs>>>
+    export type ReenrichUploadJobsMutationBody = BodyType<ReenrichJobsInput> | undefined
+    export type ReenrichUploadJobsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Retry missing AI and scholarly metadata for upload jobs
+ */
+export const useReenrichUploadJobs = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reenrichUploadJobs>>, TError,{data?: BodyType<ReenrichJobsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reenrichUploadJobs>>,
+        TError,
+        {data?: BodyType<ReenrichJobsInput>},
+        TContext
+      > => {
+      return useMutation(getReenrichUploadJobsMutationOptions(options));
+    }
+
+export const getRetryUploadJobUrl = (id: number,) => {
+
+
+
+
+  return `/api/resources/upload/jobs/${id}/retry`
+}
+
+/**
+ * @summary Retry one failed upload job from its persisted source
+ */
+export const retryUploadJob = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getRetryUploadJobUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getRetryUploadJobMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryUploadJob>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof retryUploadJob>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['retryUploadJob'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof retryUploadJob>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  retryUploadJob(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RetryUploadJobMutationResult = NonNullable<Awaited<ReturnType<typeof retryUploadJob>>>
+
+    export type RetryUploadJobMutationError = ErrorType<void>
+
+    /**
+ * @summary Retry one failed upload job from its persisted source
+ */
+export const useRetryUploadJob = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryUploadJob>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof retryUploadJob>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getRetryUploadJobMutationOptions(options));
+    }
+
+export const getRetryFailedUploadJobsUrl = () => {
+
+
+
+
+  return `/api/resources/upload/jobs/retry-failed`
+}
+
+/**
+ * @summary Retry selected failed upload jobs
+ */
+export const retryFailedUploadJobs = async (uploadJobIdsInput?: UploadJobIdsInput, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getRetryFailedUploadJobsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      uploadJobIdsInput,)
+  }
+);}
+
+
+
+
+export const getRetryFailedUploadJobsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryFailedUploadJobs>>, TError,{data?: BodyType<UploadJobIdsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof retryFailedUploadJobs>>, TError,{data?: BodyType<UploadJobIdsInput>}, TContext> => {
+
+const mutationKey = ['retryFailedUploadJobs'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof retryFailedUploadJobs>>, {data?: BodyType<UploadJobIdsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  retryFailedUploadJobs(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RetryFailedUploadJobsMutationResult = NonNullable<Awaited<ReturnType<typeof retryFailedUploadJobs>>>
+    export type RetryFailedUploadJobsMutationBody = BodyType<UploadJobIdsInput> | undefined
+    export type RetryFailedUploadJobsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Retry selected failed upload jobs
+ */
+export const useRetryFailedUploadJobs = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryFailedUploadJobs>>, TError,{data?: BodyType<UploadJobIdsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof retryFailedUploadJobs>>,
+        TError,
+        {data?: BodyType<UploadJobIdsInput>},
+        TContext
+      > => {
+      return useMutation(getRetryFailedUploadJobsMutationOptions(options));
+    }
+
+export const getDeleteDuplicateUploadJobsUrl = () => {
+
+
+
+
+  return `/api/resources/upload/jobs/delete-duplicates`
+}
+
+/**
+ * @summary Delete review jobs confirmed by a live check to duplicate library resources
+ */
+export const deleteDuplicateUploadJobs = async (uploadJobIdsInput: UploadJobIdsInput, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteDuplicateUploadJobsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      uploadJobIdsInput,)
+  }
+);}
+
+
+
+
+export const getDeleteDuplicateUploadJobsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDuplicateUploadJobs>>, TError,{data: BodyType<UploadJobIdsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDuplicateUploadJobs>>, TError,{data: BodyType<UploadJobIdsInput>}, TContext> => {
+
+const mutationKey = ['deleteDuplicateUploadJobs'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDuplicateUploadJobs>>, {data: BodyType<UploadJobIdsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  deleteDuplicateUploadJobs(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteDuplicateUploadJobsMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDuplicateUploadJobs>>>
+    export type DeleteDuplicateUploadJobsMutationBody = BodyType<UploadJobIdsInput>
+    export type DeleteDuplicateUploadJobsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete review jobs confirmed by a live check to duplicate library resources
+ */
+export const useDeleteDuplicateUploadJobs = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDuplicateUploadJobs>>, TError,{data: BodyType<UploadJobIdsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteDuplicateUploadJobs>>,
+        TError,
+        {data: BodyType<UploadJobIdsInput>},
+        TContext
+      > => {
+      return useMutation(getDeleteDuplicateUploadJobsMutationOptions(options));
+    }
+
+export const getQueueReferenceListUploadUrl = () => {
+
+
+
+
+  return `/api/resources/upload/jobs/reference-list`
+}
+
+/**
+ * @summary Queue a Word or Markdown bibliography for background decomposition
+ */
+export const queueReferenceListUpload = async (referenceListUploadForm: ReferenceListUploadForm, options?: RequestInit): Promise<UploadJobAccepted> => {
+    const formData = new FormData();
+formData.append(`file`, referenceListUploadForm.file);
+if(referenceListUploadForm.sourceType !== undefined) {
+ formData.append(`sourceType`, referenceListUploadForm.sourceType);
+ }
+if(referenceListUploadForm.folderImportId !== undefined) {
+ formData.append(`folderImportId`, referenceListUploadForm.folderImportId);
+ }
+
+  return customFetch<UploadJobAccepted>(getQueueReferenceListUploadUrl(),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body:
+      formData,
+  }
+);}
+
+
+
+
+export const getQueueReferenceListUploadMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof queueReferenceListUpload>>, TError,{data: BodyType<ReferenceListUploadForm>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof queueReferenceListUpload>>, TError,{data: BodyType<ReferenceListUploadForm>}, TContext> => {
+
+const mutationKey = ['queueReferenceListUpload'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof queueReferenceListUpload>>, {data: BodyType<ReferenceListUploadForm>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  queueReferenceListUpload(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type QueueReferenceListUploadMutationResult = NonNullable<Awaited<ReturnType<typeof queueReferenceListUpload>>>
+    export type QueueReferenceListUploadMutationBody = BodyType<ReferenceListUploadForm>
+    export type QueueReferenceListUploadMutationError = ErrorType<void>
+
+    /**
+ * @summary Queue a Word or Markdown bibliography for background decomposition
+ */
+export const useQueueReferenceListUpload = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof queueReferenceListUpload>>, TError,{data: BodyType<ReferenceListUploadForm>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof queueReferenceListUpload>>,
+        TError,
+        {data: BodyType<ReferenceListUploadForm>},
+        TContext
+      > => {
+      return useMutation(getQueueReferenceListUploadMutationOptions(options));
+    }
 

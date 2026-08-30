@@ -1,28 +1,10 @@
 import { Router } from "express";
 import { db, authorsTable, institutionsTable, resourceAuthorsTable, resourcesTable } from "@workspace/db";
-import { eq, ilike, sql } from "drizzle-orm";
+import { and, eq, ilike, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./auth";
 import { attachFacetedTags } from "../lib/tagging";
 
 const router = Router();
-
-/**
- * Keeps the authors / resource_authors tables in sync with a resource's
- * `authors` text[] column. Upserts each name into `authors`, then replaces
- * that resource's links in `resource_authors` to match the given name list.
- */
-export async function syncResourceAuthors(resourceId: number, authorNames: string[]) {
-  const names = [...new Set(authorNames.map((n) => n.trim()).filter(Boolean))];
-
-  await db.delete(resourceAuthorsTable).where(eq(resourceAuthorsTable.resourceId, resourceId));
-  if (names.length === 0) return;
-
-  for (const name of names) {
-    const [existing] = await db.select({ id: authorsTable.id }).from(authorsTable).where(eq(authorsTable.name, name)).limit(1);
-    const authorId = existing ? existing.id : (await db.insert(authorsTable).values({ name }).returning({ id: authorsTable.id }))[0].id;
-    await db.insert(resourceAuthorsTable).values({ resourceId, authorId }).onConflictDoNothing();
-  }
-}
 
 /**
  * GET /api/authors
@@ -42,15 +24,28 @@ router.get("/authors", async (req, res) => {
         institutionId: authorsTable.institutionId,
         institutionName: institutionsTable.name,
         resourceCount: sql<number>`count(distinct ${resourceAuthorsTable.resourceId})`.as("resource_count"),
+        publicationYears: sql<number[]>`array_remove(array_agg(distinct nullif(substring(${resourcesTable.publishedDate} from '^[0-9]{4}'), '')::integer), null)`.as("publication_years"),
+        chineseResourceCount: sql<number>`count(distinct case when ${resourcesTable.title} ~ '[一-龥]' then ${resourcesTable.id} end)`.as("chinese_resource_count"),
+        englishResourceCount: sql<number>`count(distinct case when ${resourcesTable.title} !~ '[一-龥]' then ${resourcesTable.id} end)`.as("english_resource_count"),
       })
       .from(authorsTable)
       .leftJoin(institutionsTable, eq(authorsTable.institutionId, institutionsTable.id))
-      .leftJoin(resourceAuthorsTable, eq(resourceAuthorsTable.authorId, authorsTable.id))
-      .where(search ? ilike(authorsTable.name, `%${search}%`) : undefined)
+      .innerJoin(resourceAuthorsTable, eq(resourceAuthorsTable.authorId, authorsTable.id))
+      .innerJoin(resourcesTable, eq(resourceAuthorsTable.resourceId, resourcesTable.id))
+      .where(and(
+        eq(resourcesTable.status, "approved"),
+        search ? ilike(authorsTable.name, `%${search}%`) : undefined,
+      ))
       .groupBy(authorsTable.id, institutionsTable.name)
       .orderBy(authorsTable.name);
 
-    res.json(rows);
+    res.json(rows.map((row) => ({
+      ...row,
+      resourceCount: Number(row.resourceCount),
+      publicationYears: (row.publicationYears ?? []).map(Number).filter(Number.isFinite),
+      chineseResourceCount: Number(row.chineseResourceCount),
+      englishResourceCount: Number(row.englishResourceCount),
+    })));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch authors" });
@@ -88,12 +83,13 @@ router.get("/authors/:name", async (req, res) => {
         url: resourcesTable.url,
         doi: resourcesTable.doi,
         abstract: resourcesTable.abstract,
+        publishedDate: resourcesTable.publishedDate,
         createdAt: resourcesTable.createdAt,
       })
       .from(resourceAuthorsTable)
       .innerJoin(resourcesTable, eq(resourceAuthorsTable.resourceId, resourcesTable.id))
       .where(sql`${resourceAuthorsTable.authorId} = ${author.id} AND ${resourcesTable.status} = 'approved'`)
-      .orderBy(resourcesTable.createdAt);
+      .orderBy(sql`${resourcesTable.publishedDate} DESC NULLS LAST`, sql`${resourcesTable.createdAt} DESC`);
 
     res.json({ ...author, resources: await attachFacetedTags(resources) });
   } catch (err) {

@@ -1,6 +1,6 @@
 import { db, resourcesTable } from "@workspace/db";
 import { and, eq, ne, or } from "drizzle-orm";
-import { titleOverlapScore } from "./scholar/matching";
+import { authorOverlapCount, titleOverlapScore } from "./scholar/matching";
 
 export type DuplicateSignal = "exact" | "fuzzy" | null;
 
@@ -44,8 +44,9 @@ export interface DuplicateCandidateMatch {
  * is now a thin wrapper over this, kept for callers that only need the yes/no signal.
  */
 export async function findDuplicateCandidates(
-  input: { title: string; doi: string | null; url: string | null; year: number | null },
+  input: { title: string; authors?: string[]; doi: string | null; url: string | null; year: number | null },
   excludeResourceId?: number,
+  query: any = db,
 ): Promise<DuplicateCandidateMatch[]> {
   const matches = new Map<number, DuplicateCandidateMatch>();
 
@@ -53,26 +54,33 @@ export async function findDuplicateCandidates(
     const conditions = excludeResourceId
       ? [eq(resourcesTable.doi, input.doi), ne(resourcesTable.id, excludeResourceId)]
       : [eq(resourcesTable.doi, input.doi)];
-    const rows = await db.select({ id: resourcesTable.id }).from(resourcesTable).where(and(...conditions));
+    const rows = await query.select({ id: resourcesTable.id }).from(resourcesTable).where(and(...conditions));
     for (const r of rows) matches.set(r.id, { candidateResourceId: r.id, matchType: "exact_doi" });
   }
   if (input.url) {
     const conditions = excludeResourceId
       ? [eq(resourcesTable.url, input.url), ne(resourcesTable.id, excludeResourceId)]
       : [eq(resourcesTable.url, input.url)];
-    const rows = await db.select({ id: resourcesTable.id }).from(resourcesTable).where(and(...conditions));
+    const rows = await query.select({ id: resourcesTable.id }).from(resourcesTable).where(and(...conditions));
     for (const r of rows) if (!matches.has(r.id)) matches.set(r.id, { candidateResourceId: r.id, matchType: "exact_url" });
   }
 
-  const candidates = await db
-    .select({ id: resourcesTable.id, title: resourcesTable.title, publishedDate: resourcesTable.publishedDate })
+  const candidates = await query
+    .select({ id: resourcesTable.id, title: resourcesTable.title, authors: resourcesTable.authors, publishedDate: resourcesTable.publishedDate })
     .from(resourcesTable);
   for (const c of candidates) {
     if (excludeResourceId && c.id === excludeResourceId) continue;
     if (matches.has(c.id)) continue; // already recorded via a stronger (exact) match
     if (titleOverlapScore(input.title, c.title) < FUZZY_TITLE_THRESHOLD) continue;
+    const authorsMatch = (input.authors?.length ?? 0) > 0 && authorOverlapCount(input.authors ?? [], c.authors) > 0;
     const candidateYear = yearOf(c.publishedDate);
-    if (input.year !== null && candidateYear !== null && Math.abs(input.year - candidateYear) > FUZZY_YEAR_TOLERANCE) continue;
+    // A highly similar title plus a shared author is the strongest practical signal for imports,
+    // including reference-list rows that do not contain a year. Without an author match, keep the
+    // older conservative year requirement so papers with generic titles are not over-flagged.
+    if (!authorsMatch) {
+      if (input.year === null || candidateYear === null) continue;
+      if (Math.abs(input.year - candidateYear) > FUZZY_YEAR_TOLERANCE) continue;
+    }
     matches.set(c.id, { candidateResourceId: c.id, matchType: "fuzzy_title" });
   }
 
@@ -80,7 +88,7 @@ export async function findDuplicateCandidates(
 }
 
 export async function checkDuplicate(
-  input: { title: string; doi: string | null; url: string | null; year: number | null },
+  input: { title: string; authors?: string[]; doi: string | null; url: string | null; year: number | null },
   excludeResourceId?: number,
 ): Promise<DuplicateSignal> {
   const matches = await findDuplicateCandidates(input, excludeResourceId);

@@ -5,12 +5,20 @@
  * Stablecoin Research Hub API
  * OpenAPI spec version: 0.1.0
  */
-import type { AuthorSummaryResourceTypesItem } from './authorSummaryResourceTypesItem';
 
 export interface AuthorSummary {
+  id: number;
   name: string;
-  institution?: string;
-  resource_count: number;
-  top_tags: string[];
-  resource_types: AuthorSummaryResourceTypesItem[];
+  /** @nullable */
+  researchInterests?: string[] | null;
+  /** @nullable */
+  bio?: string | null;
+  /** @nullable */
+  institutionId?: number | null;
+  /** @nullable */
+  institutionName?: string | null;
+  resourceCount: number;
+  publicationYears: number[];
+  chineseResourceCount: number;
+  englishResourceCount: number;
 }
