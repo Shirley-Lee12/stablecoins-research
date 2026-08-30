@@ -56,7 +56,13 @@ export async function authenticatedFetch(input: RequestInfo | URL, init?: Reques
   const headers = new Headers(input instanceof Request ? input.headers : undefined);
   new Headers(init?.headers).forEach((value, key) => headers.set(key, value));
   const response = await fetch(input, init);
-  if (response.status !== 401 || !headers.has('Authorization')) return response;
+  if (!headers.has('Authorization')) return response;
+  if (response.status === 403) {
+    const body = await response.clone().json().catch(() => null) as { code?: string } | null;
+    if (body?.code === 'ACCOUNT_SUSPENDED') window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED_EVENT));
+    return response;
+  }
+  if (response.status !== 401) return response;
 
   window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED_EVENT));
   return new Response(JSON.stringify({

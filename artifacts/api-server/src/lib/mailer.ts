@@ -170,3 +170,67 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
     throw err;
   }
 }
+
+export interface PublicationNotificationMail {
+  title: string;
+  titleZh?: string | null;
+  body?: string | null;
+  bodyZh?: string | null;
+  href?: string | null;
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;",
+  })[character] || character);
+}
+
+function frontendLink(href?: string | null): string {
+  const base = `${env.FRONTEND_URL.replace(/\/$/, "")}/`;
+  return new URL(href?.startsWith("/") ? href.slice(1) : "", base).toString();
+}
+
+function notificationItemHtml(item: PublicationNotificationMail, locale: string): string {
+  const zh = locale === "zh";
+  const title = zh ? item.titleZh || item.title : item.title;
+  const body = zh ? item.bodyZh || item.body : item.body;
+  const bodyHtml = body ? `<p style="margin:6px 0 0;color:#586579">${escapeHtml(body)}</p>` : "";
+  return `<li style="margin:0 0 18px">
+    <a href="${escapeHtml(frontendLink(item.href))}" style="color:#15356b;font-weight:600;text-decoration:none">${escapeHtml(title)}</a>
+    ${bodyHtml}
+  </li>`;
+}
+
+function notificationFooterHtml(locale: string): string {
+  const settingsUrl = frontendLink("/profile");
+  return `<p style="margin-top:26px;color:#6b7280;font-size:13px">${locale === "zh"
+    ? `您收到此邮件，是因为已开启资源邮件提醒。可在<a href="${settingsUrl}">个人设置</a>中修改发送频率。`
+    : `You received this message because publication email notifications are enabled. Update the frequency in your <a href="${settingsUrl}">profile settings</a>.`}</p>`;
+}
+
+export async function sendPublicationNotificationEmail(to: string, item: PublicationNotificationMail, locale: string) {
+  const zh = locale === "zh";
+  const subject = zh ? item.titleZh || item.title : item.title;
+  await sendMail(to, subject, `<div style="font-family:Arial,Helvetica,sans-serif;color:#172033;line-height:1.6;max-width:600px">
+    <h2 style="color:#15356b">${zh ? "关注资源有新动态" : "New publication update"}</h2>
+    <ul style="padding-left:20px">${notificationItemHtml(item, locale)}</ul>
+    ${notificationFooterHtml(locale)}
+  </div>`);
+}
+
+export async function sendPublicationDigestEmail(to: string, items: PublicationNotificationMail[], locale: string, frequency: "daily" | "weekly") {
+  const zh = locale === "zh";
+  const label = frequency === "daily"
+    ? (zh ? "每日" : "Daily")
+    : (zh ? "每周" : "Weekly");
+  await sendMail(to, `${label}${zh ? "资源更新汇总" : " publication digest"}`, `<div style="font-family:Arial,Helvetica,sans-serif;color:#172033;line-height:1.6;max-width:600px">
+    <h2 style="color:#15356b">${label}${zh ? "资源更新汇总" : " publication digest"}</h2>
+    <p>${zh ? `共有 ${items.length} 条您关注的资源更新。` : `${items.length} followed publication update${items.length === 1 ? "" : "s"}.`}</p>
+    <ul style="padding-left:20px">${items.map((item) => notificationItemHtml(item, locale)).join("")}</ul>
+    ${notificationFooterHtml(locale)}
+  </div>`);
+}

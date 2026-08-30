@@ -9,6 +9,7 @@ import { verifyResource } from "../lib/verify";
 import { normalizeResourceUrlInput } from "../lib/safeUrl";
 import { normalizeKeywordList } from "../lib/keywords";
 import { InvalidPublicationDateError, normalizePublicationDateInput } from "../lib/publicationDate";
+import { VALID_SOURCE_TYPES } from "../lib/sourceType";
 
 const router = Router();
 
@@ -230,6 +231,10 @@ router.patch("/resources/:id", requireAuth, async (req: any, res) => {
       title?: string; authors?: string[]; sourceType?: string; url?: string | null; doi?: string | null;
       abstract?: string; publishedDate?: string | null; tagIds?: number[]; keywords?: string[]; duplicateNote?: string; resubmit?: boolean;
     };
+    if (sourceType !== undefined && !VALID_SOURCE_TYPES.includes(sourceType as typeof VALID_SOURCE_TYPES[number])) {
+      res.status(400).json({ error: "Invalid resource type" });
+      return;
+    }
     // An admin can also be the submitter. The explicit marker keeps "edit my rejected item and
     // resubmit" on the owner workflow instead of accidentally treating it as an immediate admin edit.
     const isOwnerResubmission = isOwner && existing.status !== "approved" && (resubmit === true || !isAdmin);

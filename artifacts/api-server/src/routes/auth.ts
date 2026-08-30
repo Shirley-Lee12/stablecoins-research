@@ -1,8 +1,8 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
-import { db, usersTable, passwordResetTokensTable, emailVerificationCodesTable } from "@workspace/db";
-import { eq, and, gt } from "drizzle-orm";
+import { db, usersTable, pendingRegistrationsTable, passwordResetTokensTable } from "@workspace/db";
+import { eq, and, gt, lt } from "drizzle-orm";
 import crypto from "node:crypto";
 import { sendVerificationCodeEmail, sendPasswordResetEmail } from "../lib/mailer";
 import { env } from "../config";
@@ -81,11 +81,12 @@ export async function requireAuth(req: any, res: any, next: any) {
     const token = auth.slice(7);
     const payload = await verifyToken(token);
     const [currentUser] = await db
-      .select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role })
+      .select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, suspendedAt: usersTable.suspendedAt })
       .from(usersTable)
       .where(eq(usersTable.id, payload.userId))
       .limit(1);
     if (!currentUser) { res.status(401).json({ error: "Unauthorized" }); return; }
+    if (currentUser.suspendedAt) { res.status(403).json({ error: "This account has been suspended.", code: "ACCOUNT_SUSPENDED" }); return; }
     req.user = { userId: currentUser.id, email: currentUser.email, name: currentUser.name, role: currentUser.role };
     next();
   } catch {
@@ -100,11 +101,11 @@ export async function optionalAuth(req: any, _res: any, next: any) {
     if (auth?.startsWith("Bearer ")) {
       const payload = await verifyToken(auth.slice(7));
       const [currentUser] = await db
-        .select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role })
+        .select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, suspendedAt: usersTable.suspendedAt })
         .from(usersTable)
         .where(eq(usersTable.id, payload.userId))
         .limit(1);
-      if (currentUser) req.user = { userId: currentUser.id, email: currentUser.email, name: currentUser.name, role: currentUser.role };
+      if (currentUser && !currentUser.suspendedAt) req.user = { userId: currentUser.id, email: currentUser.email, name: currentUser.name, role: currentUser.role };
     }
   } catch { /* ignore */ }
   next();
@@ -149,23 +150,28 @@ router.post("/auth/register", registrationLimiter, async (req, res): Promise<voi
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-    const [user] = await db.insert(usersTable).values({
+    const code = generateSixDigitCode();
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 10);
+    const codeHash = hashSingleUseSecret(code);
+    await db.delete(pendingRegistrationsTable).where(lt(pendingRegistrationsTable.expiresAt, new Date()));
+    await db.insert(pendingRegistrationsTable).values({
       email,
       name,
       passwordHash,
-      role: isBootstrapAdminEmail(email) ? "admin" : "user",
-      emailVerified: false,
-    }).returning({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role });
-
-    const code = generateSixDigitCode();
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 10);
-    await db.insert(emailVerificationCodesTable).values({ userId: user.id, code: hashSingleUseSecret(code), expiresAt });
+      verificationCode: codeHash,
+      expiresAt,
+    }).onConflictDoUpdate({
+      target: pendingRegistrationsTable.email,
+      set: { name, passwordHash, verificationCode: codeHash, expiresAt, updatedAt: new Date() },
+    });
 
     try {
-      await sendVerificationCodeEmail(user.email, code, verificationUrl(user.email, code));
+      await sendVerificationCodeEmail(email, code, verificationUrl(email, code));
     } catch (mailErr) {
-      // Roll back so the user can cleanly retry registration instead of being stuck unverified.
-      await db.delete(usersTable).where(eq(usersTable.id, user.id));
+      await db.delete(pendingRegistrationsTable).where(and(
+        eq(pendingRegistrationsTable.email, email),
+        eq(pendingRegistrationsTable.verificationCode, codeHash),
+      ));
       req.log.error({ err: mailErr }, "Registration verification email delivery failed");
       res.status(503).json({
         error: "Verification email could not be sent. The account was not created; please try again shortly.",
@@ -174,7 +180,7 @@ router.post("/auth/register", registrationLimiter, async (req, res): Promise<voi
       return;
     }
 
-    res.status(201).json({ message: "Verification code sent to your email.", email: user.email, requiresVerification: true });
+    res.status(201).json({ message: "Verification code sent to your email.", email, requiresVerification: true });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to register" });
@@ -189,42 +195,40 @@ router.post("/auth/verify-email", verificationLimiter, async (req, res): Promise
       return;
     }
 
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
-    if (!user) {
-      res.status(400).json({ error: "Invalid email or code" });
-      return;
-    }
-    if (user.emailVerified) {
+    const normalizedEmail = email.toLowerCase();
+    const [existingUser] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, normalizedEmail));
+    if (existingUser) {
       res.status(400).json({ error: "This email is already verified" });
       return;
     }
-
-    const [codeRow] = await db
-      .select()
-      .from(emailVerificationCodesTable)
-      .where(and(
-        eq(emailVerificationCodesTable.userId, user.id),
-        eq(emailVerificationCodesTable.code, hashSingleUseSecret(code)),
-        eq(emailVerificationCodesTable.used, false),
-        gt(emailVerificationCodesTable.expiresAt, new Date()),
-      ));
-
-    if (!codeRow) {
-      res.status(400).json({ error: "Invalid or expired verification code" });
+    const [pending] = await db.select().from(pendingRegistrationsTable).where(and(
+      eq(pendingRegistrationsTable.email, normalizedEmail),
+      eq(pendingRegistrationsTable.verificationCode, hashSingleUseSecret(code)),
+      gt(pendingRegistrationsTable.expiresAt, new Date()),
+    )).limit(1);
+    if (!pending) {
+      res.status(400).json({ error: "Invalid email or code" });
       return;
     }
 
-    const verified = await db.transaction(async (tx) => {
-      const [claimedCode] = await tx
-        .update(emailVerificationCodesTable)
-        .set({ used: true })
-        .where(and(eq(emailVerificationCodesTable.id, codeRow.id), eq(emailVerificationCodesTable.used, false)))
-        .returning({ id: emailVerificationCodesTable.id });
-      if (!claimedCode) return false;
-      await tx.update(usersTable).set({ emailVerified: true, updatedAt: new Date() }).where(eq(usersTable.id, user.id));
-      return true;
+    const user = await db.transaction(async (tx) => {
+      const [claimed] = await tx.delete(pendingRegistrationsTable).where(and(
+        eq(pendingRegistrationsTable.id, pending.id),
+        eq(pendingRegistrationsTable.verificationCode, pending.verificationCode),
+      )).returning({ id: pendingRegistrationsTable.id });
+      if (!claimed) return null;
+      const [created] = await tx.insert(usersTable).values({
+        email: pending.email,
+        name: pending.name,
+        passwordHash: pending.passwordHash,
+        role: isBootstrapAdminEmail(pending.email) ? "admin" : "user",
+        emailVerified: true,
+        notificationEmail: false,
+        notificationDigest: "off",
+      }).returning({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role });
+      return created;
     });
-    if (!verified) { res.status(400).json({ error: "Invalid or expired verification code" }); return; }
+    if (!user) { res.status(400).json({ error: "Invalid or expired verification code" }); return; }
 
     const token = await signToken({ userId: user.id, email: user.email, name: user.name, role: user.role });
     res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
@@ -242,24 +246,38 @@ router.post("/auth/resend-verification", resendLimiter, async (req, res): Promis
       return;
     }
 
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
-    if (!user || user.emailVerified) {
+    const normalizedEmail = email.toLowerCase();
+    const [user] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, normalizedEmail));
+    if (user) {
+      res.json({ message: "If this account needs verification, a new code has been sent." });
+      return;
+    }
+
+    const [pending] = await db.select().from(pendingRegistrationsTable)
+      .where(eq(pendingRegistrationsTable.email, normalizedEmail)).limit(1);
+    if (!pending) {
       res.json({ message: "If this account needs verification, a new code has been sent." });
       return;
     }
 
     const code = generateSixDigitCode();
     const expiresAt = new Date(Date.now() + 1000 * 60 * 10);
-    await db.transaction(async (tx) => {
-      await tx.update(emailVerificationCodesTable).set({ used: true }).where(and(eq(emailVerificationCodesTable.userId, user.id), eq(emailVerificationCodesTable.used, false)));
-      await tx.insert(emailVerificationCodesTable).values({ userId: user.id, code: hashSingleUseSecret(code), expiresAt });
-    });
+    const codeHash = hashSingleUseSecret(code);
+    await db.update(pendingRegistrationsTable).set({
+      verificationCode: codeHash,
+      expiresAt,
+      updatedAt: new Date(),
+    }).where(eq(pendingRegistrationsTable.id, pending.id));
     try {
-      await sendVerificationCodeEmail(user.email, code, verificationUrl(user.email, code));
+      await sendVerificationCodeEmail(pending.email, code, verificationUrl(pending.email, code));
     } catch (mailErr) {
-      await db.update(emailVerificationCodesTable).set({ used: true }).where(and(
-        eq(emailVerificationCodesTable.userId, user.id),
-        eq(emailVerificationCodesTable.code, hashSingleUseSecret(code)),
+      await db.update(pendingRegistrationsTable).set({
+        verificationCode: pending.verificationCode,
+        expiresAt: pending.expiresAt,
+        updatedAt: new Date(),
+      }).where(and(
+        eq(pendingRegistrationsTable.id, pending.id),
+        eq(pendingRegistrationsTable.verificationCode, codeHash),
       ));
       req.log.error({ err: mailErr }, "Verification email resend delivery failed");
       res.status(503).json({
@@ -299,6 +317,10 @@ router.post("/auth/login", loginLimiter, async (req, res): Promise<void> => {
       res.status(403).json({ error: "Please verify your email before signing in", requiresVerification: true, email: user.email });
       return;
     }
+    if (user.suspendedAt) {
+      res.status(403).json({ error: "This account has been suspended. Contact an administrator for assistance.", code: "ACCOUNT_SUSPENDED" });
+      return;
+    }
 
     const token = await signToken({ userId: user.id, email: user.email, name: user.name, role: user.role });
     res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
@@ -334,8 +356,8 @@ router.post("/auth/forgot-password", passwordRequestLimiter, async (req, res): P
       return;
     }
 
-    const [user] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
-    if (!user) {
+    const [user] = await db.select({ id: usersTable.id, suspendedAt: usersTable.suspendedAt }).from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
+    if (!user || user.suspendedAt) {
       res.json({ message: "If this email exists, a reset link has been sent." });
       return;
     }

@@ -1,5 +1,6 @@
 import { db, authorsTable, institutionsTable, notificationsTable, resourceAuthorsTable, resourcesTable, userFollowsTable, usersTable } from "@workspace/db";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne, or } from "drizzle-orm";
+import { deliverInstantNotificationEmail } from "./notificationEmails";
 
 export async function notifyFollowersForApprovedResources(resourceIds: number[]): Promise<void> {
   if (resourceIds.length === 0) return;
@@ -17,12 +18,17 @@ export async function notifyFollowersForApprovedResources(resourceIds: number[])
     .where(inArray(resourceAuthorsTable.resourceId, resourceIds));
   const follows = await db.select({
     userId: userFollowsTable.userId,
+    emailEnabled: usersTable.notificationEmail,
+    digest: usersTable.notificationDigest,
     targetType: userFollowsTable.targetType,
     targetKey: userFollowsTable.targetKey,
     targetLabel: userFollowsTable.targetLabel,
   }).from(userFollowsTable)
     .innerJoin(usersTable, eq(userFollowsTable.userId, usersTable.id))
-    .where(eq(usersTable.notificationInApp, true));
+    .where(or(
+      eq(usersTable.notificationInApp, true),
+      and(eq(usersTable.notificationEmail, true), ne(usersTable.notificationDigest, "off")),
+    ));
 
   for (const resource of resources) {
     const resourceLinks = links.filter((link) => link.resourceId === resource.id);
@@ -35,7 +41,7 @@ export async function notifyFollowersForApprovedResources(resourceIds: number[])
     }
     for (const [userId, labels] of recipients) {
       const source = [...new Set(labels)].join(", ");
-      await db.insert(notificationsTable).values({
+      const [notification] = await db.insert(notificationsTable).values({
         userId,
         type: "followed_publication",
         title: `New publication from ${source}`,
@@ -43,7 +49,11 @@ export async function notifyFollowersForApprovedResources(resourceIds: number[])
         body: resource.title,
         bodyZh: resource.title,
         href: "/academic-resources",
-      });
+      }).returning({ id: notificationsTable.id });
+      const recipient = follows.find((follow) => follow.userId === userId);
+      if (recipient?.emailEnabled && recipient.digest === "instant") {
+        void deliverInstantNotificationEmail(notification.id);
+      }
     }
   }
 }

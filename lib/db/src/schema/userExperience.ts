@@ -22,6 +22,10 @@ export const notificationsTable = pgTable("notifications", {
   bodyZh: text("body_zh"),
   href: text("href"),
   read: boolean("read").notNull().default(false),
+  emailSentAt: timestamp("email_sent_at", { withTimezone: true }),
+  emailAttemptedAt: timestamp("email_attempted_at", { withTimezone: true }),
+  emailAttempts: integer("email_attempts").notNull().default(0),
+  emailLastError: text("email_last_error"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

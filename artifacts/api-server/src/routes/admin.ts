@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, usersTable, resourcesTable, rejectionReasonsTable, tagsTable, resourceTagsTable, backgroundTasksTable } from "@workspace/db";
-import { eq, desc, asc, and, gte, lte, isNotNull, inArray, count } from "drizzle-orm";
+import { eq, desc, asc, and, gte, lte, isNotNull, inArray, count, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod/v4";
 import { requireAuth, requireAdmin } from "./auth";
@@ -195,6 +195,8 @@ router.get("/admin/users", requireAuth, requireAdmin, async (req, res) => {
         email: usersTable.email,
         name: usersTable.name,
         role: usersTable.role,
+        suspendedAt: usersTable.suspendedAt,
+        suspendedReason: usersTable.suspendedReason,
         createdAt: usersTable.createdAt,
       })
       .from(usersTable)
@@ -203,6 +205,66 @@ router.get("/admin/users", requireAuth, requireAdmin, async (req, res) => {
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+/** GET /api/admin/users/:id/detail — account profile plus contribution history. */
+router.get("/admin/users/:id/detail", requireAuth, requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) { res.status(400).json({ error: "Invalid user id" }); return; }
+  try {
+    const [user] = await db.select({
+      id: usersTable.id,
+      email: usersTable.email,
+      name: usersTable.name,
+      role: usersTable.role,
+      emailVerified: usersTable.emailVerified,
+      institution: usersTable.institution,
+      title: usersTable.title,
+      locale: usersTable.locale,
+      notificationInApp: usersTable.notificationInApp,
+      notificationEmail: usersTable.notificationEmail,
+      notificationDigest: usersTable.notificationDigest,
+      suspendedAt: usersTable.suspendedAt,
+      suspendedReason: usersTable.suspendedReason,
+      createdAt: usersTable.createdAt,
+      updatedAt: usersTable.updatedAt,
+    }).from(usersTable).where(eq(usersTable.id, id)).limit(1);
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+    const [contributionRows, statusRows] = await Promise.all([
+      db.select({
+        id: resourcesTable.id,
+        title: resourcesTable.title,
+        status: resourcesTable.status,
+        createdAt: resourcesTable.createdAt,
+        reviewedAt: resourcesTable.reviewedAt,
+        rejectionNote: resourcesTable.rejectionNote,
+        rejectionReasonZh: rejectionReasonsTable.nameZh,
+        rejectionReasonEn: rejectionReasonsTable.nameEn,
+      }).from(resourcesTable)
+        .leftJoin(rejectionReasonsTable, eq(resourcesTable.rejectionReasonId, rejectionReasonsTable.id))
+        .where(eq(resourcesTable.createdBy, id))
+        .orderBy(desc(resourcesTable.createdAt))
+        .limit(100),
+      db.select({ status: resourcesTable.status, count: sql<number>`count(*)::int` })
+        .from(resourcesTable)
+        .where(eq(resourcesTable.createdBy, id))
+        .groupBy(resourcesTable.status),
+    ]);
+
+    const contributionCounts = Object.fromEntries(statusRows.map((row) => [row.status, row.count]));
+    res.json({
+      user,
+      contributions: {
+        total: statusRows.reduce((sum, row) => sum + row.count, 0),
+        counts: contributionCounts,
+        records: contributionRows,
+      },
+    });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to fetch user details" });
   }
 });
 
@@ -224,13 +286,56 @@ router.patch("/admin/users/:id", requireAuth, requireAdmin, async (req: any, res
       .update(usersTable)
       .set({ role: role as "user" | "admin", updatedAt: new Date() })
       .where(eq(usersTable.id, id))
-      .returning({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, createdAt: usersTable.createdAt });
+      .returning({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, suspendedAt: usersTable.suspendedAt, suspendedReason: usersTable.suspendedReason, createdAt: usersTable.createdAt });
 
     if (!updated) { res.status(404).json({ error: "User not found" }); return; }
     res.json(updated);
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to update user role" });
+  }
+});
+
+const userSuspensionSchema = z.object({
+  suspended: z.boolean(),
+  reason: z.string().trim().max(500).optional(),
+});
+
+/** PATCH /api/admin/users/:id/suspension — suspend or restore an account. */
+router.patch("/admin/users/:id/suspension", requireAuth, requireAdmin, async (req: any, res) => {
+  try {
+    const id = Number(req.params.id);
+    const parsed = userSuspensionSchema.safeParse(req.body);
+    if (!Number.isInteger(id) || id <= 0 || !parsed.success) { res.status(400).json({ error: "Invalid suspension request" }); return; }
+    if (id === req.user.userId) { res.status(400).json({ error: "You cannot suspend your own account" }); return; }
+    const [updated] = await db.update(usersTable).set({
+      suspendedAt: parsed.data.suspended ? new Date() : null,
+      suspendedReason: parsed.data.suspended ? parsed.data.reason || null : null,
+      updatedAt: new Date(),
+    }).where(eq(usersTable.id, id)).returning({
+      id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role,
+      suspendedAt: usersTable.suspendedAt, suspendedReason: usersTable.suspendedReason, createdAt: usersTable.createdAt,
+    });
+    if (!updated) { res.status(404).json({ error: "User not found" }); return; }
+    res.json(updated);
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to update account suspension" });
+  }
+});
+
+/** DELETE /api/admin/users/:id — permanently delete an account and cascading user data. */
+router.delete("/admin/users/:id", requireAuth, requireAdmin, async (req: any, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) { res.status(400).json({ error: "Invalid user id" }); return; }
+    if (id === req.user.userId) { res.status(400).json({ error: "You cannot delete your own account" }); return; }
+    const [deleted] = await db.delete(usersTable).where(eq(usersTable.id, id)).returning({ id: usersTable.id });
+    if (!deleted) { res.status(404).json({ error: "User not found" }); return; }
+    res.status(204).end();
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to delete account" });
   }
 });
 

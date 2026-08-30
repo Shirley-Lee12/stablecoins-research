@@ -1,7 +1,7 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { db, resourcesTable } from "@workspace/db";
 
-type SourceType = "journal_article" | "working_paper" | "conference_paper" | "thesis" | "report" | "gov_document" | "news";
+type SourceType = "journal_article" | "working_paper" | "conference_paper" | "thesis" | "dataset" | "report" | "gov_document" | "news";
 type ScholarResult = {
   title: string;
   authors: string[];

@@ -7,12 +7,14 @@ import { startResourceSubscriptionScheduler } from "./lib/subscriptionDiscovery"
 import { startAiPreReviewScheduler } from "./lib/aiPreReview";
 import { startBackgroundTaskScheduler } from "./lib/backgroundTasks";
 import { startStablecoinMarketScheduler } from "./lib/stablecoinMarket";
+import { startNotificationEmailScheduler } from "./lib/notificationEmails";
 
 startUploadJobMaintenance();
 startResourceSubscriptionScheduler();
 startAiPreReviewScheduler();
 startBackgroundTaskScheduler();
 startStablecoinMarketScheduler();
+startNotificationEmailScheduler();
 
 app.listen(env.PORT, (err) => {
   if (err) {

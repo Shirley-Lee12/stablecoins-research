@@ -8,7 +8,7 @@ import {
   Tag, ChevronLeft, ChevronRight, Loader2, Plus, X, Upload, AlertCircle,
   Check, CheckCheck, Clock, XCircle, Pencil, List, Sparkles,
   Presentation, GraduationCap, ScrollText, Landmark, RefreshCw,
-  SlidersHorizontal, Trash2,
+  SlidersHorizontal, Trash2, Database,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -103,6 +103,7 @@ export const SOURCE_TYPE_ICONS: Record<SourceType, React.ElementType> = {
   working_paper: BookOpen,
   conference_paper: Presentation,
   thesis: GraduationCap,
+  dataset: Database,
   report: ScrollText,
   gov_document: Landmark,
   news: Newspaper,
@@ -113,6 +114,7 @@ export const SOURCE_TYPE_COLORS: Record<SourceType, string> = {
   working_paper: "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-800",
   conference_paper: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
   thesis: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800",
+  dataset: "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800",
   report: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
   gov_document: "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800",
   news: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
@@ -563,6 +565,7 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
   const [publishedDate, setPublishedDate] = useState(resource.publishedDate ?? "");
   const [sourceType, setSourceType] = useState<SourceType>(resource.sourceType);
   const [saving,   setSaving]   = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error,    setError]    = useState("");
   // docs/planning/16 §16.2 — the tag picker (37+16+22 tags) stays collapsed unless the admin
   // explicitly asks to edit tags, so opening this modal to fix a typo doesn't also dump the whole
@@ -600,6 +603,33 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
       }
       onSaved(); onClose();
     } catch { setError(zh ? "网络请求失败" : "Network error"); setSaving(false); }
+  }
+
+  async function handleDelete() {
+    if (!isAdmin) return;
+    const confirmed = window.confirm(zh
+      ? `永久删除资源「${resource.title}」？\n相关标签、作者关联和审核记录也会一并删除，此操作无法撤销。`
+      : `Permanently delete “${resource.title}”?\nRelated tags, author links, and review records will also be deleted. This cannot be undone.`);
+    if (!confirmed) return;
+    setDeleting(true);
+    setError("");
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/${resource.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? (zh ? "删除失败" : "Delete failed"));
+        setDeleting(false);
+        return;
+      }
+      onSaved();
+      onClose();
+    } catch {
+      setError(zh ? "网络请求失败" : "Network error");
+      setDeleting(false);
+    }
   }
 
   return (
@@ -683,12 +713,25 @@ export function EditModal({ resource, token, language, isAdmin, onClose, onSaved
             <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
               {zh ? "取消" : "Cancel"}
             </button>
-            <button onClick={handleSave} disabled={saving || !title.trim()}
+            <button onClick={handleSave} disabled={saving || deleting || !title.trim()}
               className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
               {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
               {isAdmin ? (zh ? "保存" : "Save") : (zh ? "重新提交" : "Resubmit")}
             </button>
           </div>
+          {isAdmin && (
+            <div className="border-t border-border pt-4">
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={saving || deleting}
+                className="inline-flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 hover:underline disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:text-red-300"
+              >
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                {zh ? "删除资源" : "Delete resource"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

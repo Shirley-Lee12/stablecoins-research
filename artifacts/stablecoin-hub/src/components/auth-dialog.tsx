@@ -204,6 +204,12 @@ export function AuthDialog({ open, onOpenChange, initialView = "login", loginNot
               <div className="space-y-2">
                 <Label htmlFor="reg-email">{t("Email", "邮箱")}</Label>
                 <Input id="reg-email" type="email" autoComplete="email" placeholder="you@zju.edu.cn" value={form.email} onChange={update("email")} required />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {t(
+                    "Verified delivery: QQ, 163, Outlook and Hotmail. Gmail and institutional mail systems are accepted, but delivery may be delayed or filtered; check Spam or use another address if no code arrives.",
+                    "已验证可稳定收件：QQ、163、Outlook 和 Hotmail。Gmail 及学校/机构邮箱可以注册，但邮件可能延迟或被过滤；如未收到验证码，请检查垃圾邮件或改用其他邮箱。",
+                  )}
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="reg-password">{t("Password", "密码")}</Label>

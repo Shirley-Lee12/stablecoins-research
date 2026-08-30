@@ -7,7 +7,7 @@ type Correction = {
   authors: string[];
   title?: string;
   publishedDate?: string;
-  sourceType?: "journal_article" | "working_paper" | "conference_paper" | "thesis" | "report" | "gov_document" | "news";
+  sourceType?: "journal_article" | "working_paper" | "conference_paper" | "thesis" | "dataset" | "report" | "gov_document" | "news";
 };
 
 const corrections: Correction[] = [

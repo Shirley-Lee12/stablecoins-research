@@ -186,7 +186,20 @@ router.delete("/account/follows/:type/:key", requireAuth, async (req: any, res) 
 });
 
 router.get("/account/notifications", requireAuth, async (req: any, res) => {
-  const rows = await db.select().from(notificationsTable)
+  const [preferences] = await db.select({ notificationInApp: usersTable.notificationInApp })
+    .from(usersTable).where(eq(usersTable.id, req.user.userId)).limit(1);
+  if (!preferences?.notificationInApp) { res.json([]); return; }
+  const rows = await db.select({
+    id: notificationsTable.id,
+    type: notificationsTable.type,
+    title: notificationsTable.title,
+    titleZh: notificationsTable.titleZh,
+    body: notificationsTable.body,
+    bodyZh: notificationsTable.bodyZh,
+    href: notificationsTable.href,
+    read: notificationsTable.read,
+    createdAt: notificationsTable.createdAt,
+  }).from(notificationsTable)
     .where(eq(notificationsTable.userId, req.user.userId))
     .orderBy(desc(notificationsTable.createdAt)).limit(50);
   res.json(rows);

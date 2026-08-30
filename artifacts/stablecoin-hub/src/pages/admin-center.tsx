@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { authenticatedFetch, useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Shield, Users, CheckSquare, FileText, Settings as SettingsIcon,
   Clock, Check, X, Loader2, ChevronRight, Database, Mail, Sparkles, History, Pencil, RefreshCw, Tag,
@@ -16,7 +17,34 @@ import {
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface UserRow {
   id: number; email: string; name: string;
-  role: "user" | "admin"; createdAt: string;
+  role: "user" | "admin"; suspendedAt: string | null; suspendedReason: string | null; createdAt: string;
+}
+type ContributionStatus = "incomplete" | "disputed" | "off_topic" | "duplicate" | "pending" | "approved" | "rejected" | "withdrawn";
+interface UserDetailPayload {
+  user: UserRow & {
+    emailVerified: boolean;
+    institution: string | null;
+    title: string | null;
+    locale: "zh" | "en";
+    notificationInApp: boolean;
+    notificationEmail: boolean;
+    notificationDigest: "instant" | "daily" | "weekly" | "off";
+    updatedAt: string;
+  };
+  contributions: {
+    total: number;
+    counts: Partial<Record<ContributionStatus, number>>;
+    records: Array<{
+      id: number;
+      title: string;
+      status: ContributionStatus;
+      createdAt: string;
+      reviewedAt: string | null;
+      rejectionNote: string | null;
+      rejectionReasonZh: string | null;
+      rejectionReasonEn: string | null;
+    }>;
+  };
 }
 interface ReviewLogEntry {
   id: number; title: string; status: "approved" | "rejected";
@@ -63,12 +91,31 @@ function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
 }
 
+function contributionStatusLabel(status: ContributionStatus, zh: boolean): string {
+  const labels: Record<ContributionStatus, [string, string]> = {
+    incomplete: ["待补充", "Incomplete"],
+    disputed: ["有争议", "Disputed"],
+    off_topic: ["主题不符", "Off topic"],
+    duplicate: ["疑似重复", "Duplicate"],
+    pending: ["待审核", "Pending"],
+    approved: ["已通过", "Approved"],
+    rejected: ["已拒绝", "Rejected"],
+    withdrawn: ["已撤回", "Withdrawn"],
+  };
+  return labels[status][zh ? 0 : 1];
+}
+
 // ── User Management Panel ─────────────────────────────────────────────────────
 function UserManagementPanel({ token, language, currentUserId }: { token: string; language: string; currentUserId?: number }) {
   const zh = language === "zh";
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
+  const [detail, setDetail] = useState<UserDetailPayload | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState("");
+  const [suspensionReason, setSuspensionReason] = useState("");
 
   const loadUsers = () => {
     setLoading(true);
@@ -83,6 +130,33 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
 
   useEffect(loadUsers, [token]);
 
+  const openUserDetail = useCallback(async (user: UserRow) => {
+    setSelectedUser(user);
+    setDetail(null);
+    setDetailError("");
+    setSuspensionReason(user.suspendedReason || "");
+    setDetailLoading(true);
+    try {
+      const res = await authenticatedFetch(`${apiBase()}/api/admin/users/${user.id}/detail`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to load user details");
+      const payload = await res.json() as UserDetailPayload;
+      setDetail(payload);
+      setSuspensionReason(payload.user.suspendedReason || "");
+    } catch {
+      setDetailError(zh ? "无法加载用户详情，请稍后重试。" : "Unable to load user details. Please try again.");
+    } finally {
+      setDetailLoading(false);
+    }
+  }, [token, zh]);
+
+  function applyUserUpdate(updated: UserRow) {
+    setUsers((prev) => prev.map((item) => item.id === updated.id ? { ...item, ...updated } : item));
+    setSelectedUser((prev) => prev?.id === updated.id ? { ...prev, ...updated } : prev);
+    setDetail((prev) => prev?.user.id === updated.id ? { ...prev, user: { ...prev.user, ...updated } } : prev);
+  }
+
   async function toggleRole(u: UserRow) {
     const nextRole = u.role === "admin" ? "user" : "admin";
     setUpdatingId(u.id);
@@ -94,7 +168,49 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
       });
       if (res.ok) {
         const updated = await res.json();
-        setUsers((prev) => prev.map((x) => (x.id === u.id ? updated : x)));
+        applyUserUpdate(updated);
+      }
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
+  async function toggleSuspension(u: UserRow) {
+    const suspended = !u.suspendedAt;
+    if (!window.confirm(suspended
+      ? (zh ? `暂停账号 ${u.email}？该用户会立即退出且无法登录。` : `Suspend ${u.email}? The user will be signed out and unable to log in.`)
+      : (zh ? `恢复账号 ${u.email}？` : `Restore ${u.email}?`))) return;
+    setUpdatingId(u.id);
+    try {
+      const res = await authenticatedFetch(`${apiBase()}/api/admin/users/${u.id}/suspension`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ suspended, reason: suspended ? suspensionReason.trim() || undefined : undefined }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        applyUserUpdate(updated);
+        setSuspensionReason(updated.suspendedReason || "");
+      }
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
+  async function deleteUser(u: UserRow) {
+    if (!window.confirm(zh
+      ? `永久删除账号 ${u.email}？\n该用户的关注、通知和其他关联数据也会被删除，此操作无法撤销。`
+      : `Permanently delete ${u.email}?\nFollows, notifications, and other linked user data will also be deleted. This cannot be undone.`)) return;
+    setUpdatingId(u.id);
+    try {
+      const res = await authenticatedFetch(`${apiBase()}/api/admin/users/${u.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setUsers((prev) => prev.filter((x) => x.id !== u.id));
+        setSelectedUser(null);
+        setDetail(null);
       }
     } finally {
       setUpdatingId(null);
@@ -107,7 +223,7 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
         <div>
           <h2 className="text-base font-semibold">{zh ? "用户权限管理" : "User Management"}</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {zh ? "查看所有注册用户，管理角色权限。" : "View all registered users and manage their roles."}
+            {zh ? "点击用户查看账号状态、权限和贡献记录。" : "Select a user to review account status, permissions, and contributions."}
           </p>
         </div>
       </div>
@@ -125,7 +241,7 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
           </p>
         </div>
       ) : (
-        <div className="rounded-xl border border-border overflow-hidden">
+        <div className="rounded-lg border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 border-b border-border">
               <tr>
@@ -138,8 +254,14 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
             </thead>
             <tbody className="divide-y divide-border">
               {users.map((u) => (
-                <tr key={u.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 font-medium">{u.name}</td>
+                <tr
+                  key={u.id}
+                  onClick={() => void openUserDetail(u)}
+                  className={`cursor-pointer hover:bg-muted/30 transition-colors ${u.suspendedAt ? "opacity-65" : ""}`}
+                >
+                  <td className="px-4 py-3 font-medium">
+                    <button type="button" className="text-left hover:text-primary" onClick={(event) => { event.stopPropagation(); void openUserDetail(u); }}>{u.name}</button>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground text-xs">{u.email}</td>
                   <td className="px-4 py-3">
                     <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -149,22 +271,20 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
                     }`}>
                       {u.role === "admin" ? (zh ? "管理员" : "Admin") : (zh ? "普通用户" : "User")}
                     </span>
+                    {u.suspendedAt && <span className="ml-2 inline-block rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">{zh ? "已暂停" : "Suspended"}</span>}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">
                     {new Date(u.createdAt).toLocaleDateString(zh ? "zh-CN" : "en-US", { year: "numeric", month: "short", day: "numeric" })}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
-                      onClick={() => toggleRole(u)}
-                      disabled={updatingId === u.id || u.id === currentUserId}
-                      title={u.id === currentUserId ? (zh ? "不能修改自己的角色" : "You cannot change your own role") : undefined}
-                      className="text-xs px-2.5 py-1 rounded-md border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      type="button"
+                      onClick={(event) => { event.stopPropagation(); void openUserDetail(u); }}
+                      title={zh ? "查看用户详情" : "View user details"}
+                      aria-label={zh ? `查看 ${u.name} 的详情` : `View details for ${u.name}`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                     >
-                      {updatingId === u.id
-                        ? <Loader2 className="h-3 w-3 animate-spin inline" />
-                        : u.role === "admin"
-                          ? (zh ? "降为普通用户" : "Demote to User")
-                          : (zh ? "升为管理员" : "Promote to Admin")}
+                      <ChevronRight className="h-4 w-4" />
                     </button>
                   </td>
                 </tr>
@@ -173,6 +293,137 @@ function UserManagementPanel({ token, language, currentUserId }: { token: string
           </table>
         </div>
       )}
+
+      <Sheet open={selectedUser !== null} onOpenChange={(open) => { if (!open) { setSelectedUser(null); setDetail(null); setDetailError(""); } }}>
+        <SheetContent side="right" className="w-full overflow-y-auto p-0 sm:max-w-2xl">
+          <SheetHeader className="border-b border-border px-6 py-5 pr-12">
+            <SheetTitle>{selectedUser?.name || (zh ? "用户详情" : "User details")}</SheetTitle>
+            <SheetDescription>{selectedUser?.email}</SheetDescription>
+          </SheetHeader>
+
+          {detailLoading ? (
+            <div className="flex items-center justify-center gap-2 py-24 text-sm text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              {zh ? "正在加载用户详情…" : "Loading user details…"}
+            </div>
+          ) : detailError ? (
+            <div className="px-6 py-10 text-sm text-red-600">{detailError}</div>
+          ) : detail ? (
+            <div className="divide-y divide-border">
+              <section className="space-y-4 px-6 py-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`inline-flex border px-2 py-0.5 text-xs font-medium ${detail.user.role === "admin" ? "border-primary/20 bg-primary/10 text-primary" : "border-border bg-muted text-muted-foreground"}`}>
+                    {detail.user.role === "admin" ? (zh ? "管理员" : "Admin") : (zh ? "普通用户" : "User")}
+                  </span>
+                  <span className={`inline-flex border px-2 py-0.5 text-xs font-medium ${detail.user.suspendedAt ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300" : "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"}`}>
+                    {detail.user.suspendedAt ? (zh ? "已暂停" : "Suspended") : (zh ? "正常" : "Active")}
+                  </span>
+                  <span className="inline-flex border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    {detail.user.emailVerified ? (zh ? "邮箱已验证" : "Email verified") : (zh ? "邮箱未验证" : "Email unverified")}
+                  </span>
+                </div>
+                <dl className="grid grid-cols-[7rem_1fr] gap-x-4 gap-y-2 text-sm">
+                  <dt className="text-muted-foreground">{zh ? "机构" : "Institution"}</dt><dd>{detail.user.institution || "—"}</dd>
+                  <dt className="text-muted-foreground">{zh ? "职称" : "Title"}</dt><dd>{detail.user.title || "—"}</dd>
+                  <dt className="text-muted-foreground">{zh ? "注册时间" : "Joined"}</dt><dd>{formatAuditTimestamp(detail.user.createdAt)}</dd>
+                  <dt className="text-muted-foreground">{zh ? "邮件通知" : "Email alerts"}</dt><dd>{detail.user.notificationEmail ? `${zh ? "已开启" : "On"} · ${detail.user.notificationDigest}` : (zh ? "未开启" : "Off")}</dd>
+                  {detail.user.suspendedAt && <><dt className="text-muted-foreground">{zh ? "暂停时间" : "Suspended"}</dt><dd>{formatAuditTimestamp(detail.user.suspendedAt)}</dd></>}
+                  {detail.user.suspendedReason && <><dt className="text-muted-foreground">{zh ? "暂停原因" : "Reason"}</dt><dd>{detail.user.suspendedReason}</dd></>}
+                </dl>
+              </section>
+
+              <section className="space-y-4 px-6 py-5">
+                <div>
+                  <h3 className="text-sm font-semibold">{zh ? "权限与账号状态" : "Permissions and account status"}</h3>
+                  {detail.user.id === currentUserId && <p className="mt-1 text-xs text-muted-foreground">{zh ? "为避免管理员误锁定自己，当前账号不能在此修改或删除。" : "The current administrator cannot modify or delete their own account here."}</p>}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void toggleRole(detail.user)}
+                    disabled={updatingId === detail.user.id || detail.user.id === currentUserId}
+                    className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ShieldCheck className="h-4 w-4" />
+                    {detail.user.role === "admin" ? (zh ? "降为普通用户" : "Demote to user") : (zh ? "升为管理员" : "Promote to admin")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void toggleSuspension(detail.user)}
+                    disabled={updatingId === detail.user.id || detail.user.id === currentUserId}
+                    className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm hover:bg-amber-50 hover:text-amber-700 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-amber-950/30"
+                  >
+                    {updatingId === detail.user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : detail.user.suspendedAt ? <RefreshCw className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
+                    {detail.user.suspendedAt ? (zh ? "恢复账号" : "Restore account") : (zh ? "暂停账号" : "Suspend account")}
+                  </button>
+                </div>
+                {!detail.user.suspendedAt && detail.user.id !== currentUserId && (
+                  <label className="block space-y-1.5 text-sm">
+                    <span className="text-xs font-medium text-muted-foreground">{zh ? "暂停原因（选填）" : "Suspension reason (optional)"}</span>
+                    <input
+                      value={suspensionReason}
+                      onChange={(event) => setSuspensionReason(event.target.value)}
+                      maxLength={500}
+                      placeholder={zh ? "供其他管理员查看" : "Visible to other administrators"}
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </label>
+                )}
+              </section>
+
+              <section className="space-y-4 px-6 py-5">
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <h3 className="text-sm font-semibold">{zh ? "贡献记录" : "Contribution history"}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">{zh ? `共 ${detail.contributions.total} 条资源` : `${detail.contributions.total} resources in total`}</p>
+                  </div>
+                  <div className="flex flex-wrap justify-end gap-1.5 text-xs">
+                    {(["approved", "pending", "rejected"] as ContributionStatus[]).map((status) => (
+                      <span key={status} className="border border-border bg-muted px-2 py-1 text-muted-foreground">
+                        {contributionStatusLabel(status, zh)} {detail.contributions.counts[status] || 0}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {detail.contributions.records.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">{zh ? "该用户尚无贡献记录" : "No contribution records yet"}</p>
+                ) : (
+                  <div className="divide-y divide-border border-y border-border">
+                    {detail.contributions.records.map((record) => (
+                      <div key={record.id} className="py-3">
+                        <div className="flex items-start justify-between gap-4">
+                          <p className="min-w-0 flex-1 truncate text-sm font-medium" title={record.title}>{record.title}</p>
+                          <span className="shrink-0 text-xs text-muted-foreground">{contributionStatusLabel(record.status, zh)}</span>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">{formatAuditTimestamp(record.createdAt)}</p>
+                        {(record.rejectionReasonZh || record.rejectionNote) && (
+                          <p className="mt-1.5 text-xs text-red-600">
+                            {zh ? record.rejectionReasonZh : record.rejectionReasonEn}{record.rejectionNote ? ` · ${record.rejectionNote}` : ""}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="px-6 py-5">
+                <h3 className="text-sm font-semibold text-red-600">{zh ? "危险操作" : "Danger zone"}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">{zh ? "删除后，用户关联的关注、通知和账号数据无法恢复。贡献资源会保留，但不再关联该账号。" : "Deleting an account removes its follows, notifications, and account data. Contributions remain but are no longer linked to the account."}</p>
+                <button
+                  type="button"
+                  onClick={() => void deleteUser(detail.user)}
+                  disabled={updatingId === detail.user.id || detail.user.id === currentUserId}
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 hover:underline disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {zh ? "删除账户" : "Delete account"}
+                </button>
+              </section>
+            </div>
+          ) : null}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
@@ -1298,8 +1549,8 @@ interface SubscriptionCandidateRow {
 function subscriptionSourceWarning(error: string, zh: boolean): string {
   if (/semanticscholar.*(?:429|rate.?limit)/i.test(error)) {
     return zh
-      ? "Semantic Scholar 暂时达到访问频率限制；Crossref 与 OpenAlex 已完成，本次候选结果已保留。"
-      : "Semantic Scholar is temporarily rate-limited; Crossref and OpenAlex completed, and this run's candidates were kept.";
+      ? "本次检索已完成，但 Semantic Scholar 暂时受到访问频率限制；Crossref 与 OpenAlex 的结果已正常处理。可稍后再次运行以补充检索。"
+      : "This search completed, but Semantic Scholar was temporarily rate-limited. Crossref and OpenAlex results were processed normally; run it again later to complete coverage.";
   }
   return zh ? `部分资料来源暂未完成：${error}` : `Some discovery sources did not complete: ${error}`;
 }
@@ -1436,7 +1687,7 @@ function ResourceSubscriptionsPanel({ token, language }: { token: string; langua
             <div className="min-w-0 flex-1"><p className="text-sm font-medium truncate">{item.name}</p><p className="text-xs text-muted-foreground truncate">{item.query} · {item.frequency === "daily" ? (zh ? "每日" : "Daily") : (zh ? "每周" : "Weekly")} · {(item.sources ?? []).map((source) => source === "semanticscholar" ? "Semantic Scholar" : source === "openalex" ? "OpenAlex" : "Crossref").join(" + ")}</p></div>
             {item.lastError && (
               <span
-                className="inline-flex max-w-sm items-center gap-1.5 text-xs text-amber-700"
+                className="inline-flex max-w-sm items-center gap-1.5 text-xs text-amber-700 dark:text-amber-300"
                 title={item.lastError}
               >
                 <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
@@ -1483,7 +1734,7 @@ function ResourceSubscriptionsPanel({ token, language }: { token: string; langua
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted"><div className={`h-full transition-[width] duration-500 ${subscriptionTask.status === "failed" ? "bg-red-500" : "bg-primary"}`} style={{ width: `${Math.max(4, Math.round(subscriptionTask.processed / Math.max(subscriptionTask.total, 1) * 100))}%` }} /></div>
             {subscriptionTask.status === "completed" && <p className="mt-4 text-sm text-foreground">{zh ? `发现 ${subscriptionTask.result?.found ?? 0} 条，新增 ${subscriptionTask.result?.added ?? 0} 条候选。` : `Found ${subscriptionTask.result?.found ?? 0}; added ${subscriptionTask.result?.added ?? 0} candidates.`}</p>}
             {subscriptionTask.status === "completed" && Object.entries(subscriptionTask.result?.sources ?? {}).some(([, source]) => source.error) && (
-              <div className="mt-3 flex items-start gap-2 border-l-2 border-amber-500 pl-3 text-xs leading-5 text-amber-800">
+              <div className="mt-3 flex items-start gap-2 border-l-2 border-amber-500 pl-3 text-xs leading-5 text-amber-800 dark:text-amber-300">
                 <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>{subscriptionSourceWarning(
                   Object.entries(subscriptionTask.result?.sources ?? {})

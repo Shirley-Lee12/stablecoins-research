@@ -18,8 +18,21 @@ export const usersTable = pgTable("users", {
   themePreference: text("theme_preference").notNull().default("system"),
   fontScale: text("font_scale").notNull().default("medium"),
   notificationInApp: boolean("notification_in_app").notNull().default(true),
-  notificationEmail: boolean("notification_email").notNull().default(true),
-  notificationDigest: text("notification_digest").notNull().default("weekly"),
+  notificationEmail: boolean("notification_email").notNull().default(false),
+  notificationDigest: text("notification_digest").notNull().default("off"),
+  suspendedAt: timestamp("suspended_at", { withTimezone: true }),
+  suspendedReason: text("suspended_reason"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const pendingRegistrationsTable = pgTable("pending_registrations", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  verificationCode: text("verification_code").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -43,5 +56,6 @@ export const emailVerificationCodesTable = pgTable("email_verification_codes", {
 });
 
 export type User = typeof usersTable.$inferSelect;
+export type PendingRegistration = typeof pendingRegistrationsTable.$inferSelect;
 export type PasswordResetToken = typeof passwordResetTokensTable.$inferSelect;
 export type EmailVerificationCode = typeof emailVerificationCodesTable.$inferSelect;
