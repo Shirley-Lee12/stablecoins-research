@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth, VerificationRequiredError } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -33,6 +33,17 @@ export function AuthDialog({ open, onOpenChange, initialView = "login", loginNot
   const [form, setForm] = useState({ email: "", name: "", password: "", confirmPassword: "", code: "" });
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
+
+  useEffect(() => {
+    if (!open) return;
+    setView(initialView);
+    setIsLoading(false);
+    setError(null);
+    setShowPassword(false);
+    setPendingEmail("");
+    setResendMessage(null);
+    setForm({ email: "", name: "", password: "", confirmPassword: "", code: "" });
+  }, [initialView, open]);
 
   const reset = () => { setError(null); setResendMessage(null); setForm({ email: "", name: "", password: "", confirmPassword: "", code: "" }); };
   const switchTo = (v: View) => { reset(); setView(v); };
@@ -80,6 +91,7 @@ export function AuthDialog({ open, onOpenChange, initialView = "login", loginNot
     try {
       const result = await register(form.email, form.name, form.password);
       setPendingEmail(result.email);
+      setResendMessage(result.message);
       setView("verify");
     } catch (err: any) {
       setError(err.message);
@@ -252,6 +264,7 @@ export function AuthDialog({ open, onOpenChange, initialView = "login", loginNot
                   {t("Resend", "重新发送")}
                 </button>
               </p>
+              <p className="text-center text-sm"><button type="button" onClick={() => switchTo("login")} className="text-muted-foreground hover:text-primary">{t("Back to Sign In", "返回登录")}</button></p>
             </form>
           </>
         )}

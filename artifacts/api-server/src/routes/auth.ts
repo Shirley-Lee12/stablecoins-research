@@ -7,6 +7,7 @@ import crypto from "node:crypto";
 import { sendVerificationCodeEmail, sendPasswordResetEmail } from "../lib/mailer";
 import { env } from "../config";
 import { createRateLimiter, ipAndEmailKey } from "../lib/rateLimit";
+import { z } from "zod/v4";
 
 const router = Router();
 
@@ -18,6 +19,12 @@ const resendLimiter = createRateLimiter({ windowMs: 15 * 60_000, max: 3, key: ip
 const passwordRequestLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 5, key: ipAndEmailKey });
 const passwordResetLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 5 });
 
+const registrationSchema = z.object({
+  email: z.string().trim().email().max(254).transform((value) => value.toLowerCase()),
+  name: z.string().trim().min(1).max(100),
+  password: z.string(),
+});
+
 router.use("/auth", (req, res, next) => req.method === "POST" ? authIpLimiter(req, res, next) : next());
 
 function generateSixDigitCode(): string {
@@ -26,6 +33,11 @@ function generateSixDigitCode(): string {
 
 function hashSingleUseSecret(value: string): string {
   return crypto.createHmac("sha256", env.JWT_SECRET).update(value).digest("hex");
+}
+
+function verificationUrl(email: string, code: string): string {
+  const base = env.FRONTEND_URL.replace(/\/$/, "");
+  return `${base}/verify-email?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`;
 }
 
 function getSecret() {
@@ -119,17 +131,18 @@ export async function requireAdmin(req: any, res: any, next: any) {
 
 router.post("/auth/register", registrationLimiter, async (req, res): Promise<void> => {
   try {
-    const { email, name, password } = req.body as { email?: string; name?: string; password?: string };
-    if (!email || !name || !password) {
-      res.status(400).json({ error: "email, name, and password are required" });
+    const parsed = registrationSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Please enter a valid email address, name, and password." });
       return;
     }
+    const { email, name, password } = parsed.data;
     if (!isValidPassword(password)) {
       res.status(400).json({ error: "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a digit" });
       return;
     }
 
-    const existing = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
+    const existing = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, email));
     if (existing.length > 0) {
       res.status(409).json({ error: "An account with this email already exists" });
       return;
@@ -137,7 +150,7 @@ router.post("/auth/register", registrationLimiter, async (req, res): Promise<voi
 
     const passwordHash = await bcrypt.hash(password, 12);
     const [user] = await db.insert(usersTable).values({
-      email: email.toLowerCase(),
+      email,
       name,
       passwordHash,
       role: isBootstrapAdminEmail(email) ? "admin" : "user",
@@ -149,11 +162,16 @@ router.post("/auth/register", registrationLimiter, async (req, res): Promise<voi
     await db.insert(emailVerificationCodesTable).values({ userId: user.id, code: hashSingleUseSecret(code), expiresAt });
 
     try {
-      await sendVerificationCodeEmail(user.email, code);
+      await sendVerificationCodeEmail(user.email, code, verificationUrl(user.email, code));
     } catch (mailErr) {
       // Roll back so the user can cleanly retry registration instead of being stuck unverified.
       await db.delete(usersTable).where(eq(usersTable.id, user.id));
-      throw mailErr;
+      req.log.error({ err: mailErr }, "Registration verification email delivery failed");
+      res.status(503).json({
+        error: "Verification email could not be sent. The account was not created; please try again shortly.",
+        code: "EMAIL_DELIVERY_FAILED",
+      });
+      return;
     }
 
     res.status(201).json({ message: "Verification code sent to your email.", email: user.email, requiresVerification: true });
@@ -236,7 +254,20 @@ router.post("/auth/resend-verification", resendLimiter, async (req, res): Promis
       await tx.update(emailVerificationCodesTable).set({ used: true }).where(and(eq(emailVerificationCodesTable.userId, user.id), eq(emailVerificationCodesTable.used, false)));
       await tx.insert(emailVerificationCodesTable).values({ userId: user.id, code: hashSingleUseSecret(code), expiresAt });
     });
-    await sendVerificationCodeEmail(user.email, code);
+    try {
+      await sendVerificationCodeEmail(user.email, code, verificationUrl(user.email, code));
+    } catch (mailErr) {
+      await db.update(emailVerificationCodesTable).set({ used: true }).where(and(
+        eq(emailVerificationCodesTable.userId, user.id),
+        eq(emailVerificationCodesTable.code, hashSingleUseSecret(code)),
+      ));
+      req.log.error({ err: mailErr }, "Verification email resend delivery failed");
+      res.status(503).json({
+        error: "Verification email could not be sent. Please try again shortly.",
+        code: "EMAIL_DELIVERY_FAILED",
+      });
+      return;
+    }
 
     res.json({ message: "If this account needs verification, a new code has been sent." });
   } catch (err) {
@@ -311,10 +342,23 @@ router.post("/auth/forgot-password", passwordRequestLimiter, async (req, res): P
 
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
-    await db.insert(passwordResetTokensTable).values({ userId: user.id, token: hashSingleUseSecret(token), expiresAt });
+    const [resetToken] = await db
+      .insert(passwordResetTokensTable)
+      .values({ userId: user.id, token: hashSingleUseSecret(token), expiresAt })
+      .returning({ id: passwordResetTokensTable.id });
 
     const frontendBase = env.FRONTEND_URL.replace(/\/$/, "");
-    await sendPasswordResetEmail(email.toLowerCase(), `${frontendBase}/reset-password?token=${token}`);
+    try {
+      await sendPasswordResetEmail(email.toLowerCase(), `${frontendBase}/reset-password?token=${token}`);
+    } catch (mailErr) {
+      await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.id, resetToken.id));
+      req.log.error({ err: mailErr }, "Password reset email delivery failed");
+      res.status(503).json({
+        error: "Password reset email could not be sent. Please try again shortly.",
+        code: "EMAIL_DELIVERY_FAILED",
+      });
+      return;
+    }
 
     res.json({ message: "If this email exists, a reset link has been sent." });
   } catch (err) {

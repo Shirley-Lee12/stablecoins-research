@@ -28,6 +28,7 @@ import AdminCenter from "@/pages/admin-center";
 import MyContributionsPage from "@/pages/my-contributions";
 import ProfilePage from "@/pages/profile";
 import ChangePasswordPage from "@/pages/change-password";
+import VerifyEmailPage from "@/pages/verify-email";
 import {
   QuantDimensionA,
   QuantDimensionB,
@@ -57,6 +58,7 @@ function Router() {
         <Route path="/market-data" component={MarketData} />
         <Route path="/quantitative" component={Quantitative} />
         <Route path="/reset-password" component={ResetPassword} />
+        <Route path="/verify-email" component={VerifyEmailPage} />
         <Route path="/admin" component={AdminCenter} />
 
         {/* About Stablecoins sub-pages */}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bell, Building2, Check, CircleUserRound, Eye, Languages, Moon, Save, Sun, UserRoundCheck, X } from "lucide-react";
+import { Bell, Building2, Check, CircleUserRound, Eye, Languages, Loader2, MailCheck, Moon, Save, Sun, UserRoundCheck, X } from "lucide-react";
 import { useAuth, authenticatedFetch } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { useTheme } from "@/lib/theme-context";
@@ -11,6 +11,7 @@ function apiBase() {
 
 type Profile = {
   id: number; email: string; name: string; role: "user" | "admin";
+  emailVerified: boolean;
   institution: string | null; title: string | null; bio: string | null;
   locale: "zh" | "en"; themePreference: "light" | "dark" | "system";
   fontScale: "small" | "medium" | "large"; notificationInApp: boolean; notificationEmail: boolean;
@@ -27,6 +28,10 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [follows, setFollows] = useState<Follow[]>([]);
   const [saving, setSaving] = useState(false);
+  const [emailDraft, setEmailDraft] = useState("");
+  const [emailCode, setEmailCode] = useState("");
+  const [emailChangeStep, setEmailChangeStep] = useState<"idle" | "verify">("idle");
+  const [emailBusy, setEmailBusy] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -34,7 +39,11 @@ export default function ProfilePage() {
     Promise.all([
       authenticatedFetch(`${apiBase()}/api/account/profile`, { headers }).then((res) => res.ok ? res.json() : null),
       authenticatedFetch(`${apiBase()}/api/account/follows`, { headers }).then((res) => res.ok ? res.json() : []),
-    ]).then(([nextProfile, nextFollows]) => { setProfile(nextProfile); setFollows(nextFollows); });
+    ]).then(([nextProfile, nextFollows]) => {
+      setProfile(nextProfile);
+      setEmailDraft(nextProfile?.email ?? "");
+      setFollows(nextFollows);
+    });
   }, [token]);
 
   const initials = useMemo(() => (profile?.name || user?.name || "U").slice(0, 2).toUpperCase(), [profile?.name, user?.name]);
@@ -46,7 +55,18 @@ export default function ProfilePage() {
       const response = await authenticatedFetch(`${apiBase()}/api/account/profile`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        body: JSON.stringify({
+          name: profile.name,
+          institution: profile.institution,
+          title: profile.title,
+          bio: profile.bio,
+          locale: profile.locale,
+          themePreference: profile.themePreference,
+          fontScale: profile.fontScale,
+          notificationInApp: profile.notificationInApp,
+          notificationEmail: profile.notificationEmail,
+          notificationDigest: profile.notificationDigest,
+        }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Save failed");
@@ -63,6 +83,48 @@ export default function ProfilePage() {
     } catch (error) {
       toast({ title: t("Could not save", "保存失败"), description: error instanceof Error ? error.message : "Save failed", variant: "destructive" });
     } finally { setSaving(false); }
+  }
+
+  async function requestEmailChange() {
+    if (!profile || !token) return;
+    setEmailBusy(true);
+    try {
+      const response = await authenticatedFetch(`${apiBase()}/api/account/email-change/request`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailDraft }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not send verification email");
+      setEmailDraft(data.email);
+      setEmailCode("");
+      setEmailChangeStep("verify");
+      toast({ title: t("Verification email sent", "验证邮件已发送"), description: t("Enter the 6-digit code sent to your new email.", "请输入发送到新邮箱的6位验证码。") });
+    } catch (error) {
+      toast({ title: t("Could not send email", "邮件发送失败"), description: error instanceof Error ? error.message : "Request failed", variant: "destructive" });
+    } finally { setEmailBusy(false); }
+  }
+
+  async function confirmEmailChange() {
+    if (!profile || !token) return;
+    setEmailBusy(true);
+    try {
+      const response = await authenticatedFetch(`${apiBase()}/api/account/email-change/confirm`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailDraft, code: emailCode }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Email verification failed");
+      setProfile(data);
+      setEmailDraft(data.email);
+      setEmailCode("");
+      setEmailChangeStep("idle");
+      updateUser({ id: data.id, email: data.email, name: data.name, role: data.role });
+      toast({ title: t("Email updated", "邮箱已更新"), description: t("Your new email has been verified and is now active.", "新邮箱已验证并生效。") });
+    } catch (error) {
+      toast({ title: t("Could not update email", "邮箱更新失败"), description: error instanceof Error ? error.message : "Verification failed", variant: "destructive" });
+    } finally { setEmailBusy(false); }
   }
 
   async function unfollow(follow: Follow) {
@@ -90,10 +152,24 @@ export default function ProfilePage() {
         <div><CircleUserRound className="h-7 w-7 text-primary" /><h2 className="mt-3 text-xl font-semibold">{t("Profile", "个人资料")}</h2><p className="mt-2 text-sm leading-6 text-foreground/65">{t("Information shown with your contributions and account.", "用于账号及贡献记录的个人信息。")}</p></div>
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="text-sm font-medium">{t("Name", "用户名")}<input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="mt-2 h-11 w-full rounded-md border border-border bg-background px-3 font-normal" /></label>
-          <label className="text-sm font-medium">{t("Email", "邮箱")}<input type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="mt-2 h-11 w-full rounded-md border border-border bg-background px-3 font-normal" /></label>
           <label className="text-sm font-medium">{t("Institution", "机构")}<input value={profile.institution ?? ""} onChange={(e) => setProfile({ ...profile, institution: e.target.value })} className="mt-2 h-11 w-full rounded-md border border-border bg-background px-3 font-normal" /></label>
           <label className="text-sm font-medium">{t("Role or title", "职务或身份")}<input value={profile.title ?? ""} onChange={(e) => setProfile({ ...profile, title: e.target.value })} className="mt-2 h-11 w-full rounded-md border border-border bg-background px-3 font-normal" /></label>
           <label className="text-sm font-medium sm:col-span-2">{t("Short bio", "个人简介")}<textarea rows={4} value={profile.bio ?? ""} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} className="mt-2 w-full rounded-md border border-border bg-background p-3 font-normal leading-6" /></label>
+        </div>
+      </section>
+
+      <section className="grid gap-12 border-b border-border py-12 lg:grid-cols-[220px_1fr]">
+        <div><MailCheck className="h-7 w-7 text-primary" /><h2 className="mt-3 text-xl font-semibold">{t("Account email", "账号邮箱")}</h2><p className="mt-2 text-sm leading-6 text-foreground/65">{t("A new address becomes active only after verification.", "新邮箱只有通过验证后才会生效。")}</p></div>
+        <div className="space-y-5">
+          <div className="border-b border-border pb-5">
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-foreground/55">{t("Current email", "当前邮箱")}</span>
+            <div className="mt-2 flex flex-wrap items-center gap-3"><strong className="text-base">{profile.email}</strong><span className={profile.emailVerified ? "inline-flex items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-400" : "inline-flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-400"}><Check className="h-3.5 w-3.5" />{profile.emailVerified ? t("Verified", "已验证") : t("Not verified", "未验证")}</span></div>
+          </div>
+          <label className="block max-w-xl text-sm font-medium">{t("New email", "新邮箱")}<input type="email" value={emailDraft} onChange={(e) => { setEmailDraft(e.target.value); setEmailChangeStep("idle"); setEmailCode(""); }} className="mt-2 h-11 w-full rounded-md border border-border bg-background px-3 font-normal" /></label>
+          {emailChangeStep === "verify" && <label className="block max-w-xs text-sm font-medium">{t("Verification code", "验证码")}<input inputMode="numeric" maxLength={6} value={emailCode} onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="123456" className="mt-2 h-11 w-full rounded-md border border-border bg-background px-3 text-center font-mono text-lg tracking-[0.25em]" /></label>}
+          <div className="flex flex-wrap gap-3">
+            {emailChangeStep === "idle" ? <button type="button" onClick={() => void requestEmailChange()} disabled={emailBusy || !emailDraft || emailDraft.toLowerCase() === profile.email.toLowerCase()} className="inline-flex h-10 items-center gap-2 rounded-md border border-primary px-4 text-sm font-medium text-primary disabled:cursor-not-allowed disabled:opacity-45">{emailBusy && <Loader2 className="h-4 w-4 animate-spin" />}{t("Send verification code", "发送验证码")}</button> : <><button type="button" onClick={() => void confirmEmailChange()} disabled={emailBusy || emailCode.length !== 6} className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-45">{emailBusy && <Loader2 className="h-4 w-4 animate-spin" />}{t("Verify and update", "验证并更新")}</button><button type="button" onClick={() => void requestEmailChange()} disabled={emailBusy} className="h-10 rounded-md border border-border px-4 text-sm font-medium hover:bg-muted disabled:opacity-45">{t("Resend code", "重新发送")}</button></>}
+          </div>
         </div>
       </section>
 
