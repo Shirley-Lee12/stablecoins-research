@@ -85,7 +85,7 @@ try {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${connectorToken}` },
     body: JSON.stringify({
-      pageUrl: `https://example.org/stablecoin-research/${marker}`,
+      pageUrl: `https://stablecoins-hub.onrender.com/connector-test/${marker}`,
       metadata: {
         title,
         authors: ["Connector E2E Researcher"],
@@ -114,7 +114,7 @@ try {
   assert(job?.type === "browser_capture", "Created job has the wrong type");
   assert(job?.status === "ready_for_review", `Capture processing ended in ${job?.status || "unknown"}: ${job?.error || "no error"}`);
   assert(job.result?.draft?.title?.toLowerCase() === title.toLowerCase(), "Captured page title was not preserved");
-  assert(job.result?.draft?.url?.includes("example.org/stablecoin-research/"), "Captured page URL was not preserved");
+  assert(job.result?.draft?.url?.includes("stablecoins-hub.onrender.com/connector-test/"), "Captured page URL was not preserved");
   assert(Array.isArray(job.result?.tags), "Capture result has no tag review data");
 
   await request("/connector/session", { method: "DELETE", headers: { Authorization: `Bearer ${connectorToken}` } }, [204]);
