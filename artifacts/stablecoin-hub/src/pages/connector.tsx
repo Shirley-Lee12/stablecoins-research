@@ -8,8 +8,11 @@ function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
 }
 
-const RELEASE = "0.3.0";
-const DOWNLOAD_URL = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/downloads/zibs-stablecoin-research-connector-${RELEASE}.zip`;
+const DOWNLOADS_BASE_URL = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/downloads`;
+const FALLBACK_RELEASE = {
+  version: "0.3.1",
+  file: "zibs-stablecoin-research-connector-0.3.1.zip",
+};
 
 type ConnectorSession = {
   id: number;
@@ -22,6 +25,7 @@ type ConnectorSession = {
 };
 
 type PairingInfo = { clientName: string; status: string; expiresAt: string };
+type ConnectorRelease = { version: string; file: string };
 
 export default function ConnectorPage() {
   const { user, token } = useAuth();
@@ -34,6 +38,7 @@ export default function ConnectorPage() {
   const [busy, setBusy] = useState(false);
   const [authorized, setAuthorized] = useState(false);
   const [error, setError] = useState("");
+  const [release, setRelease] = useState<ConnectorRelease>(FALLBACK_RELEASE);
 
   const loadSessions = useCallback(async () => {
     if (!token) { setSessions([]); return; }
@@ -44,6 +49,17 @@ export default function ConnectorPage() {
   }, [token]);
 
   useEffect(() => { if (!isAuthorize) void loadSessions(); }, [isAuthorize, loadSessions]);
+
+  useEffect(() => {
+    fetch(`${DOWNLOADS_BASE_URL}/connector-release.json`)
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Unable to load connector release");
+        const data = await response.json() as Partial<ConnectorRelease>;
+        if (typeof data.version !== "string" || typeof data.file !== "string" || !data.file.endsWith(".zip")) throw new Error("Invalid connector release");
+        setRelease({ version: data.version, file: data.file });
+      })
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     if (!isAuthorize || !code) return;
@@ -122,11 +138,12 @@ export default function ConnectorPage() {
   }
 
   const activeSessions = sessions.filter((session) => !session.revokedAt && (!session.expiresAt || new Date(session.expiresAt).getTime() > Date.now()));
+  const downloadUrl = `${DOWNLOADS_BASE_URL}/${encodeURIComponent(release.file)}`;
   return (
     <div className="mx-auto max-w-6xl pb-20">
       <header className="grid gap-8 border-b border-border pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
         <div><p className="text-xs font-semibold uppercase text-primary">ZIBS Stablecoin Research Connector</p><h1 className="mt-3 font-serif text-4xl font-semibold text-primary">{t("Browser capture tool", "浏览器采集工具")}</h1><p className="mt-3 max-w-3xl leading-7 text-foreground/65">{t("Capture bibliographic metadata from the paper, book, regulation, report, or dataset already open in your browser. Incomplete fields are prepared with AI and always return to the site for confirmation.", "从浏览器当前打开的论文、图书、法规、报告或数据集页面提取题录；缺失字段由 AI 辅助补全，并始终回到网站人工确认。")}</p></div>
-        <a href={DOWNLOAD_URL} download className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground"><Download className="h-4 w-4" />{t("Download connector", "下载插件")} <span className="opacity-70">v{RELEASE}</span></a>
+        <a href={downloadUrl} download className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground"><Download className="h-4 w-4" />{t("Download connector", "下载插件")} <span className="opacity-70">v{release.version}</span></a>
       </header>
 
       <section className="grid gap-10 border-b border-border py-12 lg:grid-cols-[220px_1fr]">
