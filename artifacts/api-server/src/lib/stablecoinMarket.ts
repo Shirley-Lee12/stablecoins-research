@@ -90,7 +90,9 @@ const OFFICIAL_PROJECT_URLS: Record<string, string> = {
   "119": "https://firstdigitallabs.com/",
   "120": "https://www.paypal.com/us/digital-wallet/manage-money/crypto/pyusd",
   "129": "https://ondo.finance/usdy",
-  "146": "https://www.ethena.fi/",
+  // USDe's protocol documentation is the most useful official destination for
+  // readers comparing how stablecoins work, rather than the issuer landing page.
+  "146": "https://docs.ethena.fi/",
   "173": "https://www.blackrock.com/cash/en-us/products/329365/blackrock-usd-institutional-digital-liquidity-fund",
   "195": "https://usual.money/",
   "205": "https://www.agora.finance/",

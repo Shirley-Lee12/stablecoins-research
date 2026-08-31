@@ -228,11 +228,6 @@ const manualImports = [
     url: "https://doi.org/10.1093/ojls/gqaa036",
     reason: "Corrected and verified published-version DOI for the incomplete Word citation.",
   },
-  {
-    title: "Ethena documentation / USDe whitepaper",
-    url: "https://ethena-labs.gitbook.io/ethena-labs",
-    reason: "Official project documentation retained from the unverified section; needs URL parsing rather than citation parsing.",
-  },
 ];
 
 await rm(OUTPUT_ROOT, { recursive: true, force: true });

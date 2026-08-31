@@ -13,6 +13,7 @@ import {
   RefreshCcw,
   RefreshCw,
   RotateCcw,
+  Search,
   ShieldCheck,
   SlidersHorizontal,
   Target,
@@ -159,6 +160,7 @@ export default function AboutTypesPage() {
   const [snapshot, setSnapshot] = useState<MarketSnapshot | null>(null);
   const [status, setStatus] = useState<"all" | "active" | "historical">("all");
   const [selectedMechanism, setSelectedMechanism] = useState("all");
+  const [projectQuery, setProjectQuery] = useState("");
   const [focusedMechanism, setFocusedMechanism] = useState("fiat-backed");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -215,10 +217,13 @@ export default function AboutTypesPage() {
     .filter((item) => item.activeTotal > 0)
     .map((item) => ({ ...item, value: item.activeTotal, label: mechanismLabel(item.mechanism, zh) })), [summaries, zh]);
 
+  const normalizedProjectQuery = projectQuery.trim().toLocaleLowerCase();
+
   const visibleProjects = useMemo(() => (snapshot?.projects ?? [])
     .filter((item) => status === "all" || item.status === status)
     .filter((item) => selectedMechanism === "all" || item.mechanism === selectedMechanism)
-    .sort((a, b) => projectAmount(b) - projectAmount(a)), [snapshot, status, selectedMechanism]);
+    .filter((item) => !normalizedProjectQuery || `${item.name} ${item.symbol}`.toLocaleLowerCase().includes(normalizedProjectQuery))
+    .sort((a, b) => projectAmount(b) - projectAmount(a)), [snapshot, status, selectedMechanism, normalizedProjectQuery]);
 
   const activeMechanism = selectedMechanism === "all" ? focusedMechanism : selectedMechanism;
 
@@ -230,6 +235,7 @@ export default function AboutTypesPage() {
   const resetFilters = () => {
     setStatus("all");
     setSelectedMechanism("all");
+    setProjectQuery("");
   };
 
   return (
@@ -364,9 +370,10 @@ export default function AboutTypesPage() {
         </div>
 
         <div className="mt-5 flex flex-wrap items-end gap-3 border-y border-border py-4">
+          <label className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">{t("Search projects", "搜索项目")}<span className="relative mt-2 block"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><input value={projectQuery} onChange={(event) => setProjectQuery(event.target.value)} placeholder={t("Name or symbol", "名称或代号")} className="h-10 w-64 max-w-full border border-input bg-background py-2 pl-9 pr-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none placeholder:text-muted-foreground focus:border-primary" /></span></label>
           <label className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">{t("Mechanism", "机制")}<select value={selectedMechanism} onChange={(event) => setSelectedMechanism(event.target.value)} className="mt-2 block h-10 min-w-48 border border-input bg-background px-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary"><option value="all">{t("All mechanisms", "全部机制")}</option>{MECHANISMS.map((item) => <option key={item.id} value={item.id}>{zh ? item.zh : item.en}</option>)}</select></label>
           <label className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">{t("Operating status", "运行状态")}<select value={status} onChange={(event) => setStatus(event.target.value as typeof status)} className="mt-2 block h-10 min-w-48 border border-input bg-background px-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary"><option value="all">{t("All statuses", "全部状态")}</option><option value="active">{t("Operating", "运行中")}</option><option value="historical">{t("Discontinued / historical", "已停止运行 / 历史项目")}</option></select></label>
-          {(selectedMechanism !== "all" || status !== "all") && <Button type="button" variant="ghost" onClick={resetFilters} className="h-10"><RotateCcw className="mr-2 h-4 w-4" />{t("Clear filters", "清除筛选")}</Button>}
+          {(projectQuery || selectedMechanism !== "all" || status !== "all") && <Button type="button" variant="ghost" onClick={resetFilters} className="h-10"><RotateCcw className="mr-2 h-4 w-4" />{t("Clear filters", "清除筛选")}</Button>}
         </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground"><span className="inline-flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" />{t("Showing", "当前显示")} {visibleProjects.length} {t("projects", "个项目")}</span>{snapshot && <a href={snapshot.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-primary">{t("Data source", "数据来源")}: {snapshot.source} · {new Intl.DateTimeFormat(zh ? "zh-CN" : "en-GB", { dateStyle: "medium", timeStyle: "short" }).format(new Date(snapshot.refreshedAt))}<ExternalLink className="h-3.5 w-3.5" /></a>}</div>

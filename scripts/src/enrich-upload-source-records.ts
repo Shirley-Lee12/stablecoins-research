@@ -80,10 +80,6 @@ const patches = new Map<number, SourcePatch>([
     publishedDate: "2023-04-10",
     sourceType: "report",
   }],
-  [614, {
-    url: "https://docs.ethena.fi/",
-    sourceType: "report",
-  }],
   [621, {
     abstract: "Smart contracts are computer programs that can be correctly executed by a network of mutually distrusting nodes, without the need of an external trusted authority. Since smart contracts handle and transfer assets of considerable value, their implementation must be secure against attacks that steal or tamper with assets. This study analyses Ethereum smart-contract vulnerabilities, develops a taxonomy of common programming pitfalls, and shows attacks that exploit them to steal money or cause other damage.",
   }],
