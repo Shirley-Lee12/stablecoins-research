@@ -12,6 +12,8 @@ export const sourceTypeEnum = pgEnum("source_type", [
   "working_paper",
   "conference_paper",
   "thesis",
+  "book",
+  "book_chapter",
   "dataset",
   "report",
   "gov_document",

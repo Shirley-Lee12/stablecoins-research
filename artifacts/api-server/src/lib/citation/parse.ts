@@ -10,10 +10,12 @@ function splitRecords(text: string): string[] {
     .filter(Boolean);
 }
 
-/** Maps a CNKI "reference type" string (which varies slightly by format — "Dissertation/Thesis" vs "Thesis", "Conference Proceeding(s)") to one of the 08-final 7 slugs. Falls back to "report" for anything not recognized (books, generic records) rather than guessing. */
+/** Maps a citation-export reference type to a stable source-type slug. */
 function mapSourceType(rawType: string): string {
   const t = rawType.toLowerCase();
   if (t.includes("thesis") || t.includes("dissertation")) return "thesis";
+  if (t.includes("book chapter") || t.includes("chapter")) return "book_chapter";
+  if (t.includes("book") || t.includes("monograph")) return "book";
   if (t.includes("conference")) return "conference_paper";
   if (t.includes("newspaper")) return "news";
   if (t.includes("journal")) return "journal_article";

@@ -90,6 +90,8 @@ router.post("/admin/subscription-candidates/import", requireAuth, requireAdmin, 
     if (values.some((value) => value.includes("proceedings") || value.includes("conference"))) return "conference_paper";
     if (values.some((value) => value.includes("posted-content") || value.includes("preprint") || value.includes("working"))) return "working_paper";
     if (values.some((value) => value.includes("dissertation") || value.includes("thesis"))) return "thesis";
+    if (values.some((value) => value.includes("book-chapter") || value.includes("book chapter") || value.includes("chapter"))) return "book_chapter";
+    if (values.some((value) => value === "book" || value.includes("monograph"))) return "book";
     if (values.some((value) => value.includes("dataset") || value.includes("data-set")) || /\bdataset\b|数据集/iu.test(candidate.title)) return "dataset";
     if (values.some((value) => value.includes("report"))) return "report";
     return "journal_article";

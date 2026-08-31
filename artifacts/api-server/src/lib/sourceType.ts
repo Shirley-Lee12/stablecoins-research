@@ -3,6 +3,8 @@ export const VALID_SOURCE_TYPES = [
   "working_paper",
   "conference_paper",
   "thesis",
+  "book",
+  "book_chapter",
   "dataset",
   "report",
   "gov_document",
@@ -21,9 +23,14 @@ export function normalizeSourceType(value: unknown): SourceType {
 export function refineSourceType(sourceType: unknown, sourceUrl?: string | null, title = "", sourceText = ""): SourceType {
   const normalized = normalizeSourceType(sourceType);
   const evidence = `${title}\n${sourceText.slice(0, 5_000)}`;
+  // Publisher pages can mention books or chapters in references. Only use the page identity and
+  // opening metadata for book classification, rather than a long body that may contain citations.
+  const identityEvidence = `${title}\n${sourceUrl ?? ""}\n${sourceText.slice(0, 1_200)}`;
 
   // The document's own identity is stronger evidence than the website section linking to it.
   if (/\b(?:doctoral|master'?s?|undergraduate)\s+(?:thesis|dissertation)\b|\b(?:thesis|dissertation)\s+submitted\b|学位论文|博士论文|硕士论文/iu.test(evidence)) return "thesis";
+  if (/\b(?:book chapter|chapter \d+|chapter in)\b|\bin\s+.+\s*\(ed(?:s)?\.\)|书章|图书章节/iu.test(identityEvidence)) return "book_chapter";
+  if (/\b(?:monograph|book)\b|专著/iu.test(identityEvidence)) return "book";
   if (/\b(?:conference proceedings|proceedings of|presented at|conference paper)\b|会议论文|会议论文集/iu.test(evidence)) return "conference_paper";
   if (/\b(?:working paper|discussion paper|research paper)\s*(?:no\.?|series|\d)|\bNBER\s+working paper\b|工作论文/iu.test(evidence)) return "working_paper";
   if (/\b(?:dataset|data\s*set|data release|data repository|data snapshot)\b|数据集|数据发布|数据快照/iu.test(evidence)) return "dataset";

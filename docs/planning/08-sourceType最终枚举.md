@@ -3,7 +3,7 @@
 > 收口 sourceType。与标签表一致:**存 slug(语言无关),前端按当前语言显示 nameZh / nameEn**。
 > 不要把 sourceType 存成中文或英文字符串;存 slug。
 
-## 最终 7 类(报告与智库报告已合并为 report)
+## 最终 10 类(报告与智库报告已合并为 report)
 
 | slug | nameZh | nameEn |
 |---|---|---|
@@ -11,6 +11,8 @@
 | working_paper | 工作论文 / 预印本 | Working Paper / Preprint |
 | conference_paper | 会议论文 | Conference Paper |
 | thesis | 学位论文 | Thesis |
+| book | 图书 / 专著 | Book / Monograph |
+| book_chapter | 图书章节 | Book Chapter |
 | report | 研究与行业报告 | Research & Industry Report |
 | gov_document | 法律与监管文件 | Laws & Regulatory Documents |
 | news | 新闻与评论 | News & Commentary |
@@ -23,6 +25,8 @@
 | working_paper | 工作论文系列、预印本或尚未作为期刊文章正式发表的研究稿；SSRN/arXiv 且无正式出版证据时归入此类 | 已正式出版的期刊版本 |
 | conference_paper | 会议论文集收录或明确在会议发表的论文 | 仅在研讨会介绍但没有会议论文身份的网页 |
 | thesis | 大学授予学位所对应的硕士或博士论文 | 普通课程论文、工作论文 |
+| book | 有独立书名、作者或编者、出版信息的专著或图书 | 单独收录在编辑文集中的章节 |
+| book_chapter | 明确标识为编辑图书/文集中的一章，通常有章节 DOI 或 “In [editor] (ed.)” 题录信息 | 作为整本书发布的专著，或期刊论文 |
 | report | 机构独立发布的研究、政策、行业、审计或技术成果；通常有报告/白皮书身份、封面目录、执行摘要、报告编号或方法说明。网页可以是报告落地页 | 普通新闻稿、观点文章、博客、访谈 |
 | gov_document | 法律法规、监管规则、官方指引、咨询文件及其他具有权威规范性质的公共部门文件 | 政府或国际组织发布的一般研究报告；后者仍归 report |
 | news | 新闻、评论、观点、博客、访谈、公告及没有独立报告身份的网页文章；Stories/News/Blog/Opinion 栏目默认归入此类 | 有独立报告身份的正式报告，即使由新闻页介绍 |

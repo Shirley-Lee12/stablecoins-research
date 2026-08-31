@@ -125,7 +125,7 @@ export default function ConnectorPage() {
   return (
     <div className="mx-auto max-w-6xl pb-20">
       <header className="grid gap-8 border-b border-border pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
-        <div><p className="text-xs font-semibold uppercase text-primary">ZIBS Stablecoin Research Connector</p><h1 className="mt-3 font-serif text-4xl font-semibold text-primary">{t("Browser capture tool", "浏览器采集工具")}</h1><p className="mt-3 max-w-3xl leading-7 text-foreground/65">{t("Capture bibliographic metadata from the paper, regulation, report, or dataset already open in your browser. Incomplete fields are prepared with AI and always return to the site for confirmation.", "从浏览器当前打开的论文、法规、报告或数据集页面提取题录；缺失字段由 AI 辅助补全，并始终回到网站人工确认。")}</p></div>
+        <div><p className="text-xs font-semibold uppercase text-primary">ZIBS Stablecoin Research Connector</p><h1 className="mt-3 font-serif text-4xl font-semibold text-primary">{t("Browser capture tool", "浏览器采集工具")}</h1><p className="mt-3 max-w-3xl leading-7 text-foreground/65">{t("Capture bibliographic metadata from the paper, book, regulation, report, or dataset already open in your browser. Incomplete fields are prepared with AI and always return to the site for confirmation.", "从浏览器当前打开的论文、图书、法规、报告或数据集页面提取题录；缺失字段由 AI 辅助补全，并始终回到网站人工确认。")}</p></div>
         <a href={DOWNLOAD_URL} download className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground"><Download className="h-4 w-4" />{t("Download connector", "下载插件")} <span className="opacity-70">v{RELEASE}</span></a>
       </header>
 

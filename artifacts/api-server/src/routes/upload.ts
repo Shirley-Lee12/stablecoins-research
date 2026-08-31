@@ -191,11 +191,13 @@ Return a JSON object with exactly these fields:
   byline, page header/footer, or publication details. Never copy a DOI from the references,
   bibliography, footnotes, or a different work discussed in the body. Return null when no DOI for
   this document is explicitly identifiable.
-- "sourceType": one of exactly: "journal_article", "working_paper", "conference_paper", "thesis", "dataset", "report", "gov_document", "news". Use:
+- "sourceType": one of exactly: "journal_article", "working_paper", "conference_paper", "thesis", "book", "book_chapter", "dataset", "report", "gov_document", "news". Use:
   - journal_article only for an article published in an academic or professional periodical;
   - working_paper for a preprint or numbered working-paper series not yet published as a journal article;
   - conference_paper for proceedings or a paper explicitly presented at a conference;
-  - thesis for a university degree thesis or dissertation;
+- thesis for a university degree thesis or dissertation;
+- book for a standalone authored monograph or book;
+- book_chapter for a work explicitly identified as a chapter in an edited book;
   - dataset for a published data collection, data release, repository deposit, or recurring data snapshot whose primary research object is the downloadable data rather than an accompanying paper;
   - report for a standalone institutional research, policy, industry, audit, or technical report (normally identifiable by a report title/number, cover, contents, executive summary, or methodology);
   - gov_document for legislation, regulations, official rules, regulatory guidelines, consultations, and other authoritative public-sector instruments;

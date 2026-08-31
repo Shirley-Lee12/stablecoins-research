@@ -55,6 +55,8 @@ const TYPE_COLORS: Record<string, string> = {
   working_paper: "bg-cyan-50 text-cyan-700 border-cyan-100",
   conference_paper: "bg-purple-50 text-purple-700 border-purple-100",
   thesis: "bg-indigo-50 text-indigo-700 border-indigo-100",
+  book: "bg-rose-50 text-rose-700 border-rose-100",
+  book_chapter: "bg-pink-50 text-pink-700 border-pink-100",
   report: "bg-emerald-50 text-emerald-700 border-emerald-100",
   gov_document: "bg-violet-50 text-violet-700 border-violet-100",
   news: "bg-amber-50 text-amber-700 border-amber-100",

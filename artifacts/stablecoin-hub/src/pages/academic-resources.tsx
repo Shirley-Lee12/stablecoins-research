@@ -7,7 +7,7 @@ import {
   Search, ExternalLink, FileText, BookOpen, Newspaper,
   Tag, ChevronLeft, ChevronRight, Loader2, Plus, X, Upload, AlertCircle,
   Check, CheckCheck, Clock, XCircle, Pencil, List, Sparkles,
-  Presentation, GraduationCap, ScrollText, Landmark, RefreshCw,
+  Presentation, GraduationCap, ScrollText, Landmark, RefreshCw, BookMarked,
   SlidersHorizontal, Trash2, Database,
 } from "lucide-react";
 
@@ -103,6 +103,8 @@ export const SOURCE_TYPE_ICONS: Record<SourceType, React.ElementType> = {
   working_paper: BookOpen,
   conference_paper: Presentation,
   thesis: GraduationCap,
+  book: BookOpen,
+  book_chapter: BookMarked,
   dataset: Database,
   report: ScrollText,
   gov_document: Landmark,
@@ -114,6 +116,8 @@ export const SOURCE_TYPE_COLORS: Record<SourceType, string> = {
   working_paper: "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-800",
   conference_paper: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
   thesis: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800",
+  book: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800",
+  book_chapter: "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950/40 dark:text-pink-300 dark:border-pink-800",
   dataset: "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800",
   report: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
   gov_document: "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800",

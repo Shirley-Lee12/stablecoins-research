@@ -4,7 +4,7 @@ export interface DecomposedEntry {
   title: string;
   authors: string[];
   year: number | null;
-  sourceType: "journal_article" | "working_paper" | "conference_paper" | "thesis" | "dataset" | "report" | "gov_document" | "news";
+  sourceType: "journal_article" | "working_paper" | "conference_paper" | "thesis" | "book" | "book_chapter" | "dataset" | "report" | "gov_document" | "news";
   /** Either a URL or a bare DOI (e.g. "10.1016/j.frl.2020.101867") — normalized to a fetchable URL by the caller before routing, since this is exactly what's printed in a reference list and callers shouldn't have to re-derive it. */
   urlOrDoi: string | null;
 }
@@ -22,7 +22,7 @@ For each reference entry, extract:
 - "title": string — the work's title
 - "authors": string[] — copy author names exactly as the citation prints them. Never guess or expand initials into names. Use the issuing institution's name as the sole entry only when the citation identifies it as the author (e.g. a government body, standards organization, or company report), not merely because the institution is discussed in the title.
 - "year": number | null — publication year if shown
-- "sourceType": one of exactly "journal_article", "working_paper", "conference_paper", "thesis", "dataset", "report", "gov_document", or "news". Journal title/volume/issue/pages means journal_article; an explicitly numbered preprint or working-paper series means working_paper; proceedings or a presented paper means conference_paper; a degree dissertation means thesis; a published data collection, repository deposit, data release, or recurring snapshot means dataset; a standalone institutional/audit/research publication means report; legislation, regulations, rules, official guidelines or consultations mean gov_document; a dated web story, press release, commentary or blog post means news.
+- "sourceType": one of exactly "journal_article", "working_paper", "conference_paper", "thesis", "book", "book_chapter", "dataset", "report", "gov_document", or "news". Journal title/volume/issue/pages means journal_article; an explicitly numbered preprint or working-paper series means working_paper; proceedings or a presented paper means conference_paper; a degree dissertation means thesis; a standalone authored monograph means book; a work explicitly identified as a chapter in an edited book means book_chapter; a published data collection, repository deposit, data release, or recurring snapshot means dataset; a standalone institutional/audit/research publication means report; legislation, regulations, rules, official guidelines or consultations mean gov_document; a dated web story, press release, commentary or blog post means news.
 - "urlOrDoi": string | null — a URL if one is printed, otherwise a bare DOI (e.g. "10.1016/j.frl.2020.101867") if one is printed, otherwise null. Never invent one.
 
 Text:
@@ -45,7 +45,7 @@ Respond with ONLY a JSON object: { "entries": [ { "title": string, "authors": st
       title: typeof e.title === "string" ? e.title.trim() : "",
       authors: Array.isArray(e.authors) ? e.authors.filter((a: unknown): a is string => typeof a === "string") : [],
       year: typeof e.year === "number" ? e.year : null,
-      sourceType: (["journal_article", "working_paper", "conference_paper", "thesis", "dataset", "report", "gov_document", "news"] as const).includes(e.sourceType as any)
+      sourceType: (["journal_article", "working_paper", "conference_paper", "thesis", "book", "book_chapter", "dataset", "report", "gov_document", "news"] as const).includes(e.sourceType as any)
         ? e.sourceType as DecomposedEntry["sourceType"]
         : "journal_article",
       urlOrDoi: typeof e.urlOrDoi === "string" && e.urlOrDoi.trim() ? e.urlOrDoi.trim() : null,

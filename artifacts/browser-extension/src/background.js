@@ -25,7 +25,7 @@ function captureActivePage() {
     } catch { /* Ignore malformed publisher markup. */ }
   }
   const scholarlyTypes = new Set([
-    "scholarlyarticle", "article", "report", "dataset", "thesis", "creativework",
+    "scholarlyarticle", "article", "report", "dataset", "thesis", "book", "chapter", "creativework",
     "legislation", "newsarticle", "governmentservice",
   ]);
   const jsonRecord = jsonObjects.find((entry) => asArray(entry["@type"]).some((type) => scholarlyTypes.has(String(type).toLowerCase()))) || null;
@@ -71,6 +71,8 @@ function captureActivePage() {
   const typeSignal = `${jsonType} ${firstMeta(["citation_dissertation_institution", "citation_technical_report_institution"])} ${title} ${canonical}`.toLowerCase();
   if (/dataset|data set|数据集/u.test(typeSignal)) sourceType = "dataset";
   else if (/thesis|dissertation|学位论文/u.test(typeSignal)) sourceType = "thesis";
+  else if (/bookchapter|book chapter|chapter in|\.ch\d+\b|图书章节/u.test(typeSignal)) sourceType = "book_chapter";
+  else if (/\bbook\b|monograph|专著/u.test(typeSignal)) sourceType = "book";
   else if (/legislation|government|regulation|congress\.gov|europarl\.europa\.eu|法案|条例/u.test(typeSignal)) sourceType = "gov_document";
   else if (/newsarticle|\/news\/|新闻/u.test(typeSignal)) sourceType = "news";
   else if (/federalreserve\.gov\/econres\/notes\/feds-notes|feds notes/u.test(typeSignal)) sourceType = "report";

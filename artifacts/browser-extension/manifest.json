@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "ZIBS Stablecoin Research Connector",
   "short_name": "ZIBS Connector",
-  "version": "0.3.0",
-  "description": "Capture papers, reports, regulations, and datasets for the ZIBS Stablecoin Research Hub.",
+  "version": "0.3.1",
+  "description": "Capture papers, books, reports, regulations, and datasets for the ZIBS Stablecoin Research Hub.",
   "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": [
     "https://stablecoins-research-hub.onrender.com/*",
