@@ -22,7 +22,7 @@ import { parseCitationFile, UnsupportedCitationFormatError, type CitationRecord 
 import { extractListFileText, UnsupportedListFormatError } from "../lib/unstructuredList/extractText";
 import { decomposeReferenceListInChunks, type DecomposedEntry } from "../lib/unstructuredList/decompose";
 import { titleOverlapScore } from "../lib/scholar/matching";
-import { assertSafePublicHttpUrl, normalizeResourceUrlInput, readBoundedBody, safeFetch, UnsafeUrlError } from "../lib/safeUrl";
+import { assertSafePublicHttpUrl, assertSafeStoredHttpUrl, normalizeResourceUrlInput, readBoundedBody, safeFetch, UnsafeUrlError } from "../lib/safeUrl";
 import { uploadTaskQueue } from "../lib/taskQueue";
 import { consumeUploadPreview, createUploadPreview } from "../lib/uploadPreview";
 import { createRateLimiter } from "../lib/rateLimit";
@@ -849,7 +849,7 @@ router.post("/resources/upload/jobs/browser-capture", requireConnectorAuth, uplo
   const parsed = browserCaptureSchema.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "The captured page metadata is invalid" }); return; }
   try {
-    const safePageUrl = (await assertSafePublicHttpUrl(parsed.data.pageUrl)).toString();
+    const safePageUrl = assertSafeStoredHttpUrl(parsed.data.pageUrl).toString();
     const payload: BrowserCapturePayload = {
       ...parsed.data,
       pageUrl: safePageUrl,

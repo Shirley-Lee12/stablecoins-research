@@ -100,8 +100,12 @@ function isDevelopmentProxyAddress(address: string): boolean {
   return isIP(candidate) === 4 && developmentProxyAddresses.check(candidate, "ipv4");
 }
 
-/** Validates the URL and every currently resolved address before an outbound request. */
-export async function assertSafePublicHttpUrl(rawUrl: string): Promise<URL> {
+/**
+ * Validates a URL that will only be stored, not fetched by the server. Domain names are allowed
+ * without DNS lookup because managed runtimes may resolve all public traffic through an internal
+ * proxy address. Literal private IPs and local hostnames remain forbidden.
+ */
+export function assertSafeStoredHttpUrl(rawUrl: string): URL {
   let url: URL;
   try {
     url = new URL(normalizeResourceUrlInput(rawUrl));
@@ -122,6 +126,17 @@ export async function assertSafePublicHttpUrl(rawUrl: string): Promise<URL> {
     throw new UnsafeUrlError("Local or private network addresses are not allowed");
   }
 
+  const literalFamily = isIP(hostname);
+  if (literalFamily && isBlockedIpAddress(hostname)) {
+    throw new UnsafeUrlError("Local, private, reserved, and link-local network addresses are not allowed");
+  }
+  return url;
+}
+
+/** Validates the URL and every currently resolved address before an outbound request. */
+export async function assertSafePublicHttpUrl(rawUrl: string): Promise<URL> {
+  const url = assertSafeStoredHttpUrl(rawUrl);
+  const hostname = normalizedHostname(url.hostname);
   const literalFamily = isIP(hostname);
   const addresses = literalFamily
     ? [{ address: hostname, family: literalFamily }]
