@@ -115,6 +115,7 @@ function splitList(value, limit, itemLength) {
 
 function renderCapture() {
   const metadata = capture.metadata;
+  metadata.abstractEdited = false;
   $("editTitle").value = metadata.title || "";
   $("editAuthors").value = metadata.authors.join("; ");
   $("editDate").value = metadata.publishedDate || "";
@@ -124,7 +125,10 @@ function renderCapture() {
   $("editAbstract").value = metadata.abstract || "";
   $("editKeywords").value = metadata.keywords.join("; ");
   const missing = [!metadata.title && "标题", !metadata.authors.length && "作者", !metadata.publishedDate && "日期", !metadata.abstract && "摘要"].filter(Boolean);
-  $("aiNotice").textContent = missing.length
+  const needsBodySummary = capture.visibleText.trim().length >= 800 && metadata.abstract.trim().length < 280;
+  $("aiNotice").textContent = needsBodySummary
+    ? "提交后将根据已读取的网页正文优化摘要；您手动填写的内容不会被覆盖。"
+    : missing.length
     ? `提交后将使用 AI 补全：${missing.join("、")}。您填写的内容不会被覆盖。`
     : "页面元数据完整；将跳过题录 AI 抽取，仅执行标签、去重与核对。";
 }
@@ -219,9 +223,10 @@ $("connectButton").addEventListener("click", startPairing);
 $("checkPairingButton").addEventListener("click", () => pollPairing(true));
 $("captureButton").addEventListener("click", capturePage);
 $("recaptureButton").addEventListener("click", capturePage);
+$("editAbstract").addEventListener("input", () => { if (capture) capture.metadata.abstractEdited = true; });
 $("submitButton").addEventListener("click", submitCapture);
 $("captureAnotherButton").addEventListener("click", showCaptureEmpty);
-$("openReviewButton").addEventListener("click", () => chrome.tabs.create({ url: `${config.frontendUrl}/academic-resources?uploadJobId=${currentJobId || ""}` }));
+$("openReviewButton").addEventListener("click", () => chrome.tabs.create({ url: `${config.frontendUrl}/my-contributions` }));
 $("settingsButton").addEventListener("click", () => { $("disconnectButton").classList.toggle("hidden", !connected); showView("settingsView"); });
 $("backButton").addEventListener("click", () => connected ? (showCaptureEmpty(), showView("captureView")) : showView("disconnectedView"));
 $("disconnectButton").addEventListener("click", disconnect);

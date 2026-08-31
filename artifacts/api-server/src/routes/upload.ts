@@ -229,6 +229,22 @@ Respond with ONLY the JSON object, no markdown fences, no extra text.`;
   };
 }
 
+/** Uses the source's first substantive sentences only when the model cannot return a summary. */
+function extractiveAbstractFallback(sourceText: string): string {
+  const sentences = decodeAndCleanField(sourceText)
+    .split(/(?<=[.!?。！？])\s+/u)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length >= 60);
+  let result = "";
+  for (const sentence of sentences) {
+    const next = result ? `${result} ${sentence}` : sentence;
+    if (next.length > 900) break;
+    result = next;
+    if (result.length >= 360) break;
+  }
+  return result || decodeAndCleanField(sourceText).slice(0, 600);
+}
+
 /**
  * Generates a summary only after extraction has confirmed that the fetched source does not expose
  * its own abstract. The source text is mandatory: a title alone is never enough to invent one.
@@ -249,10 +265,10 @@ ${sourceText.slice(0, 6000)}
 Respond with ONLY a JSON object: { "abstract": string }`;
     const raw = await generateJson(prompt, 1024);
     const parsed = JSON.parse(raw);
-    return decodeAndCleanField(parsed.abstract);
+    return decodeAndCleanField(parsed.abstract) || extractiveAbstractFallback(sourceText);
   } catch (err) {
     logger.error({ err }, "generateAbstractFromSourceText failed");
-    return "";
+    return extractiveAbstractFallback(sourceText);
   }
 }
 
@@ -457,6 +473,7 @@ const browserCaptureSchema = z.object({
     sourceType: z.string().trim().max(80).default(""),
     publisher: z.string().trim().max(500).default(""),
     siteName: z.string().trim().max(300).default(""),
+    abstractEdited: z.boolean().default(false),
     extractionMethod: z.enum(["highwire", "json_ld", "dublin_core", "open_graph", "visible_text", "mixed"]).default("mixed"),
   }),
   visibleText: z.string().max(30_000).default(""),
@@ -665,7 +682,13 @@ async function processBrowserCapture(payload: BrowserCapturePayload, vocab: TagV
     payload.visibleText,
   ].filter(Boolean).join("\n\n").slice(0, 30_000);
 
-  const needsAi = !capturedTitle || capturedAuthors.length === 0 || !metadata.abstract || !capturedDate;
+  // Publisher descriptions are frequently a one-line institutional boilerplate rather than an
+  // abstract. The browser has already supplied the rendered document text, so enrich only these
+  // thin descriptions from that text while preserving a substantive source abstract verbatim.
+  const shouldEnrichAbstract = !metadata.abstractEdited
+    && payload.visibleText.trim().length >= 800
+    && decodeAndCleanField(metadata.abstract).length < 280;
+  const needsAi = !capturedTitle || capturedAuthors.length === 0 || !metadata.abstract || !capturedDate || shouldEnrichAbstract;
   const extracted = needsAi && sourceText.length >= 160
     ? await extractFromText(sourceText, normalizeSourceType(metadata.sourceType), `Browser metadata method: ${metadata.extractionMethod}`)
     : null;
@@ -698,7 +721,15 @@ async function processBrowserCapture(payload: BrowserCapturePayload, vocab: TagV
     capturedDoi ?? linked.doi ?? extracted?.doi,
     [linked.authors, extracted?.authors ?? []],
   );
-  const abstract = decodeAndCleanField(metadata.abstract || extracted?.abstract || linked.abstract);
+  const generatedAbstract = shouldEnrichAbstract
+    ? await generateAbstractFromSourceText(capturedTitle || extracted?.title || "", payload.visibleText)
+    : "";
+  const abstract = decodeAndCleanField(
+    (shouldEnrichAbstract ? generatedAbstract || extracted?.abstract : metadata.abstract)
+      || metadata.abstract
+      || extracted?.abstract
+      || linked.abstract,
+  );
   const explicitKeywords = normalizeKeywordList(metadata.keywords.length ? metadata.keywords : extracted?.keywords ?? []);
   const keywordResult = await resolveKeywords(explicitKeywords, abstract, title);
   const publishedDate = capturedDate

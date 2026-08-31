@@ -73,6 +73,7 @@ function captureActivePage() {
   else if (/thesis|dissertation|学位论文/u.test(typeSignal)) sourceType = "thesis";
   else if (/legislation|government|regulation|congress\.gov|europarl\.europa\.eu|法案|条例/u.test(typeSignal)) sourceType = "gov_document";
   else if (/newsarticle|\/news\/|新闻/u.test(typeSignal)) sourceType = "news";
+  else if (/federalreserve\.gov\/econres\/notes\/feds-notes|feds notes/u.test(typeSignal)) sourceType = "report";
   else if (/report|whitepaper|white paper|报告/u.test(typeSignal)) sourceType = "report";
   else if (/ssrn\.com|arxiv\.org|working paper/u.test(typeSignal)) sourceType = "working_paper";
   else if (/conference|proceedings|会议/u.test(typeSignal)) sourceType = "conference_paper";

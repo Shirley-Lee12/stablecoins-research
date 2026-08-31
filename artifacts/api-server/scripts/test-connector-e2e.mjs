@@ -11,6 +11,12 @@ const pool = new Pool({ connectionString: databaseUrl });
 const marker = `${Date.now()}-${crypto.randomBytes(3).toString("hex")}`;
 const email = `connector-e2e-${marker}@example.test`;
 const password = `Connector-${crypto.randomBytes(12).toString("base64url")}`;
+const genericAbstract = "Federal Reserve Board of Governors in Washington DC.";
+const sourceText = [
+  "Stablecoins are digital assets designed to maintain a stable value against a reference asset such as the US dollar.",
+  "This research note describes their issuance, reserve management, redemption arrangements, and the risks created by runs and opacity.",
+  "It categorizes stabilization mechanisms and discusses how governance, asset quality, and liquidity affect financial stability.",
+].join(" ").repeat(5);
 let userId = null;
 let jobId = null;
 
@@ -89,7 +95,7 @@ try {
       metadata: {
         title,
         authors: ["Connector E2E Researcher"],
-        abstract: "This research report evaluates stablecoin reserve transparency, redemption liquidity, issuer governance, and disclosure standards across regulated digital asset markets.",
+        abstract: genericAbstract,
         doi: "",
         publishedDate: "2026-08-31",
         keywords: ["stablecoin", "reserves", "transparency", "liquidity"],
@@ -98,7 +104,7 @@ try {
         sourceType: "report",
         extractionMethod: "mixed",
       },
-      visibleText: "Stablecoin reserve transparency requires verifiable reserve assets, liquid redemption channels, independent attestations, and clear issuer governance. This report compares disclosure standards and liquidity safeguards.",
+      visibleText: sourceText,
     }),
   }, [202]);
   jobId = submitted.body.jobId;
@@ -115,6 +121,7 @@ try {
   assert(job?.status === "ready_for_review", `Capture processing ended in ${job?.status || "unknown"}: ${job?.error || "no error"}`);
   assert(job.result?.draft?.title?.toLowerCase() === title.toLowerCase(), "Captured page title was not preserved");
   assert(job.result?.draft?.url?.includes("bis.org/publ/work1085.htm"), "Captured page URL was not preserved");
+  assert(job.result?.draft?.abstract && job.result.draft.abstract !== genericAbstract, "Thin page description was not enriched from browser text");
   assert(Array.isArray(job.result?.tags), "Capture result has no tag review data");
 
   await request("/connector/session", { method: "DELETE", headers: { Authorization: `Bearer ${connectorToken}` } }, [204]);

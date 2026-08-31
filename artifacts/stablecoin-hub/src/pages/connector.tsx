@@ -8,7 +8,7 @@ function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
 }
 
-const RELEASE = "0.2.0";
+const RELEASE = "0.3.0";
 const DOWNLOAD_URL = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/downloads/zibs-stablecoin-research-connector-${RELEASE}.zip`;
 
 type ConnectorSession = {

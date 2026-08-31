@@ -36,6 +36,7 @@ export function refineSourceType(sourceType: unknown, sourceUrl?: string | null,
     if (/(?:^|\.)medium\.com$/i.test(url.hostname)) return "news";
     if (/(?:^|\.)forvismazars\.us$/i.test(url.hostname) && /^\/forsights\//i.test(url.pathname)) return "news";
     if (/(?:^|\.)lw\.com$/i.test(url.hostname) && /^\/en\/insights\//i.test(url.pathname)) return "news";
+    if (/(?:^|\.)federalreserve\.gov$/i.test(url.hostname) && /^\/econres\/notes\/feds-notes\//i.test(url.pathname)) return "report";
     if (/\/(?:stories?|news|blog|opinion)(?:\/|$)/i.test(url.pathname)) return "news";
   } catch {
     // Preserve the existing category when no valid public URL is available.
