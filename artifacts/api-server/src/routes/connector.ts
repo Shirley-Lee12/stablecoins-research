@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { Router } from "express";
-import { and, desc, eq, gt, isNull, lt } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, lt, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { connectorPairingsTable, connectorSessionsTable, db } from "@workspace/db";
 import { env } from "../config";
@@ -19,7 +19,6 @@ import { requireAuth } from "./auth";
 
 const router = Router();
 const PAIRING_TTL_MS = 10 * 60_000;
-const SESSION_TTL_MS = 90 * 24 * 60 * 60_000;
 const pairCreateLimiter = createRateLimiter({ windowMs: 15 * 60_000, max: 15 });
 const pairPollLimiter = createRateLimiter({ windowMs: 60_000, max: 40 });
 
@@ -113,7 +112,7 @@ router.post("/connector/pairings/:code/authorize", requireAuth, async (req: any,
         clientName: claimed.clientName,
         tokenHash: hashConnectorToken(token),
         tokenPrefix: token.slice(0, 18),
-        expiresAt: new Date(Date.now() + SESSION_TTL_MS),
+        expiresAt: sql`NULL`,
       }).returning({ id: connectorSessionsTable.id, expiresAt: connectorSessionsTable.expiresAt });
       await tx.update(connectorPairingsTable).set({
         status: "authorized",

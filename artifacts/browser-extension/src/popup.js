@@ -40,6 +40,7 @@ async function checkSession() {
     try {
       const session = await api("/connector/session", { headers: { Authorization: `Bearer ${stored.connectorToken}` } });
       connected = true;
+      await chrome.storage.local.remove(["pairing"]);
       $("accountName").textContent = session.user?.name || session.user?.email || "已连接";
       showCaptureEmpty();
       showView("captureView");
@@ -51,7 +52,7 @@ async function checkSession() {
   if (stored.pairing) {
     $("pairingCode").textContent = stored.pairing.code;
     $("pairingPanel").classList.remove("hidden");
-    await pollPairing(false);
+    if (await pollPairing(false)) return;
   }
   showView("disconnectedView");
 }
@@ -108,40 +109,73 @@ function showCaptureEmpty() {
   $("successPanel").classList.add("hidden");
 }
 
-function typeLabel(type) {
-  return ({ journal_article: "期刊论文", working_paper: "工作论文", conference_paper: "会议论文", thesis: "学位论文", dataset: "数据集", report: "报告", gov_document: "法规/政府文件", news: "新闻" })[type] || type;
+function splitList(value, limit, itemLength) {
+  return [...new Set(value.split(/[\n;；,，|]+/u).map((item) => item.trim().slice(0, itemLength)).filter(Boolean))].slice(0, limit);
+}
+
+function renderCapture() {
+  const metadata = capture.metadata;
+  $("editTitle").value = metadata.title || "";
+  $("editAuthors").value = metadata.authors.join("; ");
+  $("editDate").value = metadata.publishedDate || "";
+  $("editDoi").value = metadata.doi || "";
+  $("editType").value = metadata.sourceType || "journal_article";
+  $("editUrl").value = capture.pageUrl || "";
+  $("editAbstract").value = metadata.abstract || "";
+  $("editKeywords").value = metadata.keywords.join("; ");
+  const missing = [!metadata.title && "标题", !metadata.authors.length && "作者", !metadata.publishedDate && "日期", !metadata.abstract && "摘要"].filter(Boolean);
+  $("aiNotice").textContent = missing.length
+    ? `提交后将使用 AI 补全：${missing.join("、")}。您填写的内容不会被覆盖。`
+    : "页面元数据完整；将跳过题录 AI 抽取，仅执行标签、去重与核对。";
+}
+
+function applyEdits() {
+  if (!capture) return;
+  capture.pageUrl = $("editUrl").value.trim();
+  capture.metadata.title = $("editTitle").value.trim();
+  capture.metadata.authors = splitList($("editAuthors").value, 50, 300);
+  capture.metadata.publishedDate = $("editDate").value.trim();
+  capture.metadata.doi = $("editDoi").value.trim();
+  capture.metadata.sourceType = $("editType").value;
+  capture.metadata.abstract = $("editAbstract").value.trim();
+  capture.metadata.keywords = splitList($("editKeywords").value, 30, 200);
 }
 
 async function capturePage() {
   $("captureButton").disabled = true;
   $("recaptureButton").disabled = true;
+  $("captureButton").textContent = "读取中…";
+  $("readStatus").textContent = "正在读取…";
+  $("recaptureButton").textContent = "读取中…";
+  $("errorBanner").classList.add("hidden");
   try {
-    const response = await chrome.runtime.sendMessage({ type: "CAPTURE_ACTIVE_TAB" });
+    const response = await Promise.race([
+      chrome.runtime.sendMessage({ type: "CAPTURE_ACTIVE_TAB" }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("读取页面超时，请刷新网页后重试。")), 12_000)),
+    ]);
     if (!response?.ok) throw new Error(response?.error || "读取页面失败");
     capture = response.capture;
-    const metadata = capture.metadata;
-    $("previewTitle").textContent = metadata.title || "标题待 AI 识别";
-    $("previewAuthors").textContent = metadata.authors.length ? metadata.authors.join("; ") : "待补全";
-    $("previewDate").textContent = metadata.publishedDate || "待补全";
-    $("previewDoi").textContent = metadata.doi || "未检测到";
-    $("previewType").textContent = typeLabel(metadata.sourceType);
-    const missing = [!metadata.title && "标题", !metadata.authors.length && "作者", !metadata.publishedDate && "日期", !metadata.abstract && "摘要"].filter(Boolean);
-    $("aiNotice").textContent = missing.length
-      ? `将使用 AI 补全：${missing.join("、")}。现有网页元数据不会被覆盖。`
-      : `页面元数据完整；将跳过题录 AI 抽取，仅执行标签、去重与核对。`;
+    renderCapture();
+    $("readStatus").textContent = `已读取 ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
     $("emptyCapture").classList.add("hidden");
     $("successPanel").classList.add("hidden");
     $("previewPanel").classList.remove("hidden");
   } catch (error) {
+    $("readStatus").textContent = "读取失败";
     showError(error instanceof Error ? error.message : String(error));
   } finally {
     $("captureButton").disabled = false;
+    $("captureButton").textContent = "读取当前页面";
     $("recaptureButton").disabled = false;
+    $("recaptureButton").textContent = "重新读取";
   }
 }
 
 async function submitCapture() {
   if (!capture) return;
+  applyEdits();
+  if (!capture.pageUrl) { showError("请填写网页链接。 "); return; }
+  if (!capture.metadata.title) { showError("请填写标题，或重新读取页面。 "); return; }
   $("submitButton").disabled = true;
   try {
     const { connectorToken } = await storageGet(["connectorToken"]);

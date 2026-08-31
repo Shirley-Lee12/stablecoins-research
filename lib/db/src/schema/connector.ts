@@ -13,7 +13,7 @@ export const connectorSessionsTable = pgTable("connector_sessions", {
   tokenHash: text("token_hash").notNull().unique(),
   tokenPrefix: text("token_prefix").notNull(),
   scope: text("scope").notNull().default("resource:capture"),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
   revokedAt: timestamp("revoked_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

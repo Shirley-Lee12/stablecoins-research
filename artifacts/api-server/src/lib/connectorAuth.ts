@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { and, eq, gt, isNull } from "drizzle-orm";
+import { and, eq, isNull, or, gt } from "drizzle-orm";
 import { connectorSessionsTable, db, usersTable } from "@workspace/db";
 import { env } from "../config";
 
@@ -75,7 +75,7 @@ export async function requireConnectorAuth(req: any, res: any, next: any) {
       .where(and(
         eq(connectorSessionsTable.tokenHash, hashConnectorToken(token)),
         isNull(connectorSessionsTable.revokedAt),
-        gt(connectorSessionsTable.expiresAt, new Date()),
+        or(isNull(connectorSessionsTable.expiresAt), gt(connectorSessionsTable.expiresAt, new Date())),
       )).limit(1);
     if (!connection) {
       res.status(401).json({ error: "This browser connection has expired or been revoked", code: "CONNECTOR_REVOKED" });

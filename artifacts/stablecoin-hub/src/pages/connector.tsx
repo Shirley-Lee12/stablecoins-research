@@ -8,14 +8,14 @@ function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
 }
 
-const RELEASE = "0.1.0";
+const RELEASE = "0.2.0";
 const DOWNLOAD_URL = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/downloads/zibs-stablecoin-research-connector-${RELEASE}.zip`;
 
 type ConnectorSession = {
   id: number;
   clientName: string;
   tokenPrefix: string;
-  expiresAt: string;
+  expiresAt: string | null;
   lastUsedAt: string | null;
   revokedAt: string | null;
   createdAt: string;
@@ -52,6 +52,7 @@ export default function ConnectorPage() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Pairing code not found");
         setPairing(data);
+        if (data.status === "authorized" || data.status === "consumed") setAuthorized(true);
       })
       .catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)));
   }, [code, isAuthorize]);
@@ -103,13 +104,13 @@ export default function ConnectorPage() {
             <div className="border-y border-emerald-600/30 py-10 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600/10 text-emerald-700 dark:text-emerald-400"><Check className="h-6 w-6" /></div>
               <h2 className="mt-5 text-2xl font-semibold">{t("Browser connected", "浏览器已连接")}</h2>
-              <p className="mt-2 text-foreground/60">{t("Return to the connector and choose Check authorization status.", "请返回插件并点击“检查授权状态”。")}</p>
+              <p className="mt-2 text-foreground/60">{t("Return to the connector. It will keep this connection until you revoke it.", "请返回插件。连接将持续有效，直到您主动撤销。")}</p>
             </div>
           ) : (
             <div className="space-y-7">
               <div className="grid gap-5 border-y border-border py-6 sm:grid-cols-[1fr_auto] sm:items-center">
                 <div className="flex items-start gap-4"><Laptop className="mt-1 h-6 w-6 text-primary" /><div><strong className="block">{pairing.clientName}</strong><span className="mt-1 block text-sm text-foreground/55">{t("Pairing code", "配对码")} · <span className="font-mono text-foreground">{code}</span></span></div></div>
-                <span className="text-sm text-foreground/55">{t("Valid for 10 minutes", "10 分钟内有效")}</span>
+                <span className="max-w-56 text-sm leading-6 text-foreground/55">{t("This one-time pairing code is valid for 10 minutes. The completed connection does not expire automatically.", "仅此一次性配对码在 10 分钟内有效；连接成功后不会自动失效。")}</span>
               </div>
               <div className="flex items-start gap-4"><ShieldCheck className="mt-1 h-6 w-6 text-primary" /><div><strong>{t("Requested permission", "申请的权限")}</strong><p className="mt-1 text-sm leading-6 text-foreground/60">{t("Submit the current page to your resource review queue. It cannot manage users, approve records, or read your account password.", "将当前网页提交到您的资源待确认队列。插件不能管理用户、审核通过资源，也不能读取账号密码。")}</p></div></div>
               {!user ? <button type="button" onClick={requestSignIn} className="inline-flex h-11 items-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground"><ExternalLink className="h-4 w-4" />{t("Sign in to continue", "登录后继续")}</button> : <button type="button" onClick={() => void authorize()} disabled={busy} className="inline-flex h-11 items-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground disabled:opacity-50">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}{t("Allow connection", "允许连接")}</button>}
@@ -120,7 +121,7 @@ export default function ConnectorPage() {
     );
   }
 
-  const activeSessions = sessions.filter((session) => !session.revokedAt && new Date(session.expiresAt).getTime() > Date.now());
+  const activeSessions = sessions.filter((session) => !session.revokedAt && (!session.expiresAt || new Date(session.expiresAt).getTime() > Date.now()));
   return (
     <div className="mx-auto max-w-6xl pb-20">
       <header className="grid gap-8 border-b border-border pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
@@ -149,7 +150,7 @@ export default function ConnectorPage() {
 
       <section className="grid gap-10 py-12 lg:grid-cols-[220px_1fr]">
         <div><ShieldCheck className="h-7 w-7 text-primary" /><h2 className="mt-3 text-xl font-semibold">{t("Connected browsers", "已连接浏览器")}</h2><p className="mt-2 text-sm leading-6 text-foreground/60">{t("Revoke a browser you no longer use.", "可随时撤销不再使用的浏览器。")}</p></div>
-        {!user ? <div className="border-y border-border py-8"><p className="m-0 text-sm text-foreground/60">{t("Sign in to view and manage connected browsers.", "登录后可查看和管理已连接浏览器。")}</p><button type="button" onClick={requestSignIn} className="mt-4 inline-flex h-10 items-center rounded-md border border-primary px-4 text-sm font-medium text-primary">{t("Sign in", "登录")}</button></div> : activeSessions.length ? <div className="divide-y divide-border border-y border-border">{activeSessions.map((session) => <div key={session.id} className="flex flex-col justify-between gap-4 py-5 sm:flex-row sm:items-center"><div className="flex items-start gap-4"><Laptop className="mt-1 h-5 w-5 text-primary" /><div><strong className="block text-sm">{session.clientName}</strong><span className="mt-1 block text-xs text-foreground/55">{t("Last used", "最近使用")} · {session.lastUsedAt ? new Date(session.lastUsedAt).toLocaleString() : t("Not yet", "尚未使用")}</span></div></div><button type="button" onClick={() => void revoke(session.id)} disabled={busy} className="inline-flex h-9 items-center gap-2 self-start rounded-md border border-destructive/40 px-3 text-xs font-medium text-destructive hover:bg-destructive/5 disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" />{t("Revoke", "撤销")}</button></div>)}</div> : <div className="flex min-h-32 items-center justify-center border-y border-border text-sm text-foreground/55">{t("No browser is connected yet.", "尚未连接浏览器。")}</div>}
+        {!user ? <div className="border-y border-border py-8"><p className="m-0 text-sm text-foreground/60">{t("Sign in to view and manage connected browsers.", "登录后可查看和管理已连接浏览器。")}</p><button type="button" onClick={requestSignIn} className="mt-4 inline-flex h-10 items-center rounded-md border border-primary px-4 text-sm font-medium text-primary">{t("Sign in", "登录")}</button></div> : activeSessions.length ? <div className="divide-y divide-border border-y border-border">{activeSessions.map((session) => <div key={session.id} className="flex flex-col justify-between gap-4 py-5 sm:flex-row sm:items-center"><div className="flex items-start gap-4"><Laptop className="mt-1 h-5 w-5 text-primary" /><div><strong className="block text-sm">{session.clientName}</strong><span className="mt-1 block text-xs text-foreground/55">{t("Last used", "最近使用")} · {session.lastUsedAt ? new Date(session.lastUsedAt).toLocaleString() : t("Not yet", "尚未使用")}</span><span className="mt-1 block text-xs text-emerald-700 dark:text-emerald-400">{t("Connected until revoked", "持续连接，直至主动撤销")}</span></div></div><button type="button" onClick={() => void revoke(session.id)} disabled={busy} className="inline-flex h-9 items-center gap-2 self-start rounded-md border border-destructive/40 px-3 text-xs font-medium text-destructive hover:bg-destructive/5 disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" />{t("Revoke", "撤销")}</button></div>)}</div> : <div className="flex min-h-32 items-center justify-center border-y border-border text-sm text-foreground/55">{t("No browser is connected yet.", "尚未连接浏览器。")}</div>}
       </section>
       {error && <div className="border-l-4 border-destructive bg-destructive/5 px-5 py-4 text-sm text-destructive">{error}<button onClick={() => { setError(""); void loadSessions(); }} className="ml-3 inline-flex items-center gap-1 font-medium"><RefreshCw className="h-3.5 w-3.5" />{t("Retry", "重试")}</button></div>}
     </div>

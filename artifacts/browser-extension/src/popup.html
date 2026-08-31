@@ -37,14 +37,32 @@
           <button id="captureButton" class="primary-button">读取当前页面</button>
         </div>
         <div id="previewPanel" class="hidden">
-          <p class="eyebrow">采集预览</p>
-          <h1 id="previewTitle"></h1>
-          <dl>
-            <div><dt>作者</dt><dd id="previewAuthors"></dd></div>
-            <div><dt>日期</dt><dd id="previewDate"></dd></div>
-            <div><dt>DOI</dt><dd id="previewDoi"></dd></div>
-            <div><dt>类型</dt><dd id="previewType"></dd></div>
-          </dl>
+          <div class="preview-heading">
+            <p class="eyebrow">采集预览</p>
+            <span id="readStatus" class="read-status" role="status"></span>
+          </div>
+          <p class="edit-hint">提交前可直接修改以下题录信息。</p>
+          <div class="field-stack">
+            <label><span>标题</span><textarea id="editTitle" rows="2" maxlength="1000"></textarea></label>
+            <label><span>作者</span><textarea id="editAuthors" rows="2" maxlength="15000" placeholder="多位作者请用分号分隔"></textarea></label>
+            <div class="field-grid">
+              <label><span>日期</span><input id="editDate" type="text" maxlength="100" placeholder="2026 或 2026-08-30" /></label>
+              <label><span>类型</span><select id="editType">
+                <option value="journal_article">期刊论文</option>
+                <option value="working_paper">工作论文</option>
+                <option value="conference_paper">会议论文</option>
+                <option value="thesis">学位论文</option>
+                <option value="dataset">数据集</option>
+                <option value="report">报告</option>
+                <option value="gov_document">法规/政府文件</option>
+                <option value="news">新闻</option>
+              </select></label>
+            </div>
+            <label><span>DOI</span><input id="editDoi" type="text" maxlength="300" placeholder="未检测到" /></label>
+            <label><span>网页链接</span><textarea id="editUrl" rows="2" maxlength="4096"></textarea></label>
+            <label><span>摘要</span><textarea id="editAbstract" rows="4" maxlength="20000" placeholder="待 AI 补全"></textarea></label>
+            <label><span>关键词</span><textarea id="editKeywords" rows="2" maxlength="6000" placeholder="多个关键词请用分号分隔"></textarea></label>
+          </div>
           <p id="aiNotice" class="notice"></p>
           <div class="button-row">
             <button id="recaptureButton" class="secondary-button">重新读取</button>

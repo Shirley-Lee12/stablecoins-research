@@ -70,6 +70,9 @@ try {
   const connectorToken = authorized.body.token;
   assert(authorized.body.status === "authorized" && typeof connectorToken === "string", "Authorization did not issue a connector token");
 
+  const sessions = await request("/account/connector-sessions", { headers: { Authorization: `Bearer ${userToken}` } });
+  assert(sessions.body.some((session) => session.id === authorized.body.sessionId && session.expiresAt === null), "Connector session should remain active until revoked");
+
   await request(`/connector/pairings/${created.body.pairingId}/poll`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -119,7 +122,7 @@ try {
 
   console.log(JSON.stringify({
     ok: true,
-    checks: ["login", "pairing", "single-use token delivery", "browser capture", "review queue", "server-side revoke"],
+    checks: ["login", "pairing", "persistent session", "single-use token delivery", "browser capture", "review queue", "server-side revoke"],
     jobStatus: job.status,
   }));
 } finally {
