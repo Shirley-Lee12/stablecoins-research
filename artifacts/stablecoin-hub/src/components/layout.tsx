@@ -52,6 +52,7 @@ import {
   CheckCheck,
   UsersRound,
   ArrowUp,
+  Puzzle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -82,6 +83,8 @@ const ROUTE_LABELS: Record<string, { en: string; zh: string }> = {
   "/profile": { en: "My Profile", zh: "个人资料" },
   "/my-contributions": { en: "My Contributions", zh: "我的贡献" },
   "/change-password": { en: "Change Password", zh: "修改密码" },
+  "/connector": { en: "Browser Connector", zh: "浏览器采集工具" },
+  "/connector/authorize": { en: "Connect Browser", zh: "连接浏览器" },
 };
 
 // ── Nav config ────────────────────────────────────────────────────────────────
@@ -424,6 +427,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [sessionExpired]);
 
   useEffect(() => {
+    const handleOpenAuth = (event: Event) => {
+      const view = (event as CustomEvent<{ view?: "login" | "register" }>).detail?.view;
+      setAuthView(view === "register" ? "register" : "login");
+      setAuthOpen(true);
+    };
+    window.addEventListener("stablecoin:open-auth", handleOpenAuth);
+    return () => window.removeEventListener("stablecoin:open-auth", handleOpenAuth);
+  }, []);
+
+  useEffect(() => {
     window.localStorage.setItem("global-sidebar-collapsed", String(isDesktopSidebarCollapsed));
   }, [isDesktopSidebarCollapsed]);
 
@@ -719,6 +732,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   >
                     <BookMarked className="h-3.5 w-3.5 text-muted-foreground" />
                     {zh ? "我的贡献" : "My Contributions"}
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => navigate("/connector")}
+                    className="gap-2 cursor-pointer"
+                  >
+                    <Puzzle className="h-3.5 w-3.5 text-muted-foreground" />
+                    {zh ? "浏览器采集工具" : "Browser Connector"}
                   </DropdownMenuItem>
 
                   <DropdownMenuItem

@@ -10,3 +10,4 @@ export * from "./regulatory";
 export * from "./resourceSubscriptions";
 export * from "./backgroundTasks";
 export * from "./userExperience";
+export * from "./connector";

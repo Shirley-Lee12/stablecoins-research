@@ -1,0 +1,10 @@
+{
+  "name": "@workspace/browser-extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ./build.mjs --copy-to ../stablecoin-hub/public/downloads",
+    "typecheck": "node --check src/background.js && node --check src/popup.js"
+  }
+}

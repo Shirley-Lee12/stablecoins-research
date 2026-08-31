@@ -29,6 +29,7 @@ import MyContributionsPage from "@/pages/my-contributions";
 import ProfilePage from "@/pages/profile";
 import ChangePasswordPage from "@/pages/change-password";
 import VerifyEmailPage from "@/pages/verify-email";
+import ConnectorPage from "@/pages/connector";
 import {
   QuantDimensionA,
   QuantDimensionB,
@@ -60,6 +61,8 @@ function Router() {
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/verify-email" component={VerifyEmailPage} />
         <Route path="/admin" component={AdminCenter} />
+        <Route path="/connector/authorize" component={ConnectorPage} />
+        <Route path="/connector" component={ConnectorPage} />
 
         {/* About Stablecoins sub-pages */}
         <Route path="/about-stablecoins/history" component={AboutHistoryPage} />

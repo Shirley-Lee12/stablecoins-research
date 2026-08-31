@@ -36,7 +36,11 @@ app.use(
   cors({
     origin(origin, callback) {
       if (!origin) { callback(null, true); return; }
-      const allowed = configuredOrigins.has(origin) || (env.NODE_ENV !== "production" && developmentOrigins.has(origin));
+      // Connector requests originate from a Manifest V3 service worker. They still require a
+      // narrowly scoped, revocable bearer token; allowing the extension origin here only permits
+      // the browser to reach that authenticated endpoint and does not grant account access.
+      const connectorOrigin = /^chrome-extension:\/\/[a-p]{32}$/u.test(origin);
+      const allowed = connectorOrigin || configuredOrigins.has(origin) || (env.NODE_ENV !== "production" && developmentOrigins.has(origin));
       callback(allowed ? null : new Error("Origin is not allowed by CORS"), allowed);
     },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],

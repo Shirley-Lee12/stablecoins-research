@@ -6,7 +6,7 @@ import { usersTable } from "./users";
 // "title" = either a no-URL reference that needs title search, or a short-lived Word/Markdown
 // parent task marked by input.taskKind="reference_list". The worker atomically replaces the latter
 // with one url/title child job per parsed reference, avoiding a database enum migration.
-export const uploadJobTypeEnum = pgEnum("upload_job_type", ["pdf", "url", "citation", "title"]);
+export const uploadJobTypeEnum = pgEnum("upload_job_type", ["pdf", "url", "citation", "title", "browser_capture"]);
 export const uploadJobStatusEnum = pgEnum("upload_job_status", ["queued", "processing", "ready_for_review", "failed"]);
 
 /**

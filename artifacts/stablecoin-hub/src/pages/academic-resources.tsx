@@ -970,10 +970,10 @@ interface PipelineResultLike {
   duplicateCandidates?: DuplicatePreview[];
   confirmationId?: string;
 }
-export type UploadJobType = "pdf" | "url" | "citation" | "title";
+export type UploadJobType = "pdf" | "url" | "citation" | "title" | "browser_capture";
 export interface UploadJob {
   id: number; batchId: string | null; folderImportId?: string | null; type: UploadJobType; status: "queued" | "processing" | "ready_for_review" | "failed";
-  input: { fileName?: string; url?: string; title?: string; sourceTypeHint?: string; reference?: { title?: string } };
+  input: { fileName?: string; url?: string; pageUrl?: string; title?: string; sourceTypeHint?: string; metadata?: { title?: string }; reference?: { title?: string } };
   result: PipelineResultLike | null; error: string | null; createdAt: string; nextAttemptAt?: string | null;
 }
 export interface UploadJobSummary {
@@ -2023,8 +2023,10 @@ export function JobQueuePanel({ token, language, type, folderImportId, statusFil
             {batchJobs.map((job) => {
               const label = job.result?.draft?.title
                 ?? job.input?.reference?.title
+                ?? job.input?.metadata?.title
                 ?? job.input?.title
                 ?? job.input?.fileName
+                ?? job.input?.pageUrl
                 ?? job.input?.url
                 ?? `#${job.id}`;
               const duplicates = job.result?.duplicateCandidates ?? [];
@@ -2046,7 +2048,9 @@ export function JobQueuePanel({ token, language, type, folderImportId, statusFil
                         </p>
                       )}
                       {job.status === "processing" && (
-                        <p className="text-primary">{zh ? "AI正在解析文档与补充信息" : "AI is parsing the document and enriching metadata"}</p>
+                        <p className="text-primary">{job.type === "browser_capture"
+                          ? (zh ? "正在整理网页题录与补充缺失信息" : "Preparing page metadata and filling missing fields")
+                          : (zh ? "AI正在解析文档与补充信息" : "AI is parsing the document and enriching metadata")}</p>
                       )}
                       {duplicates.length > 0 && (
                         <p className="text-amber-700 dark:text-amber-300">

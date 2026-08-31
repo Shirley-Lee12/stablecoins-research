@@ -213,6 +213,25 @@ export async function verifyResource(input: VerifyInput): Promise<VerifyReport> 
 }
 
 /**
+ * A connector capture is direct evidence that the submitted URL rendered in the user's active
+ * browser tab. Keep DOI cross-checks, but do not re-fetch the same anti-bot page from the server
+ * and turn the connector's strongest evidence into a misleading reachability warning.
+ */
+export async function verifyBrowserCapture(input: VerifyInput): Promise<VerifyReport> {
+  const report = await verifyResource({ ...input, url: null });
+  const checks = report.checks.map((check) => check.field === "url"
+    ? input.url
+      ? { field: "url", status: "✅" as const, detail: "链接已由浏览器插件在用户当前标签页中读取" }
+      : check
+    : check);
+  return {
+    checks,
+    hasFailure: checks.some((check) => check.status === "❌"),
+    hasWarning: checks.some((check) => check.status === "⚠️"),
+  };
+}
+
+/**
  * Completeness-only check for citation-import entries (docs/planning/06 §3, docs/planning/14 §2) —
  * no network calls at all. CNKI's own metadata (including its DOI) is treated as authoritative
  * since it comes from the database itself, not a user claim that needs cross-checking — resolveDoi/

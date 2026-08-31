@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "ZIBS Stablecoin Research Connector",
+  "short_name": "ZIBS Connector",
+  "version": "0.1.0",
+  "description": "Capture papers, reports, regulations, and datasets for the ZIBS Stablecoin Research Hub.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "https://stablecoins-research-hub.onrender.com/*",
+    "http://127.0.0.1:3001/*",
+    "http://localhost:3001/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Capture for ZIBS Research Hub",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

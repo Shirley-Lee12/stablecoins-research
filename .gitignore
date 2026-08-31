@@ -10,6 +10,11 @@ out-tsc
 
 # dependencies
 node_modules
+.pnpm-store/
+
+# Browser connector build output (the downloadable release is copied to the site)
+artifacts/browser-extension/dist/
+artifacts/browser-extension/release/
 
 # IDEs and editors
 /.idea

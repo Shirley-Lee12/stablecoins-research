@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZIBS Connector</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <img src="icons/icon-48.png" alt="" />
+      <div><strong>ZIBS Connector</strong><span>Stablecoin Research Hub</span></div>
+      <button id="settingsButton" class="icon-button" title="连接设置 / Connection settings" aria-label="连接设置">⋯</button>
+    </header>
+
+    <main>
+      <section id="loadingView" class="center-view"><span class="spinner"></span><p>正在检查连接…</p></section>
+
+      <section id="disconnectedView" class="hidden">
+        <div class="status-mark">↗</div>
+        <h1>连接研究资源库</h1>
+        <p>授权后即可把当前网页中的论文、法规、报告和数据集送入待确认队列。</p>
+        <button id="connectButton" class="primary-button">连接 ZIBS Research Hub</button>
+        <div id="pairingPanel" class="pairing hidden">
+          <span>配对码</span><strong id="pairingCode">----</strong>
+          <p>请在刚打开的网站页面完成登录与授权，然后返回这里。</p>
+          <button id="checkPairingButton" class="secondary-button">检查授权状态</button>
+        </div>
+      </section>
+
+      <section id="captureView" class="hidden">
+        <div class="account-row"><span id="accountName">已连接</span><span class="connected-dot">已连接</span></div>
+        <div id="emptyCapture" class="capture-empty">
+          <div class="capture-icon">＋</div>
+          <h1>采集当前页面</h1>
+          <p>插件优先读取网页自带题录；缺失字段会由 AI 补全，提交后仍需人工确认。</p>
+          <button id="captureButton" class="primary-button">读取当前页面</button>
+        </div>
+        <div id="previewPanel" class="hidden">
+          <p class="eyebrow">采集预览</p>
+          <h1 id="previewTitle"></h1>
+          <dl>
+            <div><dt>作者</dt><dd id="previewAuthors"></dd></div>
+            <div><dt>日期</dt><dd id="previewDate"></dd></div>
+            <div><dt>DOI</dt><dd id="previewDoi"></dd></div>
+            <div><dt>类型</dt><dd id="previewType"></dd></div>
+          </dl>
+          <p id="aiNotice" class="notice"></p>
+          <div class="button-row">
+            <button id="recaptureButton" class="secondary-button">重新读取</button>
+            <button id="submitButton" class="primary-button">送入待确认</button>
+          </div>
+        </div>
+        <div id="successPanel" class="success hidden">
+          <div class="success-mark">✓</div><h1>已送入待确认队列</h1>
+          <p id="successMessage"></p>
+          <button id="openReviewButton" class="primary-button">在网站中审核</button>
+          <button id="captureAnotherButton" class="text-button">继续采集其他页面</button>
+        </div>
+      </section>
+
+      <section id="settingsView" class="hidden">
+        <button id="backButton" class="back-button">← 返回</button>
+        <h1>连接设置</h1>
+        <p class="settings-copy">授权仅允许提交网页采集，不可管理用户或自动审核资源。</p>
+        <div class="setting-line"><span>版本</span><strong id="versionLabel"></strong></div>
+        <button id="disconnectButton" class="danger-button">断开此浏览器</button>
+      </section>
+
+      <p id="errorBanner" class="error hidden"></p>
+    </main>
+    <script src="config.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -8,13 +8,14 @@ import { db, resourcesTable, uploadJobsTable, resourceTagsTable, tagsTable, dupl
 import { eq, and, desc, inArray, gte, count, isNull, lte, or, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { requireAuth } from "./auth";
+import { requireConnectorAuth } from "../lib/connectorAuth";
 import { syncResourceAuthors } from "../lib/resourceAuthors";
 import { generateJson } from "../lib/llm";
 import { logger } from "../lib/logger";
 import { hasAbbreviatedAuthorName, preferFullAuthorNames, resolveDoiOpenAlex, resolveLink, searchOpenAlex } from "../lib/scholar";
 import { extractPdfText, type PdfBibliographicMetadata } from "../lib/pdfExtract";
 import { loadTagVocabulary, computeTagsForText, type TagVocabulary, type ComputedTags } from "../lib/tagging";
-import { verifyResource, verifyCitationRecord, type VerifyReport } from "../lib/verify";
+import { verifyBrowserCapture, verifyResource, verifyCitationRecord, type VerifyReport } from "../lib/verify";
 import { classifyStatus, missingSixElements } from "../lib/resourceStatus";
 import { findDuplicateCandidates, type DuplicateSignal } from "../lib/duplicateCheck";
 import { parseCitationFile, UnsupportedCitationFormatError, type CitationRecord } from "../lib/citation";
@@ -443,6 +444,26 @@ export interface PipelineResult {
   confirmationId?: string;
 }
 
+const browserCaptureSchema = z.object({
+  pageUrl: z.string().url().max(4096),
+  capturedAt: z.string().datetime().optional(),
+  metadata: z.object({
+    title: z.string().trim().max(1000).default(""),
+    authors: z.array(z.string().trim().min(1).max(300)).max(50).default([]),
+    abstract: z.string().trim().max(20_000).default(""),
+    doi: z.string().trim().max(300).default(""),
+    publishedDate: z.string().trim().max(100).default(""),
+    keywords: z.array(z.string().trim().min(1).max(200)).max(30).default([]),
+    sourceType: z.string().trim().max(80).default(""),
+    publisher: z.string().trim().max(500).default(""),
+    siteName: z.string().trim().max(300).default(""),
+    extractionMethod: z.enum(["highwire", "json_ld", "dublin_core", "open_graph", "visible_text", "mixed"]).default("mixed"),
+  }),
+  visibleText: z.string().max(30_000).default(""),
+});
+
+type BrowserCapturePayload = z.infer<typeof browserCaptureSchema>;
+
 async function findDuplicatePreviews(draft: PipelineDraft): Promise<DuplicatePreview[]> {
   const matches = await findDuplicateCandidates({
     title: draft.title,
@@ -622,6 +643,104 @@ async function runUrlInputPipeline(input: string, sourceTypeHint: string, vocab:
   return result;
 }
 
+async function processBrowserCapture(payload: BrowserCapturePayload, vocab: TagVocabulary): Promise<PipelineResult> {
+  const metadata = payload.metadata;
+  const capturedDoi = extractDoiFromInput(metadata.doi || payload.pageUrl);
+  let capturedDate: string | null = null;
+  try {
+    capturedDate = normalizePublicationDateInput(metadata.publishedDate || null);
+  } catch {
+    capturedDate = null;
+  }
+  const capturedYear = publicationYear(capturedDate);
+  const capturedAuthors = [...new Set(metadata.authors.map((author) => decodeAndCleanField(author)).filter(Boolean))];
+  const capturedTitle = normalizeResourceTitle(decodeAndCleanField(metadata.title));
+  const sourceText = [
+    capturedTitle ? `Title: ${capturedTitle}` : "",
+    capturedAuthors.length ? `Authors: ${capturedAuthors.join("; ")}` : "",
+    capturedDate ? `Published: ${capturedDate}` : "",
+    metadata.publisher ? `Publisher: ${metadata.publisher}` : "",
+    metadata.abstract ? `Abstract: ${metadata.abstract}` : "",
+    metadata.keywords.length ? `Keywords: ${metadata.keywords.join("; ")}` : "",
+    payload.visibleText,
+  ].filter(Boolean).join("\n\n").slice(0, 30_000);
+
+  const needsAi = !capturedTitle || capturedAuthors.length === 0 || !metadata.abstract || !capturedDate;
+  const extracted = needsAi && sourceText.length >= 160
+    ? await extractFromText(sourceText, normalizeSourceType(metadata.sourceType), `Browser metadata method: ${metadata.extractionMethod}`)
+    : null;
+  const linked = capturedDoi || capturedTitle
+    ? await resolveLink({
+        title: capturedTitle || extracted?.title || "",
+        authors: capturedAuthors.length ? capturedAuthors : extracted?.authors ?? [],
+        year: capturedYear ?? extracted?.year ?? null,
+        doi: capturedDoi ?? extracted?.doi ?? null,
+      })
+    : {
+        found: false,
+        foundInScholarlyDb: false,
+        title: "",
+        authors: [],
+        year: null,
+        doi: null,
+        abstract: null,
+        canonicalUrl: null,
+        fulltextUrl: null,
+        accessStatus: "unknown",
+        venue: null,
+        sourceTypeHint: null,
+      } as Awaited<ReturnType<typeof resolveLink>>;
+
+  const title = normalizeResourceTitle(capturedTitle || linked.title || extracted?.title || "");
+  const authors = await resolveFullAuthorNames(
+    capturedAuthors.length ? capturedAuthors : linked.authors.length ? linked.authors : extracted?.authors ?? [],
+    title,
+    capturedDoi ?? linked.doi ?? extracted?.doi,
+    [linked.authors, extracted?.authors ?? []],
+  );
+  const abstract = decodeAndCleanField(metadata.abstract || extracted?.abstract || linked.abstract);
+  const explicitKeywords = normalizeKeywordList(metadata.keywords.length ? metadata.keywords : extracted?.keywords ?? []);
+  const keywordResult = await resolveKeywords(explicitKeywords, abstract, title);
+  const publishedDate = capturedDate
+    ?? extracted?.publishedDate
+    ?? (linked.year != null ? String(linked.year) : null);
+  const year = publicationYear(publishedDate) ?? linked.year ?? extracted?.year ?? null;
+  const sourceTypeHint = normalizeSourceType(metadata.sourceType || extracted?.sourceType || undefined);
+  const draft: PipelineDraft = {
+    title,
+    authors,
+    year,
+    publishedDate,
+    abstract,
+    doi: capturedDoi ?? linked.doi ?? extracted?.doi ?? null,
+    url: payload.pageUrl,
+    sourceType: refineSourceType(sourceTypeHint, payload.pageUrl, title, sourceText),
+    keywords: keywordResult.keywords,
+    keywordsSource: metadata.keywords.length > 0 ? "extracted" : keywordResult.keywordsSource,
+  };
+  const tagIds = await computeTagsForText({ title: draft.title, abstract: draft.abstract }, vocab);
+  const tags = await enrichTags(tagIds);
+  const report = await verifyBrowserCapture({
+    title: draft.title,
+    authors: draft.authors,
+    year: draft.year,
+    doi: draft.doi,
+    url: draft.url,
+    abstract: draft.abstract,
+    keywords: draft.keywords,
+  });
+  const missingRequired = missingSixElements({
+    title: draft.title,
+    authors: draft.authors,
+    year: draft.year,
+    abstract: draft.abstract,
+    url: draft.url,
+    doi: draft.doi,
+    keywords: draft.keywords,
+  });
+  return { draft, tagIds, tags, report, foundInScholarlyDb: linked.foundInScholarlyDb, missingRequired };
+}
+
 /**
  * POST /api/resources/upload/manual — must be logged in.
  * Body: { title, authors, year, abstract?, url?, doi?, sourceType }
@@ -717,6 +836,56 @@ router.post("/resources/upload/url", requireAuth, uploadWorkLimiter, async (req:
     if (err instanceof UnsafeUrlError) { res.status(400).json({ error: err.message }); return; }
     req.log.error(err);
     res.status(500).json({ error: "Upload failed" });
+  }
+});
+
+/**
+ * POST /api/resources/upload/jobs/browser-capture
+ * A Connector-only entry point. The browser has already read the page, so this route persists a
+ * bounded, recoverable payload and lets the normal background worker perform enrichment, tagging,
+ * duplicate detection and human-review preparation.
+ */
+router.post("/resources/upload/jobs/browser-capture", requireConnectorAuth, uploadWorkLimiter, async (req: any, res) => {
+  const parsed = browserCaptureSchema.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ error: "The captured page metadata is invalid" }); return; }
+  try {
+    const safePageUrl = (await assertSafePublicHttpUrl(parsed.data.pageUrl)).toString();
+    const payload: BrowserCapturePayload = {
+      ...parsed.data,
+      pageUrl: safePageUrl,
+      metadata: {
+        ...parsed.data.metadata,
+        sourceType: normalizeSourceType(parsed.data.metadata.sourceType),
+      },
+    };
+    const captureHash = createHash("sha256").update(JSON.stringify({
+      pageUrl: payload.pageUrl,
+      title: payload.metadata.title,
+      doi: payload.metadata.doi,
+    })).digest("hex");
+    await enforceJobQuota(req.user.userId, 1);
+    const hashExpression = sql<string>`${uploadJobsTable.input}->>'captureHash'`;
+    const [existing] = await db.select({ id: uploadJobsTable.id, status: uploadJobsTable.status })
+      .from(uploadJobsTable).where(and(
+        eq(uploadJobsTable.createdBy, req.user.userId),
+        eq(uploadJobsTable.type, "browser_capture"),
+        eq(hashExpression, captureHash),
+        inArray(uploadJobsTable.status, ["queued", "processing", "ready_for_review"]),
+      )).limit(1);
+    if (existing) {
+      res.status(202).json({ jobId: existing.id, status: existing.status, duplicateSubmission: true });
+      return;
+    }
+    const [job] = await db.insert(uploadJobsTable).values({
+      type: "browser_capture",
+      status: "queued",
+      input: { payloadVersion: 1, captureHash, connectorSessionId: req.connectorSessionId, capture: payload },
+      createdBy: req.user.userId,
+    }).returning({ id: uploadJobsTable.id });
+    enqueueStoredUploadJob(job.id);
+    res.status(202).json({ jobId: job.id, status: "queued", duplicateSubmission: false });
+  } catch (error) {
+    sendUploadRouteError(error, req, res);
   }
 });
 
@@ -1538,6 +1707,10 @@ export async function runStoredUploadJob(jobId: number): Promise<void> {
     let result: PipelineResult;
     if (job.result && Array.isArray((job.result as any)?.missingRequired)) {
       result = await reenrichPipelineResult(job.result as PipelineResult, vocab);
+    } else if (job.type === "browser_capture" && input.capture) {
+      const parsedCapture = browserCaptureSchema.safeParse(input.capture);
+      if (!parsedCapture.success) throw new Error("This browser capture has an invalid payload");
+      result = await processBrowserCapture(parsedCapture.data, vocab);
     } else if (job.type === "pdf" && (typeof input.extractedText === "string" || managedPdfTempPath(input))) {
       const extracted = typeof input.extractedText === "string"
         ? { text: input.extractedText, metadata: input.pdfMetadata as PdfBibliographicMetadata | undefined }
@@ -1631,6 +1804,7 @@ async function hasRecoverableUploadPayload(job: typeof uploadJobsTable.$inferSel
   }
   if (job.type === "url") return !!input.reference || typeof input.url === "string";
   if (job.type === "citation") return !!input.record;
+  if (job.type === "browser_capture") return !!input.capture;
   if (job.type === "title" && input.taskKind === "reference_list") return typeof input.extractedText === "string";
   return job.type === "title" && typeof input.title === "string";
 }
@@ -2118,7 +2292,13 @@ router.post("/resources/upload/jobs/:id/confirm", requireAuth, async (req: any, 
     input.tagIds = validatedTags.tagIds;
     input.tagScores = validatedTags.tagScores;
 
-    const inserted = await persistConfirmedDraft(input, req.user.userId, job.type === "citation", id);
+    const inserted = await persistConfirmedDraft(
+      input,
+      req.user.userId,
+      job.type === "citation" || job.type === "browser_capture",
+      id,
+      job.type === "browser_capture" ? jobResult.report : undefined,
+    );
     res.status(201).json(inserted);
   } catch (err: any) {
     handleConfirmError(err, req, res);
@@ -2193,7 +2373,13 @@ router.post("/resources/upload/jobs/confirm-complete", requireAuth, async (req: 
         const validatedTags = await validateConfirmedTags(input.tagIds ?? [], result.tags.map((tag) => tag.id), computedTagScores(result.tags));
         input.tagIds = validatedTags.tagIds;
         input.tagScores = validatedTags.tagScores;
-        const inserted = await persistConfirmedDraft(input, req.user.userId, job.type === "citation", job.id, result.report);
+        const inserted = await persistConfirmedDraft(
+          input,
+          req.user.userId,
+          job.type === "citation" || job.type === "browser_capture",
+          job.id,
+          result.report,
+        );
         confirmed.push({ jobId, resourceId: inserted.id, status: inserted.status });
       } catch (error) {
         req.log.error({ error, jobId }, "Bulk upload confirmation failed for one job");

@@ -239,6 +239,13 @@
       "when": 1788095642777,
       "tag": "0033_light_excalibur",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1788142989836,
+      "tag": "0034_dry_wendell_rand",
+      "breakpoints": true
     }
   ]
 }

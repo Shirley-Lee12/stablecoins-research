@@ -12,6 +12,7 @@ import regulatoryRouter from "./regulatory";
 import resourceSubscriptionsRouter from "./resourceSubscriptions";
 import stablecoinMarketRouter from "./stablecoinMarket";
 import accountRouter from "./account";
+import connectorRouter from "./connector";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(regulatoryRouter);
 router.use(resourceSubscriptionsRouter);
 router.use(stablecoinMarketRouter);
 router.use(accountRouter);
+router.use(connectorRouter);
 
 export default router;
