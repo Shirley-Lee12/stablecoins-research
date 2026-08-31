@@ -19,6 +19,7 @@ const sourceText = [
 ].join(" ").repeat(5);
 let userId = null;
 let jobId = null;
+let resourceId = null;
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -124,15 +125,43 @@ try {
   assert(job.result?.draft?.abstract && job.result.draft.abstract !== genericAbstract, "Thin page description was not enriched from browser text");
   assert(Array.isArray(job.result?.tags), "Capture result has no tag review data");
 
+  const reenriched = await request("/resources/upload/jobs/reenrich", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${userToken}` },
+    body: JSON.stringify({ jobIds: [jobId], force: true }),
+  }, [202]);
+  assert(reenriched.body.queued?.includes(jobId), "Browser capture was not queued for re-extraction");
+  for (let attempt = 0; attempt < 45; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+    const result = await request(`/resources/upload/jobs/${jobId}`, { headers: { Authorization: `Bearer ${userToken}` } });
+    job = result.body;
+    if (job.status === "ready_for_review" || job.status === "failed") break;
+  }
+  assert(job?.status === "ready_for_review", `Re-extraction ended in ${job?.status || "unknown"}: ${job?.error || "no error"}`);
+  assert(job.result?.draft?.abstract && job.result.draft.abstract !== genericAbstract, "Re-extraction did not use the saved browser text");
+
+  const confirmed = await request(`/resources/upload/jobs/${jobId}/confirm`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${userToken}` },
+    body: JSON.stringify({
+      ...job.result.draft,
+      tagIds: job.result.tags.map((tag) => tag.id),
+      tagScores: Object.fromEntries(job.result.tags.map((tag) => [tag.id, 1])),
+    }),
+  }, [201]);
+  resourceId = confirmed.body.id;
+  assert(Number.isInteger(resourceId), "Browser capture could not be confirmed");
+
   await request("/connector/session", { method: "DELETE", headers: { Authorization: `Bearer ${connectorToken}` } }, [204]);
   await request("/connector/session", { headers: { Authorization: `Bearer ${connectorToken}` } }, [401]);
 
   console.log(JSON.stringify({
     ok: true,
-    checks: ["login", "pairing", "persistent session", "single-use token delivery", "browser capture", "review queue", "server-side revoke"],
+    checks: ["login", "pairing", "persistent session", "single-use token delivery", "browser capture", "review queue", "re-extraction", "browser confirmation", "server-side revoke"],
     jobStatus: job.status,
   }));
 } finally {
+  if (resourceId != null) await pool.query("delete from resources where id = $1", [resourceId]);
   if (userId != null) await pool.query("delete from users where id = $1", [userId]);
   await pool.end();
 }

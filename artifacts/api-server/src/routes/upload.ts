@@ -1736,12 +1736,12 @@ export async function runStoredUploadJob(jobId: number): Promise<void> {
     }
     const vocab = await loadTagVocabulary();
     let result: PipelineResult;
-    if (job.result && Array.isArray((job.result as any)?.missingRequired)) {
-      result = await reenrichPipelineResult(job.result as PipelineResult, vocab);
-    } else if (job.type === "browser_capture" && input.capture) {
+    if (job.type === "browser_capture" && input.capture) {
       const parsedCapture = browserCaptureSchema.safeParse(input.capture);
       if (!parsedCapture.success) throw new Error("This browser capture has an invalid payload");
       result = await processBrowserCapture(parsedCapture.data, vocab);
+    } else if (job.result && Array.isArray((job.result as any)?.missingRequired)) {
+      result = await reenrichPipelineResult(job.result as PipelineResult, vocab);
     } else if (job.type === "pdf" && (typeof input.extractedText === "string" || managedPdfTempPath(input))) {
       const extracted = typeof input.extractedText === "string"
         ? { text: input.extractedText, metadata: input.pdfMetadata as PdfBibliographicMetadata | undefined }
@@ -2175,7 +2175,12 @@ export async function persistConfirmedDraft(
   const authors = input.authors ?? [];
   const year = input.year ?? null;
   const publishedDate = normalizePublicationDateInput(input.publishedDate ?? (year !== null ? String(year) : null));
-  const url = input.url ? (await assertSafePublicHttpUrl(input.url)).toString() : null;
+  // A browser capture already proves that the submitter's active tab rendered this public URL.
+  // Re-fetching it here can resolve through a managed-runtime proxy and falsely look private.
+  // Citation imports similarly do not need a second outbound request at confirmation time.
+  const url = input.url
+    ? (skipNetworkVerification ? assertSafeStoredHttpUrl(input.url) : await assertSafePublicHttpUrl(input.url)).toString()
+    : null;
   const doi = input.doi ?? null;
   const abstract = input.abstract ?? null;
   const tagIds = input.tagIds ?? [];

@@ -1392,10 +1392,13 @@ export function DuplicateCandidatesPanel({ resource, token, language, onResolved
 }
 
 // ── Shared editable review/confirm step — used by all three upload tabs ───────
-function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm, onCancel, onBack, onDiscard, missingRequired, duplicateCandidates = [] }: {
+function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm, onCancel, onBack, onDiscard, onReenrich, reenriching = false, missingRequired, duplicateCandidates = [] }: {
   draft: DraftData; tags: TagSummary[]; report: VerifyReport; language: string; saving: boolean;
   onChange: (d: DraftData) => void; onConfirm: () => void; onCancel: () => void; onBack?: () => void;
   onDiscard?: () => void;
+  /** Browser captures can re-run against their already stored page text to apply newer extractors. */
+  onReenrich?: () => void;
+  reenriching?: boolean;
   /** Structured "which of title/authors/year/url_doi are absent" (docs/planning/12 §1) — informational, doesn't disable Confirm here (the server decides whether it's actually enforced for this entry kind). */
   missingRequired?: string[];
   duplicateCandidates?: DuplicatePreview[];
@@ -1449,7 +1452,7 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
                 {zh ? "系统判断这项资料可能与稳定币无关" : "This resource may be unrelated to stablecoins"}
               </p>
               <p className="text-xs">
-                {zh ? "它不会直接进入审核或公开资源库。若判断正确，请删除；若是 AI 误判，可先保留，再到 My Contributions 填写说明并重新提交。" : "It will not enter review or the public library directly. Delete it if the decision is correct; if AI misclassified it, keep it and appeal from My Contributions."}
+                {zh ? "它不会直接进入审核或公开资源库。若判断正确，请删除；若是 AI 误判，请先重新提取或修正内容后再提交。" : "It will not enter review or the public library directly. Delete it if the decision is correct; if AI misclassified it, re-extract or correct the record before submitting."}
               </p>
             </div>
           </div>
@@ -1536,6 +1539,16 @@ function ReviewForm({ draft, tags, report, language, saving, onChange, onConfirm
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "自动匹配的标签" : "Auto-matched tags"}</label>
         <TagSummaryList tags={tags} language={language} />
       </div>
+      {onReenrich && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 px-3 py-2">
+          <p className="text-xs text-muted-foreground">{zh ? "使用保存的网页正文重新生成摘要、关键词、标签和类型。" : "Regenerate the summary, keywords, tags, and type from the saved page text."}</p>
+          <button type="button" onClick={onReenrich} disabled={reenriching}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50">
+            <RefreshCw className={`h-3.5 w-3.5 ${reenriching ? "animate-spin" : ""}`} />
+            {zh ? "重新提取" : "Re-extract"}
+          </button>
+        </div>
+      )}
       <div className="space-y-1.5 rounded-lg border border-border p-3 bg-muted/20">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{zh ? "核对报告" : "Verification Report"}</p>
         <VerifyReportList report={report} language={language} />
@@ -1791,6 +1804,28 @@ export function JobQueuePanel({ token, language, type, folderImportId, statusFil
     }
   }
 
+  async function handleForceReenrich() {
+    if (reviewingId == null) return;
+    setReenriching(true);
+    setReviewError("");
+    try {
+      const res = await fetch(`${apiBase()}/api/resources/upload/jobs/reenrich`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ jobIds: [reviewingId], force: true }),
+      });
+      if (!res.ok) { setReviewError(await responseError(res)); return; }
+      setReviewingId(null);
+      setReviewDraft(null);
+      setBulkMessage(zh ? "已重新排队，将按网页正文更新摘要、关键词与类型" : "Queued again to update the summary, keywords, and type from page text");
+      fetchJobs();
+    } catch {
+      setReviewError(zh ? "重新提取请求失败，请稍后重试" : "Could not restart extraction. Please try again.");
+    } finally {
+      setReenriching(false);
+    }
+  }
+
   async function handleDiscard(id: number, title?: string) {
     const confirmed = window.confirm(zh
       ? `确定删除这个上传任务吗？${title ? `\n${title}` : ""}`
@@ -1952,6 +1987,8 @@ export function JobQueuePanel({ token, language, type, folderImportId, statusFil
           missingRequired={reviewingJob.result?.missingRequired ?? []}
           duplicateCandidates={reviewingJob.result?.duplicateCandidates ?? []}
           onDiscard={() => handleDiscard(reviewingJob.id, reviewingJob.result?.draft.title)}
+          onReenrich={reviewingJob.type === "browser_capture" ? () => void handleForceReenrich() : undefined}
+          reenriching={reenriching}
           onChange={setReviewDraft} onConfirm={handleConfirmReview} onCancel={() => setReviewingId(null)} onBack={() => setReviewingId(null)} />
       </div>
     );
