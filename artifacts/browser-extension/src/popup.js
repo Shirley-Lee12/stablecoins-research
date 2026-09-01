@@ -5,6 +5,43 @@ let capture = null;
 let currentJobId = null;
 let connected = false;
 
+async function setCloseOnNextPageClick(armed) {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id || !/^https?:/u.test(tab.url || "")) return;
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      args: [armed],
+      func: (shouldArm) => {
+        const stateKey = "__zibsConnectorCloseAfterSubmit";
+        let state = globalThis[stateKey];
+        if (!state) {
+          state = { armed: false };
+          globalThis[stateKey] = state;
+          document.addEventListener("pointerdown", () => {
+            if (!state.armed) return;
+            state.armed = false;
+            chrome.runtime.sendMessage({ type: "CLOSE_SIDE_PANEL_AFTER_SUBMIT" });
+          }, true);
+        }
+        state.armed = shouldArm;
+      },
+    });
+  } catch {
+    // Browser-owned pages may block injection; Chrome's side-panel close button
+    // remains available in that case.
+  }
+}
+
+async function closeSidePanel() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (typeof tab?.windowId === "number") await chrome.sidePanel.close({ windowId: tab.windowId });
+  } catch {
+    window.close();
+  }
+}
+
 function showView(id) {
   for (const view of views) $(view).classList.toggle("hidden", view !== id);
   $("errorBanner").classList.add("hidden");
@@ -194,6 +231,7 @@ async function submitCapture() {
       : `任务 #${result.jobId} 正在进行标签、去重与完整性处理。`;
     $("previewPanel").classList.add("hidden");
     $("successPanel").classList.remove("hidden");
+    await setCloseOnNextPageClick(true);
   } catch (error) {
     showError(error instanceof Error ? error.message : String(error));
   } finally {
@@ -225,8 +263,15 @@ $("captureButton").addEventListener("click", capturePage);
 $("recaptureButton").addEventListener("click", capturePage);
 $("editAbstract").addEventListener("input", () => { if (capture) capture.metadata.abstractEdited = true; });
 $("submitButton").addEventListener("click", submitCapture);
-$("captureAnotherButton").addEventListener("click", showCaptureEmpty);
-$("openReviewButton").addEventListener("click", () => chrome.tabs.create({ url: `${config.frontendUrl}/my-contributions` }));
+$("captureAnotherButton").addEventListener("click", async () => {
+  await setCloseOnNextPageClick(false);
+  showCaptureEmpty();
+});
+$("openReviewButton").addEventListener("click", async () => {
+  await setCloseOnNextPageClick(false);
+  await chrome.tabs.create({ url: `${config.frontendUrl}/my-contributions` });
+  await closeSidePanel();
+});
 $("settingsButton").addEventListener("click", () => { $("disconnectButton").classList.toggle("hidden", !connected); showView("settingsView"); });
 $("backButton").addEventListener("click", () => connected ? (showCaptureEmpty(), showView("captureView")) : showView("disconnectedView"));
 $("disconnectButton").addEventListener("click", disconnect);

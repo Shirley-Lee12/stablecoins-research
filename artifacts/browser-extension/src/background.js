@@ -104,7 +104,14 @@ function captureActivePage() {
   };
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "CLOSE_SIDE_PANEL_AFTER_SUBMIT") {
+    const windowId = sender.tab?.windowId;
+    if (typeof windowId === "number") chrome.sidePanel.close({ windowId }).catch(() => {});
+    return false;
+  }
   if (message?.type !== "CAPTURE_ACTIVE_TAB") return false;
   (async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
