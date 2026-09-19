@@ -53,6 +53,7 @@ import {
   UsersRound,
   ArrowUp,
   Puzzle,
+  MapPinned,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -77,8 +78,15 @@ const ROUTE_LABELS: Record<string, { en: string; zh: string }> = {
   "/quantitative/dimension-a": { en: "Dimension A", zh: "维度 A" },
   "/quantitative/dimension-b": { en: "Dimension B", zh: "维度 B" },
   "/market-data": { en: "Market Data", zh: "市场数据" },
-  "/market-data/price-tracking": { en: "Price Tracking", zh: "价格追踪" },
-  "/market-data/trading-volume": { en: "Trading Volume", zh: "交易量" },
+  "/market-data/market": { en: "Market", zh: "市场" },
+  "/market-data/on-chain": { en: "On-chain", zh: "链上数据" },
+  "/market-data/issuers-reserves": { en: "Issuers & Reserves", zh: "发行方与储备" },
+  "/market-data/macro": { en: "Macro", zh: "宏观数据" },
+  "/regional-developments": { en: "Stablecoin Developments", zh: "稳定币发展" },
+  "/regional-developments/mainland-china": { en: "Mainland China", zh: "中国内地" },
+  "/regional-developments/hong-kong": { en: "Hong Kong", zh: "中国香港" },
+  "/regional-developments/singapore": { en: "Singapore", zh: "新加坡" },
+  "/regional-developments/uae": { en: "United Arab Emirates", zh: "阿联酋" },
   "/admin": { en: "Admin Center", zh: "管理中心" },
   "/profile": { en: "My Profile", zh: "个人资料" },
   "/my-contributions": { en: "My Contributions", zh: "我的贡献" },
@@ -92,6 +100,7 @@ interface NavChild {
   href: string;
   labelEn: string;
   labelZh: string;
+  matchPrefix?: string;
 }
 interface NavItem {
   href: string;
@@ -144,6 +153,15 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    href: "/regional-developments",
+    labelEn: "Stablecoin Developments",
+    labelZh: "稳定币发展",
+    icon: MapPinned,
+    children: [
+      { href: "/regional-developments", labelEn: "Asia", labelZh: "亚洲", matchPrefix: "/regional-developments/" },
+    ],
+  },
+  {
     href: "/research",
     labelEn: "Our Research",
     labelZh: "我们的研究",
@@ -172,6 +190,13 @@ const NAV_ITEMS: NavItem[] = [
     labelEn: "Market Data",
     labelZh: "市场数据",
     icon: LineChart,
+    children: [
+      { href: "/market-data", labelEn: "Overview", labelZh: "概览" },
+      { href: "/market-data/market", labelEn: "Market", labelZh: "市场" },
+      { href: "/market-data/on-chain", labelEn: "On-chain", labelZh: "链上数据" },
+      { href: "/market-data/issuers-reserves", labelEn: "Issuers & Reserves", labelZh: "发行方与储备" },
+      { href: "/market-data/macro", labelEn: "Macro", labelZh: "宏观数据" },
+    ],
   },
 ];
 
@@ -327,7 +352,9 @@ function SidebarNavItem({
       <CollapsibleContent className={cn(collapsed && "lg:hidden")}>
         <div className="ml-7 mt-0.5 mb-0.5 flex flex-col gap-0.5 border-l border-sidebar-border/60 pl-3">
           {item.children!.map((child) => {
-            const childActive = location === child.href || (child.href === "/about-stablecoins/types" && location.startsWith(`${child.href}/`));
+            const childActive = location === child.href
+              || Boolean(child.matchPrefix && location.startsWith(child.matchPrefix))
+              || (child.href === "/about-stablecoins/types" && location.startsWith(`${child.href}/`));
             return (
               <Link key={child.href} href={child.href} onClick={onNavigate}>
                 <div
@@ -363,14 +390,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [authOpen, setAuthOpen] = useState(false);
   const [authView, setAuthView] = useState<"login" | "register">("login");
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const mainScrollRef = useRef<HTMLElement>(null);
   const zh = language === "zh";
 
   useEffect(() => {
-    const updateVisibility = () => setShowBackToTop(window.scrollY > 520);
+    const scrollContainer = mainScrollRef.current;
+    if (!scrollContainer) return;
+    const updateVisibility = () => setShowBackToTop(scrollContainer.scrollTop > 520);
     updateVisibility();
-    window.addEventListener("scroll", updateVisibility, { passive: true });
-    return () => window.removeEventListener("scroll", updateVisibility);
+    scrollContainer.addEventListener("scroll", updateVisibility, { passive: true });
+    return () => scrollContainer.removeEventListener("scroll", updateVisibility);
   }, []);
+
+  useEffect(() => {
+    mainScrollRef.current?.scrollTo({ top: 0 });
+  }, [location]);
 
   useEffect(() => {
     if (!token) { setNotifications([]); return; }
@@ -475,7 +509,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen flex bg-background font-sans text-foreground">
+    <div className="flex h-dvh overflow-hidden bg-background font-sans text-foreground">
       {/* ── Sidebar ── */}
       <aside
         className={cn(
@@ -528,7 +562,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </Link>
 
         {/* Nav */}
-        <nav className={cn("flex-1 p-3 space-y-0.5 overflow-y-auto", isDesktopSidebarCollapsed && "lg:px-2")}>
+        <nav className={cn("min-h-0 flex-1 space-y-0.5 overflow-y-auto overscroll-contain p-3", isDesktopSidebarCollapsed && "lg:px-2")}>
           {NAV_ITEMS.map((item) => (
             <SidebarNavItem
               key={item.href}
@@ -565,9 +599,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* ── Main ── */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex h-dvh min-w-0 flex-1 flex-col overflow-hidden">
         {/* ── Top Header ── */}
-        <header className="h-14 flex items-center gap-3 px-4 sm:px-6 bg-card/95 backdrop-blur border-b border-border sticky top-0 z-40">
+        <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-card/95 px-4 backdrop-blur sm:px-6">
           {/* LEFT — hamburger + breadcrumbs */}
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <Button
@@ -794,7 +828,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto bg-background">
+        <main ref={mainScrollRef} className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-background p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
@@ -809,7 +843,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       />
       <button
         type="button"
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        onClick={() => mainScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
         aria-label={t("Back to top", "返回顶部")}
         title={t("Back to top", "返回顶部")}
         className={cn(

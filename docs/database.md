@@ -121,6 +121,19 @@ resource_id         integer NOT NULL REFERENCES resources(id) ON DELETE CASCADE
 UNIQUE (regulatory_entry_id, resource_id)
 ```
 
+### `market_data_snapshots`（`marketDataSnapshots.ts`）—— 外部数据最后成功快照
+
+```
+key           text PRIMARY KEY
+source        text NOT NULL
+payload       jsonb NOT NULL
+observed_at   timestamptz NOT NULL
+retrieved_at  timestamptz NOT NULL DEFAULT now()
+updated_at    timestamptz NOT NULL DEFAULT now()
+```
+
+流动性、脱锚和 Ethereum 发行流量由独立采集任务成功取得后按 `key` 覆盖写入。失败刷新不写空值，也不会删除上一份可用数据。API 根据 `observed_at` 计算“最新/延迟”状态；浏览器只读取本站 API，不直接调用外部数据商。
+
 ### `institutions`（`authors.ts`）
 
 ```

@@ -5,6 +5,7 @@ import {
   Tooltip as ChartTooltip, XAxis, YAxis,
 } from "recharts";
 import { ContentEdgeNav } from "@/components/content-edge-nav";
+import { AboutSectionNav } from "@/components/about-section-nav";
 import { useLanguage } from "@/lib/language-context";
 import applicationData from "@/data/stablecoin-applications.json";
 import {
@@ -88,6 +89,7 @@ export default function AboutApplicationsPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
+      <AboutSectionNav />
       <ContentEdgeNav label={t("On this page", "本页目录")} items={[
         { id: "applications-overview", label: t("Application map", "应用图谱") },
         { id: "applications-markets", label: t("Crypto markets", "加密市场") },

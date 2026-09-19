@@ -2,6 +2,9 @@ import { logger } from "./logger";
 
 const DEFI_LLAMA_STABLECOINS_URL = "https://stablecoins.llama.fi/stablecoins?includePrices=true";
 const DEFI_LLAMA_CHART_URL = "https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=";
+const DEFI_LLAMA_TOTAL_HISTORY_URL = "https://stablecoins.llama.fi/stablecoincharts/all";
+const DEFI_LLAMA_CHAIN_HISTORY_URL = "https://stablecoins.llama.fi/stablecoincharts";
+const DEFI_LLAMA_CHAINS_URL = "https://stablecoins.llama.fi/stablecoinchains";
 const REFRESH_INTERVAL_MS = 24 * 60 * 60_000;
 const ACTIVE_MINIMUM_USD = 100_000;
 const MAX_ACTIVE_PROJECTS = 50;
@@ -15,13 +18,23 @@ interface DefiLlamaAsset {
   pegType?: string;
   pegMechanism?: string;
   circulating?: PeggedAmounts;
+  circulatingPrevDay?: PeggedAmounts;
+  circulatingPrevWeek?: PeggedAmounts;
+  circulatingPrevMonth?: PeggedAmounts;
+  chainCirculating?: Record<string, { current?: PeggedAmounts }>;
   price?: number | null;
   deadFrom?: string;
 }
 
 interface DefiLlamaHistoryPoint {
+  date?: string;
   totalCirculatingUSD?: PeggedAmounts;
   totalCirculating?: PeggedAmounts;
+}
+
+interface DefiLlamaChain {
+  name?: string;
+  totalCirculatingUSD?: PeggedAmounts;
 }
 
 export interface StablecoinMarketItem {
@@ -31,6 +44,12 @@ export interface StablecoinMarketItem {
   pegType: string;
   mechanism: string;
   currentMarketCapUsd: number;
+  priceUsd: number | null;
+  priceDeviationBps: number | null;
+  change1dPct: number | null;
+  change7dPct: number | null;
+  change30dPct: number | null;
+  chains: string[];
   historicalPeakUsd: number | null;
   status: "active" | "historical";
   statusReason: "collapsed" | "discontinued" | null;
@@ -43,6 +62,22 @@ export interface StablecoinMarketSnapshot {
   source: "DefiLlama";
   sourceUrl: string;
   refreshedAt: string;
+  summary: {
+    totalUsd: number;
+    bellwetherDominancePct: number;
+    change1dPct: number | null;
+    change7dPct: number | null;
+    change30dPct: number | null;
+  };
+  history: Array<{ date: string; totalUsd: number }>;
+  chains: Array<{
+    name: string;
+    totalUsd: number;
+    sharePct: number;
+    change30dPct: number | null;
+    history: Array<{ date: string; totalUsd: number }>;
+    dominantAssets: Array<{ symbol: string; totalUsd: number; sharePct: number }>;
+  }>;
   projects: StablecoinMarketItem[];
 }
 
@@ -114,6 +149,31 @@ function sumAmounts(amounts: PeggedAmounts | undefined): number {
   return Object.values(amounts).reduce<number>((total, value) => total + (Number.isFinite(value) ? Number(value) : 0), 0);
 }
 
+function percentChange(current: number, previous: number): number | null {
+  return previous > 0 ? ((current - previous) / previous) * 100 : null;
+}
+
+function historyTotal(point: DefiLlamaHistoryPoint): number {
+  return sumAmounts(point.totalCirculatingUSD) || sumAmounts(point.totalCirculating);
+}
+
+function normaliseHistory(points: DefiLlamaHistoryPoint[], days: number) {
+  const threshold = Date.now() - days * 86_400_000;
+  return points
+    .filter((point) => point.date && historyTotal(point) > 0)
+    .map((point) => ({ date: new Date(Number(point.date) * 1000).toISOString().slice(0, 10), totalUsd: historyTotal(point) }))
+    .filter((point) => Date.parse(point.date) >= threshold);
+}
+
+function nearestHistoryValue(history: Array<{ date: string; totalUsd: number }>, daysAgo: number): number {
+  if (!history.length) return 0;
+  const latestTimestamp = Date.parse(history.at(-1)?.date ?? "");
+  const target = latestTimestamp - daysAgo * 86_400_000;
+  return history.reduce((best, point) => (
+    Math.abs(Date.parse(point.date) - target) < Math.abs(Date.parse(best.date) - target) ? point : best
+  )).totalUsd;
+}
+
 function normaliseMechanism(value: string | undefined): string {
   if (!value) return "other";
   if (value === "fiat-backed" || value === "crypto-backed" || value === "algorithmic") return value;
@@ -143,14 +203,71 @@ async function historicalPeakUsd(id: string): Promise<number | null> {
 }
 
 async function buildSnapshot(): Promise<StablecoinMarketSnapshot> {
-  const response = await fetch(DEFI_LLAMA_STABLECOINS_URL, {
+  const request = (url: string) => fetch(url, {
     headers: { Accept: "application/json" },
     signal: AbortSignal.timeout(20_000),
   });
+  const [response, historyResponse, chainsResponse] = await Promise.all([
+    request(DEFI_LLAMA_STABLECOINS_URL),
+    request(DEFI_LLAMA_TOTAL_HISTORY_URL),
+    request(DEFI_LLAMA_CHAINS_URL),
+  ]);
   if (!response.ok) throw new Error(`DefiLlama stablecoin request failed (${response.status})`);
+  if (!historyResponse.ok) throw new Error(`DefiLlama history request failed (${historyResponse.status})`);
+  if (!chainsResponse.ok) throw new Error(`DefiLlama chains request failed (${chainsResponse.status})`);
 
   const payload = (await response.json()) as { peggedAssets?: DefiLlamaAsset[] };
+  const rawHistory = (await historyResponse.json()) as DefiLlamaHistoryPoint[];
+  const rawChains = (await chainsResponse.json()) as DefiLlamaChain[];
   const assets = payload.peggedAssets ?? [];
+  const history = normaliseHistory(rawHistory, 370);
+  const totalUsd = history.at(-1)?.totalUsd
+    ?? assets.reduce((sum, asset) => sum + sumAmounts(asset.circulating) * (Number(asset.price) || 1), 0);
+  const rankedChains = rawChains
+    .map((chain) => ({ name: chain.name ?? "Unknown", totalUsd: sumAmounts(chain.totalCirculatingUSD) }))
+    .filter((chain) => chain.totalUsd > 0)
+    .sort((a, b) => b.totalUsd - a.totalUsd)
+    .slice(0, 15);
+
+  const chainHistories = new Map<string, Array<{ date: string; totalUsd: number }>>();
+  await Promise.all(rankedChains.slice(0, 8).map(async (chain) => {
+    try {
+      const chainResponse = await request(`${DEFI_LLAMA_CHAIN_HISTORY_URL}/${encodeURIComponent(chain.name)}`);
+      if (!chainResponse.ok) throw new Error(`DefiLlama ${chain.name} history request failed (${chainResponse.status})`);
+      chainHistories.set(chain.name, normaliseHistory((await chainResponse.json()) as DefiLlamaHistoryPoint[], 190));
+    } catch (error) {
+      logger.warn({ error, chain: chain.name }, "Unable to refresh stablecoin chain history");
+      chainHistories.set(chain.name, []);
+    }
+  }));
+
+  const chains = rankedChains.map((chain) => {
+    const chainHistory = chainHistories.get(chain.name) ?? [];
+    const assetTotals = new Map<string, number>();
+    for (const asset of assets) {
+      const current = sumAmounts(asset.chainCirculating?.[chain.name]?.current);
+      if (current <= 0) continue;
+      const value = current * (Number(asset.price) || 1);
+      assetTotals.set(asset.symbol, (assetTotals.get(asset.symbol) ?? 0) + value);
+    }
+    const leadingAssets = [...assetTotals.entries()]
+      .map(([symbol, assetTotalUsd]) => ({ symbol, totalUsd: assetTotalUsd }))
+      .sort((a, b) => b.totalUsd - a.totalUsd)
+      .slice(0, 4);
+    const leadingTotal = leadingAssets.reduce((sum, asset) => sum + asset.totalUsd, 0);
+    const otherTotal = Math.max(0, chain.totalUsd - leadingTotal);
+    const dominantAssets = [
+      ...leadingAssets,
+      ...(otherTotal / chain.totalUsd >= 0.005 ? [{ symbol: "Other", totalUsd: otherTotal }] : []),
+    ].map((asset) => ({ ...asset, sharePct: chain.totalUsd > 0 ? (asset.totalUsd / chain.totalUsd) * 100 : 0 }));
+    return {
+      ...chain,
+      sharePct: totalUsd > 0 ? (chain.totalUsd / totalUsd) * 100 : 0,
+      change30dPct: chainHistory.length ? percentChange(chain.totalUsd, nearestHistoryValue(chainHistory, 30)) : null,
+      history: chainHistory,
+      dominantAssets,
+    };
+  });
   const historicalPeaks = new Map<string, number | null>();
   await Promise.all(
     Object.keys(HISTORICAL_PROJECTS).map(async (id) => {
@@ -180,6 +297,16 @@ async function buildSnapshot(): Promise<StablecoinMarketSnapshot> {
         pegType: asset.pegType ?? "other",
         mechanism: MECHANISM_OVERRIDES[asset.id] ?? normaliseMechanism(asset.pegMechanism),
         currentMarketCapUsd,
+        priceUsd: Number.isFinite(asset.price) && Number(asset.price) > 0 ? Number(asset.price) : null,
+        priceDeviationBps: asset.pegType === "peggedUSD" && Number.isFinite(asset.price) ? (Number(asset.price) - 1) * 10_000 : null,
+        change1dPct: percentChange(currentMarketCapUsd, sumAmounts(asset.circulatingPrevDay) * price),
+        change7dPct: percentChange(currentMarketCapUsd, sumAmounts(asset.circulatingPrevWeek) * price),
+        change30dPct: percentChange(currentMarketCapUsd, sumAmounts(asset.circulatingPrevMonth) * price),
+        chains: Object.entries(asset.chainCirculating ?? {})
+          .filter(([, values]) => sumAmounts(values.current) > 0)
+          .sort(([, a], [, b]) => sumAmounts(b.current) - sumAmounts(a.current))
+          .slice(0, 6)
+          .map(([name]) => name),
         historicalPeakUsd: historical ? historicalPeaks.get(asset.id) ?? null : null,
         status: historical ? "historical" : "active",
         statusReason: historical?.statusReason ?? null,
@@ -207,6 +334,17 @@ async function buildSnapshot(): Promise<StablecoinMarketSnapshot> {
     source: "DefiLlama",
     sourceUrl: "https://defillama.com/stablecoins",
     refreshedAt: new Date().toISOString(),
+    summary: {
+      totalUsd,
+      bellwetherDominancePct: totalUsd > 0
+        ? ((projects.find((project) => project.symbol.toUpperCase() === "USDT")?.currentMarketCapUsd ?? 0) / totalUsd) * 100
+        : 0,
+      change1dPct: percentChange(totalUsd, nearestHistoryValue(history, 1)),
+      change7dPct: percentChange(totalUsd, nearestHistoryValue(history, 7)),
+      change30dPct: percentChange(totalUsd, nearestHistoryValue(history, 30)),
+    },
+    history,
+    chains,
     projects,
   };
 }

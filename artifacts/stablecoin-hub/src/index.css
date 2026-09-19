@@ -111,13 +111,13 @@
   --input: 225 12% 82%;
   --ring: 226 55% 45%;
 
-  --sidebar: 225 18% 12%;
-  --sidebar-foreground: 35 10% 86%;
-  --sidebar-border: 225 14% 20%;
-  --sidebar-primary: 225 18% 12%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 226 44% 28%;
-  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar: 36 18% 97%;
+  --sidebar-foreground: 225 17% 13%;
+  --sidebar-border: 225 12% 84%;
+  --sidebar-primary: 36 18% 97%;
+  --sidebar-primary-foreground: 225 17% 13%;
+  --sidebar-accent: 226 44% 91%;
+  --sidebar-accent-foreground: 226 55% 30%;
   --sidebar-ring: 226 70% 65%;
 
   --chart-1: 226 55% 49%;
@@ -188,13 +188,13 @@
   --ring: 225 75% 70%;
 
   /* Sidebar — deepest layer */
-  --sidebar: 225 20% 6%;
-  --sidebar-foreground: 35 10% 84%;
-  --sidebar-border: 225 14% 14%;
-  --sidebar-primary: 225 20% 6%;
+  --sidebar: 225 18% 8%;
+  --sidebar-foreground: 35 14% 94%;
+  --sidebar-border: 225 12% 23%;
+  --sidebar-primary: 225 18% 8%;
   --sidebar-primary-foreground: 35 14% 96%;
-  --sidebar-accent: 226 42% 27%;
-  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-accent: 225 12% 16%;
+  --sidebar-accent-foreground: 225 75% 70%;
   --sidebar-ring: 225 75% 70%;
 
   --chart-1: 225 75% 70%;

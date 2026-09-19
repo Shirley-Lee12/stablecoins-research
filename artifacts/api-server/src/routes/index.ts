@@ -13,6 +13,7 @@ import resourceSubscriptionsRouter from "./resourceSubscriptions";
 import stablecoinMarketRouter from "./stablecoinMarket";
 import accountRouter from "./account";
 import connectorRouter from "./connector";
+import issuerDisclosuresRouter from "./issuerDisclosures";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(resourceSubscriptionsRouter);
 router.use(stablecoinMarketRouter);
 router.use(accountRouter);
 router.use(connectorRouter);
+router.use(issuerDisclosuresRouter);
 
 export default router;

@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useLanguage } from "@/lib/language-context";
 import { ContentEdgeNav } from "@/components/content-edge-nav";
+import { AboutSectionNav } from "@/components/about-section-nav";
 import {
   ArrowRight,
   Banknote,
@@ -391,6 +392,7 @@ export default function AboutHistoryPage() {
 
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-12 overflow-x-clip">
+      <AboutSectionNav />
       <ContentEdgeNav label={t("On this page", "本页目录")} items={[
         { id: "history-lineage", label: t("Historical lineage", "历史谱系") },
         { id: "history-scale", label: t("History at a glance", "历史一览") },

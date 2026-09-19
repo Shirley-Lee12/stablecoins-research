@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "wouter";
 import { useLanguage } from "@/lib/language-context";
 import { ContentEdgeNav } from "@/components/content-edge-nav";
+import { AboutSectionNav } from "@/components/about-section-nav";
 import {
   ArrowRight,
   Building2,
@@ -90,6 +91,7 @@ export default function About() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-10">
+      <AboutSectionNav />
       <ContentEdgeNav label={t("On this page", "本页目录")} items={[
         { id: "learn-what", label: t("What it is", "稳定币是什么") },
         { id: "learn-why", label: t("Why it emerged", "为什么兴起") },

@@ -14,6 +14,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import { ContentEdgeNav } from "@/components/content-edge-nav";
+import { AboutSectionNav } from "@/components/about-section-nav";
 import { useLanguage } from "@/lib/language-context";
 
 type ConcernId = "integrity" | "consumer" | "issuer" | "payments" | "stability" | "sovereignty";
@@ -220,6 +221,7 @@ export default function AboutRegulatoryEvolutionPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-12 pb-8">
+      <AboutSectionNav />
       <ContentEdgeNav label={t("On this page", "本页目录")} items={[
         { id: "evolution-map", label: t("What regulation sees", "监管对象") },
         { id: "evolution-streams", label: t("Evolution map", "演进图谱") },

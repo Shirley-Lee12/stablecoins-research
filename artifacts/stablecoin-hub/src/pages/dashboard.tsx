@@ -2,14 +2,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/lib/language-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
-import { FileText, Globe, BookOpen, BarChart3, Clock, ChevronRight, Tags, Users, Network, Layers3, ShieldCheck } from "lucide-react";
+import { FileText, Globe, BookOpen, BarChart3, Clock, ChevronRight, Tags, Users, Network, Layers3, ShieldCheck, ArrowRight, Activity } from "lucide-react";
 import { format } from "date-fns";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  LineChart, Line,
+  LineChart, Line, AreaChart, Area,
 } from "recharts";
 import { OFFICIAL_DOCUMENTS, PRIMARY_FRAMEWORKS } from "@/pages/regulatory";
 import { sourceTypeLabel } from "@/lib/source-types";
+import { compactUsd, useMarketSnapshot } from "@/pages/market-data-shared";
 
 interface ApiResource {
   id: number;
@@ -45,6 +46,7 @@ function apiBase() {
 
 export default function Dashboard() {
   const { t, language } = useLanguage();
+  const { snapshot: market, loading: marketLoading } = useMarketSnapshot();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentResources, setRecentResources] = useState<ApiResource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,18 +154,43 @@ export default function Dashboard() {
     () => Math.max(1, ...(stats?.top_authors.map((a) => a.count) ?? [1])),
     [stats],
   );
+  const marketHistory = useMemo(() => market?.history.slice(-185) ?? [], [market]);
+  const leadingChain = market?.chains[0];
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       <div className="flex flex-col gap-2 border-b border-border pb-6">
-        <p className="text-xs font-semibold uppercase text-muted-foreground">{t("Research Hub", "研究中心")}</p>
+        <p className="text-xs font-semibold uppercase text-muted-foreground">{t("Research and market intelligence", "研究与市场观察")}</p>
         <h1 className="text-3xl font-serif font-semibold text-foreground">
-          {t("Platform Overview", "平台概览")}
+          {t("Stablecoin Data Dashboard", "稳定币数据仪表盘")}
         </h1>
         <p className="max-w-3xl editorial-copy">
-          {t("Real-time statistics and recently added resources in the research hub.", "实时统计数据和研究中心最新添加的资源。")}
+          {t("Start with current market signals, then move into the research, regulation and source material behind them.", "先看最新市场信号，再进入相关研究、监管进展与一手资料。")}
         </p>
       </div>
+
+      {(marketLoading || market) && <section className="border-b border-border pb-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{t("Market pulse", "市场脉搏")}</p><h2 className="mt-2 font-serif text-3xl font-semibold text-primary">{t("What matters now", "当前最重要的市场信号")}</h2></div>
+          {market && <div className="text-right text-xs text-muted-foreground"><a href={market.sourceUrl} target="_blank" rel="noreferrer" className="font-semibold text-primary hover:underline">DefiLlama</a><span className="mt-1 block">{t("Updated", "更新于")} · {new Intl.DateTimeFormat(language === "zh" ? "zh-CN" : "en-GB", { dateStyle: "medium", timeStyle: "short" }).format(new Date(market.refreshedAt))}</span></div>}
+        </div>
+        {marketLoading ? <Skeleton className="mt-7 h-[430px] w-full" /> : market && <>
+          <div className="mt-7 grid gap-px bg-border sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              { label: t("Total stablecoin supply", "稳定币总供应量"), value: compactUsd(market.summary.totalUsd), note: t("Tracked across chains", "跨链汇总") },
+              { label: t("30-day supply change", "30 日供应变化"), value: market.summary.change30dPct == null ? "—" : `${market.summary.change30dPct >= 0 ? "+" : ""}${market.summary.change30dPct.toFixed(1)}%`, note: t("Change in aggregate supply", "总供应规模变化"), change: market.summary.change30dPct },
+              { label: t("USDT share", "USDT 供应占比"), value: `${market.summary.bellwetherDominancePct.toFixed(1)}%`, note: t("Share of tracked supply", "占追踪供应总量") },
+              { label: t("Largest chain", "最大供应链"), value: leadingChain?.name ?? "—", note: leadingChain ? `${leadingChain.sharePct.toFixed(1)}% ${t("of global supply", "占全球供应")}` : "" },
+            ].map((metric) => <article key={metric.label} className="bg-background p-5"><p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">{metric.label}</p><strong className={`mt-4 block text-3xl font-semibold tabular-nums ${metric.change == null ? "text-primary" : metric.change >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"}`}>{metric.value}</strong><p className="mt-2 text-xs text-muted-foreground">{metric.note}</p></article>)}
+          </div>
+          <div className="mt-9 grid gap-9 lg:grid-cols-[minmax(0,1.4fr)_minmax(300px,.6fr)]">
+            <div className="min-w-0"><div className="flex items-center justify-between gap-4"><div><p className="text-sm font-semibold">{t("Total supply trend", "总供应趋势")}</p><p className="mt-1 text-xs text-muted-foreground">{t("Latest six months", "最近六个月")}</p></div><Link href="/market-data" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">{t("Open market overview", "查看市场概览")}<ArrowRight className="h-4 w-4" /></Link></div><div className="mt-4 h-[260px] border-y border-border py-4"><ResponsiveContainer width="100%" height="100%"><AreaChart data={marketHistory}><CartesianGrid stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="date" minTickGap={45} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(value: string) => value.slice(0, 7)} /><YAxis width={74} domain={["auto", "auto"]} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(value: number) => compactUsd(value)} /><Tooltip labelFormatter={(value: string) => value} formatter={(value: number) => [compactUsd(value), t("Supply", "供应量")]} contentStyle={{ border: "1px solid hsl(var(--border))", borderRadius: 3 }} /><Area type="monotone" dataKey="totalUsd" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.08} strokeWidth={2.5} isAnimationActive={false} /></AreaChart></ResponsiveContainer></div></div>
+            <div><div className="flex items-center justify-between"><p className="text-sm font-semibold">{t("Leading chains", "主要区块链")}</p><span className="text-xs text-muted-foreground">{t("Supply share", "供应份额")}</span></div><div className="mt-4 divide-y divide-border border-y border-border">{market.chains.slice(0, 5).map((chain, index) => <div key={chain.name} className="grid grid-cols-[2rem_1fr_auto] items-center gap-3 py-4"><span className="font-mono text-xs text-muted-foreground">{String(index + 1).padStart(2, "0")}</span><div className="min-w-0"><strong className="block truncate text-sm">{chain.name}</strong><div className="mt-2 h-1.5 bg-muted"><div className="h-full bg-primary" style={{ width: `${Math.min(100, chain.sharePct * 2)}%` }} /></div></div><div className="text-right"><strong className="block text-sm tabular-nums">{compactUsd(chain.totalUsd)}</strong><span className="text-xs tabular-nums text-muted-foreground">{chain.sharePct.toFixed(1)}%</span></div></div>)}</div><Link href="/market-data/on-chain" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">{t("Compare chains", "比较各链数据")}<ArrowRight className="h-4 w-4" /></Link></div>
+          </div>
+        </>}
+      </section>}
+
+      <div className="flex items-center gap-2 pt-2"><Activity className="h-4 w-4 text-primary" /><h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground">{t("Research coverage", "研究内容覆盖")}</h2></div>
 
       {loading ? (
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -197,9 +224,8 @@ export default function Dashboard() {
         <div className="text-sm text-muted-foreground">{t("Failed to load statistics.", "加载统计数据失败。")}</div>
       )}
 
-      <section className="relative overflow-hidden border-y border-border py-9">
-        <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_70%_50%,rgba(49,87,200,0.10),transparent_58%)]" />
-        <div className="relative grid gap-8 md:grid-cols-[1.2fr_repeat(3,0.6fr)] md:items-center">
+      <section className="border-y border-border py-9">
+        <div className="grid gap-8 md:grid-cols-[1.2fr_repeat(3,0.6fr)] md:items-center">
           <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("Research in context", "研究进展")}</p><h2 className="mt-2 font-serif text-2xl font-semibold text-primary">{t("A connected view of mechanisms, risk and regulation", "把机制、风险与监管放在同一研究框架中")}</h2><p className="mt-3 max-w-xl text-sm leading-6 text-foreground/68">{t("Move from the public dashboard into the underlying research, project taxonomy and verified regulatory sources.", "从公开数据概览进一步进入研究框架、稳定币分类与经核验的监管一手来源。")}</p></div>
           {[{ n: "55", label: t("atomic risks", "项原子风险"), icon: Network, href: "/research" }, { n: "4", label: t("core mechanisms", "类核心机制"), icon: Layers3, href: "/about-stablecoins/types" }, { n: String(stats?.countries_covered ?? 7), label: t("jurisdictions mapped", "个监管辖区"), icon: ShieldCheck, href: "/regulatory" }].map((item) => <Link key={item.label} href={item.href} className="group border-l-2 border-primary/25 pl-5"><item.icon className="h-5 w-5 text-primary" /><strong className="mt-3 block text-4xl font-semibold tabular-nums text-foreground group-hover:text-primary">{item.n}</strong><span className="mt-1 block text-sm text-foreground/62">{item.label}</span></Link>)}
         </div>

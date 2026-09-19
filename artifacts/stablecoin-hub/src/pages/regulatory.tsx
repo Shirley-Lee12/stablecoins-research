@@ -38,6 +38,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ContentEdgeNav } from "@/components/content-edge-nav";
 import { Link } from "wouter";
+import { AboutSectionNav } from "@/components/about-section-nav";
 
 const entrySchema = z.object({
   country: z.string().min(1, "Country is required"),
@@ -214,6 +215,13 @@ const INTERNATIONAL_BASELINES = [
   { organisation: "CPMI–IOSCO", year: "2022", en: "Application of the PFMI to systemically important stablecoin arrangements that perform a transfer function.", zh: "将《金融市场基础设施原则》适用于承担转移功能且具有系统重要性的稳定币安排。", href: "https://www.bis.org/cpmi/publ/d206.htm" },
 ];
 
+const REGION_DEVELOPMENT_LINKS: Record<string, string> = {
+  "China (Mainland)": "/regional-developments/mainland-china",
+  "Hong Kong": "/regional-developments/hong-kong",
+  Singapore: "/regional-developments/singapore",
+  "United Arab Emirates": "/regional-developments/uae",
+};
+
 function apiBase() {
   return (
     import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL
@@ -344,6 +352,7 @@ export default function Regulatory() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      <AboutSectionNav />
       <ContentEdgeNav label={t("On this page", "本页目录")} items={[
         { id: "regulatory-introduction", label: t("Introduction", "监管概览") },
         { id: "regulatory-comparison", label: t("Jurisdiction comparison", "辖区比较") },
@@ -588,20 +597,28 @@ export default function Regulatory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {PRIMARY_FRAMEWORKS.map((framework) => <tr key={framework.country} className="align-top hover:bg-muted/20">
-                <th className="sticky left-0 z-10 bg-card px-4 py-5 font-normal">
-                  <a href={framework.href} target="_blank" rel="noreferrer" className="group block">
-                    <span className="font-semibold group-hover:text-primary">{language === "zh" ? framework.countryZh : framework.country}<ExternalLink className="ml-1 inline h-3.5 w-3.5" /></span>
-                    <span className="mt-2 block text-xs font-medium leading-5 text-primary">{language === "zh" ? framework.statusZh : framework.status}</span>
-                    <span className="mt-3 block text-xs text-muted-foreground">{framework.source}</span>
-                  </a>
-                </th>
-                <td className="px-4 py-5 text-[15px] leading-7 text-foreground/75">{language === "zh" ? framework.scopeZh : framework.scope}</td>
-                <td className="px-4 py-5 text-[15px] leading-7 text-foreground/75">{language === "zh" ? framework.issuerZh : framework.issuer}</td>
-                <td className="px-4 py-5 text-[15px] leading-7 text-foreground/75">{language === "zh" ? framework.reservesZh : framework.reserves}</td>
-                <td className="px-4 py-5 text-[15px] leading-7 text-foreground/75">{language === "zh" ? framework.redemptionZh : framework.redemption}</td>
-                <td className="px-4 py-5 text-[15px] leading-7 text-foreground/75">{language === "zh" ? framework.controlsZh : framework.controls}</td>
-              </tr>)}
+              {PRIMARY_FRAMEWORKS.map((framework) => {
+                const developmentHref = REGION_DEVELOPMENT_LINKS[framework.country];
+                return <tr key={framework.country} className="align-top hover:bg-muted/20">
+                  <th className="sticky left-0 z-10 bg-card px-4 py-5 font-normal">
+                    <a href={framework.href} target="_blank" rel="noreferrer" className="group block">
+                      <span className="font-semibold group-hover:text-primary">{language === "zh" ? framework.countryZh : framework.country}<ExternalLink className="ml-1 inline h-3.5 w-3.5" /></span>
+                      <span className="mt-2 block text-xs font-medium leading-5 text-primary">{language === "zh" ? framework.statusZh : framework.status}</span>
+                      <span className="mt-3 block text-xs text-muted-foreground">{framework.source}</span>
+                    </a>
+                    {developmentHref && (
+                      <Link href={developmentHref} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+                        {t("Regional development", "地区发展")}<ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    )}
+                  </th>
+                  <td className="px-4 py-5 text-[15px] leading-7 text-foreground/75">{language === "zh" ? framework.scopeZh : framework.scope}</td>
+                  <td className="px-4 py-5 text-[15px] leading-7 text-foreground/75">{language === "zh" ? framework.issuerZh : framework.issuer}</td>
+                  <td className="px-4 py-5 text-[15px] leading-7 text-foreground/75">{language === "zh" ? framework.reservesZh : framework.reserves}</td>
+                  <td className="px-4 py-5 text-[15px] leading-7 text-foreground/75">{language === "zh" ? framework.redemptionZh : framework.redemption}</td>
+                  <td className="px-4 py-5 text-[15px] leading-7 text-foreground/75">{language === "zh" ? framework.controlsZh : framework.controls}</td>
+                </tr>;
+              })}
             </tbody>
           </table>
         </div>

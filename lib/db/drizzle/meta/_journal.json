@@ -260,6 +260,20 @@
       "when": 1788180647687,
       "tag": "0036_cheerful_bloodstorm",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1789194564766,
+      "tag": "0037_solid_echo",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1789203267016,
+      "tag": "0038_special_puppet_master",
+      "breakpoints": true
     }
   ]
 }

@@ -22,7 +22,16 @@ import Experts from "@/pages/experts";
 import AuthorPage from "@/pages/author";
 import Regulatory from "@/pages/regulatory";
 import MarketData from "@/pages/market-data";
+import MarketStructurePage from "@/pages/market-structure";
+import { MarketAdoptionPage, MarketIssuersPage, MarketMacroPage, MarketOnChainPage } from "@/pages/market-data-sections";
 import Quantitative from "@/pages/quantitative";
+import {
+  HongKongDevelopmentPage,
+  AsiaDevelopmentOverviewPage,
+  MainlandChinaDevelopmentPage,
+  SingaporeDevelopmentPage,
+  UaeDevelopmentPage,
+} from "@/pages/asia-development";
 import ResetPassword from "@/pages/reset-password";
 import AdminCenter from "@/pages/admin-center";
 import MyContributionsPage from "@/pages/my-contributions";
@@ -33,8 +42,6 @@ import ConnectorPage from "@/pages/connector";
 import {
   QuantDimensionA,
   QuantDimensionB,
-  MarketPriceTracking,
-  MarketTradingVolume,
 } from "@/pages/placeholder";
 
 const queryClient = new QueryClient();
@@ -58,6 +65,11 @@ function Router() {
         <Route path="/regulatory" component={Regulatory} />
         <Route path="/market-data" component={MarketData} />
         <Route path="/quantitative" component={Quantitative} />
+        <Route path="/regional-developments" component={AsiaDevelopmentOverviewPage} />
+        <Route path="/regional-developments/mainland-china" component={MainlandChinaDevelopmentPage} />
+        <Route path="/regional-developments/hong-kong" component={HongKongDevelopmentPage} />
+        <Route path="/regional-developments/singapore" component={SingaporeDevelopmentPage} />
+        <Route path="/regional-developments/uae" component={UaeDevelopmentPage} />
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/verify-email" component={VerifyEmailPage} />
         <Route path="/admin" component={AdminCenter} />
@@ -76,8 +88,11 @@ function Router() {
         <Route path="/quantitative/dimension-b" component={QuantDimensionB} />
 
         {/* Market Data sub-pages */}
-        <Route path="/market-data/price-tracking" component={MarketPriceTracking} />
-        <Route path="/market-data/trading-volume" component={MarketTradingVolume} />
+        <Route path="/market-data/market" component={MarketStructurePage} />
+        <Route path="/market-data/on-chain" component={MarketOnChainPage} />
+        <Route path="/market-data/issuers-reserves" component={MarketIssuersPage} />
+        <Route path="/market-data/macro" component={MarketMacroPage} />
+        <Route path="/market-data/adoption" component={MarketAdoptionPage} />
 
         {/* User account pages */}
         <Route path="/profile" component={ProfilePage} />

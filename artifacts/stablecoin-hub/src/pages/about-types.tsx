@@ -5,6 +5,7 @@ import { useLanguage } from "@/lib/language-context";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { ContentEdgeNav } from "@/components/content-edge-nav";
+import { AboutSectionNav } from "@/components/about-section-nav";
 import {
   ArrowRight,
   Building2,
@@ -240,6 +241,7 @@ export default function AboutTypesPage() {
 
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-10 overflow-x-clip">
+      <AboutSectionNav />
       <ContentEdgeNav label={t("On this page", "本页目录")} items={[
         { id: "type-questions", label: t("Four questions", "四个问题") },
         { id: "type-mechanisms", label: t("Mechanism map", "机制图谱") },

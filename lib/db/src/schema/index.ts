@@ -11,3 +11,5 @@ export * from "./resourceSubscriptions";
 export * from "./backgroundTasks";
 export * from "./userExperience";
 export * from "./connector";
+export * from "./issuerDisclosures";
+export * from "./marketDataSnapshots";

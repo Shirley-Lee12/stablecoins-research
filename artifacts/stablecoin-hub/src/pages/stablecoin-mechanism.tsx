@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, PlayCircle, ShieldAlert } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { useLanguage } from "@/lib/language-context";
 import { ContentEdgeNav } from "@/components/content-edge-nav";
+import { AboutSectionNav } from "@/components/about-section-nav";
 import { getMechanism, MECHANISM_COLORS } from "@/lib/stablecoin-mechanisms";
 
 type MarketProject = {
@@ -65,6 +66,7 @@ export default function StablecoinMechanismPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-10">
+      <AboutSectionNav />
       <ContentEdgeNav label={t("On this page", "本页目录")} items={[
         { id: "mechanism-flow", label: t("How it works", "运行方式") },
         { id: "mechanism-risk", label: t("Design and risk", "设计与风险") },
