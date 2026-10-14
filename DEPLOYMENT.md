@@ -27,7 +27,7 @@ No passwords or secret values should be copied into an issue, commit, or chat. R
 
 ```text
 Root Directory: artifacts/stablecoin-hub
-Build Command: corepack enable && corepack prepare pnpm@11.9.0 --activate && pnpm install --frozen-lockfile && pnpm run build
+Build Command: corepack pnpm install --frozen-lockfile && corepack pnpm run build
 Publish Directory: dist/public
 ```
 
@@ -66,9 +66,9 @@ The static service also needs its existing SPA rewrite so client-side routes res
 
 ```text
 Root Directory: artifacts/api-server
-Build Command: corepack enable && corepack prepare pnpm@11.9.0 --activate && pnpm install --frozen-lockfile && pnpm run build
+Build Command: corepack pnpm install --frozen-lockfile && corepack pnpm run build
 Start Command: node --enable-source-maps dist/index.mjs
-Health Check Path: currently blank; use /api/healthz at release time
+Health Check Path: /api/healthz
 ```
 
 Current included build-filter paths:

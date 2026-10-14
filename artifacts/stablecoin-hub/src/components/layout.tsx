@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useLanguage } from "@/lib/language-context";
+import { BRAND } from "@/lib/brand";
 import { useTheme } from "@/lib/theme-context";
 import { authenticatedFetch, useAuth } from "@/lib/auth-context";
 import { AuthDialog } from "@/components/auth-dialog";
@@ -111,7 +112,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/", labelEn: "Overview", labelZh: "中心概览", icon: Home },
+  { href: "/", labelEn: "Overview", labelZh: "平台概览", icon: Home },
   {
     href: "/dashboard",
     labelEn: "Dashboard",
@@ -538,14 +539,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
           )}>
             <div className={cn("flex-1 min-w-0", isDesktopSidebarCollapsed && "lg:hidden")}>
               <span className="font-sans font-semibold text-sm leading-snug block">
-                {t("ZIBS Stablecoins", "浙大ZIBS稳定币")}
+                {t(BRAND.sidebarTitle.en, BRAND.sidebarTitle.zh)}
               </span>
               <span className="font-sans font-medium text-xs leading-snug block opacity-65">
-                {t("Research Hub", "研究中心")}
+                {t(BRAND.sidebarSubtitle.en, BRAND.sidebarSubtitle.zh)}
               </span>
             </div>
             <span className={cn("hidden font-sans text-lg font-semibold", isDesktopSidebarCollapsed && "lg:block")}>
-              Z
+              S
             </span>
             <Button
               variant="ghost"
@@ -583,10 +584,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
           "p-3 border-t border-sidebar-border text-xs text-sidebar-foreground/35 px-5",
           isDesktopSidebarCollapsed && "lg:hidden",
         )}>
-          {t(
-            `© ${new Date().getFullYear()} ZJU ZIBS`,
-            `© ${new Date().getFullYear()} 浙大ZIBS`,
-          )}
+          <p>{t(`© ${new Date().getFullYear()} ${BRAND.name.en}`, `© ${new Date().getFullYear()} ${BRAND.name.zh}`)}</p>
+          <a href={BRAND.institutionUrl} target="_blank" rel="noreferrer" className="mt-1 block text-sidebar-foreground/60 hover:underline">
+            {t("Sponsored by Zhejiang University · AIF", "支持单位：浙江大学 AIF")}
+          </a>
         </div>
       </aside>
 

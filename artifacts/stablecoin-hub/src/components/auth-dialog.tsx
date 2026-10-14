@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth, VerificationRequiredError } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
+import { BRAND } from "@/lib/brand";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -149,7 +150,7 @@ export function AuthDialog({ open, onOpenChange, initialView = "login", loginNot
           <>
             <DialogHeader>
               <DialogTitle className="font-serif text-xl">{t("Sign In", "登录")}</DialogTitle>
-              <DialogDescription>{t("Welcome back to ZIBS Stablecoins Research Hub.", "欢迎回到浙大ZIBS稳定币研究中心。")}</DialogDescription>
+              <DialogDescription>{t(`Welcome back to ${BRAND.name.en}.`, `欢迎回到${BRAND.name.zh}。`)}</DialogDescription>
             </DialogHeader>
             {loginNotice && (
               <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
@@ -194,7 +195,7 @@ export function AuthDialog({ open, onOpenChange, initialView = "login", loginNot
           <>
             <DialogHeader>
               <DialogTitle className="font-serif text-xl">{t("Create Account", "注册账号")}</DialogTitle>
-              <DialogDescription>{t("Join the ZIBS Stablecoins Research Hub.", "加入浙大ZIBS稳定币研究中心。")}</DialogDescription>
+              <DialogDescription>{t(`Join the ${BRAND.name.en}.`, `加入${BRAND.name.zh}。`)}</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleRegister} className="space-y-4 mt-2">
               <div className="space-y-2">

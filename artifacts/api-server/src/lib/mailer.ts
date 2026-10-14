@@ -1,7 +1,7 @@
 import { logger } from "./logger";
 import { env } from "../config";
 
-const FROM_NAME = "ZIBS Stablecoin Hub";
+const FROM_NAME = "Stablecoin Research Hub";
 const MICROSOFT_TOKEN_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
 const MICROSOFT_SEND_URL = "https://graph.microsoft.com/v1.0/me/sendMail";
 
@@ -130,7 +130,7 @@ export async function sendVerificationCodeEmail(to: string, code: string, verifi
   try {
     await sendMail(
       to,
-      "ZIBS稳定币研究中心 — 邮箱验证码 / Email Verification Code",
+      "稳定币学术研究平台 — 邮箱验证码 / Email Verification Code",
       verificationEmailHtml(code, verificationUrl),
     );
   } catch (err) {
@@ -143,7 +143,7 @@ export async function sendEmailChangeCodeEmail(to: string, code: string) {
   try {
     await sendMail(
       to,
-      "ZIBS稳定币研究中心 — 确认新邮箱 / Confirm Your New Email",
+      "稳定币学术研究平台 — 确认新邮箱 / Confirm Your New Email",
       `<div style="font-family:Arial,Helvetica,sans-serif;color:#172033;line-height:1.6;max-width:560px">
         <h2 style="color:#15356b">确认新邮箱 / Confirm your new email</h2>
         <p>请在个人资料页面输入以下验证码，确认更换邮箱。</p>
@@ -162,7 +162,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   try {
     await sendMail(
       to,
-      "ZIBS稳定币研究中心 — 重置密码 / Reset Your Password",
+      "稳定币学术研究平台 — 重置密码 / Reset Your Password",
       `<p>点击以下链接重置密码（1小时内有效）/ Click the link below to reset your password (valid for 1 hour):</p><p><a href="${resetUrl}">${resetUrl}</a></p>`,
     );
   } catch (err) {

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目定位
 
-ZIBS（浙江大学国际联合商学院）稳定币研究中心的双语（中/英）学术研究平台。详细产品背景见 [`docs/requirements.md`](./docs/requirements.md)。
+稳定币学术研究平台（Stablecoin Research Hub），由浙江大学金融科技研究院（AIF）支持。机构表述统一为 Sponsored by the Academy of Internet Finance (AIF), Zhejiang University；成员真实学籍和已发表文献署名保持原样。详细产品背景见 [`docs/requirements.md`](./docs/requirements.md)。
 
 ## 模块职责边界（pnpm workspaces）
 

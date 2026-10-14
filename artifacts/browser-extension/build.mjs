@@ -7,7 +7,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(root, "dist");
 const releaseDir = path.join(root, "release");
 const version = JSON.parse(await readFile(path.join(root, "manifest.json"), "utf8")).version;
-const archiveName = `zibs-stablecoin-research-connector-${version}.zip`;
+const archiveName = `stablecoin-research-connector-${version}.zip`;
 
 await rm(dist, { recursive: true, force: true });
 await mkdir(path.join(dist, "icons"), { recursive: true });

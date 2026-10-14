@@ -76,7 +76,7 @@ verified_at         timestamptz                              -- verification_rep
 
 **`tags` 字段已删除（docs/planning/18 §18.2）**：旧版"Research Tags（最多3个，固定12项列表）+ Additional Tag（最多1个自由文本）"系统，从未纳入 T.1–T.5 的受控词表规划。逻辑几乎全嵌在已废弃的 `/resources/import*` 死路由里（迁移到 upload.ts 新管线后无调用方，见 §18.2 step a），真正的活写入路径是 `PATCH /resources/:id`（`EditModal` 的 `TagEditor` UI，已随本次一并下线）。删除前确认线上库里该列全部是空数组，无需数据迁移。资源标签的唯一入口现在是 `tags`/`resource_tags` 表（theme/jurisdiction/asset facet）。
 
-### `our_research`（`our_research.ts`）—— ZIBS 自有研究
+### `our_research`（`our_research.ts`）—— 课题组研究
 
 ```
 id               serial PRIMARY KEY

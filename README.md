@@ -1,6 +1,8 @@
-# ZIBS 稳定币研究中心 · 研究平台
+# 稳定币学术研究平台 · Stablecoin Research Hub
 
-浙江大学国际联合商学院（ZIBS）稳定币研究中心的双语（中/英）学术研究平台。用于发布研究成果、策展全球稳定币相关文献，并向学术访问者展示监管与市场数据。
+由浙江大学金融科技研究院（AIF）支持的双语（中/英）学术研究平台。用于发布研究成果、策展全球稳定币相关文献，并向学术访问者展示监管与市场数据。
+
+Sponsored by the Academy of Internet Finance (AIF), Zhejiang University.
 
 > 给开发者/协作者的快速上手参考。详细的开发规则见 [`CLAUDE.md`](./CLAUDE.md)，详细的架构/数据库/API/产品设计见 [`docs/`](./docs/)。
 

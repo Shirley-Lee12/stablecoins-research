@@ -13,8 +13,8 @@ export default function Quantitative() {
         </h2>
         <p className="mt-2 text-muted-foreground max-w-3xl">
           {t(
-            "Proprietary indices and risk assessment models developed by the ZIBS Stablecoins Research Hub.", 
-            "浙江大学ZIBS稳定币研究中心开发的专有指数和风险评估模型。"
+            "Indices and risk assessment models developed by the stablecoin research team.",
+            "稳定币研究团队开发的指数和风险评估模型。"
           )}
         </p>
       </div>
@@ -29,7 +29,7 @@ export default function Quantitative() {
               <div className="p-2 bg-primary/10 rounded-md">
                 <Percent className="h-5 w-5 text-primary" />
               </div>
-              {t("ZIBS Stablecoin De-peg Risk Index", "ZIBS稳定币脱锚风险指数")}
+              {t("Stablecoin De-peg Risk Index", "稳定币脱锚风险指数")}
             </CardTitle>
             <CardDescription className="text-sm pt-2">
               {t(

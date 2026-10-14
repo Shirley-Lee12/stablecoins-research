@@ -49,7 +49,7 @@ scripts/            工具脚本
 | `/` | `home-overview.tsx` | 中心概览 |
 | `/dashboard` | `dashboard.tsx` | 数据仪表盘 |
 | `/about-stablecoins`（及四个子路由：history/types/applications/regulatory-evolution） | — | 关于稳定币 |
-| `/research` | `research.tsx` | ZIBS 自有研究 |
+| `/research` | `research.tsx` | 课题组研究 |
 | `/academic-resources` | `academic-resources.tsx` | 全球文献库（主资源页） |
 | `/experts` | `experts.tsx` | 专家学者兼容路由（不在主导航展示；主要入口在资源页） |
 | `/author/:id` | `author.tsx` | 学者个人主页 |

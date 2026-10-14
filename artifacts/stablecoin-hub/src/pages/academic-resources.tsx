@@ -2995,8 +2995,8 @@ export default function AcademicResources() {
             </h1>
             <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
               {t(
-                "A curated collection of global academic papers, industry reports, regulatory documents, and news on stablecoin research. Maintained continuously by the ZIBS research team.",
-                "汇集全球顶级学术论文、行业研究报告、监管法案原文及行业资讯，由浙大国际商学院稳定币课题组持续维护更新。",
+                "A curated collection of global academic papers, industry reports, regulatory documents, and news on stablecoin research. Maintained continuously by the stablecoin research team.",
+                "汇集全球顶级学术论文、行业研究报告、监管法案原文及行业资讯，由稳定币研究团队持续维护更新。",
               )}
             </p>
           </div>

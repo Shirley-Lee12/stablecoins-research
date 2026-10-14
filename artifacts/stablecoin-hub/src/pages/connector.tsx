@@ -3,6 +3,7 @@ import { Check, Chrome, Download, ExternalLink, Laptop, Loader2, Puzzle, Refresh
 import { useLocation } from "wouter";
 import { authenticatedFetch, useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
+import { BRAND } from "@/lib/brand";
 
 function apiBase() {
   return (import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL).replace(/\/$/, "");
@@ -10,8 +11,8 @@ function apiBase() {
 
 const DOWNLOADS_BASE_URL = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/downloads`;
 const FALLBACK_RELEASE = {
-  version: "0.3.1",
-  file: "zibs-stablecoin-research-connector-0.3.1.zip",
+  version: "0.4.1",
+  file: "stablecoin-research-connector-0.4.1.zip",
 };
 
 type ConnectorSession = {
@@ -111,7 +112,7 @@ export default function ConnectorPage() {
     return (
       <div className="mx-auto max-w-3xl pb-20">
         <header className="border-b border-border pb-9">
-          <p className="text-xs font-semibold uppercase text-primary">ZIBS Connector</p>
+          <p className="text-xs font-semibold uppercase text-primary">{t(BRAND.connector.en, BRAND.connector.zh)}</p>
           <h1 className="mt-3 font-serif text-4xl font-semibold text-primary">{t("Connect this browser", "连接此浏览器")}</h1>
           <p className="mt-3 max-w-2xl leading-7 text-foreground/65">{t("Review the requested permission before linking the connector to your account.", "请确认权限范围，再将浏览器采集工具连接到您的账号。")}</p>
         </header>
@@ -142,7 +143,7 @@ export default function ConnectorPage() {
   return (
     <div className="mx-auto max-w-6xl pb-20">
       <header className="grid gap-8 border-b border-border pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
-        <div><p className="text-xs font-semibold uppercase text-primary">ZIBS Stablecoin Research Connector</p><h1 className="mt-3 font-serif text-4xl font-semibold text-primary">{t("Browser capture tool", "浏览器采集工具")}</h1><p className="mt-3 max-w-3xl leading-7 text-foreground/65">{t("Capture bibliographic metadata from the paper, book, regulation, report, or dataset already open in your browser. Incomplete fields are prepared with AI and always return to the site for confirmation.", "从浏览器当前打开的论文、图书、法规、报告或数据集页面提取题录；缺失字段由 AI 辅助补全，并始终回到网站人工确认。")}</p></div>
+        <div><p className="text-xs font-semibold uppercase text-primary">{t(BRAND.connector.en, BRAND.connector.zh)}</p><h1 className="mt-3 font-serif text-4xl font-semibold text-primary">{t("Browser capture tool", "浏览器采集工具")}</h1><p className="mt-3 max-w-3xl leading-7 text-foreground/65">{t("Capture bibliographic metadata from the paper, book, regulation, report, or dataset already open in your browser. Incomplete fields are prepared with AI and always return to the site for confirmation.", "从浏览器当前打开的论文、图书、法规、报告或数据集页面提取题录；缺失字段由 AI 辅助补全，并始终回到网站人工确认。")}</p></div>
         <a href={downloadUrl} download className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground"><Download className="h-4 w-4" />{t("Download connector", "下载插件")} <span className="opacity-70">v{release.version}</span></a>
       </header>
 
@@ -153,7 +154,7 @@ export default function ConnectorPage() {
             t("Download the ZIP package and extract it to a folder you will keep.", "下载 ZIP 安装包，并解压到一个长期保留的文件夹。"),
             t("Open chrome://extensions or edge://extensions and enable Developer mode.", "打开 chrome://extensions 或 edge://extensions，开启“开发者模式”。"),
             t("Choose Load unpacked, then select the extracted folder containing manifest.json.", "点击“加载已解压的扩展程序”，选择包含 manifest.json 的解压文件夹。"),
-            t("Pin ZIBS Connector to the toolbar, open it, and authorize your account.", "将 ZIBS Connector 固定到工具栏，打开插件并完成账号授权。"),
+            t("Pin Stablecoin Research Connector to the toolbar, open it, and authorize your account.", "将稳定币研究采集工具固定到工具栏，打开插件并完成账号授权。"),
           ].map((text, index) => <li key={text} className="grid grid-cols-[36px_1fr] gap-3 py-4"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{index + 1}</span><span className="pt-1 text-sm leading-6">{text}</span></li>)}
         </ol>
       </section>

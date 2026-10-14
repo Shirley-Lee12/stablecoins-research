@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "wouter";
 import { useLanguage } from "@/lib/language-context";
+import { BRAND } from "@/lib/brand";
 import {
   BookOpen, Globe, ChevronRight, Database, Microscope,
   Target, Lightbulb, CheckCircle2, GraduationCap, Radar, Shapes,
@@ -65,7 +66,7 @@ export default function HomeOverview() {
   return (
     <div className="max-w-5xl mx-auto space-y-14 pb-12">
       <ContentEdgeNav label={t("On this page", "本页目录")} items={[
-        { id: "hub-introduction", label: t("Introduction", "研究中心概览") },
+        { id: "hub-introduction", label: t("Introduction", "平台概览") },
         { id: "hub-mission", label: t("Mission", "研究使命") },
         { id: "hub-work", label: t("Our work", "研究成果") },
         { id: "hub-agenda", label: t("Agenda", "研究计划") },
@@ -77,17 +78,18 @@ export default function HomeOverview() {
       <div id="hub-introduction" className="relative border-l-4 border-primary py-7 pl-7 md:py-10 md:pl-12">
         <div className="relative z-10 max-w-3xl">
           <div className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-primary">
-            {t("Zhejiang University · ZIBS · FinTech Research", "浙江大学 · 国际联合商学院 · 金融科技研究")}
+            {t("Zhejiang University · AIF · Academic Research", "浙江大学 · AIF · 学术研究")}
           </div>
           <h1 className="text-3xl md:text-4xl font-serif font-bold text-primary leading-tight mb-4">
-            {t("ZIBS Stablecoins Research Hub", "浙大ZIBS稳定币研究中心")}
+            {t(BRAND.name.en, BRAND.name.zh)}
           </h1>
           <p className="mb-6 max-w-3xl text-lg leading-8 text-foreground/78">
             {t(
-              "An interdisciplinary research center dedicated to advancing rigorous scholarship on the economics, technology, regulation, and global impact of stablecoins — hosted by the Zhejiang University International Business School (ZIBS).",
-              "浙江大学国际联合商学院（ZIBS）主办的跨学科研究中心，致力于对稳定币的经济学、技术、监管及全球影响开展系统性前沿研究。"
+              "An academic research platform exploring the economics, technology, regulation, and global impact of stablecoins.",
+              "聚焦稳定币的经济、技术、监管与全球影响，提供研究成果、学术资源与市场数据。"
             )}
           </p>
+          <p className="mb-6 text-sm font-medium text-primary">{t(BRAND.sponsorship.en, BRAND.sponsorship.zh)}</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-primary">
             {[
               t("Stablecoin Economics", "稳定币经济学"),
@@ -109,7 +111,7 @@ export default function HomeOverview() {
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
           <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-            {t("About the Hub", "关于研究中心")}
+            {t("About the Hub", "关于平台")}
           </h2>
           <div className="h-px flex-1 bg-border" />
         </div>
@@ -189,7 +191,7 @@ export default function HomeOverview() {
           <div className="h-px flex-1 bg-border" />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 border-y border-border py-5">
-          <div><p className="text-xs font-semibold uppercase tracking-wider text-primary">{t("Academic adviser", "课题指导")}</p><p className="mt-1 text-lg font-semibold">{t("Professor Ruidong Zhang", "张瑞东教授")}</p><p className="mt-1 text-sm text-foreground/62">{t("Zhejiang University International Business School", "浙江大学国际联合商学院")}</p></div>
+          <div><p className="text-xs font-semibold uppercase tracking-wider text-primary">{t("Academic adviser", "课题指导")}</p><p className="mt-1 text-lg font-semibold">{t("Professor Ruidong Zhang", "张瑞东教授")}</p><p className="mt-1 text-sm text-foreground/62">{t(BRAND.institution.en, BRAND.institution.zh)}</p></div>
           <a href="https://zibs.zju.edu.cn/2024/0529/c81819a2924735/page.htm" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">{t("Faculty profile", "教师主页")}<ExternalLink className="h-4 w-4" /></a>
         </div>
         <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -239,10 +241,10 @@ export default function HomeOverview() {
       <div className="border-t border-border pt-8 pb-2">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-foreground">{t("Zhejiang University International Business School (ZIBS)", "浙江大学国际联合商学院（ZIBS）")}</p>
-            <p className="text-xs text-muted-foreground mt-1">{t("Haining, Zhejiang, China · intl.zju.edu.cn/zibs", "中国浙江海宁 · intl.zju.edu.cn/zibs")}</p>
+            <p className="text-sm font-semibold text-foreground">{t(BRAND.sponsorship.en, BRAND.sponsorship.zh)}</p>
+            <a href={BRAND.institutionUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary hover:underline">{t("AIF official website", "AIF 官网")}<ExternalLink className="h-3 w-3" /></a>
           </div>
-          <p className="text-xs text-muted-foreground">{t(`© ${new Date().getFullYear()} ZIBS Stablecoin Research Hub`, `© ${new Date().getFullYear()} 浙大ZIBS稳定币研究中心`)}</p>
+          <p className="text-xs text-muted-foreground">{t(`© ${new Date().getFullYear()} ${BRAND.name.en}`, `© ${new Date().getFullYear()} ${BRAND.name.zh}`)}</p>
         </div>
       </div>
 

@@ -81,10 +81,10 @@ async function sendTestEmail(accessToken: string, recipient: string) {
     },
     body: JSON.stringify({
       message: {
-        subject: "ZIBS Microsoft Graph mail test",
+        subject: "Stablecoin Research Hub Microsoft Graph mail test",
         body: {
           contentType: "HTML",
-          content: "<p>Microsoft Graph email delivery is working for the ZIBS Stablecoin Research Hub.</p>",
+          content: "<p>Microsoft Graph email delivery is working for the Stablecoin Research Hub.</p>",
         },
         toRecipients: [{ emailAddress: { address: recipient } }],
       },

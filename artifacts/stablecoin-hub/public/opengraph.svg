@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f4f7fa" />
+  <rect x="64" y="70" width="7" height="482" rx="3" fill="#15356b" />
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="108" y="122" fill="#356d88" font-size="22" letter-spacing="3">ACADEMIC RESEARCH</text>
+    <text x="108" y="235" fill="#15356b" font-size="62" font-weight="700">Stablecoin</text>
+    <text x="108" y="314" fill="#15356b" font-size="62" font-weight="700">Research Hub</text>
+    <text x="108" y="380" fill="#526277" font-size="25">Research · Resources · Market data</text>
+    <path d="M108 435H1092" stroke="#cbd5e1" />
+    <text x="108" y="485" fill="#526277" font-size="21">Sponsored by the Academy of Internet Finance (AIF),</text>
+    <text x="108" y="523" fill="#15356b" font-size="23" font-weight="600">Zhejiang University</text>
+  </g>
+</svg>
