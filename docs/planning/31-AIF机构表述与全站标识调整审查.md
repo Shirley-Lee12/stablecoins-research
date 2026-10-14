@@ -1,7 +1,7 @@
 # 31｜AIF 机构表述与全站标识调整审查
 
 > 审查日期：2026-10-14。
-> 项目：`/Users/shirleylee/Downloads/Stablecoin-Lifecycle`，原始网站。
+> 项目：`<LOCAL_PROJECT_ROOT>`，原始网站。
 > 本轮结果：已完成机构表述审查和网站代码调整；发布进度见第七节。数据库原始内容和邮件服务账号资料未改动。
 
 ## 一、老师的意图与建议口径
@@ -167,4 +167,8 @@
 - 全量 `pnpm run build`（包含 typecheck）通过；浏览器核对了中文／英文首页、日间／夜间、移动宽度以及登录／注册弹窗；插件 ZIP 中 manifest 的名称与版本核对通过。
 - 本地 `.env` 的数据库连接返回 tenant/user not found，无法据此核对生产审核队列；本轮不修订数据库连接或执行迁移。
 - 发布前确认远端 main 为 `8aef6bb`。本次只提交机构表述及关联产物，不包含既有 `.gitkeep` 删除或 `scripts/src/audit-import-folders.ts` 改动。
-- Render 发布和线上验收状态将在部署后补充。
+- 代码提交 `542f534` 已推送至 GitHub main，触发现有 Render 发布流程。
+- 线上前端已验收：HTML 摘要、JS 中英文品牌、首页、侧栏、登录弹窗均为新平台名称与 AIF 支持；旧 hosted by ZIBS 和旧平台主标题不再出现在发布 JS 中。
+- 线上插件 release JSON 为 0.4.1，新下载 ZIP 的 manifest 品牌与版本正确；线上 `opengraph.png` 的 SHA-256 与本地发布文件一致。
+- 线上 API `/api/healthz` 返回 200。资源列表 `/api/resources?limit=1` 在推送前已返回 500，推送后验收仍需单独排查数据库服务连接，不能据此宣称资源库功能正常。
+- Render 后端的最新 commit／Live 状态尚待控制台核对（当前控制台加载空白）；确认后补充记录。本轮未更改生产环境变量或数据库。
