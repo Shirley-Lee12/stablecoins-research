@@ -1,0 +1,32 @@
+{
+  "status_order": [
+    "IN_FORCE",
+    "ENACTED_NOT_YET_EFFECTIVE",
+    "FINAL_RULES_NOT_YET_EFFECTIVE",
+    "IMPLEMENTATION_RULEMAKING",
+    "CONSULTATION",
+    "RESTRICTIVE_PROHIBITIVE",
+    "GUIDANCE_ONLY"
+  ],
+  "definitions": {
+    "IN_FORCE": "Binding regime currently applicable within the stated scope.",
+    "ENACTED_NOT_YET_EFFECTIVE": "Law has been enacted but substantive effective date has not yet arrived.",
+    "FINAL_RULES_NOT_YET_EFFECTIVE": "Final implementing rules are published but commence on a future date.",
+    "IMPLEMENTATION_RULEMAKING": "Binding statute/policy exists but implementing regulations are still being made.",
+    "CONSULTATION": "Proposal is open/closed for comment and is not yet a binding final rule.",
+    "RESTRICTIVE_PROHIBITIVE": "The jurisdiction does not offer a normal authorisation path for the activity within the stated scope.",
+    "GUIDANCE_ONLY": "Supervisory guidance/expectation without a standalone dedicated binding regime."
+  },
+  "instrument_types": [
+    "LAW",
+    "REGULATION",
+    "FINAL_RULE",
+    "PROPOSED_RULE",
+    "CONSULTATION",
+    "GUIDANCE",
+    "REGISTER",
+    "POLICY_FRAMEWORK",
+    "NOTICE"
+  ],
+  "hard_rule": "Do not infer IN_FORCE from the existence of an enacted law, final policy design, consultation conclusion, licence application, pilot, or register."
+}

@@ -1,0 +1,4 @@
+﻿asset_id,asset_type,route,title,purpose,implementation,status
+REG-T01,status_legend,/regulatory,Regulatory status legend,Law/regulation/final rule/proposed rule/consultation/register/restrictive boundary,DATA_UI,READY_FOR_IMPLEMENTATION
+REG-T02,comparison_table,/regulatory,Eight-jurisdiction comparison matrix,Status / legal instrument / issuer / reserves / redemption / supervision / boundary,TABLE_UI,READY_FOR_IMPLEMENTATION
+REG-T03,timeline_ui,/regulatory,Current regulatory changes,2024–2026 structured current-status timeline,DATA_UI,READY_FOR_IMPLEMENTATION

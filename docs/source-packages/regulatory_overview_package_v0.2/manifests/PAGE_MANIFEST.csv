@@ -1,0 +1,2 @@
+﻿route,title_zh,title_en,action,status,audience,primary_question,module_order,visual_assets
+/regulatory,监管现状,Regulatory Overview,TARGETED_REBUILD,READY_FOR_CODEX,general;research;enterprise,主要法域的稳定币监管现在究竟处于什么法律阶段？,hero>status-legend>jurisdiction-matrix>current-timeline>convergence-divergence>international-baselines>sources,REG-T01;REG-T02;REG-T03

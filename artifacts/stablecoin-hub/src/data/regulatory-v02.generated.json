@@ -1,0 +1,614 @@
+{
+  "version": "0.2",
+  "lastVerified": "2026-10-16",
+  "jurisdictions": [
+    {
+      "jurisdiction_en": "United States",
+      "jurisdiction_zh": "美国",
+      "status": "ENACTED_NOT_YET_EFFECTIVE + IMPLEMENTATION_RULEMAKING",
+      "primary_instruments": "GENIUS Act, Pub. L. 119-27; federal implementing proposals",
+      "current_stage_date": "2025-07-18 enacted; expected effective 2027-01-18 absent earlier final-rule trigger",
+      "issuer_permission": "Federal + qualifying state pathways for permitted payment stablecoin issuers",
+      "reserve_backing": "Statute requires at least 1:1 identifiable reserves in specified liquid assets; implementation rules still being finalised",
+      "redemption": "Statute requires public timely-redemption policy; proposed federal rules further specify operational timelines",
+      "ongoing_supervision": "Monthly reserve-composition disclosure and independent accounting examination/certification requirements in statute; AML/CFT implementation rules underway",
+      "critical_boundary": "Do not label the federal regime 'in force' as of 2026-10-16",
+      "deep_link": "",
+      "source_ids": "US-01;US-02;US-03"
+    },
+    {
+      "jurisdiction_en": "European Union",
+      "jurisdiction_zh": "欧盟",
+      "status": "IN_FORCE",
+      "primary_instruments": "MiCA Regulation (EU) 2023/1114 + EBA/ESMA technical standards",
+      "current_stage_date": "ART/EMT provisions applicable since 2024-06-30; full MiCA framework implemented in 2024",
+      "issuer_permission": "ART and EMT issuers require relevant authorisation; significant tokens face EBA-level supervision",
+      "reserve_backing": "MiCA imposes reserve, custody, own-funds, liquidity and risk-management requirements by token category",
+      "redemption": "Holder/redemption rights depend on ART vs EMT rules; redemption-plan requirements are applicable",
+      "ongoing_supervision": "White paper, governance, complaints, reporting, recovery/redemption planning; 2026 MiCA review is ongoing but current rules remain applicable",
+      "critical_boundary": "Do not treat the 2026 review consultation as suspension of MiCA",
+      "deep_link": "",
+      "source_ids": "EU-01;EU-02;EU-03"
+    },
+    {
+      "jurisdiction_en": "United Kingdom",
+      "jurisdiction_zh": "英国",
+      "status": "FINAL_RULES_NOT_YET_EFFECTIVE",
+      "primary_instruments": "FSMA 2000 (Cryptoassets) Regulations 2026; FCA PS26/10; BoE systemic-stablecoin framework",
+      "current_stage_date": "Regulations made 2026-02-04; FCA final rules 2026-06-30; full commencement 2027-10-25",
+      "issuer_permission": "FCA authorisation for qualifying-stablecoin issuance under future regime; systemic issuers also enter BoE/FCA joint framework",
+      "reserve_backing": "FCA final rules set backing-asset/safeguarding requirements; systemic prudential layer handled by BoE",
+      "redemption": "FCA final rules include redemption requirements; systemic rules add financial-stability constraints",
+      "ongoing_supervision": "Disclosure, safeguarding, prudential, Consumer Duty/operational-resilience and systemic transition rules",
+      "critical_boundary": "Do not say 'final rules pending'; do not say the full regime is already live",
+      "deep_link": "",
+      "source_ids": "UK-01;UK-02;UK-03"
+    },
+    {
+      "jurisdiction_en": "Hong Kong",
+      "jurisdiction_zh": "中国香港",
+      "status": "IN_FORCE",
+      "primary_instruments": "Stablecoins Ordinance (Cap. 656) + HKMA supervision/AML guidelines",
+      "current_stage_date": "Issuer regime effective 2025-08-01; first licences effective 2026-04-10",
+      "issuer_permission": "Licence required for regulated fiat-referenced stablecoin issuance within scope",
+      "reserve_backing": "High-quality/high-liquidity reserve assets; segregation, trust protection, risk management, regular independent assurance/audit",
+      "redemption": "Licensed issuers must provide par redemption rights under the Ordinance/guidelines",
+      "ongoing_supervision": "Governance, disclosure, technology risk, business continuity and AML/CFT supervision",
+      "critical_boundary": "Licence does not by itself mean the licensee's token is already publicly launched",
+      "deep_link": "/regional-developments/hong-kong",
+      "source_ids": "HK-01;HK-02;HK-03"
+    },
+    {
+      "jurisdiction_en": "Singapore",
+      "jurisdiction_zh": "新加坡",
+      "status": "CONSULTATION",
+      "primary_instruments": "MAS-SCS policy framework + proposed Payment Services Act amendments",
+      "current_stage_date": "Policy design finalised 2023; implementation consultation 2026-09-01 to 2026-10-16",
+      "issuer_permission": "Proposed MAS-SCS framework for SCS issued in Singapore and pegged to SGD or G10 currencies; only qualifying issuers may use MAS-regulated label after framework is in force",
+      "reserve_backing": "Proposed/value-stability safeguards cover reserve composition, valuation, custody and audit plus capital/liquid assets",
+      "redemption": "Policy design calls for par redemption within five business days",
+      "ongoing_supervision": "Disclosure and user-protection requirements are part of proposed implementation",
+      "critical_boundary": "Do not label XSGD/XUSD or existing DPT/MPI activity as issuance under a live MAS-SCS regime",
+      "deep_link": "/regional-developments/singapore",
+      "source_ids": "SG-01;SG-02;SG-03"
+    },
+    {
+      "jurisdiction_en": "Japan",
+      "jurisdiction_zh": "日本",
+      "status": "IN_FORCE",
+      "primary_instruments": "Payment Services Act electronic-payment-instrument regime + 2026 intermediary amendments",
+      "current_stage_date": "Electronic Payment Instrument regime from 2023-06-01; new intermediary regime from 2026-06-01",
+      "issuer_permission": "Electronic Payment Instrument Exchange Service Providers require registration; 2026 rules also permit registered intermediary models under stated conditions",
+      "reserve_backing": "Backing/asset safeguards depend on the legal issuer form and applicable banking/funds-transfer/trust framework",
+      "redemption": "Fiat-linked redeemability is central to the electronic-payment-instrument category; service rules protect customer assets/transactions",
+      "ongoing_supervision": "Registration, customer protection, AML/CFT and travel-rule obligations apply",
+      "critical_boundary": "Use Japan's statutory category 'electronic payment instruments'; do not invent a single generic stablecoin-issuer licence",
+      "deep_link": "",
+      "source_ids": "JP-01;JP-02;JP-03"
+    },
+    {
+      "jurisdiction_en": "United Arab Emirates — CBUAE onshore perimeter",
+      "jurisdiction_zh": "阿联酋——CBUAE 在岸范围",
+      "status": "IN_FORCE",
+      "primary_instruments": "CBUAE Payment Token Services Regulation C 2/2024",
+      "current_stage_date": "Effective 2024-08-31",
+      "issuer_permission": "Licences/registrations cover Dirham Payment Token issuance, custody/transfer and conversion; foreign-issuer registration is separately provided",
+      "reserve_backing": "Reserve assets must be protected/segregated and at least equal outstanding face value; detailed cash/eligible-government-asset rules apply by issuer type",
+      "redemption": "Tokenholders may request par redemption; licensed issuers must redeem without delay and generally by next business day",
+      "ongoing_supervision": "Capital, reserve audits, customer agreements, AML/CFT and operational requirements",
+      "critical_boundary": "This row is not a complete UAE-wide legal map; VARA, ADGM and DIFC are separate perimeters",
+      "deep_link": "/regional-developments/uae",
+      "source_ids": "UAE-01;UAE-02;UAE-03;UAE-04"
+    },
+    {
+      "jurisdiction_en": "Mainland China",
+      "jurisdiction_zh": "中国内地",
+      "status": "RESTRICTIVE_PROHIBITIVE",
+      "primary_instruments": "银发〔2026〕42号 eight-agency Notice",
+      "current_stage_date": "Effective 2026-02-06; replaces 2021 notice",
+      "issuer_permission": "Virtual-currency related business remains illegal financial activity; no normal domestic private-stablecoin issuance/payment licensing path",
+      "reserve_backing": "No dedicated prudential reserve regime for a normally authorised domestic private-stablecoin issuer because such activity is not opened as a standard licensed business",
+      "redemption": "No domestic regulated public redemption framework for private stablecoins",
+      "ongoing_supervision": "Payment-channel controls, AML/risk enforcement, restrictions on offshore service provision; approval required for offshore RMB-linked stablecoin issuance and offshore issuance by Mainland entities/controlled overseas entities",
+      "critical_boundary": "Do not describe this as merely 'cautious' or 'framework pending'",
+      "deep_link": "/regional-developments/mainland-china",
+      "source_ids": "CN-01;CN-02"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "US-01",
+      "jurisdiction": "United States",
+      "organization": "U.S. Code / House",
+      "title": "12 USC Chapter 56 / §5903 GENIUS Act requirements",
+      "date": "current code",
+      "url": "https://uscode.house.gov/view.xhtml?edition=prelim&num=0&req=granuleid%3AUSC-prelim-title12-section5903",
+      "instrument_type": "LAW",
+      "use_for": "Reserve, redemption, disclosure, issuer requirements",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "US-02",
+      "jurisdiction": "United States",
+      "organization": "Federal Reserve",
+      "title": "Implementing the Federal Reserve Board's Responsibilities Under the GENIUS Act",
+      "date": "2026-09-29",
+      "url": "https://www.govinfo.gov/content/pkg/FR-2026-09-29/html/2026-19860.htm",
+      "instrument_type": "PROPOSED_RULE",
+      "use_for": "Current implementation status and effective-date mechanics",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "US-03",
+      "jurisdiction": "United States",
+      "organization": "FDIC",
+      "title": "GENIUS Act Requirements and Standards proposal",
+      "date": "2026-04-07",
+      "url": "https://www.fdic.gov/news/financial-institution-letters/2026/notice-proposed-rulemaking-establish-genius-act",
+      "instrument_type": "PROPOSED_RULE",
+      "use_for": "FDIC-supervised issuer implementation",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "EU-01",
+      "jurisdiction": "European Union",
+      "organization": "European Banking Authority",
+      "title": "Asset-referenced and e-money tokens (MiCA)",
+      "date": "current",
+      "url": "https://www.eba.europa.eu/regulation-and-policy/asset-referenced-and-e-money-tokens-mica",
+      "instrument_type": "REGULATION_GUIDANCE",
+      "use_for": "Current ART/EMT authorisation and supervision",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "EU-02",
+      "jurisdiction": "European Union",
+      "organization": "European Banking Authority",
+      "title": "Guidelines on redemption plans under MiCAR",
+      "date": "applicable 2025-02-10",
+      "url": "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/asset-referenced-and-e-money-tokens-micar/guidelines-redemption-plans-under-micar",
+      "instrument_type": "FINAL_GUIDELINE",
+      "use_for": "Redemption planning",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "EU-03",
+      "jurisdiction": "European Union",
+      "organization": "European Commission",
+      "title": "Commission seeks feedback on functioning of EU crypto-assets rules",
+      "date": "2026-05-20",
+      "url": "https://finance.ec.europa.eu/news/commission-seeks-feedback-functioning-eu-crypto-assets-rules-2026-05-20_en",
+      "instrument_type": "REVIEW_CONSULTATION",
+      "use_for": "Shows review ongoing while MiCA remains implemented",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "UK-01",
+      "jurisdiction": "United Kingdom",
+      "organization": "UK Legislation",
+      "title": "Financial Services and Markets Act 2000 (Cryptoassets) Regulations 2026",
+      "date": "2026-02-04",
+      "url": "https://www.legislation.gov.uk/uksi/2026/102/contents/made",
+      "instrument_type": "LAW_REGULATION",
+      "use_for": "Legal perimeter and 2027 full commencement",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "UK-02",
+      "jurisdiction": "United Kingdom",
+      "organization": "Financial Conduct Authority",
+      "title": "Overview of cryptoassets regime policy statements / PS26/10 stablecoin issuance",
+      "date": "2026-06-30",
+      "url": "https://www.fca.org.uk/publications/policy-statements/cryptoasset-regime",
+      "instrument_type": "FINAL_RULE",
+      "use_for": "Final FCA stablecoin rules and 2027 application",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "UK-03",
+      "jurisdiction": "United Kingdom",
+      "organization": "Bank of England",
+      "title": "Policy statement and draft rules on systemic stablecoins",
+      "date": "2026-06-22",
+      "url": "https://www.bankofengland.co.uk/news/2026/june/boe-launches-policy-statement-and-draft-rules-on-regulating-systemic-stablecoins",
+      "instrument_type": "DRAFT_RULE_POLICY",
+      "use_for": "Systemic stablecoin prudential layer",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "HK-01",
+      "jurisdiction": "Hong Kong",
+      "organization": "Hong Kong Monetary Authority",
+      "title": "Regulatory Regime for Stablecoin Issuers",
+      "date": "current",
+      "url": "https://www.hkma.gov.hk/eng/key-functions/international-financial-centre/stablecoin-issuers/",
+      "instrument_type": "REGULATION_GUIDANCE",
+      "use_for": "Regime effective date and licensing framework",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "HK-02",
+      "jurisdiction": "Hong Kong",
+      "organization": "Hong Kong Monetary Authority",
+      "title": "Register of Licensed Stablecoin Issuers",
+      "date": "current register",
+      "url": "https://www.hkma.gov.hk/eng/regulatory-resources/registers/register-of-licensed-stablecoin-issuers/",
+      "instrument_type": "REGISTER",
+      "use_for": "Current licensees/effective dates",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "HK-03",
+      "jurisdiction": "Hong Kong",
+      "organization": "Hong Kong Monetary Authority",
+      "title": "Explanatory Note on Licensing of Stablecoin Issuers",
+      "date": "current",
+      "url": "https://www.hkma.gov.hk/media/eng/doc/key-functions/ifc/stablecoin-issuers/Explanatory_Notes_on_Licensing_of_Stablecoin_Issuers_eng.pdf",
+      "instrument_type": "GUIDANCE",
+      "use_for": "Reserve segregation/quality and licensing criteria",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SG-01",
+      "jurisdiction": "Singapore",
+      "organization": "Monetary Authority of Singapore",
+      "title": "MAS Finalises Stablecoin Regulatory Framework",
+      "date": "2023-08-15",
+      "url": "https://www.mas.gov.sg/news/media-releases/2023/mas-finalises-stablecoin-regulatory-framework",
+      "instrument_type": "POLICY_FRAMEWORK",
+      "use_for": "Policy design: reserves, capital, five-day redemption, disclosure",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SG-02",
+      "jurisdiction": "Singapore",
+      "organization": "Monetary Authority of Singapore",
+      "title": "Consultation on proposed PSA amendments for stablecoin regulation",
+      "date": "2026-09-01",
+      "url": "https://www.mas.gov.sg/publications/consultations/2026/consultation-on-proposed-amendments-to-the-payment-services-act-for-stablecoin-regulation",
+      "instrument_type": "CONSULTATION",
+      "use_for": "Current implementation stage; closes 2026-10-16",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SG-03",
+      "jurisdiction": "Singapore",
+      "organization": "Monetary Authority of Singapore",
+      "title": "MAS consults on legislative amendments to implement stablecoin framework",
+      "date": "2026-09-01",
+      "url": "https://www.mas.gov.sg/news/media-releases/2026/mas-consults-on-legislative-amendments-to-implement-stablecoin-regulatory-framework",
+      "instrument_type": "CONSULTATION_RELEASE",
+      "use_for": "Confirms framework is being implemented, not yet live",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "JP-01",
+      "jurisdiction": "Japan",
+      "organization": "Financial Services Agency",
+      "title": "Electronic Payment Instrument Exchange Service Providers",
+      "date": "current",
+      "url": "https://www.fsa.go.jp/common/shinsei/dendai/dentori.html",
+      "instrument_type": "REGULATION_GUIDANCE",
+      "use_for": "2023 electronic-payment-instrument regime and registration",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "JP-02",
+      "jurisdiction": "Japan",
+      "organization": "Financial Services Agency",
+      "title": "Electronic Payment Instruments / Cryptoasset Service Intermediary regime",
+      "date": "2026-06-01",
+      "url": "https://www.fsa.go.jp/common/shinsei/denanchuukai/index.html",
+      "instrument_type": "REGULATION_GUIDANCE",
+      "use_for": "New intermediary regime effective 2026-06-01",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "JP-03",
+      "jurisdiction": "Japan",
+      "organization": "Financial Services Agency",
+      "title": "2025 Payment Services Act amendment implementation",
+      "date": "2026-05-22",
+      "url": "https://www.fsa.go.jp/news/r7/sonota/20260522/20260522.html",
+      "instrument_type": "FINAL_RULE_AMENDMENT",
+      "use_for": "2026 amendments to electronic-payment-instrument rules",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "UAE-01",
+      "jurisdiction": "UAE",
+      "organization": "Central Bank of the UAE",
+      "title": "Payment Token Services Regulation C 2/2024",
+      "date": "effective 2024-08-31",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/payment-token-services-regulation",
+      "instrument_type": "REGULATION",
+      "use_for": "CBUAE onshore payment-token regime",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "UAE-02",
+      "jurisdiction": "UAE",
+      "organization": "Central Bank of the UAE",
+      "title": "Article 21: Issuance and Redemption of Payment Tokens",
+      "date": "current",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/article-21-issuance-and-redemption-payment-tokens",
+      "instrument_type": "REGULATION",
+      "use_for": "Par redemption timing and customer agreement",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "UAE-03",
+      "jurisdiction": "UAE",
+      "organization": "Central Bank of the UAE",
+      "title": "Article 22: Management and Safekeeping of Reserve Assets",
+      "date": "current",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/article-22-management-and-safekeeping-reserve-assets",
+      "instrument_type": "REGULATION",
+      "use_for": "Reserve composition, segregation and coverage",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "UAE-04",
+      "jurisdiction": "UAE",
+      "organization": "Central Bank of the UAE",
+      "title": "Licensing register",
+      "date": "current",
+      "url": "https://centralbank.ae/en/licensing",
+      "instrument_type": "REGISTER",
+      "use_for": "Current payment-token licence categories/entities",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "CN-01",
+      "jurisdiction": "Mainland China",
+      "organization": "PBOC et al. (government mirror)",
+      "title": "关于进一步防范和处置虚拟货币等相关风险的通知 银发〔2026〕42号",
+      "date": "2026-02-06",
+      "url": "https://www.shanghai.gov.cn/rzfwgj/20260320/ca5d3b3b19504111a379d730560f4274.html",
+      "instrument_type": "NOTICE",
+      "use_for": "Current virtual-currency/stablecoin boundary; replaces 2021 notice",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "CN-02",
+      "jurisdiction": "Mainland China",
+      "organization": "Ministry of Commerce policy database",
+      "title": "银发〔2026〕42号 — current effective status",
+      "date": "2026-02-06",
+      "url": "https://policy.mofcom.gov.cn/claw/clawContent.shtml?id=104982",
+      "instrument_type": "GOVERNMENT_DATABASE",
+      "use_for": "Status and provenance",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "INT-01",
+      "jurisdiction": "International",
+      "organization": "Financial Stability Board",
+      "title": "High-level Recommendations for Global Stablecoin Arrangements",
+      "date": "2023-07-17",
+      "url": "https://www.fsb.org/2023/07/high-level-recommendations-for-the-regulation-supervision-and-oversight-of-global-stablecoin-arrangements-final-report/",
+      "instrument_type": "INTERNATIONAL_STANDARD",
+      "use_for": "Global regulatory baseline",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "INT-02",
+      "jurisdiction": "International",
+      "organization": "Financial Stability Board",
+      "title": "Global Stablecoin Arrangements: Cross-border vulnerabilities and financial stability monitoring",
+      "date": "2026-10-12",
+      "url": "https://www.fsb.org/2026/10/global-stablecoin-arrangements-cross-border-vulnerabilities-and-financial-stability-monitoring/",
+      "instrument_type": "MONITORING_REPORT",
+      "use_for": "Current cross-border/systemic monitoring focus",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "INT-03",
+      "jurisdiction": "International",
+      "organization": "FATF",
+      "title": "Targeted Report on Stablecoins and Unhosted Wallets — P2P Transactions",
+      "date": "2026-03-03",
+      "url": "https://www.fatf-gafi.org/en/publications/Virtualassets/targeted-report-stablecoins-unhosted-wallets.html",
+      "instrument_type": "INTERNATIONAL_AML",
+      "use_for": "Current AML/CFT/P2P stablecoin risk focus",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "INT-04",
+      "jurisdiction": "International",
+      "organization": "CPMI-IOSCO / BIS",
+      "title": "Application of the PFMI to stablecoin arrangements",
+      "date": "2022-07-13",
+      "url": "https://www.bis.org/publications/application-principles-financial-market-infrastructures-stablecoin-arrangements-final-version",
+      "instrument_type": "INTERNATIONAL_STANDARD",
+      "use_for": "Systemically important stablecoin transfer arrangements",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    }
+  ],
+  "taxonomy": {
+    "status_order": [
+      "IN_FORCE",
+      "ENACTED_NOT_YET_EFFECTIVE",
+      "FINAL_RULES_NOT_YET_EFFECTIVE",
+      "IMPLEMENTATION_RULEMAKING",
+      "CONSULTATION",
+      "RESTRICTIVE_PROHIBITIVE",
+      "GUIDANCE_ONLY"
+    ],
+    "definitions": {
+      "IN_FORCE": "Binding regime currently applicable within the stated scope.",
+      "ENACTED_NOT_YET_EFFECTIVE": "Law has been enacted but substantive effective date has not yet arrived.",
+      "FINAL_RULES_NOT_YET_EFFECTIVE": "Final implementing rules are published but commence on a future date.",
+      "IMPLEMENTATION_RULEMAKING": "Binding statute/policy exists but implementing regulations are still being made.",
+      "CONSULTATION": "Proposal is open/closed for comment and is not yet a binding final rule.",
+      "RESTRICTIVE_PROHIBITIVE": "The jurisdiction does not offer a normal authorisation path for the activity within the stated scope.",
+      "GUIDANCE_ONLY": "Supervisory guidance/expectation without a standalone dedicated binding regime."
+    },
+    "instrument_types": [
+      "LAW",
+      "REGULATION",
+      "FINAL_RULE",
+      "PROPOSED_RULE",
+      "CONSULTATION",
+      "GUIDANCE",
+      "REGISTER",
+      "POLICY_FRAMEWORK",
+      "NOTICE"
+    ],
+    "hard_rule": "Do not infer IN_FORCE from the existence of an enacted law, final policy design, consultation conclusion, licence application, pilot, or register."
+  },
+  "timeline": [
+    {
+      "date": "2024-06-30",
+      "jurisdiction": "EU",
+      "event": "MiCA ART/EMT provisions begin applying",
+      "type": "IN_FORCE",
+      "source_ids": [
+        "EU-01"
+      ]
+    },
+    {
+      "date": "2024-08-31",
+      "jurisdiction": "UAE",
+      "event": "CBUAE Payment Token Services Regulation enters into force",
+      "type": "IN_FORCE",
+      "source_ids": [
+        "UAE-01"
+      ]
+    },
+    {
+      "date": "2025-07-18",
+      "jurisdiction": "United States",
+      "event": "GENIUS Act enacted",
+      "type": "LAW_ENACTED",
+      "source_ids": [
+        "US-01"
+      ]
+    },
+    {
+      "date": "2025-08-01",
+      "jurisdiction": "Hong Kong",
+      "event": "Stablecoin issuer regime enters into force",
+      "type": "IN_FORCE",
+      "source_ids": [
+        "HK-01"
+      ]
+    },
+    {
+      "date": "2026-02-06",
+      "jurisdiction": "Mainland China",
+      "event": "银发〔2026〕42号 issued and replaces 2021 notice",
+      "type": "RESTRICTIVE_BOUNDARY",
+      "source_ids": [
+        "CN-01"
+      ]
+    },
+    {
+      "date": "2026-04-10",
+      "jurisdiction": "Hong Kong",
+      "event": "First two issuer licences take effect",
+      "type": "REGISTER",
+      "source_ids": [
+        "HK-02"
+      ]
+    },
+    {
+      "date": "2026-06-01",
+      "jurisdiction": "Japan",
+      "event": "New electronic-payment-instrument / cryptoasset intermediary regime begins",
+      "type": "IN_FORCE",
+      "source_ids": [
+        "JP-02"
+      ]
+    },
+    {
+      "date": "2026-06-30",
+      "jurisdiction": "United Kingdom",
+      "event": "FCA publishes final stablecoin issuance rules",
+      "type": "FINAL_RULE",
+      "source_ids": [
+        "UK-02"
+      ]
+    },
+    {
+      "date": "2026-09-01",
+      "jurisdiction": "Singapore",
+      "event": "MAS opens legislative implementation consultation",
+      "type": "CONSULTATION",
+      "source_ids": [
+        "SG-02"
+      ]
+    },
+    {
+      "date": "2026-09-29",
+      "jurisdiction": "United States",
+      "event": "Federal Reserve implementation proposals published in Federal Register",
+      "type": "PROPOSED_RULE",
+      "source_ids": [
+        "US-02"
+      ]
+    },
+    {
+      "date": "2026-10-12",
+      "jurisdiction": "International",
+      "event": "FSB publishes global-stablecoin cross-border vulnerabilities and monitoring note",
+      "type": "INTERNATIONAL_MONITORING",
+      "source_ids": [
+        "INT-02"
+      ]
+    }
+  ],
+  "copy": {
+    "en": "# `/regulatory`｜Regulatory Overview Content Master en V0.1\n\n## HERO\n\n### Stablecoin regulation: compare legal status, not just policy direction\n\nJurisdictions increasingly discuss the same themes — reserves, redemption, governance and AML/CFT — but similar policy language does not mean that their regimes are at the same legal stage.\n\nThis page separates:\n- rules already in force;\n- enacted laws not yet effective;\n- final rules with future commencement;\n- implementation rulemaking;\n- consultations;\n- restrictive/prohibitive boundaries.\n\n**Last verified: 16 October 2026**\n\nThis page is for comparative research and is not legal advice.\n\n## Status logic\n\n`Law enacted ≠ regime in force`  \n`Framework finalised ≠ binding issuer regime`  \n`Licence granted ≠ token publicly launched`\n\n## Current jurisdiction status\n\n### United States\n**Enacted — implementation rulemaking — not yet effective**\n\nThe GENIUS Act was enacted on 18 July 2025. Its delayed effective date is the earlier of 18 months after enactment or 120 days after the primary federal regulators issue final implementing regulations. Federal implementation rulemaking remains underway as of 16 October 2026; official materials currently expect 18 January 2027 absent an earlier trigger.\n\nThe statute establishes, among other things:\n- permitted payment stablecoin issuer pathways;\n- at least 1:1 identifiable eligible reserves;\n- public redemption policies;\n- monthly reserve-composition disclosure;\n- independent accounting examination/certification;\n- capital, liquidity, risk-management and AML/CFT implementation requirements.\n\nDo not label the federal regime as already fully in force.\n\n### European Union\n**MiCA in force / applicable**\n\nMiCA regulates asset-referenced tokens (ARTs) and e-money tokens (EMTs), with authorisation, reserve, governance, risk-management, disclosure and supervisory requirements.\n\nART/EMT provisions have applied since 30 June 2024.\n\nThe 2026 MiCA review does not suspend the current regime.\n\n### United Kingdom\n**Final rules published — full commencement 25 October 2027**\n\nThe Financial Services and Markets Act 2000 (Cryptoassets) Regulations 2026 were made on 4 February 2026.\n\nThe FCA published final stablecoin-issuance rules on 30 June 2026. The full cryptoasset regime commences on 25 October 2027.\n\nSystemic stablecoins are subject to a distinct Bank of England / FCA joint-regulation layer.\n\n### Hong Kong\n**Issuer regime in force — licensed issuers exist**\n\nThe Stablecoins Ordinance issuer regime took effect on 1 August 2025.\n\nThe HKMA register currently lists two licensed issuers with licences effective on 10 April 2026.\n\nRequirements cover licensing, high-quality/liquid reserves, segregation, par redemption, governance, technology and AML/CFT.\n\nLicence status does not by itself prove that the related token is already broadly/publicly launched.\n\n### Singapore\n**Implementation consultation — dedicated MAS-SCS regime not yet in force**\n\nMAS finalised the policy design in 2023.\n\nOn 1 September 2026, MAS opened consultation on legislative amendments to the Payment Services Act to implement the MAS-SCS framework; the consultation closes on 16 October 2026.\n\nThe planned framework covers Singapore-issued SCS pegged to SGD or G10 currencies, with reserve, capital, par-redemption and disclosure safeguards.\n\nDo not describe existing DPT/MPI activity as issuance under a live MAS-SCS regime.\n\n### Japan\n**Electronic Payment Instrument regime in force**\n\nJapan's electronic-payment-instrument framework has operated since 1 June 2023.\n\nRelevant intermediaries require registration, and a new electronic-payment-instrument / cryptoasset service intermediary regime began on 1 June 2026.\n\nUse the statutory category `Electronic Payment Instruments`; do not invent a single generic “stablecoin licence”.\n\n### UAE — CBUAE onshore perimeter\n**Payment Token Services Regulation in force**\n\nCBUAE Regulation C 2/2024 has been in force since 31 August 2024.\n\nIt covers payment-token issuance, custody/transfer and conversion, with separate treatment for foreign issuers.\n\nRequirements include reserve protection/segregation, face-value coverage, par redemption, capital and audit requirements.\n\nThis row does not represent the whole UAE: VARA, ADGM and DIFC are separate regulatory perimeters.\n\n### Mainland China\n**Restrictive / prohibitive boundary**\n\nThe current baseline is the eight-agency Notice 银发〔2026〕42号 dated 6 February 2026, which replaced the 2021 notice.\n\nVirtual-currency-related business remains illegal financial activity within Mainland China. The notice expressly addresses stablecoins, offshore RMB-linked issuance and offshore issuance by Mainland entities and their controlled overseas entities.\n\nThis is not an issuer-licensing regime comparable with Hong Kong, the EU or the future US framework.\n\n## Cross-jurisdiction convergence\n\nCommon themes:\n- issuer authorisation;\n- reserve quality and segregation;\n- par/timely redemption;\n- disclosure and assurance;\n- AML/CFT;\n- operational resilience.\n\n## Key divergence\n\nStill materially different:\n- legal classification;\n- eligible issuer types;\n- treatment of foreign stablecoins;\n- systemic-supervision layer;\n- holder-identity/distribution requirements;\n- treatment of interest or yield.\n\n## International baselines\n\n### FSB\n2023 recommendations remain an important global baseline. Current 2026 work focuses increasingly on cross-border vulnerabilities and financial-stability monitoring.\n\n### FATF\nThe 2026 targeted report focuses on illicit-finance risks involving stablecoins and P2P activity through unhosted wallets.\n\n### CPMI–IOSCO\nPFMI guidance applies to stablecoin arrangements that perform a transfer function and are determined to be systemically important.\n\nThese standards coordinate regulatory outcomes; they do not replace domestic law.\n",
+    "zh": "# `/regulatory`｜监管现状 Content Master zh-CN V0.1\n\n## HERO\n\n**H1** 稳定币监管：比较的是法律状态，不只是政策态度\n\n**Lead**  \n不同法域都在讨论“储备、赎回、治理和反洗钱”，但相似的政策语言并不意味着制度处于同一阶段。这里把**已经生效的规则、已立法但尚未生效的制度、最终规则、实施中的规则制定、咨询稿和限制性边界**分开比较。\n\n**As-of**\n监管状态核验日期：**2026-10-16**\n\n**Boundary**\n本页用于研究比较，不构成法律意见。具体业务应以主管机构、适用法律和最新牌照/登记状态为准。\n\n---\n\n## 01｜先看“法律状态”，再看规则内容\n\n### IN FORCE\n具有约束力并已在当前范围内适用。\n\n### ENACTED / NOT YET EFFECTIVE\n法律已经通过，但核心生效日尚未到来。\n\n### FINAL RULES / NOT YET EFFECTIVE\n实施规则已经定稿，但适用日期在未来。\n\n### IMPLEMENTATION RULEMAKING\n法律或政策框架已确定，监管机构仍在制定实施规则。\n\n### CONSULTATION\n仍在征求意见，不能当成现行约束。\n\n### RESTRICTIVE / PROHIBITIVE\n并不存在常规发牌路径，而是以禁止或严格限制为主要边界。\n\n> `Law passed` ≠ `Regime in force`  \n> `Framework finalised` ≠ `Binding issuer regime`  \n> `Licence granted` ≠ `Token publicly launched`\n\n---\n\n## 02｜八个重点法域\n\n### 美国\n**状态：已立法；尚未生效；实施规则制定中**\n\nGENIUS Act 于 2025-07-18 成法。其生效日为“立法后 18 个月”与“主要联邦监管机构发布最终实施规则后 120 天”两者较早者；截至 2026-10-16，联邦实施规则仍在推进，官方材料预计在没有更早触发的情况下于 **2027-01-18** 生效。\n\n已立法要求包括：\n- permitted payment stablecoin issuer 体系；\n- 至少 1:1 的可识别合格储备；\n- 公开赎回政策；\n- 月度储备构成披露；\n- 独立会计机构检查与管理层认证；\n- 资本、流动性、风险管理及 AML/CFT 实施规则。\n\n**不要写：** “美国稳定币联邦制度已经全面生效”。\n\n---\n\n### 欧盟\n**状态：MiCA 已适用**\n\nMiCA 将稳定币相关代币主要区分为：\n- ART（asset-referenced token）\n- EMT（e-money token）\n\nART/EMT 相关要求自 **2024-06-30** 起适用。发行人须符合相应授权、储备、治理、风险管理和披露要求；达到“重大”标准的 ART/EMT 还进入 EBA 强化/直接监督框架。\n\n2026 年欧盟正在评估 MiCA 的运行情况，但这**不意味着现有 MiCA 规则暂停适用**。\n\n---\n\n### 英国\n**状态：最终规则已发布；完整制度 2027-10-25 全面生效**\n\n英国于 2026-02-04 制定《Financial Services and Markets Act 2000 (Cryptoassets) Regulations 2026》。\n\nFCA 已于 **2026-06-30** 发布稳定币发行最终规则，涵盖：\n- backing assets；\n- safeguarding；\n- redemption；\n- holder disclosures；\n- prudential / operational requirements。\n\n完整 cryptoasset regulatory regime 的全面生效日为 **2027-10-25**。\n\n系统性 stablecoin 另有 Bank of England + FCA 的联合监管层级；因此：\n**FCA final rules published ≠ full UK regime already live today**。\n\n---\n\n### 中国香港\n**状态：发行人制度已生效；已有持牌发行人**\n\nStablecoins Ordinance 下的发行人制度自 **2025-08-01** 生效。\n\n当前 HKMA register 列有两家持牌发行人，牌照自 **2026-04-10** 生效：\n- Anchorpoint Financial Limited\n- The Hongkong and Shanghai Banking Corporation Limited\n\n主要要求包括：\n- HKMA licence；\n- 高质量、高流动性储备；\n- reserve segregation / trust protection；\n- 按面值赎回；\n- 治理、技术、持续披露；\n- AML/CFT。\n\n**边界：** licence effective ≠ 对应 stablecoin 已经全面公开发行或广泛零售流通。\n\n→ `/regional-developments/hong-kong`\n\n---\n\n### 新加坡\n**状态：实施立法咨询中；专门 MAS-SCS 制度尚未生效**\n\nMAS 在 2023 年已经完成 MAS-SCS 的政策设计，覆盖：\n- 在新加坡发行；\n- 锚定 SGD 或 G10 currency；\n- reserve quality / custody；\n- capital；\n- par redemption；\n- disclosures。\n\n但截至 **2026-10-16**，MAS 正通过 Payment Services Act 修法咨询推进其正式实施；该咨询今天截止。\n\n因此：\n**2023 framework finalised ≠ dedicated MAS-SCS issuer regime already in force.**\n\n现有 DPT / MPI 活动或某稳定币已经在新加坡市场运行，也不能自动写成：\n`MAS-regulated stablecoin under the dedicated MAS-SCS framework`.\n\n→ `/regional-developments/singapore`\n\n---\n\n### 日本\n**状态：Electronic Payment Instrument 制度已生效**\n\n日本自 2023-06-01 起实施 electronic payment instrument 相关制度。\n\n核心监管语言应使用日本法定类别：\n**Electronic Payment Instruments**\n\n相关中介业务需要依法登记。2026-06-01 起，日本又启用了新的 electronic-payment-instrument / cryptoasset service intermediary 制度。\n\n比较时应关注：\n- 发行主体的法律形式；\n- 中介登记；\n- 客户资产与交易保护；\n- AML/CFT；\n- Travel Rule。\n\n**不要简化为一个不存在的统一“日本稳定币发行牌照”。**\n\n---\n\n### 阿联酋——CBUAE 在岸范围\n**状态：Payment Token Services Regulation 已生效**\n\nCBUAE Regulation C 2/2024 自 **2024-08-31** 生效。\n\nCBUAE 范围包括：\n- Dirham Payment Token Issuance；\n- Payment Token Custody and Transfer；\n- Payment Token Conversion；\n- Foreign Payment Token Issuer Registration。\n\n储备与赎回规则包括：\n- reserve assets 与其他资产隔离并受到保护；\n- 储备价值至少覆盖流通 face value；\n- 根据发行人类型适用现金/特定政府资产规则；\n- tokenholder 可申请按面值赎回；\n- 原则上不得迟于下一个营业日完成赎回；\n- 资本、月度 audit、客户协议等要求。\n\n**边界：**\n这是 CBUAE onshore payment-token perimeter，不代表 UAE 只有一个稳定币监管机构。\n\nVARA / ADGM / DIFC 见：\n→ `/regional-developments/uae`\n\n---\n\n### 中国内地\n**状态：限制性 / 禁止性边界**\n\n当前基线应使用 **银发〔2026〕42号**，发布日期 2026-02-06，并已取代 2021 年通知。\n\n核心边界：\n- 虚拟货币不具有与法定货币等同的法律地位；\n- 境内虚拟货币相关业务活动属于非法金融活动；\n- 境外主体不得非法向境内主体提供相关服务；\n- 未经相关部门依法依规同意，不得在境外发行挂钩人民币的稳定币；\n- 未经同意，境内主体及其控制的境外主体不得在境外发行虚拟货币。\n\n因此中国内地不能与美国、香港、欧盟放在同一个“issuer licensing regime”维度下简单比较。\n\n→ `/regional-developments/mainland-china`\n\n---\n\n## 03｜当前制度变化时间线\n\n### 2024-06-30\nEU MiCA ART / EMT provisions begin applying.\n\n### 2024-08-31\nUAE CBUAE Payment Token Services Regulation enters into force.\n\n### 2025-07-18\nUS GENIUS Act enacted.\n\n### 2025-08-01\nHong Kong Stablecoins Ordinance issuer regime takes effect.\n\n### 2026-02-06\nMainland China issues 银发〔2026〕42号, expressly addressing stablecoins and replacing the 2021 notice.\n\n### 2026-04-10\nHong Kong's first two stablecoin issuer licences take effect.\n\n### 2026-06-01\nJapan's new electronic-payment-instrument / cryptoasset service intermediary regime starts.\n\n### 2026-06-30\nFCA publishes final UK stablecoin issuance rules.\n\n### 2026-09-01 → 2026-10-16\nMAS consults on legislative amendments to implement the Singapore MAS-SCS framework.\n\n### 2026-09\nUS federal regulators continue GENIUS Act implementation rulemaking.\n\n### 2026-10-12\nFSB shifts current global work further toward cross-border vulnerabilities and financial-stability monitoring of global stablecoin arrangements.\n\n---\n\n## 04｜哪里正在收敛，哪里仍然不同\n\n### Regulatory convergence\n\n**01 · Issuer authorisation**\n多数开放型法域逐步要求发行活动进入许可、授权或特定法律主体范围。\n\n**02 · Reserve protection**\n储备质量、流动性、隔离和托管成为共同核心。\n\n**03 · Redemption**\n按面值、及时、清晰的赎回权正在成为支付型 stablecoin 规则核心。\n\n**04 · Disclosure and assurance**\n储备构成、审计/鉴证、治理和风险披露要求提高。\n\n**05 · AML/CFT and operational resilience**\n监管对象正在从发行方扩展到中介、钱包、转移与跨境活动。\n\n### Regulatory divergence\n\n**01 · Legal classification**\npayment stablecoin / EMT / ART / qualifying stablecoin / electronic payment instrument / payment token 并不等价。\n\n**02 · Who may issue**\n银行、信托、非银行支付机构或专门许可主体的准入差异明显。\n\n**03 · Foreign stablecoins**\n境外发行稳定币如何进入本地市场，各法域处理方式差异较大。\n\n**04 · Systemic layer**\n部分法域会在普通发行监管之上增加系统性支付/金融稳定监管。\n\n**05 · Holder identity and distribution**\n是否需要验证 stablecoin holder 身份、如何通过中介分发，制度差异明显。\n\n**06 · Interest / yield**\n是否允许对 stablecoin holder 支付与持有时间相关的收益，不同制度处理不同。\n\n---\n\n## 05｜国际监管基准不是“全球法律”\n\n### FSB\n2023 年建议仍是全球稳定币监管的重要共同基线。\n\n2026-10-12 的最新工作进一步关注：\n- cross-border vulnerabilities；\n- system-wide transmission；\n- data gaps；\n- financial-stability monitoring。\n\n### FATF\n2026 Targeted Report 特别强调 stablecoins 与 unhosted-wallet P2P activity 的 illicit-finance 风险，以及对国家和私营部门的控制建议。\n\n### CPMI–IOSCO\nPFMI guidance 适用于具有转移功能、并被认定具有系统重要性的 stablecoin arrangements。\n\n**Boundary**\n这些都是国际监管/标准协调基准，不直接取代国内法律。\n\n---\n\n## Footer / source note\n\n**Last verified: 16 October 2026**\n\n监管状态变化快。涉及业务准入、发行、赎回、营销或跨境服务时，应点击对应官方来源查看最新文本。\n"
+  },
+  "hashes": {
+    "00_README.md": "a2727d5303facc124c646495c62572d4c3ae86cfa4255cabd147b9c16634a7c9",
+    "01_CURRENT_PAGE_AUDIT.md": "be35084f314cbc2bf43b570182ed96ade0061f056fcadf7cb00e19b2def815e1",
+    "CODEX_HANDOFF.md": "7f34448c19968d57258299fcd2ab5e5e61f79d5df3f9ceba668cf687333f2c13",
+    "PACKAGE_INVENTORY.json": "79a036c2805ec9bb0cd47dd646f62a963a97ff0b86a70bb6910769ccff43757d",
+    "PACKAGE_STATUS.md": "a9d207f758f719bd34aa77f250e371b120bd89787425ed98826bea6a74de5bb8",
+    "components/REGULATORY_COMPARISON_COMPONENT_SPEC.md": "93c87e75d9bce36cc0e3e5f60715aaa679042d9c07a5669a51657d3979dbae74",
+    "components/SOURCE_DATE_UI_SPEC.md": "1c89c318f6c39d8ea23d333b281e6481d6229d2ba958613b8f4c649ad126a425",
+    "content/CONTENT_MASTER.en.md": "a2747a33536d9f5db921efa3ad40051e5f8fd70524d90c23e24975790ceb52bd",
+    "content/CONTENT_MASTER.zh-CN.md": "304e00ae3bbb88f4544a30c998dc9f9f71f56bea0bf646a7385f397ce15be459",
+    "data/CURRENT_REGULATORY_TIMELINE.json": "fdf364d30ef6d9cf69afee0a3157e8cb91d0bae857cb740c1635c91027c77349",
+    "data/REGULATORY_STATUS_TAXONOMY.json": "9ada13083de781dadd660ce643f63233d6e858bc561148964695934ae44f70ad",
+    "manifests/ASSET_MANIFEST.csv": "8364ac55b4de61350a138e9b5d734018bb0221b7e95d99487a645f03c13509e4",
+    "manifests/PAGE_MANIFEST.csv": "6be2b6e5318f2c947d60c5d51bf0bbaf98035203530458ed95a2e874ffa423b3",
+    "manifests/SOURCE_MANIFEST.csv": "663c7793922755b1992f2f9214ff4011f47e9053a500949cde5c52c1edb115d5",
+    "matrices/JURISDICTION_MATRIX.csv": "4737e50a5e4aa3ce49de737c875a070b8369f2b4712d783e689642702f285d18",
+    "qa/FINAL_COPY_QA.md": "583ffe85c1c8daffbe4b6436a9b624737fb098ac92e74a6209017e4722d6deb7",
+    "qa/SOURCE_VERIFICATION_LOG.md": "e4a9c800ffaf976dc63d242ba38194a117915bfc3b14f71fbb26a047c781835b",
+    "reference/CURRENT_REGULATORY_PAGE_REFERENCE.md": "a6f348cb2f9ac532a5ca818610c063ee0b64e52deaa37a88a2bb8573d3cf3c69",
+    "visuals/VISUAL_INTERACTION_PLAN.md": "f2092e5c3f1e2dfa6f67788f56a27696c3730d27756265e8c9f595a5e30f6ddd"
+  }
+}

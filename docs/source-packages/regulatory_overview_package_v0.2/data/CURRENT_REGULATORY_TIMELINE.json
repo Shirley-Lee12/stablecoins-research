@@ -1,0 +1,101 @@
+[
+  {
+    "date": "2024-06-30",
+    "jurisdiction": "EU",
+    "event": "MiCA ART/EMT provisions begin applying",
+    "type": "IN_FORCE",
+    "source_ids": [
+      "EU-01"
+    ]
+  },
+  {
+    "date": "2024-08-31",
+    "jurisdiction": "UAE",
+    "event": "CBUAE Payment Token Services Regulation enters into force",
+    "type": "IN_FORCE",
+    "source_ids": [
+      "UAE-01"
+    ]
+  },
+  {
+    "date": "2025-07-18",
+    "jurisdiction": "United States",
+    "event": "GENIUS Act enacted",
+    "type": "LAW_ENACTED",
+    "source_ids": [
+      "US-01"
+    ]
+  },
+  {
+    "date": "2025-08-01",
+    "jurisdiction": "Hong Kong",
+    "event": "Stablecoin issuer regime enters into force",
+    "type": "IN_FORCE",
+    "source_ids": [
+      "HK-01"
+    ]
+  },
+  {
+    "date": "2026-02-06",
+    "jurisdiction": "Mainland China",
+    "event": "银发〔2026〕42号 issued and replaces 2021 notice",
+    "type": "RESTRICTIVE_BOUNDARY",
+    "source_ids": [
+      "CN-01"
+    ]
+  },
+  {
+    "date": "2026-04-10",
+    "jurisdiction": "Hong Kong",
+    "event": "First two issuer licences take effect",
+    "type": "REGISTER",
+    "source_ids": [
+      "HK-02"
+    ]
+  },
+  {
+    "date": "2026-06-01",
+    "jurisdiction": "Japan",
+    "event": "New electronic-payment-instrument / cryptoasset intermediary regime begins",
+    "type": "IN_FORCE",
+    "source_ids": [
+      "JP-02"
+    ]
+  },
+  {
+    "date": "2026-06-30",
+    "jurisdiction": "United Kingdom",
+    "event": "FCA publishes final stablecoin issuance rules",
+    "type": "FINAL_RULE",
+    "source_ids": [
+      "UK-02"
+    ]
+  },
+  {
+    "date": "2026-09-01",
+    "jurisdiction": "Singapore",
+    "event": "MAS opens legislative implementation consultation",
+    "type": "CONSULTATION",
+    "source_ids": [
+      "SG-02"
+    ]
+  },
+  {
+    "date": "2026-09-29",
+    "jurisdiction": "United States",
+    "event": "Federal Reserve implementation proposals published in Federal Register",
+    "type": "PROPOSED_RULE",
+    "source_ids": [
+      "US-02"
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "jurisdiction": "International",
+    "event": "FSB publishes global-stablecoin cross-border vulnerabilities and monitoring note",
+    "type": "INTERNATIONAL_MONITORING",
+    "source_ids": [
+      "INT-02"
+    ]
+  }
+]
