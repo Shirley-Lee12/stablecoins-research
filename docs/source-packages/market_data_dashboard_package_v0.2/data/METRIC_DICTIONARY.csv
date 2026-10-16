@@ -1,0 +1,31 @@
+﻿metric_id,label_en,unit,page_group,source,formula_or_definition,time_semantics,mode,interpretation_boundary,status
+MKT_TOTAL_TRACKED_USD,Tracked stablecoin circulating value,USD,Market,DefiLlama,sum current tracked stablecoin USD value,Current snapshot,Dynamic,Tracked universe; do not imply all stablecoins globally,READY
+MKT_TOP2_SHARE,Top-2 supply concentration,%,Market,Derived from DefiLlama,(largest two tracked values / total tracked value)*100,Same snapshot,Dynamic,"Supply concentration, not trading/liquidity concentration",READY
+MKT_30D_NET_CHANGE,30-day net change in tracked circulating value,USD / %,Market,DefiLlama history,current minus 30-day prior comparable snapshot,30d,Dynamic,Method must use same universe/field semantics where possible,READY
+MKT_PRICE_DEV_BPS,Absolute price deviation from target,basis points,Market,CoinGecko,abs(price/target-1)*10000,Observation,Dynamic after QA,Only for assets with verified target and source coverage,QA_REQUIRED
+MKT_CEX_SPREAD_BPS,CEX quoted spread,basis points,Market,Binance,(ask-bid)/mid*10000,Point-in-time,Dynamic,Selected exchange/pair only,READY_IF_COLLECTOR
+MKT_CEX_BID_DEPTH_2PCT,CEX bid depth within 2%,USD quote value,Market,Binance order book,sum bid notional at prices >= mid*0.98,Point-in-time,Dynamic,Selected pair; quote conversion specified,READY_IF_COLLECTOR
+MKT_CEX_ASK_DEPTH_2PCT,CEX ask depth within 2%,USD quote value,Market,Binance order book,sum ask notional at prices <= mid*1.02,Point-in-time,Dynamic,Selected pair; quote conversion specified,READY_IF_COLLECTOR
+MKT_CEX_SLIPPAGE,Simulated CEX market-order slippage,basis points,Market,Binance order book,VWAP slippage for explicit side/notional vs midpoint,Point-in-time,Dynamic,"Must display side, order notional and book timestamp",READY_IF_COLLECTOR
+MKT_DEX_POOL_LIQ,DEX pool liquidity,USD,Market,DEX Screener,provider liquidity.usd for selected pool,Provider snapshot,Dynamic,Pool liquidity ≠ order-book depth ≠ route execution,READY_IF_COLLECTOR
+MKT_DEX_VOL_24H,DEX pool 24h volume,USD,Market,DEX Screener,provider 24h volume for selected pool,24h,Dynamic,Selected pool only; not whole DEX/stablecoin market,READY_IF_COLLECTOR
+CHAIN_SUPPLY_USD,Tracked stablecoin value by chain,USD,On-chain,DefiLlama,provider current value by chain,Current snapshot,Dynamic,Native/bridged representation treatment disclosed,READY
+CHAIN_RAW_TRANSFER,Raw stablecoin transfer volume,USD,On-chain,Artemis,raw transfer metric,day/week/month,API/report,Includes non-payment activity,LICENSE_REQUIRED
+CHAIN_ADJ_TRANSFER,Artemis-adjusted stablecoin transfer volume,USD,On-chain,Artemis,provider-adjusted metric,day/week/month,API/report,Deduped and excludes intra-exchange + MEV per Artemis method,LICENSE_REQUIRED
+CHAIN_P2P_TRANSFER,P2P stablecoin transfer volume,USD,On-chain,Artemis,wallet-to-wallet P2P metric,day/week/month,API/report,P2P transfer still not identical to merchant/payment adoption,LICENSE_REQUIRED
+CHAIN_ACTIVE_ADDR,Active stablecoin addresses,addresses,On-chain,Artemis,provider definition,daily/period,API/report,Address != unique person; source methodology required,LICENSE_REQUIRED
+ETH_NET_ISSUANCE,Ethereum net issuance,tokens / USD,On-chain,Etherscan + validated event semantics,validated mint minus burn,day,Dynamic,Per-contract event meaning must be validated first,QA_REQUIRED
+ETH_HOLDER_CONC,Top-holder concentration,%,On-chain,Etherscan + labels,top-N balances / verified supply after exclusion policy,snapshot,HOLD,Exchange/bridge/treasury labels can dominate raw result,HOLD
+ISS_RESERVE_COVERAGE,Reported reserve coverage,ratio / %,Issuers,Issuer disclosure,reported reserve assets / reported stablecoin liabilities or circulation,report period,Report snapshot,Use issuer's scope; do not invent cross-issuer comparability,READY_MANUAL
+ISS_DISCLOSURE_LAG,Disclosure lag,days,Issuers,Derived,publication date - report period end,per report,Report snapshot,Publication timestamp required,READY_MANUAL
+ISS_ASSURANCE_TYPE,Assurance type,category,Issuers,Issuer / accountant,attestation / examination / audit / other,per report,Report snapshot,Attestation ≠ audit,READY_MANUAL
+MACRO_USD_SHORT,USD short-rate environment,%,Macro,FRED SOFR/EFFR/DGS3MO,raw official series,daily,Dynamic,Not issuer realised reserve yield,READY
+MACRO_CURVE,Treasury curve points,%,Macro,FRED DGS3MO/DGS2/DGS10,raw official series,daily,Dynamic,Market yields; no claim on issuer portfolio duration,READY
+MACRO_USD_INDEX,Broad USD index,index,Macro,FRED DTWEXBGS,raw official series,daily,Dynamic,Do not infer stablecoin demand causally,READY
+MACRO_RRP,Overnight reverse repo amount,USD bn,Macro,FRED RRPONTSYD,raw official series,daily,Dynamic,Separate axis from rates,READY
+MACRO_VIX,VIX,index,Macro,FRED VIXCLS,raw official series,daily close,Dynamic,"Market-stress context only, not stablecoin risk probability",READY
+MACRO_ASIA_FX,Asia FX vs USD,local currency per USD,Macro,FRED DEXCHUS/DEXHKUS/DEXSIUS,raw official series,daily,Dynamic,Quote direction explicit; compare normalized index if charting together,READY
+ADOPT_PAYMENT_CUM,Attributable sampled stablecoin payments,USD,Adoption,Artemis 2025 report,report total,Jan 2023–Aug 2025,Report snapshot,Sampled/estimated firms; not entire market,READY_REPORT
+ADOPT_PAYMENT_RUNRATE,Sample payment annualised run rate,USD/year,Adoption,Artemis 2025 report,provider annualisation as of Aug 2025,Aug 2025,Report snapshot,Dated sample estimate,READY_REPORT
+ADOPT_PAYMENT_CATEGORY,Payment category run rate,USD/year,Adoption,Artemis 2025 report,provider category figures,Aug 2025,Report snapshot,B2B/P2P/card/B2C/prefunding sample,READY_REPORT
+ADOPT_ISSUER_ACTIVITY,Issuer-reported activity metric,source-defined,Adoption,Issuer report,no cross-source aggregation,report period,Report snapshot,Must preserve issuer definition; not automatically payment volume,READY_MANUAL

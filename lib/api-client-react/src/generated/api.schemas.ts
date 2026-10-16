@@ -5,6 +5,50 @@
  * Stablecoin Research Hub API
  * OpenAPI spec version: 0.1.0
  */
+export interface PublicMarketPoint {
+  date: string;
+  /** @nullable */
+  value: number | null;
+}
+
+export type PublicMarketMetricFreshnessState = typeof PublicMarketMetricFreshnessState[keyof typeof PublicMarketMetricFreshnessState];
+
+
+export const PublicMarketMetricFreshnessState = {
+  FRESH: 'FRESH',
+  DELAYED: 'DELAYED',
+  LAST_SUCCESSFUL_SNAPSHOT: 'LAST_SUCCESSFUL_SNAPSHOT',
+  REPORT_SNAPSHOT: 'REPORT_SNAPSHOT',
+  UNAVAILABLE: 'UNAVAILABLE',
+  NOT_APPLICABLE: 'NOT_APPLICABLE',
+  UNKNOWN_TO_VERIFY: 'UNKNOWN_TO_VERIFY',
+} as const;
+
+export interface PublicMarketMetric {
+  metric_id: string;
+  label: string;
+  /** @nullable */
+  value: number | null;
+  unit: string;
+  source_id: string;
+  source: string;
+  source_url: string;
+  source_scope: string;
+  /** @nullable */
+  observation_time: string | null;
+  /** @nullable */
+  report_period_end: string | null;
+  /** @nullable */
+  publication_time: string | null;
+  freshness_state: PublicMarketMetricFreshnessState;
+  /** @nullable */
+  last_successful_fetch: string | null;
+  methodology_note: string;
+  coverage_note: string;
+  is_estimate: boolean;
+  is_adjusted: boolean;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -453,6 +497,85 @@ export interface PlatformStats {
   countries_covered?: number;
   top_tags?: Tag[];
 }
+
+export type GetStablecoinMarket200Version = typeof GetStablecoinMarket200Version[keyof typeof GetStablecoinMarket200Version];
+
+
+export const GetStablecoinMarket200Version = {
+  '02': '0.2',
+} as const;
+
+export type GetStablecoinMarket200RankedItem = { [key: string]: unknown };
+
+export type GetStablecoinMarket200ChainsItem = { [key: string]: unknown };
+
+export type GetStablecoinMarket200 = {
+  version: GetStablecoinMarket200Version;
+  total: PublicMarketMetric;
+  top2: PublicMarketMetric;
+  change30d: PublicMarketMetric;
+  history: PublicMarketPoint[];
+  ranked: GetStablecoinMarket200RankedItem[];
+  chains: GetStablecoinMarket200ChainsItem[];
+};
+
+export type GetStablecoinMacro200Version = typeof GetStablecoinMacro200Version[keyof typeof GetStablecoinMacro200Version];
+
+
+export const GetStablecoinMacro200Version = {
+  '02': '0.2',
+} as const;
+
+export type GetStablecoinMacro200SeriesItem = { [key: string]: unknown };
+
+export type GetStablecoinMacro200 = {
+  version: GetStablecoinMacro200Version;
+  series: GetStablecoinMacro200SeriesItem[];
+};
+
+export type GetStablecoinLiquidity200Version = typeof GetStablecoinLiquidity200Version[keyof typeof GetStablecoinLiquidity200Version];
+
+
+export const GetStablecoinLiquidity200Version = {
+  '02': '0.2',
+} as const;
+
+export type GetStablecoinLiquidity200VenuesItem = { [key: string]: unknown };
+
+export type GetStablecoinLiquidity200 = {
+  version: GetStablecoinLiquidity200Version;
+  venues: GetStablecoinLiquidity200VenuesItem[];
+};
+
+export type GetObservedStablecoinPrices200Version = typeof GetObservedStablecoinPrices200Version[keyof typeof GetObservedStablecoinPrices200Version];
+
+
+export const GetObservedStablecoinPrices200Version = {
+  '02': '0.2',
+} as const;
+
+export type GetObservedStablecoinPrices200TokensItem = { [key: string]: unknown };
+
+export type GetObservedStablecoinPrices200 = {
+  version: GetObservedStablecoinPrices200Version;
+  tokens: GetObservedStablecoinPrices200TokensItem[];
+};
+
+export type GetStablecoinIssuanceStatus200Version = typeof GetStablecoinIssuanceStatus200Version[keyof typeof GetStablecoinIssuanceStatus200Version];
+
+
+export const GetStablecoinIssuanceStatus200Version = {
+  '02': '0.2',
+} as const;
+
+export type GetStablecoinIssuanceStatus200TokensItem = { [key: string]: unknown };
+
+export type GetStablecoinIssuanceStatus200 = {
+  version: GetStablecoinIssuanceStatus200Version;
+  /** @maxItems 0 */
+  tokens: GetStablecoinIssuanceStatus200TokensItem[];
+  freshness_state: 'UNKNOWN_TO_VERIFY';
+};
 
 export type ListResourcesParams = {
 resource_type?: string;

@@ -7,6 +7,8 @@ servers:
   - url: /api
     description: Base API path
 tags:
+  - name: marketData
+    description: Source-aware public market data; no event-history or holder-concentration metrics
   - name: health
     description: Health operations
   - name: resources
@@ -22,6 +24,86 @@ tags:
   - name: subscriptions
     description: Admin-managed literature discovery subscriptions
 paths:
+  /stablecoin-market:
+    get:
+      operationId: getStablecoinMarket
+      tags: [marketData]
+      summary: Tracked USD circulating value and dated history
+      responses:
+        "200":
+          description: Governed source snapshot; missing values remain null
+          content:
+            application/json:
+              schema: {"type": "object", "required": ["version", "total", "top2", "change30d", "history", "ranked", "chains"], "properties": {"version": {"type": "string", "enum": ["0.2"]}, "total": {"$ref": "#/components/schemas/PublicMarketMetric"}, "top2": {"$ref": "#/components/schemas/PublicMarketMetric"}, "change30d": {"$ref": "#/components/schemas/PublicMarketMetric"}, "history": {"type": "array", "items": {"$ref": "#/components/schemas/PublicMarketPoint"}}, "ranked": {"type": "array", "items": {"type": "object"}}, "chains": {"type": "array", "items": {"type": "object"}}}}
+        "503":
+          description: No valid source snapshot available
+        "502":
+          description: Upstream source unavailable
+
+  /stablecoin-macro:
+    get:
+      operationId: getStablecoinMacro
+      tags: [marketData]
+      summary: FRED series with per-series freshness
+      responses:
+        "200":
+          description: Governed source snapshot; missing values remain null
+          content:
+            application/json:
+              schema: {"type": "object", "required": ["version", "series"], "properties": {"version": {"type": "string", "enum": ["0.2"]}, "series": {"type": "array", "items": {"type": "object"}}}}
+        "503":
+          description: No valid source snapshot available
+        "502":
+          description: Upstream source unavailable
+
+  /stablecoin-liquidity:
+    get:
+      operationId: getStablecoinLiquidity
+      tags: [marketData]
+      summary: Selected CEX pairs and DEX pools, kept separate
+      responses:
+        "200":
+          description: Governed source snapshot; missing values remain null
+          content:
+            application/json:
+              schema: {"type": "object", "required": ["version", "venues"], "properties": {"version": {"type": "string", "enum": ["0.2"]}, "venues": {"type": "array", "items": {"type": "object"}}}}
+        "503":
+          description: No valid source snapshot available
+        "502":
+          description: Upstream source unavailable
+
+  /stablecoin-depegs:
+    get:
+      operationId: getObservedStablecoinPrices
+      tags: [marketData]
+      summary: Current observed prices only; event history is not public
+      responses:
+        "200":
+          description: Governed source snapshot; missing values remain null
+          content:
+            application/json:
+              schema: {"type": "object", "required": ["version", "tokens"], "properties": {"version": {"type": "string", "enum": ["0.2"]}, "tokens": {"type": "array", "items": {"type": "object"}}}}
+        "503":
+          description: No valid source snapshot available
+        "502":
+          description: Upstream source unavailable
+
+  /stablecoin-onchain:
+    get:
+      operationId: getStablecoinIssuanceStatus
+      tags: [marketData]
+      summary: Issuance status; holders and unvalidated issuance are not public
+      responses:
+        "200":
+          description: Governed source snapshot; missing values remain null
+          content:
+            application/json:
+              schema: {"type": "object", "required": ["version", "tokens", "freshness_state"], "properties": {"version": {"type": "string", "enum": ["0.2"]}, "tokens": {"type": "array", "maxItems": 0, "items": {"type": "object"}}, "freshness_state": {"type": "string", "const": "UNKNOWN_TO_VERIFY"}}}
+        "503":
+          description: No valid source snapshot available
+        "502":
+          description: Upstream source unavailable
+
   /healthz:
     get:
       operationId: healthCheck
@@ -734,6 +816,53 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    PublicMarketPoint:
+      type: object
+      required: [date, value]
+      properties:
+        date:
+          type: string
+        value:
+          type: [number, "null"]
+    PublicMarketMetric:
+      type: object
+      required: [metric_id, label, value, unit, source_id, source, source_url, source_scope, observation_time, report_period_end, publication_time, freshness_state, last_successful_fetch, methodology_note, coverage_note, is_estimate, is_adjusted]
+      properties:
+        metric_id:
+          type: string
+        label:
+          type: string
+        value:
+          type: [number, "null"]
+        unit:
+          type: string
+        source_id:
+          type: string
+        source:
+          type: string
+        source_url:
+          type: string
+        source_scope:
+          type: string
+        observation_time:
+          type: [string, "null"]
+        report_period_end:
+          type: [string, "null"]
+        publication_time:
+          type: [string, "null"]
+        freshness_state:
+          type: string
+          enum: [FRESH, DELAYED, LAST_SUCCESSFUL_SNAPSHOT, REPORT_SNAPSHOT, UNAVAILABLE, NOT_APPLICABLE, UNKNOWN_TO_VERIFY]
+        last_successful_fetch:
+          type: [string, "null"]
+        methodology_note:
+          type: string
+        coverage_note:
+          type: string
+        is_estimate:
+          type: boolean
+        is_adjusted:
+          type: boolean
     HealthStatus:
       type: object
       properties:

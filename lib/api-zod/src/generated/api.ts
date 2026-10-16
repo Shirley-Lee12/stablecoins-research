@@ -9,6 +9,130 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Tracked USD circulating value and dated history
+ */
+export const GetStablecoinMarketResponse = zod.object({
+  "version": zod.enum(['0.2']),
+  "total": zod.object({
+  "metric_id": zod.string(),
+  "label": zod.string(),
+  "value": zod.number().nullable(),
+  "unit": zod.string(),
+  "source_id": zod.string(),
+  "source": zod.string(),
+  "source_url": zod.string(),
+  "source_scope": zod.string(),
+  "observation_time": zod.string().nullable(),
+  "report_period_end": zod.string().nullable(),
+  "publication_time": zod.string().nullable(),
+  "freshness_state": zod.enum(['FRESH', 'DELAYED', 'LAST_SUCCESSFUL_SNAPSHOT', 'REPORT_SNAPSHOT', 'UNAVAILABLE', 'NOT_APPLICABLE', 'UNKNOWN_TO_VERIFY']),
+  "last_successful_fetch": zod.string().nullable(),
+  "methodology_note": zod.string(),
+  "coverage_note": zod.string(),
+  "is_estimate": zod.boolean(),
+  "is_adjusted": zod.boolean()
+}),
+  "top2": zod.object({
+  "metric_id": zod.string(),
+  "label": zod.string(),
+  "value": zod.number().nullable(),
+  "unit": zod.string(),
+  "source_id": zod.string(),
+  "source": zod.string(),
+  "source_url": zod.string(),
+  "source_scope": zod.string(),
+  "observation_time": zod.string().nullable(),
+  "report_period_end": zod.string().nullable(),
+  "publication_time": zod.string().nullable(),
+  "freshness_state": zod.enum(['FRESH', 'DELAYED', 'LAST_SUCCESSFUL_SNAPSHOT', 'REPORT_SNAPSHOT', 'UNAVAILABLE', 'NOT_APPLICABLE', 'UNKNOWN_TO_VERIFY']),
+  "last_successful_fetch": zod.string().nullable(),
+  "methodology_note": zod.string(),
+  "coverage_note": zod.string(),
+  "is_estimate": zod.boolean(),
+  "is_adjusted": zod.boolean()
+}),
+  "change30d": zod.object({
+  "metric_id": zod.string(),
+  "label": zod.string(),
+  "value": zod.number().nullable(),
+  "unit": zod.string(),
+  "source_id": zod.string(),
+  "source": zod.string(),
+  "source_url": zod.string(),
+  "source_scope": zod.string(),
+  "observation_time": zod.string().nullable(),
+  "report_period_end": zod.string().nullable(),
+  "publication_time": zod.string().nullable(),
+  "freshness_state": zod.enum(['FRESH', 'DELAYED', 'LAST_SUCCESSFUL_SNAPSHOT', 'REPORT_SNAPSHOT', 'UNAVAILABLE', 'NOT_APPLICABLE', 'UNKNOWN_TO_VERIFY']),
+  "last_successful_fetch": zod.string().nullable(),
+  "methodology_note": zod.string(),
+  "coverage_note": zod.string(),
+  "is_estimate": zod.boolean(),
+  "is_adjusted": zod.boolean()
+}),
+  "history": zod.array(zod.object({
+  "date": zod.string(),
+  "value": zod.number().nullable()
+})),
+  "ranked": zod.array(zod.object({
+
+}).passthrough()),
+  "chains": zod.array(zod.object({
+
+}).passthrough())
+})
+
+
+/**
+ * @summary FRED series with per-series freshness
+ */
+export const GetStablecoinMacroResponse = zod.object({
+  "version": zod.enum(['0.2']),
+  "series": zod.array(zod.object({
+
+}).passthrough())
+})
+
+
+/**
+ * @summary Selected CEX pairs and DEX pools, kept separate
+ */
+export const GetStablecoinLiquidityResponse = zod.object({
+  "version": zod.enum(['0.2']),
+  "venues": zod.array(zod.object({
+
+}).passthrough())
+})
+
+
+/**
+ * @summary Current observed prices only; event history is not public
+ */
+export const GetObservedStablecoinPricesResponse = zod.object({
+  "version": zod.enum(['0.2']),
+  "tokens": zod.array(zod.object({
+
+}).passthrough())
+})
+
+
+/**
+ * @summary Issuance status; holders and unvalidated issuance are not public
+ */
+export const getStablecoinIssuanceStatusResponseTokensMax = 0;
+
+
+
+export const GetStablecoinIssuanceStatusResponse = zod.object({
+  "version": zod.enum(['0.2']),
+  "tokens": zod.array(zod.object({
+
+}).passthrough()).max(getStablecoinIssuanceStatusResponseTokensMax),
+  "freshness_state": zod.literal("UNKNOWN_TO_VERIFY")
+})
+
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({

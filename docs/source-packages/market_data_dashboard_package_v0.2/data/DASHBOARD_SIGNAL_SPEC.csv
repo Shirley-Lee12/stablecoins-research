@@ -1,0 +1,7 @@
+﻿signal_id,public_label,metric_or_source,freshness_rule,why_it_matters,boundary
+DASH-01,Tracked stablecoin circulating value,MKT_TOTAL_TRACKED_USD,LIVE/FRESH or LAST_SUCCESSFUL,Primary current market size signal,Do not call payment volume or trading volume
+DASH-02,Top-2 supply concentration,MKT_TOP2_SHARE,same DefiLlama snapshot,Structural concentration signal,Supply concentration only
+DASH-03,30-day net supply change,MKT_30D_NET_CHANGE,same provider/history,Direction of aggregate supply change,No causal interpretation
+DASH-04,3-month Treasury yield,DGS3MO / MACRO_USD_SHORT,latest FRED observation,Reserve-income environment proxy,Not issuer realised yield
+DASH-05,Selected market liquidity status,CEX spread/depth freshness,only if collector healthy,Show health/availability rather than invented aggregate liquidity,Selected venue/pairs only
+DASH-06,Latest adoption evidence,ADOPT_PAYMENT_RUNRATE or report card,REPORT_SNAPSHOT,Link to dated adoption research,Must show Aug 2025 sample date; not live KPI

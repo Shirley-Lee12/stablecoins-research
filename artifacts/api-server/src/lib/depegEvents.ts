@@ -1,5 +1,9 @@
 import { logger } from "./logger";
-import { readPersistentSnapshot, writePersistentSnapshot } from "./persistentSnapshot";
+import { metric, freshness } from "./dataGovernance";
+import {
+  readPersistentSnapshot,
+  writePersistentSnapshot,
+} from "./persistentSnapshot";
 
 const REFRESH_INTERVAL_MS = 30 * 60_000;
 const STALE_AFTER_MS = 90 * 60_000;
@@ -39,31 +43,54 @@ export interface DepegSnapshot {
     recoveryConfirmations: number;
     interval: "hourly";
   };
-  tokens: Array<{ symbol: string; latestPriceUsd: number; latestAt: string; events: DepegEvent[] }>;
+  tokens: Array<{
+    symbol: string;
+    latestPriceUsd: number;
+    latestAt: string;
+    events: DepegEvent[];
+  }>;
   sourceUrl: string;
 }
 
 let refreshing: Promise<DepegSnapshot> | null = null;
+let depegRefreshFailed = false;
 
 function coinGeckoConfig() {
   const proKey = process.env.COINGECKO_PRO_API_KEY;
   const demoKey = process.env.COINGECKO_API_KEY;
-  if (proKey) return { baseUrl: "https://pro-api.coingecko.com/api/v3", headers: { "x-cg-pro-api-key": proKey } };
-  if (demoKey) return { baseUrl: "https://api.coingecko.com/api/v3", headers: { "x-cg-demo-api-key": demoKey } };
+  if (proKey)
+    return {
+      baseUrl: "https://pro-api.coingecko.com/api/v3",
+      headers: { "x-cg-pro-api-key": proKey },
+    };
+  if (demoKey)
+    return {
+      baseUrl: "https://api.coingecko.com/api/v3",
+      headers: { "x-cg-demo-api-key": demoKey },
+    };
   return { baseUrl: "https://api.coingecko.com/api/v3", headers: {} };
 }
 
-export function detectDepegEvents(token: string, prices: Array<[number, number]>): DepegEvent[] {
+export function detectDepegEvents(
+  token: string,
+  prices: Array<[number, number]>,
+): DepegEvent[] {
   const events: DepegEvent[] = [];
-  let active: { startIndex: number; worstIndex: number; recoveryCount: number } | null = null;
+  let active: {
+    startIndex: number;
+    worstIndex: number;
+    recoveryCount: number;
+  } | null = null;
   for (let index = 0; index < prices.length; index += 1) {
     const point = prices[index];
     const deviation = Math.abs(point[1] - 1) * 10_000;
-    if (!active && deviation >= START_THRESHOLD_BPS) active = { startIndex: index, worstIndex: index, recoveryCount: 0 };
+    if (!active && deviation >= START_THRESHOLD_BPS)
+      active = { startIndex: index, worstIndex: index, recoveryCount: 0 };
     if (!active) continue;
     const worstDeviation = Math.abs(prices[active.worstIndex][1] - 1) * 10_000;
     if (deviation > worstDeviation) active.worstIndex = index;
-    active.recoveryCount = deviation <= RECOVERY_THRESHOLD_BPS ? active.recoveryCount + 1 : 0;
+    active.recoveryCount =
+      deviation <= RECOVERY_THRESHOLD_BPS ? active.recoveryCount + 1 : 0;
     if (active.recoveryCount < RECOVERY_CONFIRMATIONS) continue;
     const recoveredIndex = index;
     const start = prices[active.startIndex];
@@ -100,13 +127,20 @@ export function detectDepegEvents(token: string, prices: Array<[number, number]>
 
 async function loadToken(id: string, symbol: string) {
   const config = coinGeckoConfig();
-  const response = await fetch(`${config.baseUrl}/coins/${id}/market_chart?vs_currency=usd&days=90&interval=hourly&precision=full`, {
-    headers: { Accept: "application/json", ...config.headers },
-    signal: AbortSignal.timeout(20_000),
-  });
-  if (!response.ok) throw new Error(`CoinGecko ${symbol} history failed (${response.status})`);
-  const payload = await response.json() as MarketChartPayload;
-  const prices = (payload.prices ?? []).filter((point) => Number.isFinite(point[0]) && Number.isFinite(point[1]) && point[1] > 0);
+  const response = await fetch(
+    `${config.baseUrl}/coins/${id}/market_chart?vs_currency=usd&days=90&interval=hourly&precision=full`,
+    {
+      headers: { Accept: "application/json", ...config.headers },
+      signal: AbortSignal.timeout(20_000),
+    },
+  );
+  if (!response.ok)
+    throw new Error(`CoinGecko ${symbol} history failed (${response.status})`);
+  const payload = (await response.json()) as MarketChartPayload;
+  const prices = (payload.prices ?? []).filter(
+    (point) =>
+      Number.isFinite(point[0]) && Number.isFinite(point[1]) && point[1] > 0,
+  );
   const latest = prices.at(-1);
   if (!latest) throw new Error(`CoinGecko ${symbol} history is empty`);
   return {
@@ -118,12 +152,21 @@ async function loadToken(id: string, symbol: string) {
 }
 
 async function buildSnapshot(): Promise<DepegSnapshot> {
-  const settled = await Promise.allSettled(TOKENS.map((token) => loadToken(token.id, token.symbol)));
+  const settled = await Promise.allSettled(
+    TOKENS.map((token) => loadToken(token.id, token.symbol)),
+  );
   settled.forEach((result, index) => {
-    if (result.status === "rejected") logger.warn({ error: result.reason, token: TOKENS[index].symbol }, "Unable to load depeg history");
+    if (result.status === "rejected")
+      logger.warn(
+        { error: result.reason, token: TOKENS[index].symbol },
+        "Unable to load depeg history",
+      );
   });
-  const tokens = settled.flatMap((result) => result.status === "fulfilled" ? [result.value] : []);
-  if (!tokens.length) throw new Error("All depeg history sources are unavailable");
+  const tokens = settled.flatMap((result) =>
+    result.status === "fulfilled" ? [result.value] : [],
+  );
+  if (!tokens.length)
+    throw new Error("All depeg history sources are unavailable");
   return {
     refreshedAt: new Date().toISOString(),
     windowDays: 90,
@@ -140,17 +183,98 @@ async function buildSnapshot(): Promise<DepegSnapshot> {
 
 export async function refreshDepegSnapshot(): Promise<DepegSnapshot> {
   if (refreshing) return refreshing;
-  refreshing = buildSnapshot().then(async (snapshot) => {
-    await writePersistentSnapshot(SNAPSHOT_KEY, "CoinGecko", snapshot, snapshot.refreshedAt);
-    return snapshot;
-  }).finally(() => { refreshing = null; });
+  refreshing = buildSnapshot()
+    .then(async (snapshot) => {
+      await writePersistentSnapshot(
+        SNAPSHOT_KEY,
+        "CoinGecko",
+        snapshot,
+        snapshot.refreshedAt,
+      );
+      depegRefreshFailed = false;
+      return snapshot;
+    })
+    .catch((error) => {
+      depegRefreshFailed = true;
+      throw error;
+    })
+    .finally(() => {
+      refreshing = null;
+    });
   return refreshing;
 }
 
 export async function getDepegSnapshot() {
-  const snapshot = await readPersistentSnapshot<DepegSnapshot>(SNAPSHOT_KEY, STALE_AFTER_MS);
-  if (!snapshot) throw new Error("No successful stablecoin depeg snapshot is available");
+  const snapshot = await readPersistentSnapshot<DepegSnapshot>(
+    SNAPSHOT_KEY,
+    STALE_AFTER_MS,
+  );
+  if (!snapshot)
+    throw new Error("No successful stablecoin depeg snapshot is available");
   return snapshot;
 }
 
 export const depegRefreshIntervalMs = REFRESH_INTERVAL_MS;
+
+// V0.2 public projection: the detector above is research-only. Never return its
+// thresholds, events, counts, durations or rankings to a public client.
+export async function getObservedPrices() {
+  if (depegRefreshFailed) return { version: "0.2", tokens: [] };
+  const snapshot = await getDepegSnapshot();
+  const targets: Record<string, string> = {
+    USDT: "SRC-MD-21",
+    USDC: "SRC-MD-19",
+    PYUSD: "SRC-MD-23",
+    FDUSD: "SRC-MD-24",
+  };
+  const tokens = snapshot.tokens.flatMap((token) => {
+    if (
+      !targets[token.symbol] ||
+      freshness(token.latestAt, STALE_AFTER_MS) !== "FRESH" ||
+      snapshot.dataStatus.state !== "current"
+    )
+      return [];
+    if (!Number.isFinite(token.latestPriceUsd) || token.latestPriceUsd <= 0)
+      return [];
+    const common = {
+      source_id: "SRC-MD-04",
+      source: "CoinGecko",
+      source_url: snapshot.sourceUrl,
+      observation_time: token.latestAt,
+      last_successful_fetch: snapshot.refreshedAt,
+      methodology_note:
+        "Absolute price deviation = abs(price / verified USD target - 1) × 10,000. Latest valid observation only; no future probability or threshold-event inference.",
+      coverage_note:
+        "Selected USD-target issuer tokens; excludes wrappers and non-USD targets. Hourly observations can miss short-lived deviations.",
+    };
+    return [
+      {
+        symbol: token.symbol,
+        target: 1,
+        target_unit: "USD",
+        target_source_id: targets[token.symbol],
+        price: metric(
+          {
+            ...common,
+            metric_id: "PRICE_" + token.symbol,
+            label: "Observed price",
+            value: token.latestPriceUsd,
+            unit: "USD",
+          },
+          STALE_AFTER_MS,
+        ),
+        deviation: metric(
+          {
+            ...common,
+            metric_id: "MKT_PRICE_DEV_BPS",
+            label: "Observed price deviation",
+            value: Math.abs(token.latestPriceUsd - 1) * 10000,
+            unit: "bps",
+          },
+          STALE_AFTER_MS,
+        ),
+      },
+    ];
+  });
+  return { version: "0.2", tokens };
+}

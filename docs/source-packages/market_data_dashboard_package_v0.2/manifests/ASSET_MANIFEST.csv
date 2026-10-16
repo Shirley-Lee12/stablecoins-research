@@ -1,0 +1,25 @@
+﻿asset_id,asset_type,route,title,data_source,status
+DASH-C01,dynamic_metric_group,/dashboard,Core market signals,DefiLlama-derived size/concentration/change,READY_FOR_IMPLEMENTATION
+DASH-C02,dynamic_metric_card,/dashboard,Macro context,Latest DGS3MO observation,READY_FOR_IMPLEMENTATION
+DASH-C03,data_health_ui,/dashboard,Data health,Source-level freshness and last-success state,READY_FOR_IMPLEMENTATION
+MKT-C01,dynamic_chart,/market-data/market,Tracked circulating value history,DefiLlama,READY_FOR_IMPLEMENTATION
+MKT-C02,dynamic_bars,/market-data/market,Top tracked stablecoins,DefiLlama,READY_FOR_IMPLEMENTATION
+MKT-C03,dynamic_metric,/market-data/market,Supply concentration,Derived DefiLlama,READY_FOR_IMPLEMENTATION
+MKT-C04,dynamic_table,/market-data/market,Price deviation,CoinGecko after method QA,READY_CONDITIONAL
+MKT-C05,dynamic_table,/market-data/market,Selected CEX liquidity,Binance selected pairs,READY_FOR_IMPLEMENTATION
+MKT-C06,dynamic_table,/market-data/market,Selected DEX pool liquidity,DEX Screener selected pools,READY_FOR_IMPLEMENTATION
+CHAIN-C01,dynamic_chart,/market-data/on-chain,Supply by chain,DefiLlama,READY_FOR_IMPLEMENTATION
+CHAIN-C02,dynamic_or_report_chart,/market-data/on-chain,Transfer activity hierarchy,Artemis when licensed / dated snapshot,READY_FOR_IMPLEMENTATION
+CHAIN-C03,dynamic_or_report_chart,/market-data/on-chain,Active addresses,Artemis,READY_FOR_IMPLEMENTATION
+CHAIN-C04,conditional_module,/market-data/on-chain,Ethereum issuance,Etherscan after semantic QA,READY_CONDITIONAL
+ISS-C01,report_table,/market-data/issuers-reserves,Issuer disclosure comparison,Primary issuer disclosures,READY_FOR_IMPLEMENTATION
+ISS-C02,explanatory_ui,/market-data/issuers-reserves,Assurance scope ladder,No external image,READY_FOR_IMPLEMENTATION
+MAC-C01,dynamic_chart,/market-data/macro,USD short rates,FRED,READY_FOR_IMPLEMENTATION
+MAC-C02,dynamic_chart,/market-data/macro,Treasury curve,FRED,READY_FOR_IMPLEMENTATION
+MAC-C03,dynamic_chart,/market-data/macro,Broad USD,FRED,READY_FOR_IMPLEMENTATION
+MAC-C04,dynamic_chart,/market-data/macro,VIX,FRED,READY_FOR_IMPLEMENTATION
+MAC-C05,dynamic_chart,/market-data/macro,Reverse repo,FRED,READY_FOR_IMPLEMENTATION
+MAC-C06,dynamic_chart,/market-data/macro,Normalized Asia FX,FRED,READY_FOR_IMPLEMENTATION
+ADOPT-C01,report_metric_group,/market-data/adoption,Attributable payments snapshot,Artemis 2025 report,READY_FOR_IMPLEMENTATION
+ADOPT-C02,report_bars,/market-data/adoption,Payment category run-rate,Artemis 2025 report,READY_FOR_IMPLEMENTATION
+ADOPT-C03,evidence_matrix,/market-data/adoption,Evidence classes,No new data,READY_FOR_IMPLEMENTATION

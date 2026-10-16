@@ -1,0 +1,39 @@
+{
+  "states": {
+    "FRESH": {
+      "display": "Live / fresh",
+      "meaning": "Latest successful observation is within the configured source-specific freshness window."
+    },
+    "DELAYED": {
+      "display": "Delayed",
+      "meaning": "A valid observation exists but is older than the configured freshness tolerance."
+    },
+    "LAST_SUCCESSFUL_SNAPSHOT": {
+      "display": "Last successful snapshot",
+      "meaning": "Current retrieval failed; a prior valid observation is displayed with its actual observation time."
+    },
+    "REPORT_SNAPSHOT": {
+      "display": "Report snapshot",
+      "meaning": "Dated research/issuer/report evidence; not a live API observation."
+    },
+    "UNAVAILABLE": {
+      "display": "Unavailable",
+      "meaning": "No valid value exists for the requested metric."
+    },
+    "NOT_APPLICABLE": {
+      "display": "Not applicable",
+      "meaning": "Metric does not apply under the defined scope."
+    },
+    "UNKNOWN_TO_VERIFY": {
+      "display": "Unknown / to verify",
+      "meaning": "Method/value/access cannot yet be verified."
+    }
+  },
+  "zero_rule": "Null, missing, failed request, rate limit, parse error, unavailable credential and empty response MUST NOT be rendered as numeric zero.",
+  "required_ui_fields": [
+    "source",
+    "observation_time_or_report_period",
+    "freshness_state",
+    "coverage_note"
+  ]
+}

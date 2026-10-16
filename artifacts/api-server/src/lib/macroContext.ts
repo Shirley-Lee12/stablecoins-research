@@ -1,70 +1,87 @@
-const REFRESH_INTERVAL_MS = 24 * 60 * 60_000;
-
+import { createSnapshotCache, metric, numeric } from "./dataGovernance";
+const DAY = 86_400_000;
 const SERIES = [
-  { id: "EFFR", label: "Effective federal funds rate", unit: "%" },
-  { id: "DGS3MO", label: "3-month Treasury yield", unit: "%" },
-  { id: "DGS2", label: "2-year Treasury yield", unit: "%" },
-  { id: "DGS10", label: "10-year Treasury yield", unit: "%" },
-  { id: "SOFR", label: "Secured overnight financing rate", unit: "%" },
-  { id: "DTWEXBGS", label: "Nominal broad U.S. dollar index", unit: "index" },
-  { id: "RRPONTSYD", label: "Overnight reverse repo balance", unit: "USD bn" },
-  { id: "VIXCLS", label: "VIX", unit: "index" },
-  { id: "DEXCHUS", label: "Chinese yuan per U.S. dollar", unit: "local/USD" },
-  { id: "DEXHKUS", label: "Hong Kong dollars per U.S. dollar", unit: "local/USD" },
-  { id: "DEXSIUS", label: "Singapore dollars per U.S. dollar", unit: "local/USD" },
+  ["SOFR", "Secured overnight financing rate", "%", "SRC-MD-12"],
+  ["EFFR", "Effective federal funds rate", "%", "SRC-MD-13"],
+  ["DGS3MO", "3-month Treasury yield", "%", "SRC-MD-14"],
+  ["DGS2", "2-year Treasury yield", "%", "SRC-MD-14"],
+  ["DGS10", "10-year Treasury yield", "%", "SRC-MD-14"],
+  ["DTWEXBGS", "Broad USD index", "index · Jan 2006=100", "SRC-MD-15"],
+  ["VIXCLS", "VIX", "index", "SRC-MD-17"],
+  ["RRPONTSYD", "Overnight reverse repo amount", "USD bn", "SRC-MD-16"],
+  ["DEXCHUS", "CNY per USD", "CNY / USD", "SRC-MD-18"],
+  ["DEXHKUS", "HKD per USD", "HKD / USD", "SRC-MD-18"],
+  ["DEXSIUS", "SGD per USD", "SGD / USD", "SRC-MD-18"],
 ] as const;
-
-export interface MacroSeries {
-  id: string;
-  label: string;
-  unit: string;
-  sourceUrl: string;
-  latest: { date: string; value: number } | null;
-  observations: Array<{ date: string; value: number }>;
+export function parseFredCsv(csv: string) {
+  const lines = csv.trim().split(/\r?\n/);
+  if (!/^(observation_date|DATE),/i.test(lines[0] ?? ""))
+    throw new Error("Invalid FRED CSV header");
+  return lines
+    .slice(1)
+    .flatMap((line) => {
+      const [date, raw] = line.split(",");
+      if (
+        !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+        !Number.isFinite(Date.parse(date))
+      )
+        return [];
+      return [{ date, value: numeric(raw) }];
+    })
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
-
-export interface MacroContextSnapshot {
-  source: "Federal Reserve Economic Data";
-  refreshedAt: string;
-  series: MacroSeries[];
-}
-
-let cached: MacroContextSnapshot | null = null;
-let refreshing: Promise<MacroContextSnapshot> | null = null;
-
-function parseFredCsv(csv: string): Array<{ date: string; value: number }> {
-  return csv.trim().split(/\r?\n/).slice(1).flatMap((line) => {
-    const [date, rawValue] = line.split(",");
-    const cleanedValue = rawValue?.trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !cleanedValue || cleanedValue === ".") return [];
-    const value = Number(cleanedValue);
-    return Number.isFinite(value) ? [{ date, value }] : [];
-  });
-}
-
-async function buildSnapshot(): Promise<MacroContextSnapshot> {
-  const cutoff = Date.now() - 370 * 86_400_000;
-  const series = await Promise.all(SERIES.map(async (definition): Promise<MacroSeries> => {
-    const sourceUrl = `https://fred.stlouisfed.org/series/${definition.id}`;
-    const response = await fetch(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=${definition.id}`, {
-      headers: { Accept: "text/csv" },
-      signal: AbortSignal.timeout(20_000),
-    });
-    if (!response.ok) throw new Error(`FRED ${definition.id} request failed (${response.status})`);
-    const all = parseFredCsv(await response.text());
-    const observations = all.filter((point) => Date.parse(point.date) >= cutoff);
-    return { ...definition, sourceUrl, latest: all.at(-1) ?? null, observations };
-  }));
-  return { source: "Federal Reserve Economic Data", refreshedAt: new Date().toISOString(), series };
-}
-
-export async function getMacroContext(force = false): Promise<MacroContextSnapshot> {
-  const isFresh = cached && Date.now() - Date.parse(cached.refreshedAt) < REFRESH_INTERVAL_MS;
-  if (!force && cached && isFresh) return cached;
-  if (!force && refreshing) return refreshing;
-  refreshing = buildSnapshot().then((snapshot) => {
-    cached = snapshot;
-    return snapshot;
-  }).finally(() => { refreshing = null; });
-  return refreshing;
+const readers = SERIES.map(([id, label, unit, source_id]) => {
+  const source_url = `https://fred.stlouisfed.org/series/${id}`;
+  const meta = {
+    metric_id: id,
+    label,
+    unit,
+    source_id,
+    source: "FRED",
+    source_url,
+    methodology_note:
+      "Official daily observations; missing observations remain gaps. Freshness tolerance is five calendar days to accommodate non-publication days.",
+    coverage_note:
+      "Macro environment only; not issuer realised portfolio return, stablecoin demand causality or risk probability.",
+  };
+  const load = createSnapshotCache(async () => {
+    const r = await fetch(
+      `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${id}`,
+      { headers: { Accept: "text/csv" }, signal: AbortSignal.timeout(20_000) },
+    );
+    if (!r.ok) throw new Error(`FRED ${id}: ${r.status}`);
+    const all = parseFredCsv(await r.text());
+    const latest = all
+      .filter((p) => p.value !== null && Date.parse(p.date) <= Date.now())
+      .at(-1);
+    if (!latest) throw new Error(`FRED ${id}: no valid observation`);
+    return {
+      id,
+      metric: metric(
+        {
+          ...meta,
+          value: latest.value,
+          observation_time: latest.date,
+          last_successful_fetch: new Date().toISOString(),
+        },
+        5 * DAY,
+      ),
+      observations: all.filter(
+        (p) => Date.parse(p.date) >= Date.now() - 370 * DAY,
+      ),
+    };
+  }, DAY);
+  return async (force = false) => {
+    try {
+      return await load(force);
+    } catch {
+      return { id, metric: metric({ ...meta, value: null }), observations: [] };
+    }
+  };
+});
+export async function getMacroContext(force = false) {
+  return {
+    version: "0.2",
+    series: await Promise.all(readers.map((read) => read(force))),
+  };
 }

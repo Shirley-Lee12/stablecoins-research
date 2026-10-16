@@ -1,0 +1,35 @@
+{
+  "metric_card": {
+    "FRESH": {
+      "value": "show latest valid value",
+      "badge": "Live / fresh",
+      "timestamp": "observation time",
+      "chart": "render if enough valid points"
+    },
+    "DELAYED": {
+      "value": "show latest valid value",
+      "badge": "Delayed",
+      "timestamp": "latest valid observation time",
+      "chart": "render valid history, visually flag delayed status"
+    },
+    "LAST_SUCCESSFUL_SNAPSHOT": {
+      "value": "show last valid value",
+      "badge": "Last successful snapshot",
+      "timestamp": "last valid observation time",
+      "chart": "render historical series only through last valid observation"
+    },
+    "REPORT_SNAPSHOT": {
+      "value": "show report value",
+      "badge": "Report snapshot",
+      "timestamp": "report period + publication date",
+      "chart": "render only within report-defined period"
+    },
+    "UNAVAILABLE": {
+      "value": null,
+      "badge": "Unavailable",
+      "timestamp": "optional last attempt",
+      "chart": "do not render fake zero/blank full-height plot"
+    }
+  },
+  "zero_rule": "Only render numeric 0 when a valid source observation explicitly equals zero."
+}

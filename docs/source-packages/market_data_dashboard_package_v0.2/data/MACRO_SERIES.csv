@@ -1,0 +1,12 @@
+﻿series_id,name,unit,frequency,use,boundary
+SOFR,Secured Overnight Financing Rate,Percent,Daily,Short-term secured USD funding,Do not equate with stablecoin reserve portfolio yield
+EFFR,Effective Federal Funds Rate,Percent,Daily,Unsecured overnight federal-funds environment,Can be optional if SOFR shown
+DGS3MO,3-Month Treasury Constant Maturity,Percent,Daily,Short Treasury yield environment relevant to reserve assets,Market yield ≠ realised issuer yield
+DGS2,2-Year Treasury Constant Maturity,Percent,Daily,Medium-short curve point,Use with curve chart
+DGS10,10-Year Treasury Constant Maturity,Percent,Daily,Longer-duration market yield / rate-risk backdrop,Do not imply issuer holds 10Y bonds
+DTWEXBGS,Nominal Broad U.S. Dollar Index,Index Jan 2006=100,Daily,Broad USD environment,Correlation is not causal stablecoin-demand evidence
+RRPONTSYD,Overnight Reverse Repo Amount,Billions USD,Daily,Money-market liquidity background,Own axis; low balance is still a valid observed value
+VIXCLS,CBOE VIX,Index,Daily close,Cross-market stress context,Not stablecoin risk probability
+DEXCHUS,CNY per USD,CNY per USD,Daily,China FX background,Quote direction explicit
+DEXHKUS,HKD per USD,HKD per USD,Daily,Hong Kong FX background,Quote direction explicit
+DEXSIUS,SGD per USD,SGD per USD,Daily,Singapore FX background,Quote direction explicit

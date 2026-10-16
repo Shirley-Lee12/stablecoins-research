@@ -1,0 +1,14 @@
+﻿source,public_mode,status,approved_use,expected_refresh,boundary
+DefiLlama stablecoin endpoints,DYNAMIC,READY,Use for tracked circulating value/history/chain distribution/prices where field semantics are validated,~24h site cache,Dynamic source; display source-specific observation time where available
+Binance Spot API,DYNAMIC_COLLECTOR,READY_IF_EXISTING_COLLECTOR_HEALTHY,Selected pair spread/depth/slippage only,~10m collector; delayed >30m,No whole-market liquidity claim
+DEX Screener,DYNAMIC_COLLECTOR,READY_IF_EXISTING_COLLECTOR_HEALTHY,Selected pool price/liquidity/24h volume,same liquidity cycle,Pool liquidity != order-book depth/slippage
+CoinGecko price history,DYNAMIC_METHOD_HOLD,PARTIAL,Current price/deviation allowed after asset-target/source QA; event history hidden until validation,collector-specific,Hourly interval supports up to 100 days via explicit interval on current API; longer windows need separate method
+Etherscan supply/events,CONDITIONAL_DYNAMIC,PARTIAL,Selected Ethereum supply/issuance only after contract/event semantic QA,existing ~1h logic,Do not equate raw mint events with circulating issuance
+Etherscan holder list,HOLD,NOT_PUBLIC,Do not publish holder concentration yet,n/a,PRO Standard+ endpoint; address classification needed
+Artemis raw/adjusted/P2P APIs,API_IF_LICENSED,LICENSE_REQUIRED,Use only when API key/licensing/redistribution is confirmed,source-defined,Adjusted and P2P metrics retain Artemis methodology labels
+Artemis payment report 2025,REPORT_SNAPSHOT,READY,Dated attributable-payment evidence only,Jan 2023–Aug 2025,Not a live 2026 market total
+FRED macro series,DYNAMIC,READY,Rates/yields/USD/RRP/VIX/FX,~24h site cache,Keep source units and observation dates
+Circle transparency,DYNAMIC_PRIMARY_PAGE,READY,USDC current reserve/circulation snapshot and issuance/redemption if parser/API is stable,page current snapshot,Company financials separate
+Tether reserve disclosure,REPORT_SNAPSHOT,READY,Latest verified quarterly reserve attestation,quarterly,Q2 2026 baseline; annual audit separate
+Paxos PYUSD transparency,REPORT_SNAPSHOT,READY,Monthly reports/attestations,monthly,Self-report and attestation are distinct documents
+FDUSD transparency,REPORT_SNAPSHOT,READY_WITH_FIELD_QA,Monthly reserve snapshot/attestation,monthly,Do not hard-code scraped composition percentages without report-level QA

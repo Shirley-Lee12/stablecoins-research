@@ -1,0 +1,1504 @@
+{
+  "version": "0.2",
+  "baseline": "2026-10-16",
+  "sources": [
+    {
+      "source_id": "SRC-MD-01",
+      "topic": "Market supply",
+      "organization": "DefiLlama",
+      "title": "Stablecoins API",
+      "date_or_snapshot": "current",
+      "url": "https://api-docs.defillama.com/",
+      "source_type": "OFFICIAL_DATA_API",
+      "use_for": "Free stablecoin endpoints: current circulating amounts, historical aggregate, chain distribution, prices",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-02",
+      "topic": "CEX liquidity",
+      "organization": "Binance",
+      "title": "Spot REST API — Market",
+      "date_or_snapshot": "current",
+      "url": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market",
+      "source_type": "VENUE_OFFICIAL_API",
+      "use_for": "Selected pair book ticker, order book, trades/volume; compute spread/depth/slippage only for sampled pairs",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-03",
+      "topic": "DEX liquidity",
+      "organization": "DEX Screener",
+      "title": "API Reference",
+      "date_or_snapshot": "current",
+      "url": "https://docs.dexscreener.com/api/reference",
+      "source_type": "DATA_PROVIDER_API",
+      "use_for": "Selected pool price, volume and pool liquidity; not order-book depth/slippage",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-04",
+      "topic": "Price history / depeg",
+      "organization": "CoinGecko",
+      "title": "Coin Historical Chart Data by ID",
+      "date_or_snapshot": "current",
+      "url": "https://docs.coingecko.com/reference/coins-id-market-chart",
+      "source_type": "DATA_PROVIDER_API",
+      "use_for": "Historical price series; 2–90 days auto-hourly; explicit plan/key constraints",
+      "site_mode": "DYNAMIC_REQUIRES_CREDENTIAL_QA",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-05",
+      "topic": "Ethereum supply",
+      "organization": "Etherscan",
+      "title": "ERC20 TotalSupply endpoint",
+      "date_or_snapshot": "current",
+      "url": "https://docs.etherscan.io/api-reference/endpoint/tokensupply",
+      "source_type": "EXPLORER_OFFICIAL_API",
+      "use_for": "Ethereum token total supply; token semantics must be verified per contract",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-06",
+      "topic": "Ethereum holders",
+      "organization": "Etherscan",
+      "title": "Token Holder List endpoint",
+      "date_or_snapshot": "current",
+      "url": "https://docs.etherscan.io/api-reference/endpoint/tokenholderlist",
+      "source_type": "EXPLORER_OFFICIAL_API",
+      "use_for": "Raw holder list; currently PRO/Standard plan+; concentration requires address-classification QA",
+      "site_mode": "DYNAMIC_REQUIRES_PLAN",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-07",
+      "topic": "On-chain activity",
+      "organization": "Artemis",
+      "title": "Stablecoins Overview",
+      "date_or_snapshot": "current",
+      "url": "https://www.artemis.ai/sectors/stablecoins/overview",
+      "source_type": "DATA_PROVIDER_DASHBOARD",
+      "use_for": "Public dashboard reference for supply, transfer volume, active addresses; public visibility ≠ redistribution license",
+      "site_mode": "SOURCE_ONLY_OR_MANUAL",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-08",
+      "topic": "On-chain adjusted volume",
+      "organization": "Artemis",
+      "title": "Artemis-filtered Stablecoin Transfer Volume API",
+      "date_or_snapshot": "current",
+      "url": "https://app.artemisanalytics.com/docs/api-reference/stablecoins/fetch-artemis-filtered-stablecoin-transfer-volume",
+      "source_type": "DATA_PROVIDER_API",
+      "use_for": "Adjusted transfer volume removes deduped/intra-exchange/MEV per Artemis methodology; API key required",
+      "site_mode": "DYNAMIC_REQUIRES_LICENSE_KEY",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-09",
+      "topic": "On-chain P2P",
+      "organization": "Artemis",
+      "title": "P2P Stablecoin Transfer Volume API",
+      "date_or_snapshot": "current",
+      "url": "https://app.artemisanalytics.com/docs/api-reference/stablecoins/fetch-p2p-stablecoin-transfer-volume",
+      "source_type": "DATA_PROVIDER_API",
+      "use_for": "Wallet-to-wallet P2P transfer volume; API key required",
+      "site_mode": "DYNAMIC_REQUIRES_LICENSE_KEY",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-10",
+      "topic": "Adoption",
+      "organization": "Artemis",
+      "title": "Stablecoin Payments from the Ground Up 2025",
+      "date_or_snapshot": "2025-10",
+      "url": "https://reports.artemisanalytics.com/stablecoins/artemis-stablecoin-payments-from-the-ground-up-2025.pdf",
+      "source_type": "RESEARCH_REPORT",
+      "use_for": "Dated sampled attributable payments Jan 2023–Aug 2025; 22 surveyed + 11 estimated firms",
+      "site_mode": "REPORT_SNAPSHOT",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-11",
+      "topic": "Adoption methodology",
+      "organization": "Artemis",
+      "title": "An Empirical Analysis of Stablecoin Payment Usage on Ethereum",
+      "date_or_snapshot": "2025-12-19",
+      "url": "https://about.artemis.ai/resources/an-empirical-analysis-of-stablecoin-payment-usage-on-ethereum",
+      "source_type": "RESEARCH_REPORT",
+      "use_for": "Payment-vs-other-activity classification methodology context",
+      "site_mode": "REPORT_SNAPSHOT",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-12",
+      "topic": "Macro",
+      "organization": "FRED / NY Fed",
+      "title": "SOFR",
+      "date_or_snapshot": "current",
+      "url": "https://fred.stlouisfed.org/series/SOFR",
+      "source_type": "OFFICIAL_STATISTICAL_SERIES",
+      "use_for": "Secured overnight dollar funding rate; daily, percent",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-13",
+      "topic": "Macro",
+      "organization": "FRED / Federal Reserve",
+      "title": "EFFR",
+      "date_or_snapshot": "current",
+      "url": "https://fred.stlouisfed.org/series/EFFR",
+      "source_type": "OFFICIAL_STATISTICAL_SERIES",
+      "use_for": "Effective federal funds rate; daily, percent",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-14",
+      "topic": "Macro",
+      "organization": "FRED / Federal Reserve",
+      "title": "DGS3MO / DGS2 / DGS10",
+      "date_or_snapshot": "current",
+      "url": "https://fred.stlouisfed.org/series/DGS3MO",
+      "source_type": "OFFICIAL_STATISTICAL_SERIES",
+      "use_for": "Treasury constant-maturity yields; daily percent; use as market environment, not issuer realised return",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-15",
+      "topic": "Macro",
+      "organization": "FRED / Federal Reserve",
+      "title": "Nominal Broad U.S. Dollar Index (DTWEXBGS)",
+      "date_or_snapshot": "current",
+      "url": "https://fred.stlouisfed.org/series/DTWEXBGS",
+      "source_type": "OFFICIAL_STATISTICAL_SERIES",
+      "use_for": "Broad USD index, Jan 2006=100",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-16",
+      "topic": "Macro",
+      "organization": "FRED / NY Fed",
+      "title": "RRPONTSYD",
+      "date_or_snapshot": "current",
+      "url": "https://fred.stlouisfed.org/series/RRPONTSYD",
+      "source_type": "OFFICIAL_STATISTICAL_SERIES",
+      "use_for": "Overnight reverse repo amount; billions USD; do not share axis with rates",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-17",
+      "topic": "Macro",
+      "organization": "FRED / CBOE",
+      "title": "VIXCLS",
+      "date_or_snapshot": "current",
+      "url": "https://fred.stlouisfed.org/series/VIXCLS",
+      "source_type": "OFFICIAL_STATISTICAL_SERIES",
+      "use_for": "Equity implied-volatility background variable; not stablecoin risk probability",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-18",
+      "topic": "Macro Asia FX",
+      "organization": "FRED / Federal Reserve",
+      "title": "DEXCHUS / DEXHKUS / DEXSIUS",
+      "date_or_snapshot": "current",
+      "url": "https://fred.stlouisfed.org/series/DEXCHUS",
+      "source_type": "OFFICIAL_STATISTICAL_SERIES",
+      "use_for": "CNY/HKD/SGD per USD daily spot series; explicit quote direction required",
+      "site_mode": "DYNAMIC_CANDIDATE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-19",
+      "topic": "Issuer reserves",
+      "organization": "Circle",
+      "title": "Transparency & Stability",
+      "date_or_snapshot": "2026-10-12 snapshot visible 2026-10-16",
+      "url": "https://www.circle.com/transparency",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "USDC circulation, reserves, composition, issuance/redemption; monthly reserve attestations / dynamic reserves",
+      "site_mode": "MANUAL_PLUS_DYNAMIC_SOURCE",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-20",
+      "topic": "Issuer financials",
+      "organization": "Circle",
+      "title": "Investor Relations — Q2 2026",
+      "date_or_snapshot": "2026-08-05",
+      "url": "https://investor.circle.com/overview/default.aspx",
+      "source_type": "ISSUER_FINANCIAL_DISCLOSURE",
+      "use_for": "Latest verified quarter as of baseline; company-level financials separate from reserve backing",
+      "site_mode": "REPORT_SNAPSHOT",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-21",
+      "topic": "Issuer reserves",
+      "organization": "Tether",
+      "title": "Q2 2026 attestation announcement",
+      "date_or_snapshot": "2026-07-31",
+      "url": "https://tether.io/news/tether-posts-strong-q2-performance-generates-1-5b-net-operating-profit-maintains-4-11b-reserve-buffer-and-expands-gold-holdings-to-more-than-146-tons/",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Latest verified reserve attestation as of baseline; period end 2026-06-30",
+      "site_mode": "REPORT_SNAPSHOT",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-22",
+      "topic": "Issuer audit",
+      "organization": "Tether",
+      "title": "2025 financial statement audit announcement",
+      "date_or_snapshot": "2026-08-13",
+      "url": "https://tether.io/news/tether-completes-the-largest-inaugural-financial-audit-in-history/",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Full 2025 financial statement audit distinct from quarterly reserve attestation",
+      "site_mode": "REPORT_SNAPSHOT",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-23",
+      "topic": "Issuer reserves",
+      "organization": "Paxos",
+      "title": "PYUSD Transparency Reports",
+      "date_or_snapshot": "2026 reports through Aug visible",
+      "url": "https://www.paxos.com/pyusd-transparency",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Monthly reserve reports/attestations; KPMG from Feb 2025 onward",
+      "site_mode": "REPORT_SNAPSHOT",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-MD-24",
+      "topic": "Issuer reserves",
+      "organization": "First Digital Labs",
+      "title": "FDUSD Transparency",
+      "date_or_snapshot": "2026-08-31 snapshot visible",
+      "url": "https://www.firstdigitallabs.com/transparency",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Monthly reserve reporting/attestation and direct-client redemption conditions",
+      "site_mode": "REPORT_SNAPSHOT",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    }
+  ],
+  "pages": [
+    {
+      "route": "/dashboard",
+      "title_zh": "稳定币数据仪表盘",
+      "title_en": "Stablecoin Dashboard",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "general;research;enterprise",
+      "primary_question": "今天最值得看的稳定币市场信号是什么？",
+      "module_order": "hero>core-signals>data-health>links",
+      "visual_assets": "DASH-C01;DASH-C02;DASH-C03",
+      "boundary": "At most 4–6 signals; no research-count KPIs"
+    },
+    {
+      "route": "/market-data",
+      "title_zh": "市场数据",
+      "title_en": "Market Data",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "general;research;enterprise",
+      "primary_question": "这些数据分别回答什么问题，能不能直接比较？",
+      "module_order": "hero>five-questions>methodology>source-status",
+      "visual_assets": "DATA-MAP",
+      "boundary": "Data map, not another dashboard"
+    },
+    {
+      "route": "/market-data/market",
+      "title_zh": "市场规模、价格与流动性",
+      "title_en": "Market Size, Price & Liquidity",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "research;enterprise",
+      "primary_question": "规模、价格偏离和交易流动性分别是什么？",
+      "module_order": "hero>supply>price-stability>cex-liquidity>dex-liquidity>method",
+      "visual_assets": "MKT-C01;MKT-C02;MKT-C03;MKT-C04;MKT-C05;MKT-C06",
+      "boundary": "No merged CEX/DEX liquidity metric"
+    },
+    {
+      "route": "/market-data/on-chain",
+      "title_zh": "链上活动",
+      "title_en": "On-chain Activity",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "research;enterprise",
+      "primary_question": "链上供应和转移活动如何解释，哪些不是支付？",
+      "module_order": "hero>chain-supply>activity-hierarchy>addresses>issuance>holders",
+      "visual_assets": "CHAIN-C01;CHAIN-C02;CHAIN-C03;CHAIN-C04",
+      "boundary": "Holder concentration HOLD until classification QA"
+    },
+    {
+      "route": "/market-data/issuers-reserves",
+      "title_zh": "发行方、储备与赎回",
+      "title_en": "Issuers, Reserves & Redemption",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "research;enterprise",
+      "primary_question": "储备由什么组成、谁核验、谁能赎回、披露有多新？",
+      "module_order": "hero>issuer-table>assurance-ladder>issuer-profiles>economics-boundary",
+      "visual_assets": "ISS-C01;ISS-C02",
+      "boundary": "Attestation != audit; company profit separate"
+    },
+    {
+      "route": "/market-data/macro",
+      "title_zh": "宏观环境",
+      "title_en": "Macro Environment",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "research;enterprise",
+      "primary_question": "利率、美元、流动性与风险情绪处于什么环境？",
+      "module_order": "hero>short-rates>curve>dollar>stress>rrp>asia-fx",
+      "visual_assets": "MAC-C01;MAC-C02;MAC-C03;MAC-C04;MAC-C05;MAC-C06",
+      "boundary": "Environment, not causal stablecoin risk"
+    },
+    {
+      "route": "/market-data/adoption",
+      "title_zh": "支付与实际使用",
+      "title_en": "Payments & Observed Use",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "research;enterprise;general",
+      "primary_question": "哪些活动真正能够归因到支付与实际使用？",
+      "module_order": "hero>payment-sample>categories>evidence-classes>issuer-activity>links",
+      "visual_assets": "ADOPT-C01;ADOPT-C02;ADOPT-C03",
+      "boundary": "Report sample != total live market"
+    }
+  ],
+  "datasets": [
+    {
+      "dataset_id": "DS-MKT-SUPPLY",
+      "dataset": "DefiLlama stablecoins",
+      "page_group": "Market",
+      "metrics": "tracked circulating value; history; chain distribution; stablecoin prices",
+      "mode": "API",
+      "expected_site_refresh": "~24h site cache",
+      "allowed_states": "FRESH/DELAYED/LAST_SUCCESSFUL",
+      "access_scope": "No auth for free endpoints",
+      "public_use": "Dynamic source",
+      "critical_boundary": "Do not label all outputs 'market cap' without field-level check"
+    },
+    {
+      "dataset_id": "DS-CEX-LIQ",
+      "dataset": "Binance selected spot pairs",
+      "page_group": "Market",
+      "metrics": "best bid/ask; spread; order-book depth; simulated slippage; venue volume",
+      "mode": "Collector/API",
+      "expected_site_refresh": "~10m existing collector; delayed >30m",
+      "allowed_states": "FRESH/DELAYED/LAST_SUCCESSFUL",
+      "access_scope": "Selected venue/pairs only",
+      "public_use": "Dynamic",
+      "critical_boundary": "Always show pair, quote, timestamp and order size"
+    },
+    {
+      "dataset_id": "DS-DEX-LIQ",
+      "dataset": "DEX Screener selected pools",
+      "page_group": "Market",
+      "metrics": "pool liquidity; price; 24h volume",
+      "mode": "Collector/API",
+      "expected_site_refresh": "same liquidity cycle",
+      "allowed_states": "FRESH/DELAYED/LAST_SUCCESSFUL",
+      "access_scope": "Selected pools only",
+      "public_use": "Dynamic",
+      "critical_boundary": "Pool liquidity is not order-book depth or route slippage"
+    },
+    {
+      "dataset_id": "DS-DEPEG",
+      "dataset": "CoinGecko selected stablecoins",
+      "page_group": "Market",
+      "metrics": "historical prices and exploratory depeg events",
+      "mode": "Collector/API",
+      "expected_site_refresh": "~30m collector; delayed >90m",
+      "allowed_states": "FRESH/DELAYED/LAST_SUCCESSFUL/UNAVAILABLE",
+      "access_scope": "Credential/plan to verify",
+      "public_use": "Dynamic only after QA",
+      "critical_boundary": "Not a risk probability"
+    },
+    {
+      "dataset_id": "DS-CHAIN-SUPPLY",
+      "dataset": "DefiLlama stablecoinchains",
+      "page_group": "On-chain",
+      "metrics": "tracked circulating value by chain",
+      "mode": "API",
+      "expected_site_refresh": "~24h site cache",
+      "allowed_states": "FRESH/DELAYED/LAST_SUCCESSFUL",
+      "access_scope": "Bridged/native classification needs care",
+      "public_use": "Dynamic",
+      "critical_boundary": "Do not double count wrapped representations without definition"
+    },
+    {
+      "dataset_id": "DS-ARTEMIS-ACTIVITY",
+      "dataset": "Artemis activity",
+      "page_group": "On-chain",
+      "metrics": "raw/adjusted transfer volume; addresses; P2P",
+      "mode": "API or dated snapshot",
+      "expected_site_refresh": "Manual unless licensed API configured",
+      "allowed_states": "REPORT_SNAPSHOT or API freshness",
+      "access_scope": "API key / redistribution rights to verify",
+      "public_use": "Manual/source-only until confirmed",
+      "critical_boundary": "Adjusted methodology must be named"
+    },
+    {
+      "dataset_id": "DS-ETH-ISSUANCE",
+      "dataset": "Etherscan selected Ethereum contracts",
+      "page_group": "On-chain",
+      "metrics": "mint/burn/supply/treasury flows",
+      "mode": "Collector/API",
+      "expected_site_refresh": "~1h existing logic; delayed >3h",
+      "allowed_states": "FRESH/DELAYED/LAST_SUCCESSFUL/UNAVAILABLE",
+      "access_scope": "Contract-event semantics require per-token validation",
+      "public_use": "Conditional dynamic",
+      "critical_boundary": "Do not call every Transfer from zero address 'circulating issuance' without validation"
+    },
+    {
+      "dataset_id": "DS-ETH-HOLDERS",
+      "dataset": "Etherscan holders",
+      "page_group": "On-chain",
+      "metrics": "raw holder list / concentration research",
+      "mode": "API",
+      "expected_site_refresh": "plan dependent",
+      "allowed_states": "UNAVAILABLE until plan/labels verified",
+      "access_scope": "Holder endpoint Standard plan+; address labels needed",
+      "public_use": "HOLD",
+      "critical_boundary": "Raw concentration can be distorted by exchanges/bridges/treasury"
+    },
+    {
+      "dataset_id": "DS-ISSUER",
+      "dataset": "Issuer disclosures",
+      "page_group": "Issuers",
+      "metrics": "reserves; circulation; assurance; redemption; report freshness",
+      "mode": "Manual primary-source registry",
+      "expected_site_refresh": "per disclosure",
+      "allowed_states": "REPORT_SNAPSHOT",
+      "access_scope": "Issuer-specific scope",
+      "public_use": "Manual",
+      "critical_boundary": "Report period and publication date separate"
+    },
+    {
+      "dataset_id": "DS-FRED",
+      "dataset": "FRED macro series",
+      "page_group": "Macro",
+      "metrics": "rates; Treasury yields; dollar; RRP; VIX; Asia FX",
+      "mode": "Official CSV/API",
+      "expected_site_refresh": "~24h site cache; source-specific frequency",
+      "allowed_states": "FRESH/DELAYED/LAST_SUCCESSFUL",
+      "access_scope": "Series units differ",
+      "public_use": "Dynamic",
+      "critical_boundary": "Do not force unlike units onto same axis"
+    },
+    {
+      "dataset_id": "DS-ADOPTION-REPORT",
+      "dataset": "Artemis payments report",
+      "page_group": "Adoption",
+      "metrics": "attributable sampled payment volume/categories/providers",
+      "mode": "Report",
+      "expected_site_refresh": "period Jan 2023–Aug 2025",
+      "allowed_states": "REPORT_SNAPSHOT",
+      "access_scope": "Sample/report, not full market",
+      "public_use": "Static dated research evidence",
+      "critical_boundary": "Never call a live total market volume"
+    },
+    {
+      "dataset_id": "DS-ISSUER-ACTIVITY",
+      "dataset": "Issuer-reported adoption/activity",
+      "page_group": "Adoption",
+      "metrics": "wallets; network participants; on-chain volumes; payment-network activity",
+      "mode": "Manual report snapshots",
+      "expected_site_refresh": "per report",
+      "allowed_states": "REPORT_SNAPSHOT",
+      "access_scope": "Issuer-defined metrics",
+      "public_use": "Static dated evidence",
+      "critical_boundary": "Do not add to Artemis payments"
+    }
+  ],
+  "metrics": [
+    {
+      "metric_id": "MKT_TOTAL_TRACKED_USD",
+      "label_en": "Tracked stablecoin circulating value",
+      "unit": "USD",
+      "page_group": "Market",
+      "source": "DefiLlama",
+      "formula_or_definition": "sum current tracked stablecoin USD value",
+      "time_semantics": "Current snapshot",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Tracked universe; do not imply all stablecoins globally",
+      "status": "READY"
+    },
+    {
+      "metric_id": "MKT_TOP2_SHARE",
+      "label_en": "Top-2 supply concentration",
+      "unit": "%",
+      "page_group": "Market",
+      "source": "Derived from DefiLlama",
+      "formula_or_definition": "(largest two tracked values / total tracked value)*100",
+      "time_semantics": "Same snapshot",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Supply concentration, not trading/liquidity concentration",
+      "status": "READY"
+    },
+    {
+      "metric_id": "MKT_30D_NET_CHANGE",
+      "label_en": "30-day net change in tracked circulating value",
+      "unit": "USD / %",
+      "page_group": "Market",
+      "source": "DefiLlama history",
+      "formula_or_definition": "current minus 30-day prior comparable snapshot",
+      "time_semantics": "30d",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Method must use same universe/field semantics where possible",
+      "status": "READY"
+    },
+    {
+      "metric_id": "MKT_PRICE_DEV_BPS",
+      "label_en": "Absolute price deviation from target",
+      "unit": "basis points",
+      "page_group": "Market",
+      "source": "CoinGecko",
+      "formula_or_definition": "abs(price/target-1)*10000",
+      "time_semantics": "Observation",
+      "mode": "Dynamic after QA",
+      "interpretation_boundary": "Only for assets with verified target and source coverage",
+      "status": "QA_REQUIRED"
+    },
+    {
+      "metric_id": "MKT_CEX_SPREAD_BPS",
+      "label_en": "CEX quoted spread",
+      "unit": "basis points",
+      "page_group": "Market",
+      "source": "Binance",
+      "formula_or_definition": "(ask-bid)/mid*10000",
+      "time_semantics": "Point-in-time",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Selected exchange/pair only",
+      "status": "READY_IF_COLLECTOR"
+    },
+    {
+      "metric_id": "MKT_CEX_BID_DEPTH_2PCT",
+      "label_en": "CEX bid depth within 2%",
+      "unit": "USD quote value",
+      "page_group": "Market",
+      "source": "Binance order book",
+      "formula_or_definition": "sum bid notional at prices >= mid*0.98",
+      "time_semantics": "Point-in-time",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Selected pair; quote conversion specified",
+      "status": "READY_IF_COLLECTOR"
+    },
+    {
+      "metric_id": "MKT_CEX_ASK_DEPTH_2PCT",
+      "label_en": "CEX ask depth within 2%",
+      "unit": "USD quote value",
+      "page_group": "Market",
+      "source": "Binance order book",
+      "formula_or_definition": "sum ask notional at prices <= mid*1.02",
+      "time_semantics": "Point-in-time",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Selected pair; quote conversion specified",
+      "status": "READY_IF_COLLECTOR"
+    },
+    {
+      "metric_id": "MKT_CEX_SLIPPAGE",
+      "label_en": "Simulated CEX market-order slippage",
+      "unit": "basis points",
+      "page_group": "Market",
+      "source": "Binance order book",
+      "formula_or_definition": "VWAP slippage for explicit side/notional vs midpoint",
+      "time_semantics": "Point-in-time",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Must display side, order notional and book timestamp",
+      "status": "READY_IF_COLLECTOR"
+    },
+    {
+      "metric_id": "MKT_DEX_POOL_LIQ",
+      "label_en": "DEX pool liquidity",
+      "unit": "USD",
+      "page_group": "Market",
+      "source": "DEX Screener",
+      "formula_or_definition": "provider liquidity.usd for selected pool",
+      "time_semantics": "Provider snapshot",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Pool liquidity ≠ order-book depth ≠ route execution",
+      "status": "READY_IF_COLLECTOR"
+    },
+    {
+      "metric_id": "MKT_DEX_VOL_24H",
+      "label_en": "DEX pool 24h volume",
+      "unit": "USD",
+      "page_group": "Market",
+      "source": "DEX Screener",
+      "formula_or_definition": "provider 24h volume for selected pool",
+      "time_semantics": "24h",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Selected pool only; not whole DEX/stablecoin market",
+      "status": "READY_IF_COLLECTOR"
+    },
+    {
+      "metric_id": "CHAIN_SUPPLY_USD",
+      "label_en": "Tracked stablecoin value by chain",
+      "unit": "USD",
+      "page_group": "On-chain",
+      "source": "DefiLlama",
+      "formula_or_definition": "provider current value by chain",
+      "time_semantics": "Current snapshot",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Native/bridged representation treatment disclosed",
+      "status": "READY"
+    },
+    {
+      "metric_id": "CHAIN_RAW_TRANSFER",
+      "label_en": "Raw stablecoin transfer volume",
+      "unit": "USD",
+      "page_group": "On-chain",
+      "source": "Artemis",
+      "formula_or_definition": "raw transfer metric",
+      "time_semantics": "day/week/month",
+      "mode": "API/report",
+      "interpretation_boundary": "Includes non-payment activity",
+      "status": "LICENSE_REQUIRED"
+    },
+    {
+      "metric_id": "CHAIN_ADJ_TRANSFER",
+      "label_en": "Artemis-adjusted stablecoin transfer volume",
+      "unit": "USD",
+      "page_group": "On-chain",
+      "source": "Artemis",
+      "formula_or_definition": "provider-adjusted metric",
+      "time_semantics": "day/week/month",
+      "mode": "API/report",
+      "interpretation_boundary": "Deduped and excludes intra-exchange + MEV per Artemis method",
+      "status": "LICENSE_REQUIRED"
+    },
+    {
+      "metric_id": "CHAIN_P2P_TRANSFER",
+      "label_en": "P2P stablecoin transfer volume",
+      "unit": "USD",
+      "page_group": "On-chain",
+      "source": "Artemis",
+      "formula_or_definition": "wallet-to-wallet P2P metric",
+      "time_semantics": "day/week/month",
+      "mode": "API/report",
+      "interpretation_boundary": "P2P transfer still not identical to merchant/payment adoption",
+      "status": "LICENSE_REQUIRED"
+    },
+    {
+      "metric_id": "CHAIN_ACTIVE_ADDR",
+      "label_en": "Active stablecoin addresses",
+      "unit": "addresses",
+      "page_group": "On-chain",
+      "source": "Artemis",
+      "formula_or_definition": "provider definition",
+      "time_semantics": "daily/period",
+      "mode": "API/report",
+      "interpretation_boundary": "Address != unique person; source methodology required",
+      "status": "LICENSE_REQUIRED"
+    },
+    {
+      "metric_id": "ETH_NET_ISSUANCE",
+      "label_en": "Ethereum net issuance",
+      "unit": "tokens / USD",
+      "page_group": "On-chain",
+      "source": "Etherscan + validated event semantics",
+      "formula_or_definition": "validated mint minus burn",
+      "time_semantics": "day",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Per-contract event meaning must be validated first",
+      "status": "QA_REQUIRED"
+    },
+    {
+      "metric_id": "ETH_HOLDER_CONC",
+      "label_en": "Top-holder concentration",
+      "unit": "%",
+      "page_group": "On-chain",
+      "source": "Etherscan + labels",
+      "formula_or_definition": "top-N balances / verified supply after exclusion policy",
+      "time_semantics": "snapshot",
+      "mode": "HOLD",
+      "interpretation_boundary": "Exchange/bridge/treasury labels can dominate raw result",
+      "status": "HOLD"
+    },
+    {
+      "metric_id": "ISS_RESERVE_COVERAGE",
+      "label_en": "Reported reserve coverage",
+      "unit": "ratio / %",
+      "page_group": "Issuers",
+      "source": "Issuer disclosure",
+      "formula_or_definition": "reported reserve assets / reported stablecoin liabilities or circulation",
+      "time_semantics": "report period",
+      "mode": "Report snapshot",
+      "interpretation_boundary": "Use issuer's scope; do not invent cross-issuer comparability",
+      "status": "READY_MANUAL"
+    },
+    {
+      "metric_id": "ISS_DISCLOSURE_LAG",
+      "label_en": "Disclosure lag",
+      "unit": "days",
+      "page_group": "Issuers",
+      "source": "Derived",
+      "formula_or_definition": "publication date - report period end",
+      "time_semantics": "per report",
+      "mode": "Report snapshot",
+      "interpretation_boundary": "Publication timestamp required",
+      "status": "READY_MANUAL"
+    },
+    {
+      "metric_id": "ISS_ASSURANCE_TYPE",
+      "label_en": "Assurance type",
+      "unit": "category",
+      "page_group": "Issuers",
+      "source": "Issuer / accountant",
+      "formula_or_definition": "attestation / examination / audit / other",
+      "time_semantics": "per report",
+      "mode": "Report snapshot",
+      "interpretation_boundary": "Attestation ≠ audit",
+      "status": "READY_MANUAL"
+    },
+    {
+      "metric_id": "MACRO_USD_SHORT",
+      "label_en": "USD short-rate environment",
+      "unit": "%",
+      "page_group": "Macro",
+      "source": "FRED SOFR/EFFR/DGS3MO",
+      "formula_or_definition": "raw official series",
+      "time_semantics": "daily",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Not issuer realised reserve yield",
+      "status": "READY"
+    },
+    {
+      "metric_id": "MACRO_CURVE",
+      "label_en": "Treasury curve points",
+      "unit": "%",
+      "page_group": "Macro",
+      "source": "FRED DGS3MO/DGS2/DGS10",
+      "formula_or_definition": "raw official series",
+      "time_semantics": "daily",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Market yields; no claim on issuer portfolio duration",
+      "status": "READY"
+    },
+    {
+      "metric_id": "MACRO_USD_INDEX",
+      "label_en": "Broad USD index",
+      "unit": "index",
+      "page_group": "Macro",
+      "source": "FRED DTWEXBGS",
+      "formula_or_definition": "raw official series",
+      "time_semantics": "daily",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Do not infer stablecoin demand causally",
+      "status": "READY"
+    },
+    {
+      "metric_id": "MACRO_RRP",
+      "label_en": "Overnight reverse repo amount",
+      "unit": "USD bn",
+      "page_group": "Macro",
+      "source": "FRED RRPONTSYD",
+      "formula_or_definition": "raw official series",
+      "time_semantics": "daily",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Separate axis from rates",
+      "status": "READY"
+    },
+    {
+      "metric_id": "MACRO_VIX",
+      "label_en": "VIX",
+      "unit": "index",
+      "page_group": "Macro",
+      "source": "FRED VIXCLS",
+      "formula_or_definition": "raw official series",
+      "time_semantics": "daily close",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Market-stress context only, not stablecoin risk probability",
+      "status": "READY"
+    },
+    {
+      "metric_id": "MACRO_ASIA_FX",
+      "label_en": "Asia FX vs USD",
+      "unit": "local currency per USD",
+      "page_group": "Macro",
+      "source": "FRED DEXCHUS/DEXHKUS/DEXSIUS",
+      "formula_or_definition": "raw official series",
+      "time_semantics": "daily",
+      "mode": "Dynamic",
+      "interpretation_boundary": "Quote direction explicit; compare normalized index if charting together",
+      "status": "READY"
+    },
+    {
+      "metric_id": "ADOPT_PAYMENT_CUM",
+      "label_en": "Attributable sampled stablecoin payments",
+      "unit": "USD",
+      "page_group": "Adoption",
+      "source": "Artemis 2025 report",
+      "formula_or_definition": "report total",
+      "time_semantics": "Jan 2023–Aug 2025",
+      "mode": "Report snapshot",
+      "interpretation_boundary": "Sampled/estimated firms; not entire market",
+      "status": "READY_REPORT"
+    },
+    {
+      "metric_id": "ADOPT_PAYMENT_RUNRATE",
+      "label_en": "Sample payment annualised run rate",
+      "unit": "USD/year",
+      "page_group": "Adoption",
+      "source": "Artemis 2025 report",
+      "formula_or_definition": "provider annualisation as of Aug 2025",
+      "time_semantics": "Aug 2025",
+      "mode": "Report snapshot",
+      "interpretation_boundary": "Dated sample estimate",
+      "status": "READY_REPORT"
+    },
+    {
+      "metric_id": "ADOPT_PAYMENT_CATEGORY",
+      "label_en": "Payment category run rate",
+      "unit": "USD/year",
+      "page_group": "Adoption",
+      "source": "Artemis 2025 report",
+      "formula_or_definition": "provider category figures",
+      "time_semantics": "Aug 2025",
+      "mode": "Report snapshot",
+      "interpretation_boundary": "B2B/P2P/card/B2C/prefunding sample",
+      "status": "READY_REPORT"
+    },
+    {
+      "metric_id": "ADOPT_ISSUER_ACTIVITY",
+      "label_en": "Issuer-reported activity metric",
+      "unit": "source-defined",
+      "page_group": "Adoption",
+      "source": "Issuer report",
+      "formula_or_definition": "no cross-source aggregation",
+      "time_semantics": "report period",
+      "mode": "Report snapshot",
+      "interpretation_boundary": "Must preserve issuer definition; not automatically payment volume",
+      "status": "READY_MANUAL"
+    }
+  ],
+  "modes": [
+    {
+      "source": "DefiLlama stablecoin endpoints",
+      "public_mode": "DYNAMIC",
+      "status": "READY",
+      "approved_use": "Use for tracked circulating value/history/chain distribution/prices where field semantics are validated",
+      "expected_refresh": "~24h site cache",
+      "boundary": "Dynamic source; display source-specific observation time where available"
+    },
+    {
+      "source": "Binance Spot API",
+      "public_mode": "DYNAMIC_COLLECTOR",
+      "status": "READY_IF_EXISTING_COLLECTOR_HEALTHY",
+      "approved_use": "Selected pair spread/depth/slippage only",
+      "expected_refresh": "~10m collector; delayed >30m",
+      "boundary": "No whole-market liquidity claim"
+    },
+    {
+      "source": "DEX Screener",
+      "public_mode": "DYNAMIC_COLLECTOR",
+      "status": "READY_IF_EXISTING_COLLECTOR_HEALTHY",
+      "approved_use": "Selected pool price/liquidity/24h volume",
+      "expected_refresh": "same liquidity cycle",
+      "boundary": "Pool liquidity != order-book depth/slippage"
+    },
+    {
+      "source": "CoinGecko price history",
+      "public_mode": "DYNAMIC_METHOD_HOLD",
+      "status": "PARTIAL",
+      "approved_use": "Current price/deviation allowed after asset-target/source QA; event history hidden until validation",
+      "expected_refresh": "collector-specific",
+      "boundary": "Hourly interval supports up to 100 days via explicit interval on current API; longer windows need separate method"
+    },
+    {
+      "source": "Etherscan supply/events",
+      "public_mode": "CONDITIONAL_DYNAMIC",
+      "status": "PARTIAL",
+      "approved_use": "Selected Ethereum supply/issuance only after contract/event semantic QA",
+      "expected_refresh": "existing ~1h logic",
+      "boundary": "Do not equate raw mint events with circulating issuance"
+    },
+    {
+      "source": "Etherscan holder list",
+      "public_mode": "HOLD",
+      "status": "NOT_PUBLIC",
+      "approved_use": "Do not publish holder concentration yet",
+      "expected_refresh": "n/a",
+      "boundary": "PRO Standard+ endpoint; address classification needed"
+    },
+    {
+      "source": "Artemis raw/adjusted/P2P APIs",
+      "public_mode": "API_IF_LICENSED",
+      "status": "LICENSE_REQUIRED",
+      "approved_use": "Use only when API key/licensing/redistribution is confirmed",
+      "expected_refresh": "source-defined",
+      "boundary": "Adjusted and P2P metrics retain Artemis methodology labels"
+    },
+    {
+      "source": "Artemis payment report 2025",
+      "public_mode": "REPORT_SNAPSHOT",
+      "status": "READY",
+      "approved_use": "Dated attributable-payment evidence only",
+      "expected_refresh": "Jan 2023–Aug 2025",
+      "boundary": "Not a live 2026 market total"
+    },
+    {
+      "source": "FRED macro series",
+      "public_mode": "DYNAMIC",
+      "status": "READY",
+      "approved_use": "Rates/yields/USD/RRP/VIX/FX",
+      "expected_refresh": "~24h site cache",
+      "boundary": "Keep source units and observation dates"
+    },
+    {
+      "source": "Circle transparency",
+      "public_mode": "DYNAMIC_PRIMARY_PAGE",
+      "status": "READY",
+      "approved_use": "USDC current reserve/circulation snapshot and issuance/redemption if parser/API is stable",
+      "expected_refresh": "page current snapshot",
+      "boundary": "Company financials separate"
+    },
+    {
+      "source": "Tether reserve disclosure",
+      "public_mode": "REPORT_SNAPSHOT",
+      "status": "READY",
+      "approved_use": "Latest verified quarterly reserve attestation",
+      "expected_refresh": "quarterly",
+      "boundary": "Q2 2026 baseline; annual audit separate"
+    },
+    {
+      "source": "Paxos PYUSD transparency",
+      "public_mode": "REPORT_SNAPSHOT",
+      "status": "READY",
+      "approved_use": "Monthly reports/attestations",
+      "expected_refresh": "monthly",
+      "boundary": "Self-report and attestation are distinct documents"
+    },
+    {
+      "source": "FDUSD transparency",
+      "public_mode": "REPORT_SNAPSHOT",
+      "status": "READY_WITH_FIELD_QA",
+      "approved_use": "Monthly reserve snapshot/attestation",
+      "expected_refresh": "monthly",
+      "boundary": "Do not hard-code scraped composition percentages without report-level QA"
+    }
+  ],
+  "charts": [
+    {
+      "asset_id": "DASH-C01",
+      "route": "/dashboard",
+      "visual_type": "KPI cluster",
+      "mode": "Dynamic",
+      "metrics": "MKT_TOTAL_TRACKED_USD;MKT_TOP2_SHARE;MKT_30D_NET_CHANGE",
+      "axes_or_structure": "No sparkline unless history is valid",
+      "hard_boundary": "Each card has source/time/freshness; missing != zero"
+    },
+    {
+      "asset_id": "DASH-C02",
+      "route": "/dashboard",
+      "visual_type": "Context card",
+      "mode": "Dynamic",
+      "metrics": "DGS3MO",
+      "axes_or_structure": "Single latest observation + 30d context optional",
+      "hard_boundary": "Label as macro environment, not reserve yield"
+    },
+    {
+      "asset_id": "DASH-C03",
+      "route": "/dashboard",
+      "visual_type": "Data health",
+      "mode": "Dynamic",
+      "metrics": "collector/source states",
+      "axes_or_structure": "Status rows",
+      "hard_boundary": "Expose delayed/unavailable instead of empty dashboard"
+    },
+    {
+      "asset_id": "MKT-C01",
+      "route": "/market-data/market",
+      "visual_type": "Line chart",
+      "mode": "Dynamic",
+      "metrics": "MKT_TOTAL_TRACKED_USD",
+      "axes_or_structure": "Time → USD",
+      "hard_boundary": "Tracked circulating value history; source coverage note"
+    },
+    {
+      "asset_id": "MKT-C02",
+      "route": "/market-data/market",
+      "visual_type": "Horizontal bars",
+      "mode": "Dynamic",
+      "metrics": "Top stablecoins",
+      "axes_or_structure": "USD",
+      "hard_boundary": "Same snapshot; no volume implication"
+    },
+    {
+      "asset_id": "MKT-C03",
+      "route": "/market-data/market",
+      "visual_type": "Concentration card/line",
+      "mode": "Dynamic",
+      "metrics": "MKT_TOP2_SHARE",
+      "axes_or_structure": "%",
+      "hard_boundary": "Supply concentration only"
+    },
+    {
+      "asset_id": "MKT-C04",
+      "route": "/market-data/market",
+      "visual_type": "Price deviation table",
+      "mode": "Dynamic after QA",
+      "metrics": "MKT_PRICE_DEV_BPS",
+      "axes_or_structure": "bps",
+      "hard_boundary": "No depeg probability language"
+    },
+    {
+      "asset_id": "MKT-C05",
+      "route": "/market-data/market",
+      "visual_type": "CEX liquidity table",
+      "mode": "Dynamic",
+      "metrics": "spread;bid depth;ask depth;slippage",
+      "axes_or_structure": "pair-specific",
+      "hard_boundary": "Show exchange/pair/order size/book time"
+    },
+    {
+      "asset_id": "MKT-C06",
+      "route": "/market-data/market",
+      "visual_type": "DEX pool table",
+      "mode": "Dynamic",
+      "metrics": "pool liquidity;24h volume;price",
+      "axes_or_structure": "pool-specific",
+      "hard_boundary": "No 2% depth/slippage label"
+    },
+    {
+      "asset_id": "CHAIN-C01",
+      "route": "/market-data/on-chain",
+      "visual_type": "Stacked / ranked chart",
+      "mode": "Dynamic",
+      "metrics": "CHAIN_SUPPLY_USD",
+      "axes_or_structure": "chain → USD",
+      "hard_boundary": "Native/bridged methodology note"
+    },
+    {
+      "asset_id": "CHAIN-C02",
+      "route": "/market-data/on-chain",
+      "visual_type": "Activity hierarchy",
+      "mode": "Data/report dependent",
+      "metrics": "raw;adjusted;P2P transfer volume",
+      "axes_or_structure": "USD",
+      "hard_boundary": "Only compare if same provider/window; payments remain separate"
+    },
+    {
+      "asset_id": "CHAIN-C03",
+      "route": "/market-data/on-chain",
+      "visual_type": "Active address chart",
+      "mode": "Data/report dependent",
+      "metrics": "CHAIN_ACTIVE_ADDR",
+      "axes_or_structure": "addresses",
+      "hard_boundary": "Address ≠ user"
+    },
+    {
+      "asset_id": "CHAIN-C04",
+      "route": "/market-data/on-chain",
+      "visual_type": "Ethereum issuance module",
+      "mode": "Conditional",
+      "metrics": "ETH_NET_ISSUANCE",
+      "axes_or_structure": "token/USD",
+      "hard_boundary": "Only after per-contract semantic QA"
+    },
+    {
+      "asset_id": "ISS-C01",
+      "route": "/market-data/issuers-reserves",
+      "visual_type": "Comparison table",
+      "mode": "Report-driven",
+      "metrics": "issuer disclosure schema",
+      "axes_or_structure": "mixed fields",
+      "hard_boundary": "Report period and publication date separate"
+    },
+    {
+      "asset_id": "ISS-C02",
+      "route": "/market-data/issuers-reserves",
+      "visual_type": "Assurance ladder",
+      "mode": "Static explanatory UI",
+      "metrics": "self-report;attestation;audit",
+      "axes_or_structure": "categorical",
+      "hard_boundary": "Not a quality ranking; explains scope"
+    },
+    {
+      "asset_id": "MAC-C01",
+      "route": "/market-data/macro",
+      "visual_type": "Line chart",
+      "mode": "Dynamic",
+      "metrics": "SOFR;DGS3MO",
+      "axes_or_structure": "%",
+      "hard_boundary": "Same percent axis; distinct definitions"
+    },
+    {
+      "asset_id": "MAC-C02",
+      "route": "/market-data/macro",
+      "visual_type": "Line chart",
+      "mode": "Dynamic",
+      "metrics": "DGS3MO;DGS2;DGS10",
+      "axes_or_structure": "%",
+      "hard_boundary": "Treasury curve context"
+    },
+    {
+      "asset_id": "MAC-C03",
+      "route": "/market-data/macro",
+      "visual_type": "Line chart",
+      "mode": "Dynamic",
+      "metrics": "DTWEXBGS",
+      "axes_or_structure": "index",
+      "hard_boundary": "No causal claim"
+    },
+    {
+      "asset_id": "MAC-C04",
+      "route": "/market-data/macro",
+      "visual_type": "Line chart",
+      "mode": "Dynamic",
+      "metrics": "VIXCLS",
+      "axes_or_structure": "index",
+      "hard_boundary": "Market stress only"
+    },
+    {
+      "asset_id": "MAC-C05",
+      "route": "/market-data/macro",
+      "visual_type": "Line chart",
+      "mode": "Dynamic",
+      "metrics": "RRPONTSYD",
+      "axes_or_structure": "USD bn",
+      "hard_boundary": "Separate axis/chart"
+    },
+    {
+      "asset_id": "MAC-C06",
+      "route": "/market-data/macro",
+      "visual_type": "Normalized lines",
+      "mode": "Dynamic",
+      "metrics": "DEXCHUS;DEXHKUS;DEXSIUS",
+      "axes_or_structure": "base=100; tooltip raw units",
+      "hard_boundary": "Raw quote is local currency per USD"
+    },
+    {
+      "asset_id": "ADOPT-C01",
+      "route": "/market-data/adoption",
+      "visual_type": "Dated research KPI block",
+      "mode": "Report snapshot",
+      "metrics": "ADOPT_PAYMENT_CUM;ADOPT_PAYMENT_RUNRATE",
+      "axes_or_structure": "USD",
+      "hard_boundary": "Explicit Jan 2023–Aug 2025 sample"
+    },
+    {
+      "asset_id": "ADOPT-C02",
+      "route": "/market-data/adoption",
+      "visual_type": "Bars",
+      "mode": "Report snapshot",
+      "metrics": "ADOPT_PAYMENT_CATEGORY",
+      "axes_or_structure": "annualized USD",
+      "hard_boundary": "B2B/P2P/Card/B2C/Prefunding, report sample"
+    },
+    {
+      "asset_id": "ADOPT-C03",
+      "route": "/market-data/adoption",
+      "visual_type": "Evidence-class matrix",
+      "mode": "Mixed",
+      "metrics": "payments;on-chain activity;issuer metrics",
+      "axes_or_structure": "categorical",
+      "hard_boundary": "Never sum evidence classes"
+    }
+  ],
+  "issuers": [
+    {
+      "token": "USDT",
+      "issuer": "Tether International",
+      "latest_verified_period_or_snapshot": "2026-06-30",
+      "publication": "2026-07-31",
+      "assurance_scope": "Quarterly reserve attestation / financial figures & reserves report",
+      "assurance_provider": "BDO",
+      "baseline_note": "Latest verified reserve attestation at baseline; company also released audited 2025 financial statements on 2026-08-13",
+      "redemption_boundary": "Eligible direct redemption under issuer terms; do not assume all secondary holders share identical access",
+      "source_ids": "SRC-MD-21;SRC-MD-22"
+    },
+    {
+      "token": "USDC",
+      "issuer": "Circle",
+      "latest_verified_period_or_snapshot": "2026-10-12 current transparency snapshot",
+      "publication": "dynamic page",
+      "assurance_scope": "Reserve transparency + monthly reserve attestations; public-company financial reporting separate",
+      "assurance_provider": "Big Four monthly attestation per Circle disclosure",
+      "baseline_note": "Dynamic reserves page showed circulation/reserves dated 2026-10-12 at baseline",
+      "redemption_boundary": "Circle Mint/direct issuer access eligibility differs from general secondary holding",
+      "source_ids": "SRC-MD-19;SRC-MD-20"
+    },
+    {
+      "token": "PYUSD",
+      "issuer": "Paxos Trust Company",
+      "latest_verified_period_or_snapshot": "2026 reports through Aug visible",
+      "publication": "monthly publication",
+      "assurance_scope": "Monthly reserve reports and attestations",
+      "assurance_provider": "KPMG from Feb 2025 onward",
+      "baseline_note": "Use latest available report at implementation time; do not fill missing month",
+      "redemption_boundary": "Direct redemption subject to Paxos account/product terms",
+      "source_ids": "SRC-MD-23"
+    },
+    {
+      "token": "FDUSD",
+      "issuer": "FD121 (BVI) / First Digital Labs",
+      "latest_verified_period_or_snapshot": "2026-08-31 snapshot visible",
+      "publication": "monthly publication",
+      "assurance_scope": "Monthly reserve reports / independent attestation",
+      "assurance_provider": "Independent third party; exact report provider should come from report",
+      "baseline_note": "Do not copy scraped reserve-category percentages without report-level QA",
+      "redemption_boundary": "Direct purchase/redeem restricted to qualified clients; secondary access broader",
+      "source_ids": "SRC-MD-24"
+    }
+  ],
+  "signals": [
+    {
+      "signal_id": "DASH-01",
+      "public_label": "Tracked stablecoin circulating value",
+      "metric_or_source": "MKT_TOTAL_TRACKED_USD",
+      "freshness_rule": "LIVE/FRESH or LAST_SUCCESSFUL",
+      "why_it_matters": "Primary current market size signal",
+      "boundary": "Do not call payment volume or trading volume"
+    },
+    {
+      "signal_id": "DASH-02",
+      "public_label": "Top-2 supply concentration",
+      "metric_or_source": "MKT_TOP2_SHARE",
+      "freshness_rule": "same DefiLlama snapshot",
+      "why_it_matters": "Structural concentration signal",
+      "boundary": "Supply concentration only"
+    },
+    {
+      "signal_id": "DASH-03",
+      "public_label": "30-day net supply change",
+      "metric_or_source": "MKT_30D_NET_CHANGE",
+      "freshness_rule": "same provider/history",
+      "why_it_matters": "Direction of aggregate supply change",
+      "boundary": "No causal interpretation"
+    },
+    {
+      "signal_id": "DASH-04",
+      "public_label": "3-month Treasury yield",
+      "metric_or_source": "DGS3MO / MACRO_USD_SHORT",
+      "freshness_rule": "latest FRED observation",
+      "why_it_matters": "Reserve-income environment proxy",
+      "boundary": "Not issuer realised yield"
+    },
+    {
+      "signal_id": "DASH-05",
+      "public_label": "Selected market liquidity status",
+      "metric_or_source": "CEX spread/depth freshness",
+      "freshness_rule": "only if collector healthy",
+      "why_it_matters": "Show health/availability rather than invented aggregate liquidity",
+      "boundary": "Selected venue/pairs only"
+    },
+    {
+      "signal_id": "DASH-06",
+      "public_label": "Latest adoption evidence",
+      "metric_or_source": "ADOPT_PAYMENT_RUNRATE or report card",
+      "freshness_rule": "REPORT_SNAPSHOT",
+      "why_it_matters": "Link to dated adoption research",
+      "boundary": "Must show Aug 2025 sample date; not live KPI"
+    }
+  ],
+  "macro": [
+    {
+      "series_id": "SOFR",
+      "name": "Secured Overnight Financing Rate",
+      "unit": "Percent",
+      "frequency": "Daily",
+      "use": "Short-term secured USD funding",
+      "boundary": "Do not equate with stablecoin reserve portfolio yield"
+    },
+    {
+      "series_id": "EFFR",
+      "name": "Effective Federal Funds Rate",
+      "unit": "Percent",
+      "frequency": "Daily",
+      "use": "Unsecured overnight federal-funds environment",
+      "boundary": "Can be optional if SOFR shown"
+    },
+    {
+      "series_id": "DGS3MO",
+      "name": "3-Month Treasury Constant Maturity",
+      "unit": "Percent",
+      "frequency": "Daily",
+      "use": "Short Treasury yield environment relevant to reserve assets",
+      "boundary": "Market yield ≠ realised issuer yield"
+    },
+    {
+      "series_id": "DGS2",
+      "name": "2-Year Treasury Constant Maturity",
+      "unit": "Percent",
+      "frequency": "Daily",
+      "use": "Medium-short curve point",
+      "boundary": "Use with curve chart"
+    },
+    {
+      "series_id": "DGS10",
+      "name": "10-Year Treasury Constant Maturity",
+      "unit": "Percent",
+      "frequency": "Daily",
+      "use": "Longer-duration market yield / rate-risk backdrop",
+      "boundary": "Do not imply issuer holds 10Y bonds"
+    },
+    {
+      "series_id": "DTWEXBGS",
+      "name": "Nominal Broad U.S. Dollar Index",
+      "unit": "Index Jan 2006=100",
+      "frequency": "Daily",
+      "use": "Broad USD environment",
+      "boundary": "Correlation is not causal stablecoin-demand evidence"
+    },
+    {
+      "series_id": "RRPONTSYD",
+      "name": "Overnight Reverse Repo Amount",
+      "unit": "Billions USD",
+      "frequency": "Daily",
+      "use": "Money-market liquidity background",
+      "boundary": "Own axis; low balance is still a valid observed value"
+    },
+    {
+      "series_id": "VIXCLS",
+      "name": "CBOE VIX",
+      "unit": "Index",
+      "frequency": "Daily close",
+      "use": "Cross-market stress context",
+      "boundary": "Not stablecoin risk probability"
+    },
+    {
+      "series_id": "DEXCHUS",
+      "name": "CNY per USD",
+      "unit": "CNY per USD",
+      "frequency": "Daily",
+      "use": "China FX background",
+      "boundary": "Quote direction explicit"
+    },
+    {
+      "series_id": "DEXHKUS",
+      "name": "HKD per USD",
+      "unit": "HKD per USD",
+      "frequency": "Daily",
+      "use": "Hong Kong FX background",
+      "boundary": "Quote direction explicit"
+    },
+    {
+      "series_id": "DEXSIUS",
+      "name": "SGD per USD",
+      "unit": "SGD per USD",
+      "frequency": "Daily",
+      "use": "Singapore FX background",
+      "boundary": "Quote direction explicit"
+    }
+  ],
+  "contract": {
+    "metric_contract": {
+      "required": [
+        "metric_id",
+        "label",
+        "value",
+        "unit",
+        "source_id",
+        "freshness_state",
+        "methodology_note",
+        "coverage_note"
+      ],
+      "time": {
+        "dynamic": "observation_time",
+        "report": "report_period_end",
+        "publication_date": "required when materially distinct from report period",
+        "fetch_time": "operational only; never substitute for observation time"
+      },
+      "value_rules": {
+        "null": "must remain null/unavailable",
+        "zero": "valid only if explicitly observed",
+        "failed_fetch": "must not overwrite last valid observation with zero/null without preserving state"
+      }
+    },
+    "page_rules": {
+      "/dashboard": {
+        "max_primary_signals": 6,
+        "depeg_events_public": false,
+        "risk_probability_public": false
+      },
+      "/market-data/market": {
+        "cex_dex_merged_liquidity": false,
+        "depeg_event_history_public": false
+      },
+      "/market-data/on-chain": {
+        "holder_concentration_public": false
+      },
+      "/market-data/issuers-reserves": {
+        "reserve_quality_score_public": false
+      },
+      "/market-data/adoption": {
+        "cross_evidence_sum_allowed": false
+      }
+    }
+  },
+  "copy": {
+    "en": "# Market Data + Dashboard｜Content Master en V0.1\n\n## `/dashboard`\n### Stablecoin signals worth checking today\nShow no more than 4–6 well-defined signals:\n- tracked stablecoin circulating value;\n- top-two supply concentration;\n- 30-day net supply change;\n- 3-month Treasury yield as macro context;\n- selected-market liquidity health, only when the collector is healthy;\n- the latest dated adoption-evidence card.\n\nNever turn missing data into zero.\nDo not use research counts or resource counts as market KPIs.\n\n## `/market-data`\n### Define the metric before showing the chart\nOrganise the section around five questions:\nMarket / On-chain / Issuers & reserves / Macro / Adoption.\n\nEach panel has its own source, timestamp, coverage and freshness state.\nDo not create a false impression that all sources update in real time.\n\n## `/market-data/market`\n### Supply, price stability and trading liquidity are different concepts\n\nUse `Tracked circulating value (USD)` for the main DefiLlama-derived size measure unless field-level implementation proves a different definition.\n\nCEX:\nselected venue/pair only; show pair, timestamp, spread, separate bid/ask 2% depth, and simulated slippage for an explicit order size.\n\nDEX:\nselected pool liquidity and volume only.\n\n`DEX pool liquidity ≠ CEX order-book depth ≠ route-level executable slippage.`\n\nObserved price deviation is not a depeg probability.\n\n## `/market-data/on-chain`\n### High transfer activity does not automatically mean high payment adoption\n\nSeparate:\n- supply by chain;\n- raw transfer volume;\n- adjusted transfer volume;\n- P2P transfer volume;\n- active addresses;\n- selected Ethereum issuance research.\n\nAddress ≠ user.\n\nPublic holder-concentration metrics remain on hold until address classification and exclusion rules are validated.\n\n## `/market-data/issuers-reserves`\n### Compare disclosure scopes before comparing reserve numbers\n\nCore fields:\nreport period / publication date / circulation or liabilities covered / reserve composition / assurance type / assurance provider / direct redemption eligibility / limitations.\n\n`Attestation ≠ financial-statement audit.`\n\nTether:\nlatest verified reserve attestation at this baseline is Q2 2026 (period end 30 June 2026, published 31 July 2026). Tether separately announced an unqualified KPMG audit opinion on its 2025 financial statements on 13 August 2026.\n\nCircle:\ncontinuous transparency/reserve page plus monthly reserve attestations; company financial reporting is a separate disclosure layer.\n\nPaxos PYUSD:\nmonthly reserve reports/attestations; KPMG listed from February 2025 onward.\n\nFDUSD:\nmonthly reserve disclosure/attestation; direct issuer purchase/redemption eligibility differs from secondary-market access.\n\nCompany profit may be shown only as a separately labelled company-level metric.\n\n## `/market-data/macro`\n### Macro data describe the environment; they do not establish stablecoin causality\n\nCharts:\n1. SOFR + DGS3MO (optionally EFFR)\n2. DGS3MO / DGS2 / DGS10 Treasury curve\n3. DTWEXBGS broad dollar\n4. VIXCLS market-stress context\n5. RRPONTSYD money-market liquidity\n6. optional normalized Asia FX panel using DEXCHUS / DEXHKUS / DEXSIUS\n\nAlways preserve units and quote direction.\n\n## `/market-data/adoption`\n### Adoption evidence must identify who is using stablecoins, for what, and in what sample\n\nArtemis 2025 report is a dated sample:\n- 22 surveyed firms + 11 estimated firms;\n- Jan 2023–Aug 2025;\n- $136B attributable payments in the study period;\n- $122B annualised run rate as of Aug 2025.\n\nThese are not a live 2026 total-market measure.\n\nKeep separate:\n- attributable payment research;\n- on-chain activity;\n- issuer-reported network/distribution metrics.\n\nDo not add these evidence classes together.\n",
+    "zh": "# Market Data + Dashboard｜Content Master zh-CN V0.1\n\n> 所有数字必须来自结构化数据对象；正文不硬编码会快速变化的市场数字。\n\n---\n\n# 1. `/dashboard`｜稳定币数据仪表盘\n\n## HERO\n**H1** 今天值得看的稳定币信号\n\n**Lead**  \n这里不追求“指标越多越好”。只展示定义清楚、来源可核验、时间状态明确的少数市场信号，再把用户引向完整数据页。\n\n## Core signals\n最多 6 个：\n1. **追踪稳定币流通价值** — DefiLlama 动态数据\n2. **Top-2 供应集中度** — 与总量同一快照计算\n3. **30 日流通价值净变化** — 同口径历史序列\n4. **3 个月美债收益率** — FRED，作为储备收益环境背景，不是发行方实际回报\n5. **选定交易场所流动性状态** — 有健康快照才展示，不构造“全市场流动性”\n6. **最新采用证据** — 报告快照卡，必须显示研究期间和样本范围\n\n## Data health\n每张卡显示：\n- observation / report date\n- source\n- freshness\n- methodology tooltip\n\n如果当前抓取失败：\n显示 `上次成功快照：YYYY-MM-DD HH:mm`\n而不是 `0`。\n\n## Links\n市场 / 链上 / 发行方储备 / 宏观 / 采用\n\n**禁止**\n- 55 风险、机制数量、辖区数量、资源数量作为 Dashboard KPI\n- 实时风险概率\n- 实时脱锚概率\n\n---\n\n# 2. `/market-data`｜市场数据概览\n\n## HERO\n**H1** 先定义指标，再看图表\n\n**Lead**  \n稳定币的“规模、流动性、链上活动、储备、宏观环境和采用”来自不同数据体系。它们不能被压成一个统一的“市场活跃度”。\n\n## Five questions\n\n### 01 市场\n**问题：** 市场有多大？供应是否集中？选定交易场所是否流动？价格是否偏离目标？\n\n数据：\n- tracked circulating value\n- supply concentration\n- price deviation / event history\n- selected CEX spread / depth / simulated slippage\n- selected DEX pool volume / liquidity\n\n### 02 链上\n**问题：** 稳定币在哪些链上存在？链上转移活动如何？\n\n数据：\n- supply by chain\n- raw transfer volume\n- adjusted transfer volume\n- P2P transfer volume\n- active addresses\n- selected Ethereum issuance / holder research\n\n### 03 发行方与储备\n**问题：** 什么资产支持赎回？披露与核验有多及时？\n\n数据：\n- circulation/liabilities covered\n- reserve composition\n- assurance type\n- report period / publication date\n- redemption eligibility\n\n### 04 宏观\n**问题：** 美元利率、国债收益率、美元强弱与市场压力处于什么环境？\n\n数据：\n- SOFR / EFFR\n- DGS3MO / DGS2 / DGS10\n- broad USD\n- RRP\n- VIX\n- selected Asia FX\n\n### 05 采用\n**问题：** 哪些活动可以真正归因到支付、结算或具体使用渠道？\n\n区分：\n- attributable payment research\n- on-chain activity\n- issuer-reported network/distribution metrics\n\n## Methodology warning\n不同来源的覆盖、更新频率、样本和许可不同。每个图表独立显示来源与时间，不做“统一实时”假象。\n\n---\n\n# 3. `/market-data/market`｜市场规模、价格与流动性\n\n## HERO\n**H1** 供应规模、价格稳定与交易流动性是三件不同的事\n\n## A. Supply\n### 追踪稳定币流通价值\n使用 DefiLlama stablecoins 数据。\n\n公共标签优先用：\n**Tracked circulating value (USD)**\n\n除非字段级验证完成，不把所有数据简单写成“market cap”。\n\n图表：\n- aggregate history\n- top stablecoins\n- 30d net change\n- top-2 / top-5 concentration\n\n## B. Price stability\n展示：\n- current price vs verified target\n- deviation in bps\n- event history only after methodology QA\n\n**边界**\n价格偏离是观测，不是未来脱锚概率。\n\n## C. CEX liquidity — selected venues only\n每个交易对展示：\n- exchange\n- pair\n- timestamp\n- bid / ask\n- spread bps\n- bid depth within 2%\n- ask depth within 2%\n- simulated slippage for explicit order size\n\n不要把一个 Binance pair 称为“全市场流动性”。\n\n## D. DEX liquidity — selected pools only\n展示：\n- chain / DEX / pool\n- pool liquidity USD\n- 24h volume\n- pool price\n\n**明确：**\nDEX pool liquidity ≠ CEX 2% depth ≠ route-level executable slippage.\n\n## E. Failure state\n如果 Binance / DEX / CoinGecko 没有有效快照：\n显示 unavailable / delayed / last-successful，不显示空白大图，也不显示 0。\n\n---\n\n# 4. `/market-data/on-chain`｜链上活动\n\n## HERO\n**H1** 链上转移很多，不等于支付很多\n\n## A. Supply by chain\nDefiLlama 自动更新。\n需要说明 native / bridged 处理和追踪范围。\n\n## B. Activity hierarchy\n依次解释：\n\n### Raw transfer volume\n链上代币转移总量，可能包含交易所内部流转、协议交互、机器人、MEV 和重复经济活动。\n\n### Adjusted transfer volume\n如果使用 Artemis adjusted metric，必须保留其过滤定义。\n\n### P2P transfer volume\nwallet-to-wallet 活动，比 raw transfer 更接近个人间转移，但仍不等于商户支付。\n\n### Attributable payments\n需要付款方/收款方/商户/发票/支付服务商等额外证据，放在 Adoption 页面。\n\n## C. Active addresses\n地址 ≠ 用户。\n一个用户可控制多个地址；托管地址可代表多个用户。\n\n## D. Ethereum issuance\n仅对经过验证的 USDT/USDC 等合约展示。\nMint/burn 事件含义、Treasury 转移与流通发行必须逐币验证。\n\n## E. Holder concentration\n默认 HOLD。\n只有完成 exchange/bridge/treasury 地址分类和排除规则后，才公开集中度指标。\n\n---\n\n# 5. `/market-data/issuers-reserves`｜发行方、储备与赎回\n\n## HERO\n**H1** 比较储备之前，先比较披露口径\n\n**Lead**\n“100% backed”不是一个足够完整的横向比较。还要看资产构成、期限、托管、核验类型、报告时滞和谁能直接赎回。\n\n## Comparison table\n主列：\n- Token / issuer\n- Report period\n- Publication date\n- Circulation / liabilities covered\n- Reserve composition\n- Assurance type\n- Assurance provider\n- Disclosure frequency\n- Direct redemption eligibility\n- Notes / limitations\n\n## Assurance ladder\n### Issuer self-report\n发行方自己的数字。\n\n### Attestation / examination\n独立会计机构针对特定声明和时点执行鉴证程序。\n\n### Financial-statement audit\n对公司完整财务报表执行审计。\n\n**Attestation ≠ financial-statement audit.**\n\n## Current baseline examples\n### Tether / USDT\n截至本基线，最新核验的储备鉴证为 Q2 2026、报告期末 2026-06-30、2026-07-31 发布。Tether 另于 2026-08-13 宣布 KPMG 对 2025 全年财务报表出具无保留审计意见。\n\n不要把年度公司审计与季度储备鉴证混成一个字段。\n\n### Circle / USDC\nCircle transparency 页面持续披露 circulation、reserve composition 与 issuance/redemption，并发布月度储备鉴证。公司季度财报是另一层披露。\n\n### Paxos / PYUSD\n保留每月 reserve reports / attestations；2025-02 起页面列示 KPMG。\n\n### FDUSD\n使用月度储备披露与鉴证；直接 purchase/redeem 面向符合资格的发行方客户，普通二级市场持有人关系不同。\n\n## Issuer economics\n公司级收入/利润可以作为背景，但必须单列：\n`Company-level financial result`\n不得标成某稳定币“产品利润”。\n\n---\n\n# 6. `/market-data/macro`｜宏观环境\n\n## HERO\n**H1** 宏观数据提供环境，不提供稳定币因果结论\n\n## Chart 1｜美元短端利率环境\nSOFR、DGS3MO；必要时 EFFR。\n同为百分比，但含义不同。\n\n解释：\n短端利率与短期储备资产的潜在收益环境相关；不是发行方实际投资组合回报。\n\n## Chart 2｜Treasury curve\nDGS3MO / DGS2 / DGS10。\n\n解释：\n观察期限结构与利率风险环境；不暗示发行方实际持有对应期限。\n\n## Chart 3｜Broad USD\nDTWEXBGS。\n\n解释：\n美元外部价值背景。不要由同步变化直接推出 stablecoin demand 因果关系。\n\n## Chart 4｜Market stress\nVIXCLS。\n\n解释：\n跨市场风险情绪背景，不是“稳定币风险指数”。\n\n## Chart 5｜Money-market liquidity\nRRPONTSYD。\n单位 USD bn，必须单独纵轴。\n\n## Optional｜Asia FX\nDEXCHUS / DEXHKUS / DEXSIUS。\n若同图比较，建议转换为各自基期=100 的归一化指数；tooltip 仍显示原始“本币/1美元”报价。\n\n香港本地利率、阿联酋货币市场指标仍属于后续扩展，不为了对称性硬填。\n\n---\n\n# 7. `/market-data/adoption`｜支付与实际使用\n\n## HERO\n**H1** 采用证据必须回答“谁在用、用于什么、样本有多大”\n\n## Evidence class A｜Attributable payment research\nArtemis 2025 report：\n- 22 家受访公司 + 11 家补充估算\n- 研究期：2023-01 至 2025-08\n- 可归因稳定币支付累计：$136B\n- 2025-08 年化运行规模：$122B\n\n这些数字是**报告样本**，不是 2026 年实时全市场总额。\n\n按报告分类展示：\nB2B / P2P / Card / B2C / Prefunding。\n\n## Evidence class B｜On-chain activity\ntransfer volume / transactions / active addresses。\n\n这些衡量网络活动，不能自动转成支付采用。\n\n## Evidence class C｜Issuer-reported activity\n例如发行方报告的：\n- wallets\n- on-chain volume\n- network participants\n- payment-network activity\n\n必须保留发行方自己的指标定义和报告日期。\n不得与 Artemis sampled payments 相加。\n\n## Cross-link\n“稳定币能做什么” → `/about-stablecoins/applications`\n“实际用了多少” → 本页\n\n## Explicit warning\n不要用：\n- 链上 transfer volume\n- 钱包数量\n- partner/member count\n- token circulation\n\n单独证明“merchant adoption”或“大规模支付采用”。\n"
+  },
+  "hashes": {
+    "00_README.md": "03d4c81c80f5e1cf2c0544dc7941ce5a7cc21d8ae6759ded484e088f21390be0",
+    "01_CURRENT_PAGE_AUDIT.md": "fe908d9561decab8adbc6779ec6de8b58d4cbc8e48c5fb76566dcde075a5419c",
+    "02_DATA_GOVERNANCE.md": "f788d1b5b42e7ba47687804e8dda247bf1cf37ee88fa3689b8ae02282f0e963c",
+    "CODEX_HANDOFF.md": "04b55403f144db4f396b6a6dfde5071347ad5f5491ddbc34a90eaeace916e422",
+    "PACKAGE_INVENTORY.json": "f0f3b0fa372fdd685fda88a0046111e6613c6ab24dc6f995df45b58c3c9e5bcc",
+    "PACKAGE_STATUS.md": "7ef60b72590d77a88c26554c8e857af09aaa20e0b7e4a8f98962b739603eed27",
+    "components/DATA_COMPONENT_STATES.json": "7678865141f963726104ce3f2bb5cba9f06f1103ba8de98732a0644f53996e1a",
+    "components/DATA_HEALTH_COMPONENT_SPEC.md": "6f5644ecb3bcb7aeda298d898930c9f5a7b4da527400659a9ea0be59802b3e81",
+    "components/RESPONSIVE_CHART_SPEC.md": "ab55f753cd053e06054669856154715edb60d594b3017b40a8e6402ef1c29103",
+    "content/CONTENT_MASTER.en.md": "5554b7e9ce20d3f3e16907b8f50735d08c09e0844996af100ddf8395ee54825b",
+    "content/CONTENT_MASTER.zh-CN.md": "cd7f53d71e9f30f908925440ea847e88f9188d6956e2e1bd823a332172c97c34",
+    "data/DASHBOARD_SIGNAL_SPEC.csv": "f07c49ebe3f0f8d67fe545ff2c4ad03cbaaeb4b4844a28881480d072c9dd8ad8",
+    "data/DATASET_REGISTRY.csv": "3494662e438020f7a112f346b92ad5e4d29fdd8ae19f318f55494cbb06f293b5",
+    "data/DATA_HEALTH_SCHEMA.json": "ddfd13957b8c4d560fa23639a1c459e349fadd78d97802e96e286da369400a97",
+    "data/DEPEG_EVENT_METHOD_V0.1.md": "1a688cf1426e9a88d92bdf16d19a054ea96720b5bd3b9649c4e4583056043f18",
+    "data/ISSUER_DISCLOSURE_BASELINE.csv": "ed6104e9a29da19a057910b34875efdc995f9fa723d48c62a4843018b57b71c3",
+    "data/MACRO_SERIES.csv": "ef92d69259049a0a20a3cbc1b29f53452d761e0cb90b5010f7285582f65aa59d",
+    "data/METRIC_DICTIONARY.csv": "cb89245781c7729eb8b925bf0e3cb95ba3e35a18a07caf309ec1938f04eebd3e",
+    "data/PUBLIC_DATA_CONTRACT.json": "545d99721598eaf8a795116fabb9842fe5fd4f662781fefd2ac48f8c682fdb31",
+    "data/SOURCE_MODE_DECISIONS.csv": "329a9008c47c667264c4bfacc78a8e1a41198c4ceb4a5cac4ea0604bb32efd28",
+    "manifests/ASSET_MANIFEST.csv": "ba8e6ad12a4f474b748de7920fe92accf14cf5f7ed60b6cc4056c1afd47615fc",
+    "manifests/PAGE_MANIFEST.csv": "1d12377f75613eee3e88da5806efad4c0019c41ca809c4607110e95de7f19704",
+    "manifests/SOURCE_MANIFEST.csv": "561d2823caea07f13bfe71ad60aa2e7be9011513c6fef2b2e2f96dbe55904aab",
+    "qa/DYNAMIC_VISUAL_QA.md": "f23be8d58aef969ad7e0a70aa1d170682c85ae0ab5465b1ced909c497c5420f7",
+    "qa/FINAL_COPY_QA.md": "80969499f8b6d53ccfe221fda2a480f7169ebe2d5b7c6ced5760a5c5498105dd",
+    "qa/ISSUER_DISCLOSURE_FINAL_QA.md": "fdb94a9165100bb24a637ec623963dcf25cd8a7c44c0989fa0687f0e42a9d29d",
+    "qa/PUBLIC_DEPEG_DISPLAY_DECISION.md": "33a77406bc68e14f5d05497352f1562e781bc6d84b3ae39ad6244f50ce1e31bb",
+    "qa/SOURCE_VERIFICATION_LOG.md": "ec72e9015943b3a00aeb2ed9b2d97389829a87628be0811b903908addf745de4",
+    "reference/current-market-overview-reference.jpg": "b8b77cb32decd38248752b2fdc736a07855b66694b4745677810f7f3adc7ea9c",
+    "visuals/CHART_SPEC.csv": "97d5f1776d561a2da451d05ae6e0654ed5cbb7ef217e866fd002b011a5ee4b3d",
+    "visuals/DYNAMIC_VISUAL_RULES.md": "bc58a18571b08fdc8f3f74401ba00b616ade7e12dcbde5689879c3b14289b6dc"
+  }
+}

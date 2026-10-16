@@ -1,0 +1,45 @@
+{
+  "metric_contract": {
+    "required": [
+      "metric_id",
+      "label",
+      "value",
+      "unit",
+      "source_id",
+      "freshness_state",
+      "methodology_note",
+      "coverage_note"
+    ],
+    "time": {
+      "dynamic": "observation_time",
+      "report": "report_period_end",
+      "publication_date": "required when materially distinct from report period",
+      "fetch_time": "operational only; never substitute for observation time"
+    },
+    "value_rules": {
+      "null": "must remain null/unavailable",
+      "zero": "valid only if explicitly observed",
+      "failed_fetch": "must not overwrite last valid observation with zero/null without preserving state"
+    }
+  },
+  "page_rules": {
+    "/dashboard": {
+      "max_primary_signals": 6,
+      "depeg_events_public": false,
+      "risk_probability_public": false
+    },
+    "/market-data/market": {
+      "cex_dex_merged_liquidity": false,
+      "depeg_event_history_public": false
+    },
+    "/market-data/on-chain": {
+      "holder_concentration_public": false
+    },
+    "/market-data/issuers-reserves": {
+      "reserve_quality_score_public": false
+    },
+    "/market-data/adoption": {
+      "cross_evidence_sum_allowed": false
+    }
+  }
+}

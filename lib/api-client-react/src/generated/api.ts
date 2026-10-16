@@ -30,7 +30,12 @@ import type {
   CountryStat,
   ExtractionInput,
   ExtractionResult,
+  GetObservedStablecoinPrices200,
   GetRegulatoryTimelineParams,
+  GetStablecoinIssuanceStatus200,
+  GetStablecoinLiquidity200,
+  GetStablecoinMacro200,
+  GetStablecoinMarket200,
   HealthStatus,
   ListAdminBackgroundTasksParams,
   ListAdminReviewLogParams,
@@ -69,6 +74,391 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+export const getGetStablecoinMarketUrl = () => {
+
+
+
+
+  return `/api/stablecoin-market`
+}
+
+/**
+ * @summary Tracked USD circulating value and dated history
+ */
+export const getStablecoinMarket = async ( options?: RequestInit): Promise<GetStablecoinMarket200> => {
+
+  return customFetch<GetStablecoinMarket200>(getGetStablecoinMarketUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStablecoinMarketQueryKey = () => {
+    return [
+    `/api/stablecoin-market`
+    ] as const;
+    }
+
+
+export const getGetStablecoinMarketQueryOptions = <TData = Awaited<ReturnType<typeof getStablecoinMarket>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStablecoinMarket>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStablecoinMarketQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStablecoinMarket>>> = ({ signal }) => getStablecoinMarket({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStablecoinMarket>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStablecoinMarketQueryResult = NonNullable<Awaited<ReturnType<typeof getStablecoinMarket>>>
+export type GetStablecoinMarketQueryError = ErrorType<void>
+
+
+/**
+ * @summary Tracked USD circulating value and dated history
+ */
+
+export function useGetStablecoinMarket<TData = Awaited<ReturnType<typeof getStablecoinMarket>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStablecoinMarket>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStablecoinMarketQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetStablecoinMacroUrl = () => {
+
+
+
+
+  return `/api/stablecoin-macro`
+}
+
+/**
+ * @summary FRED series with per-series freshness
+ */
+export const getStablecoinMacro = async ( options?: RequestInit): Promise<GetStablecoinMacro200> => {
+
+  return customFetch<GetStablecoinMacro200>(getGetStablecoinMacroUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStablecoinMacroQueryKey = () => {
+    return [
+    `/api/stablecoin-macro`
+    ] as const;
+    }
+
+
+export const getGetStablecoinMacroQueryOptions = <TData = Awaited<ReturnType<typeof getStablecoinMacro>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStablecoinMacro>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStablecoinMacroQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStablecoinMacro>>> = ({ signal }) => getStablecoinMacro({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStablecoinMacro>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStablecoinMacroQueryResult = NonNullable<Awaited<ReturnType<typeof getStablecoinMacro>>>
+export type GetStablecoinMacroQueryError = ErrorType<void>
+
+
+/**
+ * @summary FRED series with per-series freshness
+ */
+
+export function useGetStablecoinMacro<TData = Awaited<ReturnType<typeof getStablecoinMacro>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStablecoinMacro>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStablecoinMacroQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetStablecoinLiquidityUrl = () => {
+
+
+
+
+  return `/api/stablecoin-liquidity`
+}
+
+/**
+ * @summary Selected CEX pairs and DEX pools, kept separate
+ */
+export const getStablecoinLiquidity = async ( options?: RequestInit): Promise<GetStablecoinLiquidity200> => {
+
+  return customFetch<GetStablecoinLiquidity200>(getGetStablecoinLiquidityUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStablecoinLiquidityQueryKey = () => {
+    return [
+    `/api/stablecoin-liquidity`
+    ] as const;
+    }
+
+
+export const getGetStablecoinLiquidityQueryOptions = <TData = Awaited<ReturnType<typeof getStablecoinLiquidity>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStablecoinLiquidity>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStablecoinLiquidityQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStablecoinLiquidity>>> = ({ signal }) => getStablecoinLiquidity({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStablecoinLiquidity>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStablecoinLiquidityQueryResult = NonNullable<Awaited<ReturnType<typeof getStablecoinLiquidity>>>
+export type GetStablecoinLiquidityQueryError = ErrorType<void>
+
+
+/**
+ * @summary Selected CEX pairs and DEX pools, kept separate
+ */
+
+export function useGetStablecoinLiquidity<TData = Awaited<ReturnType<typeof getStablecoinLiquidity>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStablecoinLiquidity>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStablecoinLiquidityQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetObservedStablecoinPricesUrl = () => {
+
+
+
+
+  return `/api/stablecoin-depegs`
+}
+
+/**
+ * @summary Current observed prices only; event history is not public
+ */
+export const getObservedStablecoinPrices = async ( options?: RequestInit): Promise<GetObservedStablecoinPrices200> => {
+
+  return customFetch<GetObservedStablecoinPrices200>(getGetObservedStablecoinPricesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetObservedStablecoinPricesQueryKey = () => {
+    return [
+    `/api/stablecoin-depegs`
+    ] as const;
+    }
+
+
+export const getGetObservedStablecoinPricesQueryOptions = <TData = Awaited<ReturnType<typeof getObservedStablecoinPrices>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getObservedStablecoinPrices>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetObservedStablecoinPricesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getObservedStablecoinPrices>>> = ({ signal }) => getObservedStablecoinPrices({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getObservedStablecoinPrices>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetObservedStablecoinPricesQueryResult = NonNullable<Awaited<ReturnType<typeof getObservedStablecoinPrices>>>
+export type GetObservedStablecoinPricesQueryError = ErrorType<void>
+
+
+/**
+ * @summary Current observed prices only; event history is not public
+ */
+
+export function useGetObservedStablecoinPrices<TData = Awaited<ReturnType<typeof getObservedStablecoinPrices>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getObservedStablecoinPrices>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetObservedStablecoinPricesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetStablecoinIssuanceStatusUrl = () => {
+
+
+
+
+  return `/api/stablecoin-onchain`
+}
+
+/**
+ * @summary Issuance status; holders and unvalidated issuance are not public
+ */
+export const getStablecoinIssuanceStatus = async ( options?: RequestInit): Promise<GetStablecoinIssuanceStatus200> => {
+
+  return customFetch<GetStablecoinIssuanceStatus200>(getGetStablecoinIssuanceStatusUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStablecoinIssuanceStatusQueryKey = () => {
+    return [
+    `/api/stablecoin-onchain`
+    ] as const;
+    }
+
+
+export const getGetStablecoinIssuanceStatusQueryOptions = <TData = Awaited<ReturnType<typeof getStablecoinIssuanceStatus>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStablecoinIssuanceStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStablecoinIssuanceStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStablecoinIssuanceStatus>>> = ({ signal }) => getStablecoinIssuanceStatus({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStablecoinIssuanceStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStablecoinIssuanceStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getStablecoinIssuanceStatus>>>
+export type GetStablecoinIssuanceStatusQueryError = ErrorType<void>
+
+
+/**
+ * @summary Issuance status; holders and unvalidated issuance are not public
+ */
+
+export function useGetStablecoinIssuanceStatus<TData = Awaited<ReturnType<typeof getStablecoinIssuanceStatus>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStablecoinIssuanceStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStablecoinIssuanceStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 
 
 

@@ -1,0 +1,25 @@
+﻿asset_id,route,visual_type,mode,metrics,axes_or_structure,hard_boundary
+DASH-C01,/dashboard,KPI cluster,Dynamic,MKT_TOTAL_TRACKED_USD;MKT_TOP2_SHARE;MKT_30D_NET_CHANGE,No sparkline unless history is valid,Each card has source/time/freshness; missing != zero
+DASH-C02,/dashboard,Context card,Dynamic,DGS3MO,Single latest observation + 30d context optional,"Label as macro environment, not reserve yield"
+DASH-C03,/dashboard,Data health,Dynamic,collector/source states,Status rows,Expose delayed/unavailable instead of empty dashboard
+MKT-C01,/market-data/market,Line chart,Dynamic,MKT_TOTAL_TRACKED_USD,Time → USD,Tracked circulating value history; source coverage note
+MKT-C02,/market-data/market,Horizontal bars,Dynamic,Top stablecoins,USD,Same snapshot; no volume implication
+MKT-C03,/market-data/market,Concentration card/line,Dynamic,MKT_TOP2_SHARE,%,Supply concentration only
+MKT-C04,/market-data/market,Price deviation table,Dynamic after QA,MKT_PRICE_DEV_BPS,bps,No depeg probability language
+MKT-C05,/market-data/market,CEX liquidity table,Dynamic,spread;bid depth;ask depth;slippage,pair-specific,Show exchange/pair/order size/book time
+MKT-C06,/market-data/market,DEX pool table,Dynamic,pool liquidity;24h volume;price,pool-specific,No 2% depth/slippage label
+CHAIN-C01,/market-data/on-chain,Stacked / ranked chart,Dynamic,CHAIN_SUPPLY_USD,chain → USD,Native/bridged methodology note
+CHAIN-C02,/market-data/on-chain,Activity hierarchy,Data/report dependent,raw;adjusted;P2P transfer volume,USD,Only compare if same provider/window; payments remain separate
+CHAIN-C03,/market-data/on-chain,Active address chart,Data/report dependent,CHAIN_ACTIVE_ADDR,addresses,Address ≠ user
+CHAIN-C04,/market-data/on-chain,Ethereum issuance module,Conditional,ETH_NET_ISSUANCE,token/USD,Only after per-contract semantic QA
+ISS-C01,/market-data/issuers-reserves,Comparison table,Report-driven,issuer disclosure schema,mixed fields,Report period and publication date separate
+ISS-C02,/market-data/issuers-reserves,Assurance ladder,Static explanatory UI,self-report;attestation;audit,categorical,Not a quality ranking; explains scope
+MAC-C01,/market-data/macro,Line chart,Dynamic,SOFR;DGS3MO,%,Same percent axis; distinct definitions
+MAC-C02,/market-data/macro,Line chart,Dynamic,DGS3MO;DGS2;DGS10,%,Treasury curve context
+MAC-C03,/market-data/macro,Line chart,Dynamic,DTWEXBGS,index,No causal claim
+MAC-C04,/market-data/macro,Line chart,Dynamic,VIXCLS,index,Market stress only
+MAC-C05,/market-data/macro,Line chart,Dynamic,RRPONTSYD,USD bn,Separate axis/chart
+MAC-C06,/market-data/macro,Normalized lines,Dynamic,DEXCHUS;DEXHKUS;DEXSIUS,base=100; tooltip raw units,Raw quote is local currency per USD
+ADOPT-C01,/market-data/adoption,Dated research KPI block,Report snapshot,ADOPT_PAYMENT_CUM;ADOPT_PAYMENT_RUNRATE,USD,Explicit Jan 2023–Aug 2025 sample
+ADOPT-C02,/market-data/adoption,Bars,Report snapshot,ADOPT_PAYMENT_CATEGORY,annualized USD,"B2B/P2P/Card/B2C/Prefunding, report sample"
+ADOPT-C03,/market-data/adoption,Evidence-class matrix,Mixed,payments;on-chain activity;issuer metrics,categorical,Never sum evidence classes

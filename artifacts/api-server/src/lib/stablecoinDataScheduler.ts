@@ -1,7 +1,13 @@
 import { logger } from "./logger";
 import { depegRefreshIntervalMs, refreshDepegSnapshot } from "./depegEvents";
-import { refreshStablecoinLiquidity, stablecoinLiquidityRefreshIntervalMs } from "./stablecoinLiquidity";
-import { refreshStablecoinOnchain, stablecoinOnchainRefreshIntervalMs } from "./stablecoinOnchain";
+import {
+  refreshStablecoinLiquidity,
+  stablecoinLiquidityRefreshIntervalMs,
+} from "./stablecoinLiquidity";
+import {
+  refreshStablecoinOnchain,
+  stablecoinOnchainRefreshIntervalMs,
+} from "./stablecoinOnchain";
 
 type RefreshJob = {
   name: string;
@@ -11,13 +17,22 @@ type RefreshJob = {
 };
 
 const jobs: RefreshJob[] = [
-  { name: "stablecoin liquidity", intervalMs: stablecoinLiquidityRefreshIntervalMs, run: refreshStablecoinLiquidity },
-  { name: "stablecoin depeg", intervalMs: depegRefreshIntervalMs, run: refreshDepegSnapshot },
+  {
+    name: "stablecoin liquidity",
+    intervalMs: stablecoinLiquidityRefreshIntervalMs,
+    run: refreshStablecoinLiquidity,
+  },
+  {
+    name: "stablecoin depeg",
+    intervalMs: depegRefreshIntervalMs,
+    run: refreshDepegSnapshot,
+  },
   {
     name: "Ethereum stablecoin on-chain",
     intervalMs: stablecoinOnchainRefreshIntervalMs,
     run: refreshStablecoinOnchain,
-    enabled: () => Boolean(process.env.ETHERSCAN_API_KEY),
+    // V0.2: contract event/circulation semantics are not approved for public issuance.
+    enabled: () => false,
   },
 ];
 
@@ -26,21 +41,32 @@ async function runJob(job: RefreshJob): Promise<void> {
   try {
     await job.run();
   } catch (error) {
-    logger.warn({ error, dataJob: job.name }, "Market-data refresh failed; the last successful snapshot remains active");
+    logger.warn(
+      { error, dataJob: job.name },
+      "Market-data refresh failed; the last successful snapshot remains active",
+    );
   }
 }
 
-export async function refreshAllStablecoinData(): Promise<Array<{ name: string; refreshed: boolean }>> {
-  return Promise.all(jobs.map(async (job) => {
-    if (job.enabled && !job.enabled()) return { name: job.name, refreshed: false };
-    try {
-      await job.run();
-      return { name: job.name, refreshed: true };
-    } catch (error) {
-      logger.warn({ error, dataJob: job.name }, "Manual market-data refresh failed");
-      return { name: job.name, refreshed: false };
-    }
-  }));
+export async function refreshAllStablecoinData(): Promise<
+  Array<{ name: string; refreshed: boolean }>
+> {
+  return Promise.all(
+    jobs.map(async (job) => {
+      if (job.enabled && !job.enabled())
+        return { name: job.name, refreshed: false };
+      try {
+        await job.run();
+        return { name: job.name, refreshed: true };
+      } catch (error) {
+        logger.warn(
+          { error, dataJob: job.name },
+          "Manual market-data refresh failed",
+        );
+        return { name: job.name, refreshed: false };
+      }
+    }),
+  );
 }
 
 export function startStablecoinDataScheduler(): void {
@@ -50,4 +76,3 @@ export function startStablecoinDataScheduler(): void {
     timer.unref();
   }
 }
-
