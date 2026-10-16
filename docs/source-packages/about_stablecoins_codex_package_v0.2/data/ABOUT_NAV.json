@@ -1,0 +1,63 @@
+{
+  "sidebar": [
+    {
+      "label_zh": "关于稳定币",
+      "label_en": "About Stablecoins",
+      "route": "/about-stablecoins"
+    }
+  ],
+  "section_top_nav": [
+    {
+      "label_zh": "概览",
+      "label_en": "Overview",
+      "route": "/about-stablecoins"
+    },
+    {
+      "label_zh": "发展历程",
+      "label_en": "History",
+      "route": "/about-stablecoins/history"
+    },
+    {
+      "label_zh": "类别",
+      "label_en": "Types",
+      "route": "/about-stablecoins/types"
+    },
+    {
+      "label_zh": "应用",
+      "label_en": "Applications",
+      "route": "/about-stablecoins/applications"
+    },
+    {
+      "label_zh": "监管演进",
+      "label_en": "Regulatory Evolution",
+      "route": "/about-stablecoins/regulatory-evolution"
+    }
+  ],
+  "type_nav": [
+    {
+      "label_zh": "法币储备",
+      "label_en": "Fiat-reserve-backed",
+      "route": "/about-stablecoins/types/fiat-backed"
+    },
+    {
+      "label_zh": "加密抵押",
+      "label_en": "Crypto-collateralised",
+      "route": "/about-stablecoins/types/crypto-backed"
+    },
+    {
+      "label_zh": "合成 / 对冲",
+      "label_en": "Synthetic / hedged",
+      "route": "/about-stablecoins/types/synthetic"
+    },
+    {
+      "label_zh": "算法型",
+      "label_en": "Algorithmic",
+      "route": "/about-stablecoins/types/algorithmic"
+    },
+    {
+      "label_zh": "混合与边界",
+      "label_en": "Hybrid & boundary",
+      "route": "/about-stablecoins/types/other"
+    }
+  ]
+}

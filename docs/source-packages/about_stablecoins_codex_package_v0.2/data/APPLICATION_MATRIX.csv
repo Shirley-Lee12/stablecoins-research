@@ -1,0 +1,8 @@
+﻿application,task,why_stablecoin_may_help,evidence_state,constraint,source_ids_or_link
+Crypto trading & settlement,Stable unit for trading/settlement between volatile crypto assets,24/7 transferable settlement asset,Crypto trading remains a major/current dominant use,Trading volume != merchant-payment adoption,SRC-STB-02;SRC-STB-03
+"DeFi collateral, lending & liquidity","Borrowing, collateral, AMM pairs, margin and programmable finance",Composable on-chain asset,Widely integrated in crypto/DeFi market structure,Smart-contract/oracle/liquidation/liquidity risks,SRC-STB-02
+Cross-border transfers & remittances,Move stable value across borders,Potentially fewer intermediaries and 24/7 rails,Use is increasing,"On/off-ramp, FX, compliance and local settlement remain critical",SRC-STB-03
+B2B & treasury settlement,"Supplier payments, internal treasury movement, cross-time-zone settlement",Programmability and non-bank-hour transfer,Potential/growing use case,"Accounting, tax, counterparty acceptance and banking rails",SRC-STB-02;SRC-STB-03
+Merchant / P2P payments,Retail or person-to-person payment,Digital-native transferability,Potential use; jurisdiction-dependent,"Acceptance, fees, consumer protection, disputes/refunds",SRC-STB-02;SRC-STB-03
+Tokenised-asset settlement,Cash leg for tokenised funds/securities/assets,Can coordinate asset and settlement on digital rails,Emerging use case,"DvP, legal rights, eligibility, interoperability",SRC-STB-02
+Machine / agentic payments,API/agent/conditional/micropayment rails,Programmable 24/7 rail option,Emerging infrastructure use case,"Authorization, liability and trust are separate problems",Internal link: /agentic-payments

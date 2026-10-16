@@ -38,7 +38,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ContentEdgeNav } from "@/components/content-edge-nav";
 import { Link } from "wouter";
-import { AboutSectionNav } from "@/components/about-section-nav";
 
 const entrySchema = z.object({
   country: z.string().min(1, "Country is required"),
@@ -352,7 +351,6 @@ export default function Regulatory() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      <AboutSectionNav />
       <ContentEdgeNav label={t("On this page", "本页目录")} items={[
         { id: "regulatory-introduction", label: t("Introduction", "监管概览") },
         { id: "regulatory-comparison", label: t("Jurisdiction comparison", "辖区比较") },

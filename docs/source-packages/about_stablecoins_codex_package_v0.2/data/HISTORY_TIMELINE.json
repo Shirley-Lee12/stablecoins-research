@@ -1,0 +1,94 @@
+[
+  {
+    "date": "2014",
+    "type": "PRODUCT",
+    "title_zh": "Tether 启动",
+    "title_en": "Tether launches",
+    "what_changed_zh": "把传统法币计价单位带入可链上转移的稳定资产。",
+    "source_ids": [
+      "SRC-STB-09"
+    ]
+  },
+  {
+    "date": "2017-12",
+    "type": "MECHANISM",
+    "title_zh": "Single-Collateral Dai / Sai 上线",
+    "title_en": "Single-Collateral Dai / Sai launches",
+    "what_changed_zh": "链上超额抵押与清算成为稳定币发行机制。",
+    "source_ids": [
+      "SRC-STB-12"
+    ]
+  },
+  {
+    "date": "2018-09-26",
+    "type": "PRODUCT",
+    "title_zh": "USDC 上线",
+    "title_en": "USDC launches",
+    "what_changed_zh": "储备透明度、合规发行与开放区块链流通形成重要路线。",
+    "source_ids": [
+      "SRC-STB-22"
+    ]
+  },
+  {
+    "date": "2020–2021",
+    "type": "MARKET_STRUCTURE",
+    "title_zh": "DeFi 扩张",
+    "title_en": "DeFi expansion",
+    "what_changed_zh": "稳定币进一步成为流动性、抵押、借贷与链上结算基础资产。",
+    "source_ids": [
+      "SRC-STB-02"
+    ]
+  },
+  {
+    "date": "2022-05",
+    "type": "FAILURE",
+    "title_zh": "TerraUSD 崩溃",
+    "title_en": "TerraUSD collapses",
+    "what_changed_zh": "反身性算法稳定机制的挤兑与死亡螺旋风险成为关键案例。",
+    "source_ids": [
+      "SRC-STB-21"
+    ]
+  },
+  {
+    "date": "2023-07-17",
+    "type": "REGULATION",
+    "title_zh": "FSB 全球稳定币建议定稿",
+    "title_en": "FSB finalises global stablecoin recommendations",
+    "what_changed_zh": "治理、风险管理、赎回与跨境协调形成国际共同基准。",
+    "source_ids": [
+      "SRC-STB-04"
+    ]
+  },
+  {
+    "date": "2024-06-30",
+    "type": "REGULATION",
+    "title_zh": "MiCA ART/EMT 条款开始适用",
+    "title_en": "MiCA ART/EMT provisions begin applying",
+    "what_changed_zh": "欧盟进入专门稳定币发行与监督框架。",
+    "source_ids": [
+      "SRC-STB-23"
+    ]
+  },
+  {
+    "date": "2025-07/08",
+    "type": "REGULATION",
+    "title_zh": "美国与香港进入专门制度阶段",
+    "title_en": "US and Hong Kong dedicated regimes",
+    "what_changed_zh": "监管进一步转向发行资格、储备、赎回与监督。",
+    "source_ids": [
+      "SRC-STB-24",
+      "SRC-STB-25"
+    ]
+  },
+  {
+    "date": "2026",
+    "type": "SYSTEMIC_OVERSIGHT",
+    "title_zh": "系统性与跨境监测深化",
+    "title_en": "Systemic and cross-border monitoring deepens",
+    "what_changed_zh": "英国推进系统性 stablecoin 规则，FSB 加强全球稳定币跨境脆弱性与数据监测。",
+    "source_ids": [
+      "SRC-STB-06",
+      "SRC-STB-26"
+    ]
+  }
+]

@@ -1,0 +1,12 @@
+﻿asset_id,asset_type,page_route,module_id,filename,title,purpose,source_type,status
+STB-D01,diagram,/about-stablecoins,four-questions,STB-D01-stablecoin-lifecycle.svg,Stablecoin Lifecycle,Backing/collateral/hedge → mint → circulation → deviation → stabilisation → burn/settlement,ORIGINAL,READY
+STB-D02,boundary_diagram,/about-stablecoins,money-boundaries,STB-D02-money-boundaries.svg,Stablecoin vs Adjacent Digital Money,Stablecoin / CBDC / tokenised deposit / tokenised fund boundary,ORIGINAL,READY
+STB-T01,timeline_ui,/about-stablecoins/history,history,history-timeline,Stablecoin History Timeline,Data-driven causal history timeline,DATA_UI,READY_DATA
+STB-D03,matrix_diagram,/about-stablecoins/types,taxonomy,STB-D03-taxonomy-matrix.svg,Mechanism-first Stablecoin Taxonomy,Backing × exit/redemption × stabilisation,ORIGINAL,READY
+STB-D04,diagram,/about-stablecoins/regulatory-evolution,stages,STB-D04-regulatory-evolution.svg,Regulatory Evolution,Risk perimeter → obligations → standards → issuer regimes → systemic/cross-border,ORIGINAL,READY
+STB-D05,process_diagram,/about-stablecoins/types/fiat-backed,mechanism,STB-D05-fiat-backed-flow.svg,Fiat-reserve-backed Flow,Reserve/issuer/mint/circulation/redeem/burn,ORIGINAL,READY
+STB-D06,process_diagram,/about-stablecoins/types/crypto-backed,mechanism,STB-D06-crypto-collateral-flow.svg,Crypto-collateralised Flow,Collateral/borrow/mint/liquidation/redemption,ORIGINAL,READY
+STB-D07,process_diagram,/about-stablecoins/types/synthetic,mechanism,STB-D07-synthetic-flow.svg,Synthetic / Hedged Flow,Backing + hedge + derivatives/custody + restricted direct redemption,ORIGINAL,READY
+STB-D08,failure_diagram,/about-stablecoins/types/algorithmic,failure,STB-D08-algorithmic-death-spiral.svg,Algorithmic Reflexive Failure,Deviation → conversion → endogenous issuance → price fall → confidence loss,ORIGINAL,READY
+STB-D09,boundary_diagram,/about-stablecoins/types/other,boundary,STB-D09-boundary-map.svg,Hybrid & Boundary Map,Mechanism migration + adjacent digital money,ORIGINAL,READY
+STB-D10,matrix_ui,/about-stablecoins/applications,applications,application-matrix,Application ≠ Adoption Matrix,Task/benefit/constraint/evidence state,DATA_UI,READY_DATA

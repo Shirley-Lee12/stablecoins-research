@@ -70,7 +70,7 @@ const ROUTE_LABELS: Record<string, { en: string; zh: string }> = {
   "/about-stablecoins/applications": { en: "Applications", zh: "应用" },
   "/about-stablecoins/regulatory-evolution": {
     en: "Regulatory Evolution",
-    zh: "监管演变",
+    zh: "监管演进",
   },
   "/research": { en: "Our Research", zh: "我们的研究" },
   "/academic-resources": { en: "Resources", zh: "资源库" },
@@ -142,34 +142,6 @@ const NAV_ITEMS: NavItem[] = [
     labelEn: "About Stablecoins",
     labelZh: "关于稳定币",
     icon: BookOpen,
-    children: [
-      {
-        href: "/about-stablecoins",
-        labelEn: "Learn Stablecoins",
-        labelZh: "了解稳定币",
-      },
-      {
-        href: "/about-stablecoins/history",
-        labelEn: "History",
-        labelZh: "历程",
-      },
-      { href: "/about-stablecoins/types", labelEn: "Stablecoin Types", labelZh: "稳定币类别" },
-      {
-        href: "/about-stablecoins/applications",
-        labelEn: "Applications",
-        labelZh: "应用",
-      },
-      {
-        href: "/about-stablecoins/regulatory-evolution",
-        labelEn: "Regulatory Evolution",
-        labelZh: "监管演变",
-      },
-      {
-        href: "/regulatory",
-        labelEn: "Regulatory Status",
-        labelZh: "监管现状",
-      },
-    ],
   },
   {
     href: "/regional-developments",
@@ -191,6 +163,12 @@ const NAV_ITEMS: NavItem[] = [
     labelEn: "Our Research",
     labelZh: "我们的研究",
     icon: Microscope,
+  },
+  {
+    href: "/regulatory",
+    labelEn: "Regulatory Status",
+    labelZh: "监管现状",
+    icon: Shield,
   },
   {
     href: "/academic-resources",
@@ -244,11 +222,11 @@ function useBreadcrumbs(location: string, language: string) {
     currentPath += "/" + seg;
     const entry = ROUTE_LABELS[currentPath];
     const mechanismLabels: Record<string, { en: string; zh: string }> = {
-      "fiat-backed": { en: "Fiat-backed", zh: "法币储备型" },
-      "crypto-backed": { en: "Crypto-collateralized", zh: "加密资产抵押型" },
-      synthetic: { en: "Synthetic", zh: "合成型" },
+      "fiat-backed": { en: "Fiat-reserve-backed", zh: "法币储备型" },
+      "crypto-backed": { en: "Crypto-collateralised", zh: "加密资产抵押型" },
+      synthetic: { en: "Synthetic / hedged", zh: "合成 / 对冲型" },
       algorithmic: { en: "Algorithmic", zh: "算法型" },
-      other: { en: "Other", zh: "其他" },
+      other: { en: "Hybrid & boundary", zh: "混合与边界" },
     };
     const mechanismEntry = currentPath.startsWith("/about-stablecoins/types/") ? mechanismLabels[seg] : undefined;
     const label = entry ? (language === "zh" ? entry.zh : entry.en) : mechanismEntry ? (language === "zh" ? mechanismEntry.zh : mechanismEntry.en) : seg;

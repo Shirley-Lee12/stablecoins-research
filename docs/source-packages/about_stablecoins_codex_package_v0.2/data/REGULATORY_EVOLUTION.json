@@ -1,0 +1,59 @@
+[
+  {
+    "stage": 1,
+    "label_zh": "风险与边界",
+    "label_en": "Risk & perimeter",
+    "focus": [
+      "legal classification",
+      "consumer/investor risk",
+      "AML/CFT",
+      "financial stability"
+    ]
+  },
+  {
+    "stage": 2,
+    "label_zh": "稳定性义务",
+    "label_en": "Stability obligations",
+    "focus": [
+      "reserve quality",
+      "custody",
+      "redemption",
+      "governance",
+      "disclosure",
+      "operational resilience"
+    ]
+  },
+  {
+    "stage": 3,
+    "label_zh": "国际共同基准",
+    "label_en": "International baseline",
+    "focus": [
+      "FSB 2023",
+      "cross-border coordination",
+      "timely redemption",
+      "effective stabilisation"
+    ]
+  },
+  {
+    "stage": 4,
+    "label_zh": "专门发行制度",
+    "label_en": "Dedicated issuer regimes",
+    "focus": [
+      "MiCA",
+      "GENIUS Act",
+      "Hong Kong",
+      "UK"
+    ]
+  },
+  {
+    "stage": 5,
+    "label_zh": "系统性与跨境监测",
+    "label_en": "Systemic & cross-border monitoring",
+    "focus": [
+      "implementation gaps",
+      "systemic payment use",
+      "cross-border vulnerabilities",
+      "data monitoring"
+    ]
+  }
+]

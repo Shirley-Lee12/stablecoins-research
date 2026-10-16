@@ -1,0 +1,905 @@
+{
+  "version": "0.2",
+  "baseline": "2026-10-16",
+  "nav": {
+    "sidebar": [
+      {
+        "label_zh": "关于稳定币",
+        "label_en": "About Stablecoins",
+        "route": "/about-stablecoins"
+      }
+    ],
+    "section_top_nav": [
+      {
+        "label_zh": "概览",
+        "label_en": "Overview",
+        "route": "/about-stablecoins"
+      },
+      {
+        "label_zh": "发展历程",
+        "label_en": "History",
+        "route": "/about-stablecoins/history"
+      },
+      {
+        "label_zh": "类别",
+        "label_en": "Types",
+        "route": "/about-stablecoins/types"
+      },
+      {
+        "label_zh": "应用",
+        "label_en": "Applications",
+        "route": "/about-stablecoins/applications"
+      },
+      {
+        "label_zh": "监管演进",
+        "label_en": "Regulatory Evolution",
+        "route": "/about-stablecoins/regulatory-evolution"
+      }
+    ],
+    "type_nav": [
+      {
+        "label_zh": "法币储备",
+        "label_en": "Fiat-reserve-backed",
+        "route": "/about-stablecoins/types/fiat-backed"
+      },
+      {
+        "label_zh": "加密抵押",
+        "label_en": "Crypto-collateralised",
+        "route": "/about-stablecoins/types/crypto-backed"
+      },
+      {
+        "label_zh": "合成 / 对冲",
+        "label_en": "Synthetic / hedged",
+        "route": "/about-stablecoins/types/synthetic"
+      },
+      {
+        "label_zh": "算法型",
+        "label_en": "Algorithmic",
+        "route": "/about-stablecoins/types/algorithmic"
+      },
+      {
+        "label_zh": "混合与边界",
+        "label_en": "Hybrid & boundary",
+        "route": "/about-stablecoins/types/other"
+      }
+    ]
+  },
+  "history": [
+    {
+      "date": "2014",
+      "type": "PRODUCT",
+      "title_zh": "Tether 启动",
+      "title_en": "Tether launches",
+      "what_changed_zh": "把传统法币计价单位带入可链上转移的稳定资产。",
+      "source_ids": [
+        "SRC-STB-09"
+      ]
+    },
+    {
+      "date": "2017-12",
+      "type": "MECHANISM",
+      "title_zh": "Single-Collateral Dai / Sai 上线",
+      "title_en": "Single-Collateral Dai / Sai launches",
+      "what_changed_zh": "链上超额抵押与清算成为稳定币发行机制。",
+      "source_ids": [
+        "SRC-STB-12"
+      ]
+    },
+    {
+      "date": "2018-09-26",
+      "type": "PRODUCT",
+      "title_zh": "USDC 上线",
+      "title_en": "USDC launches",
+      "what_changed_zh": "储备透明度、合规发行与开放区块链流通形成重要路线。",
+      "source_ids": [
+        "SRC-STB-22"
+      ]
+    },
+    {
+      "date": "2020–2021",
+      "type": "MARKET_STRUCTURE",
+      "title_zh": "DeFi 扩张",
+      "title_en": "DeFi expansion",
+      "what_changed_zh": "稳定币进一步成为流动性、抵押、借贷与链上结算基础资产。",
+      "source_ids": [
+        "SRC-STB-02"
+      ]
+    },
+    {
+      "date": "2022-05",
+      "type": "FAILURE",
+      "title_zh": "TerraUSD 崩溃",
+      "title_en": "TerraUSD collapses",
+      "what_changed_zh": "反身性算法稳定机制的挤兑与死亡螺旋风险成为关键案例。",
+      "source_ids": [
+        "SRC-STB-21"
+      ]
+    },
+    {
+      "date": "2023-07-17",
+      "type": "REGULATION",
+      "title_zh": "FSB 全球稳定币建议定稿",
+      "title_en": "FSB finalises global stablecoin recommendations",
+      "what_changed_zh": "治理、风险管理、赎回与跨境协调形成国际共同基准。",
+      "source_ids": [
+        "SRC-STB-04"
+      ]
+    },
+    {
+      "date": "2024-06-30",
+      "type": "REGULATION",
+      "title_zh": "MiCA ART/EMT 条款开始适用",
+      "title_en": "MiCA ART/EMT provisions begin applying",
+      "what_changed_zh": "欧盟进入专门稳定币发行与监督框架。",
+      "source_ids": [
+        "SRC-STB-23"
+      ]
+    },
+    {
+      "date": "2025-07/08",
+      "type": "REGULATION",
+      "title_zh": "美国与香港进入专门制度阶段",
+      "title_en": "US and Hong Kong dedicated regimes",
+      "what_changed_zh": "监管进一步转向发行资格、储备、赎回与监督。",
+      "source_ids": [
+        "SRC-STB-24",
+        "SRC-STB-25"
+      ]
+    },
+    {
+      "date": "2026",
+      "type": "SYSTEMIC_OVERSIGHT",
+      "title_zh": "系统性与跨境监测深化",
+      "title_en": "Systemic and cross-border monitoring deepens",
+      "what_changed_zh": "英国推进系统性 stablecoin 规则，FSB 加强全球稳定币跨境脆弱性与数据监测。",
+      "source_ids": [
+        "SRC-STB-06",
+        "SRC-STB-26"
+      ]
+    }
+  ],
+  "regulatory": [
+    {
+      "stage": 1,
+      "label_zh": "风险与边界",
+      "label_en": "Risk & perimeter",
+      "focus": [
+        "legal classification",
+        "consumer/investor risk",
+        "AML/CFT",
+        "financial stability"
+      ]
+    },
+    {
+      "stage": 2,
+      "label_zh": "稳定性义务",
+      "label_en": "Stability obligations",
+      "focus": [
+        "reserve quality",
+        "custody",
+        "redemption",
+        "governance",
+        "disclosure",
+        "operational resilience"
+      ]
+    },
+    {
+      "stage": 3,
+      "label_zh": "国际共同基准",
+      "label_en": "International baseline",
+      "focus": [
+        "FSB 2023",
+        "cross-border coordination",
+        "timely redemption",
+        "effective stabilisation"
+      ]
+    },
+    {
+      "stage": 4,
+      "label_zh": "专门发行制度",
+      "label_en": "Dedicated issuer regimes",
+      "focus": [
+        "MiCA",
+        "GENIUS Act",
+        "Hong Kong",
+        "UK"
+      ]
+    },
+    {
+      "stage": 5,
+      "label_zh": "系统性与跨境监测",
+      "label_en": "Systemic & cross-border monitoring",
+      "focus": [
+        "implementation gaps",
+        "systemic payment use",
+        "cross-border vulnerabilities",
+        "data monitoring"
+      ]
+    }
+  ],
+  "applications": [
+    {
+      "application": "Crypto trading & settlement",
+      "task": "Stable unit for trading/settlement between volatile crypto assets",
+      "why_stablecoin_may_help": "24/7 transferable settlement asset",
+      "evidence_state": "Crypto trading remains a major/current dominant use",
+      "constraint": "Trading volume != merchant-payment adoption",
+      "source_ids_or_link": "SRC-STB-02;SRC-STB-03"
+    },
+    {
+      "application": "DeFi collateral, lending & liquidity",
+      "task": "Borrowing, collateral, AMM pairs, margin and programmable finance",
+      "why_stablecoin_may_help": "Composable on-chain asset",
+      "evidence_state": "Widely integrated in crypto/DeFi market structure",
+      "constraint": "Smart-contract/oracle/liquidation/liquidity risks",
+      "source_ids_or_link": "SRC-STB-02"
+    },
+    {
+      "application": "Cross-border transfers & remittances",
+      "task": "Move stable value across borders",
+      "why_stablecoin_may_help": "Potentially fewer intermediaries and 24/7 rails",
+      "evidence_state": "Use is increasing",
+      "constraint": "On/off-ramp, FX, compliance and local settlement remain critical",
+      "source_ids_or_link": "SRC-STB-03"
+    },
+    {
+      "application": "B2B & treasury settlement",
+      "task": "Supplier payments, internal treasury movement, cross-time-zone settlement",
+      "why_stablecoin_may_help": "Programmability and non-bank-hour transfer",
+      "evidence_state": "Potential/growing use case",
+      "constraint": "Accounting, tax, counterparty acceptance and banking rails",
+      "source_ids_or_link": "SRC-STB-02;SRC-STB-03"
+    },
+    {
+      "application": "Merchant / P2P payments",
+      "task": "Retail or person-to-person payment",
+      "why_stablecoin_may_help": "Digital-native transferability",
+      "evidence_state": "Potential use; jurisdiction-dependent",
+      "constraint": "Acceptance, fees, consumer protection, disputes/refunds",
+      "source_ids_or_link": "SRC-STB-02;SRC-STB-03"
+    },
+    {
+      "application": "Tokenised-asset settlement",
+      "task": "Cash leg for tokenised funds/securities/assets",
+      "why_stablecoin_may_help": "Can coordinate asset and settlement on digital rails",
+      "evidence_state": "Emerging use case",
+      "constraint": "DvP, legal rights, eligibility, interoperability",
+      "source_ids_or_link": "SRC-STB-02"
+    },
+    {
+      "application": "Machine / agentic payments",
+      "task": "API/agent/conditional/micropayment rails",
+      "why_stablecoin_may_help": "Programmable 24/7 rail option",
+      "evidence_state": "Emerging infrastructure use case",
+      "constraint": "Authorization, liability and trust are separate problems",
+      "source_ids_or_link": "Internal link: /agentic-payments"
+    }
+  ],
+  "types": [
+    {
+      "teaching_group": "Fiat-reserve-backed",
+      "economic_support": "Cash / T-bills / reserve assets",
+      "exit_or_redemption": "Issuer or authorised redemption",
+      "stabilisation_mechanism": "Primary redemption + arbitrage",
+      "key_risks": "Reserve liquidity; banking/custody; issuer/legal; redemption; market liquidity",
+      "examples": "USDC; USDT; PYUSD",
+      "boundary_note": "Current examples; eligibility differs by issuer",
+      "source_ids": "SRC-STB-07;SRC-STB-08;SRC-STB-10;SRC-STB-11"
+    },
+    {
+      "teaching_group": "Crypto-collateralised",
+      "economic_support": "On-chain crypto collateral",
+      "exit_or_redemption": "Protocol redemption and/or debt repayment",
+      "stabilisation_mechanism": "Overcollateralisation + liquidation + redemption/arbitrage",
+      "key_risks": "Collateral crash; oracle; liquidation; bad debt; smart contract; liquidity",
+      "examples": "BOLD; original Dai/Sai",
+      "boundary_note": "Dai/Sai cited as historical milestone; do not infer current pure classification",
+      "source_ids": "SRC-STB-12;SRC-STB-13;SRC-STB-14;SRC-STB-15"
+    },
+    {
+      "teaching_group": "Synthetic / hedged",
+      "economic_support": "Backing assets + derivative hedge",
+      "exit_or_redemption": "Often restricted direct mint/redeem; secondary access broader",
+      "stabilisation_mechanism": "Delta hedging + mint/redeem + market liquidity",
+      "key_risks": "Basis/funding; exchange; custody; hedge execution; liquidity",
+      "examples": "USDe",
+      "boundary_note": "Direct redemption rights depend on Mint User status",
+      "source_ids": "SRC-STB-16;SRC-STB-17;SRC-STB-18"
+    },
+    {
+      "teaching_group": "Algorithmic",
+      "economic_support": "Endogenous token / supply-incentive mechanism",
+      "exit_or_redemption": "Mechanism-specific conversion/arbitrage",
+      "stabilisation_mechanism": "Supply adjustment + endogenous arbitrage",
+      "key_risks": "Reflexivity; confidence; endogenous-asset collapse; liquidity",
+      "examples": "TerraUSD (historical failure case)",
+      "boundary_note": "Teaching/history category, not a current endorsement",
+      "source_ids": "SRC-STB-21"
+    },
+    {
+      "teaching_group": "Hybrid & boundary",
+      "economic_support": "Mixed or evolving",
+      "exit_or_redemption": "Multiple / changing routes",
+      "stabilisation_mechanism": "Combination or mechanism migration",
+      "key_risks": "Classification drift; legal-claim ambiguity; mixed dependencies",
+      "examples": "frxUSD as current reserve-backed mechanism example",
+      "boundary_note": "Classify current mechanism, not brand history",
+      "source_ids": "SRC-STB-19;SRC-STB-20"
+    }
+  ],
+  "pages": [
+    {
+      "route": "/about-stablecoins",
+      "title_zh": "关于稳定币",
+      "title_en": "About Stablecoins",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "intro/general",
+      "primary_question": "先理解机制，再理解稳定币",
+      "module_order": "hero>four-questions>why-stablecoins>money-boundaries>next",
+      "visual_assets": "STB-D01;STB-D02"
+    },
+    {
+      "route": "/about-stablecoins/history",
+      "title_zh": "稳定币发展历程",
+      "title_en": "Stablecoin History",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "intro/general;research",
+      "primary_question": "稳定币的稳定机制如何一步步演化并接受压力测试？",
+      "module_order": "hero>causal-timeline>lessons>next",
+      "visual_assets": "STB-T01"
+    },
+    {
+      "route": "/about-stablecoins/types",
+      "title_zh": "稳定币类别",
+      "title_en": "Stablecoin Types",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "intro/general;research",
+      "primary_question": "如何按经济机制而不是营销标签分类？",
+      "module_order": "hero>three-axis-taxonomy>five-groups>classification-warnings>type-nav",
+      "visual_assets": "STB-D03"
+    },
+    {
+      "route": "/about-stablecoins/applications",
+      "title_zh": "稳定币应用",
+      "title_en": "Stablecoin Applications",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "intro/general;enterprise",
+      "primary_question": "稳定币可以解决什么任务，和真实采用有什么区别？",
+      "module_order": "hero>application-vs-adoption>application-matrix>constraints>links",
+      "visual_assets": "STB-D10"
+    },
+    {
+      "route": "/about-stablecoins/regulatory-evolution",
+      "title_zh": "监管演进",
+      "title_en": "Regulatory Evolution",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "intro/general;research",
+      "primary_question": "稳定币监管为什么从风险提示走向发行、赎回和跨境监督？",
+      "module_order": "hero>five-stages>milestones>current-regulation-links",
+      "visual_assets": "STB-D04"
+    },
+    {
+      "route": "/about-stablecoins/types/fiat-backed",
+      "title_zh": "法币储备型",
+      "title_en": "Fiat-reserve-backed",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "intro/general;research",
+      "primary_question": "储备、一级赎回和套利怎样维持锚定？",
+      "module_order": "hero>mechanism>peg>inspection-checklist>examples>risks",
+      "visual_assets": "STB-D05"
+    },
+    {
+      "route": "/about-stablecoins/types/crypto-backed",
+      "title_zh": "加密资产抵押型",
+      "title_en": "Crypto-collateralised",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "intro/general;research",
+      "primary_question": "超额抵押、清算和赎回怎样应对加密资产波动？",
+      "module_order": "hero>mechanism>bold>dai-history>stress-path>risks",
+      "visual_assets": "STB-D06"
+    },
+    {
+      "route": "/about-stablecoins/types/synthetic",
+      "title_zh": "合成型",
+      "title_en": "Synthetic / Hedged",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "intro/general;research",
+      "primary_question": "对冲如何把高波动 backing 转化为接近美元的风险暴露？",
+      "module_order": "hero>mechanism>usde>rights>risk-stack>boundary",
+      "visual_assets": "STB-D07"
+    },
+    {
+      "route": "/about-stablecoins/types/algorithmic",
+      "title_zh": "算法型",
+      "title_en": "Algorithmic",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "intro/general;research",
+      "primary_question": "为什么内生套利稳定机制可能在信心冲击下自我强化？",
+      "module_order": "hero>mechanism>death-spiral>ust-case>lessons>boundary",
+      "visual_assets": "STB-D08"
+    },
+    {
+      "route": "/about-stablecoins/types/other",
+      "title_zh": "混合与边界案例",
+      "title_en": "Hybrid & Boundary Cases",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "intro/general;research",
+      "primary_question": "为什么项目应按今天的经济机制分类，而不是永久沿用历史标签？",
+      "module_order": "hero>mechanism-migration>frxusd>adjacent-money>checklist",
+      "visual_assets": "STB-D09"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "SRC-STB-01",
+      "topic": "Overview",
+      "organization": "Bank of England",
+      "title": "What are stablecoins and how do they work?",
+      "date": "2026-04-01",
+      "url": "https://www.bankofengland.co.uk/explainers/what-are-stablecoins-and-how-do-they-work",
+      "source_type": "CENTRAL_BANK",
+      "use_for": "Intro definition, reserve/redemption explanation and current uses",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-02",
+      "topic": "Overview / Applications",
+      "organization": "International Monetary Fund",
+      "title": "Understanding Stablecoins",
+      "date": "2025-12-04",
+      "url": "https://www.imf.org/en/publications/departmental-papers/issues/2025/12/02/understanding-stablecoins-570602",
+      "source_type": "INTERNATIONAL_ORG",
+      "use_for": "Definition, use cases, adjacent money forms, risks, regulation",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-03",
+      "topic": "Applications",
+      "organization": "International Monetary Fund",
+      "title": "How Stablecoins Can Improve Payments and Global Finance",
+      "date": "2025-12-04",
+      "url": "https://www.imf.org/en/blogs/articles/2025/12/04/how-stablecoins-can-improve-payments-and-global-finance",
+      "source_type": "INTERNATIONAL_ORG",
+      "use_for": "Current dominant use and cross-border/payment use cases",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-04",
+      "topic": "Regulation",
+      "organization": "Financial Stability Board",
+      "title": "High-level Recommendations for Global Stablecoin Arrangements",
+      "date": "2023-07-17",
+      "url": "https://www.fsb.org/2023/07/high-level-recommendations-for-the-regulation-supervision-and-oversight-of-global-stablecoin-arrangements-final-report/",
+      "source_type": "STANDARD_SETTER",
+      "use_for": "Governance, risk management, redemption, stabilisation and cross-border coordination",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-05",
+      "topic": "Regulation",
+      "organization": "Financial Stability Board",
+      "title": "Thematic Review on FSB Global Regulatory Framework for Crypto-asset Activities",
+      "date": "2025-10-16",
+      "url": "https://www.fsb.org/2025/10/thematic-review-on-fsb-global-regulatory-framework-for-crypto-asset-activities/",
+      "source_type": "STANDARD_SETTER",
+      "use_for": "Implementation gaps and inconsistencies",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-06",
+      "topic": "Regulation",
+      "organization": "Financial Stability Board",
+      "title": "Global Stablecoin Arrangements: Cross-border vulnerabilities and financial stability monitoring",
+      "date": "2026-10-12",
+      "url": "https://www.fsb.org/2026/10/global-stablecoin-arrangements-cross-border-vulnerabilities-and-financial-stability-monitoring/",
+      "source_type": "STANDARD_SETTER",
+      "use_for": "2026 cross-border/systemic monitoring stage",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-07",
+      "topic": "Fiat-backed",
+      "organization": "Circle",
+      "title": "Transparency & Stability",
+      "date": "current / verified 2026-10-16",
+      "url": "https://www.circle.com/transparency",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "USDC reserve composition, assurance, 1:1 redemption",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-08",
+      "topic": "Fiat-backed",
+      "organization": "Circle",
+      "title": "USDC",
+      "date": "current / verified 2026-10-16",
+      "url": "https://www.circle.com/usdc",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Direct Circle Mint eligibility vs retail access channels",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-09",
+      "topic": "Fiat-backed / History",
+      "organization": "Tether",
+      "title": "FAQ / Transparency",
+      "date": "current / verified 2026-10-16",
+      "url": "https://tether.to/en/faqs/",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Tether launched 2014; token model",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-10",
+      "topic": "Fiat-backed",
+      "organization": "Tether",
+      "title": "Transparency",
+      "date": "current / verified 2026-10-16",
+      "url": "https://tether.to/en/transparency/",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Reserve-backed and 1:1 issuer statements",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-11",
+      "topic": "Fiat-backed",
+      "organization": "PayPal",
+      "title": "Using the PayPal Stablecoin, PayPal USD for Commerce",
+      "date": "2024-01-25",
+      "url": "https://developer.paypal.com/community/blog/pyusd-stablecoin/",
+      "source_type": "PROVIDER_PRIMARY",
+      "use_for": "PYUSD backing and redemption design",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-12",
+      "topic": "Crypto-backed / History",
+      "organization": "Maker / Sky",
+      "title": "Maker Whitepaper / original Dai history",
+      "date": "current archive",
+      "url": "https://makerdao.com/zh-CN/whitepaper/",
+      "source_type": "PROTOCOL_PRIMARY",
+      "use_for": "Original Dai/Sai launch and collateralised-debt mechanism",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-13",
+      "topic": "Crypto-backed",
+      "organization": "Liquity",
+      "title": "BOLD & Earn",
+      "date": "current / verified 2026-10-16",
+      "url": "https://docs.liquity.org/v2-faq/bold-and-earn",
+      "source_type": "PROTOCOL_PRIMARY",
+      "use_for": "BOLD overcollateralised backing",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-14",
+      "topic": "Crypto-backed",
+      "organization": "Liquity",
+      "title": "Redemptions and Delegation",
+      "date": "current / verified 2026-10-16",
+      "url": "https://docs.liquity.org/v2-faq/redemptions-and-delegation",
+      "source_type": "PROTOCOL_PRIMARY",
+      "use_for": "BOLD redemption and peg mechanism",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-15",
+      "topic": "Crypto-backed",
+      "organization": "Liquity",
+      "title": "Risk Disclosure / Borrowing and Liquidations",
+      "date": "current / verified 2026-10-16",
+      "url": "https://docs.liquity.org/v2-documentation/risk-disclosure",
+      "source_type": "PROTOCOL_PRIMARY",
+      "use_for": "Liquidation and collateral risks",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-16",
+      "topic": "Synthetic",
+      "organization": "Ethena",
+      "title": "Ethena Overview",
+      "date": "current / verified 2026-10-16",
+      "url": "https://docs.ethena.fi/",
+      "source_type": "PROTOCOL_PRIMARY",
+      "use_for": "USDe delta-hedged backing and user access",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-17",
+      "topic": "Synthetic",
+      "organization": "Ethena",
+      "title": "Backing, Custody and Security",
+      "date": "current / verified 2026-10-16",
+      "url": "https://docs.ethena.fi/backing-custody-and-security/overview",
+      "source_type": "PROTOCOL_PRIMARY",
+      "use_for": "Backing custody and hedging infrastructure",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-18",
+      "topic": "Synthetic",
+      "organization": "Ethena",
+      "title": "USDe Terms and Conditions",
+      "date": "2025-08",
+      "url": "https://docs.ethena.fi/resources/usde-terms-and-conditions",
+      "source_type": "PROTOCOL_PRIMARY",
+      "use_for": "Mint-user vs holding-user redemption rights",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-19",
+      "topic": "Hybrid / Boundary",
+      "organization": "Frax",
+      "title": "Frax USD Stablecoin",
+      "date": "current / verified 2026-10-16",
+      "url": "https://docs.frax.com/protocol/assets/frxusd/frxusd",
+      "source_type": "PROTOCOL_PRIMARY",
+      "use_for": "Current frxUSD reserve-backed structure",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-20",
+      "topic": "Hybrid / Boundary",
+      "organization": "Frax",
+      "title": "Mint & Redeem frxUSD Overview",
+      "date": "current / verified 2026-10-16",
+      "url": "https://docs.frax.com/frxusd/mint-and-redeem-overview",
+      "source_type": "PROTOCOL_PRIMARY",
+      "use_for": "Current mint/redeem pathways",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-21",
+      "topic": "Algorithmic / History",
+      "organization": "Bank for International Settlements",
+      "title": "BIS Annual Economic Report 2022 — TerraUSD box",
+      "date": "2022",
+      "url": "https://www.bis.org/publ/arpdf/ar2022e.pdf",
+      "source_type": "INTERNATIONAL_ORG",
+      "use_for": "UST/LUNA mechanism and collapse",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-22",
+      "topic": "History",
+      "organization": "Circle",
+      "title": "Introducing USD Coin",
+      "date": "2018-09-26",
+      "url": "https://www.circle.com/blog/introducing-usd-coin",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "USDC launch milestone",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-23",
+      "topic": "Regulation",
+      "organization": "European Banking Authority",
+      "title": "MiCAR ART/EMT application",
+      "date": "2023-07-12 / provisions from 2024-06-30",
+      "url": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-encourages-timely-preparatory-steps-towards-application",
+      "source_type": "REGULATOR",
+      "use_for": "MiCA stablecoin provisions application date",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-24",
+      "topic": "Regulation",
+      "organization": "The White House",
+      "title": "GENIUS Act signed into law",
+      "date": "2025-07-18",
+      "url": "https://www.whitehouse.gov/briefings-statements/2025/07/the-president-signed-into-law-s-1582/",
+      "source_type": "GOVERNMENT",
+      "use_for": "US federal payment-stablecoin law milestone",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-25",
+      "topic": "Regulation",
+      "organization": "Hong Kong Monetary Authority",
+      "title": "Regulatory Regime for Stablecoin Issuers",
+      "date": "2025-08-01 effective",
+      "url": "https://www.hkma.gov.hk/eng/key-functions/international-financial-centre/stablecoin-issuers/",
+      "source_type": "REGULATOR",
+      "use_for": "Hong Kong issuer regime milestone",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-STB-26",
+      "topic": "Regulation",
+      "organization": "Bank of England",
+      "title": "Bank of England and FCA approach to joint regulation of systemic stablecoin issuers",
+      "date": "2026-06-30",
+      "url": "https://www.bankofengland.co.uk/paper/2026/boe-and-fcas-approach-to-joint-regulation-of-systemic-stablecoin-issuers",
+      "source_type": "CENTRAL_BANK",
+      "use_for": "UK systemic stablecoin regulatory development",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "STB-D01",
+      "asset_type": "diagram",
+      "page_route": "/about-stablecoins",
+      "module_id": "four-questions",
+      "filename": "STB-D01-stablecoin-lifecycle.svg",
+      "title": "Stablecoin Lifecycle",
+      "purpose": "Backing/collateral/hedge → mint → circulation → deviation → stabilisation → burn/settlement",
+      "source_type": "ORIGINAL",
+      "status": "READY"
+    },
+    {
+      "asset_id": "STB-D02",
+      "asset_type": "boundary_diagram",
+      "page_route": "/about-stablecoins",
+      "module_id": "money-boundaries",
+      "filename": "STB-D02-money-boundaries.svg",
+      "title": "Stablecoin vs Adjacent Digital Money",
+      "purpose": "Stablecoin / CBDC / tokenised deposit / tokenised fund boundary",
+      "source_type": "ORIGINAL",
+      "status": "READY"
+    },
+    {
+      "asset_id": "STB-T01",
+      "asset_type": "timeline_ui",
+      "page_route": "/about-stablecoins/history",
+      "module_id": "history",
+      "filename": "history-timeline",
+      "title": "Stablecoin History Timeline",
+      "purpose": "Data-driven causal history timeline",
+      "source_type": "DATA_UI",
+      "status": "READY_DATA"
+    },
+    {
+      "asset_id": "STB-D03",
+      "asset_type": "matrix_diagram",
+      "page_route": "/about-stablecoins/types",
+      "module_id": "taxonomy",
+      "filename": "STB-D03-taxonomy-matrix.svg",
+      "title": "Mechanism-first Stablecoin Taxonomy",
+      "purpose": "Backing × exit/redemption × stabilisation",
+      "source_type": "ORIGINAL",
+      "status": "READY"
+    },
+    {
+      "asset_id": "STB-D04",
+      "asset_type": "diagram",
+      "page_route": "/about-stablecoins/regulatory-evolution",
+      "module_id": "stages",
+      "filename": "STB-D04-regulatory-evolution.svg",
+      "title": "Regulatory Evolution",
+      "purpose": "Risk perimeter → obligations → standards → issuer regimes → systemic/cross-border",
+      "source_type": "ORIGINAL",
+      "status": "READY"
+    },
+    {
+      "asset_id": "STB-D05",
+      "asset_type": "process_diagram",
+      "page_route": "/about-stablecoins/types/fiat-backed",
+      "module_id": "mechanism",
+      "filename": "STB-D05-fiat-backed-flow.svg",
+      "title": "Fiat-reserve-backed Flow",
+      "purpose": "Reserve/issuer/mint/circulation/redeem/burn",
+      "source_type": "ORIGINAL",
+      "status": "READY"
+    },
+    {
+      "asset_id": "STB-D06",
+      "asset_type": "process_diagram",
+      "page_route": "/about-stablecoins/types/crypto-backed",
+      "module_id": "mechanism",
+      "filename": "STB-D06-crypto-collateral-flow.svg",
+      "title": "Crypto-collateralised Flow",
+      "purpose": "Collateral/borrow/mint/liquidation/redemption",
+      "source_type": "ORIGINAL",
+      "status": "READY"
+    },
+    {
+      "asset_id": "STB-D07",
+      "asset_type": "process_diagram",
+      "page_route": "/about-stablecoins/types/synthetic",
+      "module_id": "mechanism",
+      "filename": "STB-D07-synthetic-flow.svg",
+      "title": "Synthetic / Hedged Flow",
+      "purpose": "Backing + hedge + derivatives/custody + restricted direct redemption",
+      "source_type": "ORIGINAL",
+      "status": "READY"
+    },
+    {
+      "asset_id": "STB-D08",
+      "asset_type": "failure_diagram",
+      "page_route": "/about-stablecoins/types/algorithmic",
+      "module_id": "failure",
+      "filename": "STB-D08-algorithmic-death-spiral.svg",
+      "title": "Algorithmic Reflexive Failure",
+      "purpose": "Deviation → conversion → endogenous issuance → price fall → confidence loss",
+      "source_type": "ORIGINAL",
+      "status": "READY"
+    },
+    {
+      "asset_id": "STB-D09",
+      "asset_type": "boundary_diagram",
+      "page_route": "/about-stablecoins/types/other",
+      "module_id": "boundary",
+      "filename": "STB-D09-boundary-map.svg",
+      "title": "Hybrid & Boundary Map",
+      "purpose": "Mechanism migration + adjacent digital money",
+      "source_type": "ORIGINAL",
+      "status": "READY"
+    },
+    {
+      "asset_id": "STB-D10",
+      "asset_type": "matrix_ui",
+      "page_route": "/about-stablecoins/applications",
+      "module_id": "applications",
+      "filename": "application-matrix",
+      "title": "Application ≠ Adoption Matrix",
+      "purpose": "Task/benefit/constraint/evidence state",
+      "source_type": "DATA_UI",
+      "status": "READY_DATA"
+    }
+  ],
+  "copy": {
+    "en": "# About Stablecoins｜Content Master en V0.1\n\n> Introductory layer. Keep concise, mechanism-led and evidence-based.\n\n## `/about-stablecoins`\n### Understand the mechanism before the label\nA stablecoin is a transferable digital token designed to maintain a relatively stable value against a reference asset or unit. Stability is not an intrinsic property of the token; it depends on reserves, collateral, redemption, liquidation, hedging or other stabilisation arrangements.\n\nAsk four questions:\n1. What value is it trying to track?\n2. What economically supports the claim and absorbs losses?\n3. Who can mint, transfer and directly redeem?\n4. What is supposed to restore the reference value after a deviation?\n\nStablecoins are distinct from CBDCs, tokenised bank deposits and tokenised fund shares.\n\n## `/about-stablecoins/history`\n### Stablecoin history is a history of mechanisms being stress-tested\nTimeline:\n2014 Tether launch → 2017 Dai/Sai → 2018 USDC → DeFi expansion → May 2022 UST collapse → 2023 FSB framework → 2024 MiCA stablecoin provisions → 2025 US/HK dedicated regimes → 2026 systemic/cross-border implementation.\n\nEach event must explain **what changed**, not just show a logo/date.\n\n## `/about-stablecoins/types`\n### Mechanism before taxonomy\nClassify through:\n- economic backing;\n- exit/redemption path;\n- stabilisation mechanism.\n\nFive teaching groups:\nfiat-reserve-backed / crypto-collateralised / synthetic-hedged / algorithmic / hybrid & boundary cases.\n\nCategories are not universally legal, permanent or mutually exclusive.\n\n## `/about-stablecoins/applications`\n### Application is not adoption\nExplain tasks:\n- crypto settlement and collateral;\n- DeFi;\n- cross-border transfers;\n- B2B/treasury;\n- merchant/P2P payments;\n- tokenised-asset settlement;\n- machine/agentic payments.\n\nActual usage belongs in `/market-data/adoption`.\n\nCurrent IMF evidence still identifies crypto trading as the main use case, with cross-border payments increasing.\n\n## `/about-stablecoins/regulatory-evolution`\n### From risk perimeter to issuer, redemption and systemic oversight\nFive stages:\nrisk perimeter → reserve/redemption obligations → international standards → dedicated issuer regimes → cross-border/systemic monitoring.\n\nDo not duplicate `/regulatory`.\n\n## Fiat-reserve-backed\nIssuer + reserve + eligible direct redemption + secondary-market arbitrage.\n\nCore distinction:\n**Reserve backing does not mean every holder has identical direct issuer redemption access.**\n\nExamples: USDC, USDT, PYUSD.\n\n## Crypto-collateralised\nCrypto collateral + overcollateralisation + liquidation + redemption/market arbitrage.\n\nContemporary teaching example: Liquity V2 BOLD.\nHistorical milestone: Maker's original Dai/Sai.\n\n## Synthetic / hedged\nBacking assets + derivatives hedge + custody/settlement infrastructure.\n\nExample: Ethena USDe.\n\nCore distinction:\nsynthetic/hedged is not the same as a classic endogenous algorithmic stablecoin.\n\n## Algorithmic\nSupply/incentive/arbitrage feedback with endogenous assets.\n\nCanonical failure case: TerraUSD.\n\nCore lesson:\nreflexive backing can weaken precisely when confidence falls.\n\n## Hybrid & boundary cases\nClassify today's mechanism, not the project's historical reputation.\n\nCurrent frxUSD is described by Frax as fiat-redeemable and fully collateralised with permitted cash-equivalent/tokenised-Treasury reserves.\n\nSeparate stablecoins from CBDCs, tokenised deposits, tokenised MMF/Treasury shares and yield-bearing wrappers.\n",
+    "zh": "# About Stablecoins｜Content Master zh-CN V0.1\n\n> 定位：轻量、准确的稳定币入门层。  \n> 顶部导航遵循 `NAVIGATION_SPEC.md`；侧边栏不展开二级页面。\n\n---\n\n# 1. `/about-stablecoins`｜关于稳定币\n\n## HERO\n**H1** 先理解机制，再理解稳定币\n\n**Lead**  \n稳定币是一类试图围绕某个参考价值保持相对稳定的可转移数字代币。美元是最常见的参考单位，但“稳定”并不是代币天然拥有的属性，而是由储备、抵押、赎回、清算、对冲或其他稳定机制共同维持。\n\n## 01｜稳定币是什么\n不要只看“锚定 1 美元”。\n\n理解一个稳定币，需要看四个问题：\n\n1. **参考价值**：它试图追踪什么？\n2. **经济支撑**：什么资产、头寸或机制吸收损失？\n3. **发行与退出**：谁能铸造、持有、转移和直接赎回？\n4. **偏离后如何恢复**：靠套利、赎回、清算、对冲还是供给调整？\n\n**Visual** `STB-D01-stablecoin-lifecycle.svg`\n\n## 02｜为什么会出现\n稳定币最初解决的是加密市场中的“稳定计价与结算”问题，随后逐步进入：\n- 跨境资金转移；\n- 商户与企业结算；\n- DeFi 抵押与流动性；\n- tokenised assets 的链上结算；\n- 机器/智能体支付等新场景。\n\n但“可以用于某个场景”不等于“已经大规模采用”。\n\n## 03｜稳定币不是这些东西\n### CBDC\n中央银行发行的数字法定货币。\n\n### Tokenised bank deposit\n对商业银行存款负债的数字化表示。\n\n### Tokenised MMF / Treasury fund share\n代表基金份额或证券资产的 tokenised claim。\n\n### Stablecoin\n通常由私人主体或协议安排发行，目标是维持某个参考价值，并在数字网络中流通。\n\n**Visual** `STB-D02-money-boundaries.svg`\n\n## 04｜从哪里继续\n- 看历史 → `/about-stablecoins/history`\n- 看类别与机制 → `/about-stablecoins/types`\n- 看应用 → `/about-stablecoins/applications`\n- 看监管演进 → `/about-stablecoins/regulatory-evolution`\n- 看当前各地监管 → `/regulatory`\n- 看亚洲真实产品 → `/regional-developments`\n\n---\n\n# 2. `/about-stablecoins/history`｜稳定币发展历程\n\n## HERO\n**H1** 稳定币的历史，是稳定机制不断接受压力测试的历史\n\n**Lead**  \n从把法币价值搬到链上，到加密抵押、DeFi、算法实验，再到发行人监管和跨境监测，稳定币的发展并不是简单的“规模增长”，而是一次次重新回答：价值支撑在哪里、谁能赎回、压力由谁承担。\n\n## Timeline\n### 2014｜法币价值进入区块链\nTether 启动。早期稳定币开始把传统法币计价单位带入区块链交易。\n\n**What changed:** 加密市场获得可链上转移的稳定计价资产。\n\n### 2017｜链上抵押创造稳定币\nMaker 推出 Single-Collateral Dai（现称 Sai）。\n\n**What changed:** 稳定币不再只能依赖银行账户中的法币储备，也可以由链上超额抵押与清算机制生成。\n\n### 2018｜储备型稳定币走向更广泛机构化\nUSDC 于 2018-09-26 上线。\n\n**What changed:** 储备透明度、合规发行和开放区块链流通开始成为重要产品路线。\n\n### 2020–2021｜DeFi 放大稳定币的金融功能\n稳定币成为 AMM、借贷、抵押、收益策略和链上结算的重要基础资产。\n\n**What changed:** 稳定币从“交易所现金替代品”进一步变成链上金融基础设施。\n\n### 2022-05｜TerraUSD 崩溃\nUST/LUNA 的反身性稳定机制在挤兑中进入死亡螺旋。\n\n**What changed:** 市场重新关注可赎回储备、抵押质量、流动性和信心依赖。\n\n### 2023｜国际监管标准成形\nFSB 完成全球稳定币安排的高层建议。\n\n**What changed:** 监管开始围绕治理、风险管理、赎回权、稳定机制和跨境协调形成共同基准。\n\n### 2024｜欧盟 MiCA 的稳定币规则开始适用\nART / EMT 相关条款自 2024-06-30 起适用。\n\n**What changed:** 稳定币进入大型经济体的专门发行与监督框架。\n\n### 2025｜美国与香港进入专门制度阶段\n美国 GENIUS Act 于 2025-07-18 签署成法；香港稳定币发行人制度于 2025-08-01 生效。\n\n**What changed:** “是否监管”逐渐转向“谁能发行、储备是什么、如何赎回、如何监督”。\n\n### 2026｜从发牌走向系统性与跨境监测\n英国推进 FCA/BoE 稳定币规则；FSB 继续研究全球稳定币的跨境脆弱性与数据监测。\n\n**What changed:** 监管问题从单一发行人进一步扩展到支付系统、跨境传导和金融稳定。\n\n**Visual** `STB-T01-history-timeline`（结构化时间线，不做静态大图）\n\n---\n\n# 3. `/about-stablecoins/types`｜稳定币类别\n\n## HERO\n**H1** 与其记住标签，不如先看稳定机制\n\n**Lead**  \n“法币储备型”“加密抵押型”“合成型”“算法型”是理解机制的入口，不是永远互斥的法律分类。项目会升级、改变抵押和赎回结构，甚至彻底迁移稳定机制。\n\n## 01｜三轴分类法\n### 价值支撑\n- 现金 / 短期国债 / 其他储备资产\n- 加密资产抵押\n- 对冲后的加密资产头寸\n- 内生 token / 算法激励\n- 混合结构\n\n### 退出与赎回\n- issuer 直接 1:1 赎回\n- 链上用抵押品赎回\n- 仅符合资格的 direct minter/redeemer\n- 主要依靠二级市场退出\n- 多路径 / 受容量限制\n\n### 稳定机制\n- primary-market arbitrage\n- overcollateralisation + liquidation\n- redemption\n- delta hedge\n- supply adjustment / endogenous arbitrage\n- multiple mechanisms combined\n\n**Visual** `STB-D03-taxonomy-matrix.svg`\n\n## 02｜五类页面\n### 法币储备型\n核心是 issuer + reserve + redemption。\n\n### 加密资产抵押型\n核心是 collateral + overcollateralisation + liquidation/redemption。\n\n### 合成型\n核心是 backing + hedge + derivatives/custody infrastructure。\n\n### 算法型\n核心是 supply/incentive/arbitrage feedback；历史上最典型的失败案例是 UST。\n\n### 混合与边界\n用于机制迁移、复合结构，以及与 CBDC / tokenised deposit / tokenised fund 的边界说明。\n\n## 03｜不要这样分类\n- 不因为“去中心化”就自动归为算法型；\n- 不因为 token 叫“USD”就认为是 1:1 法币储备；\n- 不因为项目过去使用某种机制，就永久沿用旧标签；\n- 不把收益型 wrapper 与基础 stablecoin 本体混为一谈。\n\n---\n\n# 4. `/about-stablecoins/applications`｜稳定币应用\n\n## HERO\n**H1** 应用回答“能解决什么任务”，采用回答“实际用了多少”\n\n**Lead**  \n这一页讲稳定币可以承担哪些金融与支付任务；真实交易量、用户规模、地区分布和渠道采用，应到 Adoption 数据页查看。\n\n## Application matrix\n\n### 1. 加密交易与结算\n**Task:** 在高波动资产之间提供稳定计价、交易和结算资产。  \n**Why stablecoin:** 链上/交易平台间移动方便，减少频繁回到银行体系。  \n**Constraint:** 交易量不等于真实商品支付采用。\n\n### 2. DeFi 抵押、借贷与流动性\n**Task:** 作为借贷资产、AMM 配对资产、保证金和抵押物。  \n**Why:** 可组合、可编程、24/7。  \n**Constraint:** 智能合约、预言机、清算和流动性风险。\n\n### 3. 跨境转移与汇款\n**Task:** 跨境发送稳定价值。  \n**Why:** 公共链可减少部分跨境中间环节。  \n**Constraint:** on/off-ramp、合规、汇兑、本地法币结算仍决定实际体验。\n\n### 4. 企业资金与 B2B 结算\n**Task:** 跨时区结算、供应商付款、内部资金调拨。  \n**Why:** 可在银行营业时间之外转移。  \n**Constraint:** 对手方接受度、会计税务、银行出入金和法域规则。\n\n### 5. 商户 / P2P 支付\n**Task:** 商品服务支付或个人间转账。  \n**Why:** 可编程、数字原生。  \n**Constraint:** 商户接受、费用、用户保护、退款/争议机制和监管要求。\n\n### 6. Tokenised asset settlement\n**Task:** 为 tokenised securities / funds / real-world assets 提供链上现金腿。  \n**Why:** 资产与结算可以在相近数字基础设施中协调。  \n**Constraint:** delivery-versus-payment、资产法律权利、合格投资者和互操作性。\n\n### 7. Machine / agentic payments\n**Task:** API、agent、机器之间的小额或条件式支付。  \n**Why:** stablecoin 可以成为某些 24/7 programmable rails。  \n**Constraint:** stablecoin 不是 Agentic Payments 的必要条件；授权与责任更关键。\n\n→ `/agentic-payments`\n\n## Boundary\n**当前 IMF 研究仍指出，加密交易是稳定币的主要用途；跨境支付正在增长。**\n因此页面不使用“已经广泛取代银行卡/银行转账”之类表述。\n\n→ 实际采用数据：`/market-data/adoption`\n\n---\n\n# 5. `/about-stablecoins/regulatory-evolution`｜监管演进\n\n## HERO\n**H1** 稳定币监管正在从“风险提示”转向“发行、赎回与系统性监督”\n\n**Lead**  \n这一页解释监管逻辑怎样变化，不承担“今天哪个国家允许什么”的实时比较任务。当前制度状态请进入独立监管栏目。\n\n## Five stages\n\n### Stage 1｜识别风险与监管边界\n早期问题主要是：\n稳定币究竟是 crypto asset、e-money、payment instrument、security，还是其他金融工具？\n\n### Stage 2｜把稳定性拆成可监管义务\n监管重点逐渐收敛到：\n- reserve quality and custody\n- redemption rights\n- governance\n- operational resilience\n- AML/CFT\n- disclosure\n- recovery / wind-down\n\n### Stage 3｜国际共同基准\n2023 FSB 建议强调治理、全面风险管理、跨境协调、及时赎回和有效稳定机制。\n\n### Stage 4｜专门发行人制度\n- EU MiCA：ART/EMT 规则自 2024-06-30 起适用；\n- US GENIUS Act：2025-07-18 成法；\n- Hong Kong：issuer licensing 2025-08-01 生效；\n- UK：2026 推进 qualifying/systemic stablecoin 规则。\n\n### Stage 5｜跨境与系统性监测\nFSB 2025 review 指出各地实施仍不一致；2026 工作进一步关注全球稳定币跨境脆弱性和金融稳定监测数据。\n\n**Visual** `STB-D04-regulatory-evolution.svg`\n\n## Links\n当前监管比较 → `/regulatory`  \n亚洲制度与真实产品 → `/regional-developments`\n\n---\n\n# 6. `/about-stablecoins/types/fiat-backed`｜法币储备型\n\n## HERO\n**H1** 法币储备型：稳定来自“可兑现的储备 + 赎回机制”\n\n## Mechanism\nFiat / reserve assets  \n→ authorised issuer receives funds/assets  \n→ mint stablecoin  \n→ token circulates in secondary market  \n→ eligible customer redeems  \n→ token burned + reserve paid out\n\n**Visual** `STB-D05-fiat-backed-flow.svg`\n\n## Why the peg can hold\n如果一级市场参与者可以接近面值铸造/赎回，二级市场偏离就会产生套利动机。\n\n## What to inspect\n1. reserve composition\n2. reserve liquidity\n3. custodian / bank structure\n4. holder legal claim\n5. direct redemption eligibility\n6. redemption timing / fees / minimums\n7. disclosure / assurance\n8. secondary-market liquidity\n\n## Current examples\n### USDC\nCircle 表示 USDC 由高流动性的现金与现金等价资产支持并可按 1:1 赎回。Circle Mint 的直接 mint/redeem 面向机构，不面向个人和小企业；普通用户通常通过交易所、钱包等渠道获得。\n\n### USDT\nTether 表示 Tether tokens 与对应法币 1:1 挂钩并由储备支持。\n\n### PYUSD\nPayPal USD 由 Paxos 发行，PayPal 表示其储备包括美元存款、短期美国国债及类似现金等价物，并可 1:1 买卖。\n\n## Critical distinction\n**Reserve backing ≠ every holder has the same direct redemption right.**\n\n## Risks\nreserve / bank / custody / issuer / legal / compliance / redemption / operational / market-liquidity risk.\n\n---\n\n# 7. `/about-stablecoins/types/crypto-backed`｜加密资产抵押型\n\n## HERO\n**H1** 加密抵押型：用超额抵押与清算抵御高波动资产风险\n\n## Mechanism\ncrypto collateral  \n→ open borrowing position  \n→ mint stablecoin debt  \n→ collateral ratio changes  \n→ liquidation if unsafe  \n→ redemption / market arbitrage supports peg\n\n**Visual** `STB-D06-crypto-collateral-flow.svg`\n\n## Current clean example: BOLD\nLiquity V2 将 BOLD 描述为美元锚定、超额抵押，并由 WETH、wstETH、rETH 支持；BOLD 可以按面值逻辑兑换协议抵押品，抵押不足的仓位进入清算机制。\n\n## Historical milestone: Dai / Sai\nMaker 于 2017 年推出 Single-Collateral Dai，允许用户抵押 ETH 生成 Dai，后来扩展到多抵押品体系。\n\n## Stability is not free\n超额抵押的代价是资本效率较低；极端下跌时系统依赖：\n- oracle\n- liquidators\n- stability pools / auctions\n- blockchain capacity\n- collateral liquidity\n\n## Risks\ncollateral crash / oracle / liquidation / bad debt / smart-contract / liquidity / governance or parameter risk.\n\n---\n\n# 8. `/about-stablecoins/types/synthetic`｜合成型\n\n## HERO\n**H1** 合成型：稳定不仅看“持有什么”，还要看“如何对冲”\n\n## Mechanism\nbacking assets  \n+ offsetting derivatives / hedge  \n→ mint synthetic dollar  \n→ hedge maintains approximate USD exposure  \n→ funding / basis / PnL / custody continuously managed  \n→ eligible counterparties redeem\n\n**Visual** `STB-D07-synthetic-flow.svg`\n\n## Example: USDe\nEthena 表示 USDe 的稳定性由协议持有资产与 delta-hedging derivatives positions 支持。直接 mint/redeem 需要 KYC/KYB 并进入白名单；普通 holding user 与 direct mint user 的权利不同。\n\n## Why this is different\n合成型并不是简单“没有资产支撑”。\n它的关键是：\n- backing asset value\n- hedge effectiveness\n- derivative liquidity\n- funding/basis\n- exchange settlement\n- custody architecture\n\n## Risks\nbasis/funding risk / derivative counterparty / exchange failure / custody / hedge execution / liquidity / redemption access.\n\n## Boundary\n**Synthetic/hedged ≠ classic endogenous algorithmic stablecoin.**\n\n---\n\n# 9. `/about-stablecoins/types/algorithmic`｜算法型\n\n## HERO\n**H1** 算法型：当稳定依赖信心和内生套利，压力可能自我强化\n\n## Classic mechanism\nstablecoin < target  \n→ buy stablecoin  \n→ convert/burn against endogenous token  \n→ endogenous token supply expands  \n→ intended arbitrage restores peg\n\nIf confidence falls:\nstablecoin sell-off  \n→ endogenous token issuance  \n→ token price falls  \n→ backing/arbitrage capacity weakens  \n→ more redemptions  \n→ death spiral\n\n**Visual** `STB-D08-algorithmic-death-spiral.svg`\n\n## Case: TerraUSD\nBIS 记录显示，UST 依赖与 LUNA 之间的 1 美元价值兑换与套利。2022 年 5 月信心崩溃后，大量 UST 换成新铸 LUNA，LUNA 价格进一步下跌，机制进入死亡螺旋。\n\n## What the case teaches\n稳定机制如果依赖一个与系统信心高度共振的内生资产，就可能在压力下出现反身性。\n\n## Important boundary\n- UST 是经典失败案例，不代表所有非储备型 stablecoin；\n- algorithmic ≠ decentralised；\n- crypto-collateralised stablecoin 有真实超额抵押与清算机制，不能与 UST 模式混为一谈。\n\n---\n\n# 10. `/about-stablecoins/types/other`｜混合与边界案例\n\n## HERO\n**H1** 混合与边界：产品名称不重要，今天的经济机制才重要\n\n## 01｜为什么需要这一页\n真实项目会：\n- 更换储备资产；\n- 从算法机制转向资产储备；\n- 引入 RWA / tokenised Treasuries；\n- 增加 PSM / redemption modules；\n- 改变 governance 与发行主体。\n\n所以分类必须随机制变化。\n\n## 02｜Current frxUSD\nFrax 当前将 frxUSD 描述为可法币赎回、fully collateralised，并由 permitted cash-equivalent reserves / tokenised Treasury funds 支持。\n\n这说明：\n**不能因为一个品牌历史上采用过另一种稳定机制，就用旧标签描述当前 token。**\n\n## 03｜边界资产\n### CBDC\n央行负债。\n\n### Tokenised deposit\n商业银行存款负债的 tokenised representation。\n\n### Tokenised MMF / Treasury fund\n基金/证券份额，不是稳定币本体。\n\n### Yield-bearing wrapper\n例如某些 stablecoin 的质押/收益凭证，经济权利可能与基础 stablecoin 不同。\n\n**Visual** `STB-D09-boundary-map.svg`\n\n## 04｜最终判断清单\n看到一个新 token 时，不先问“它属于哪一类”，而先问：\n- redeemable against what?\n- by whom?\n- on what terms?\n- what absorbs losses?\n- what restores the peg?\n- what happens under stress?\n"
+  },
+  "svg": {
+    "STB-D01": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Stablecoin Lifecycle</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:27px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs>\n<marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker>\n</defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Stablecoin Lifecycle</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">A shared teaching frame — not every stablecoin uses every step.</text><rect x=\"45\" y=\"245\" width=\"230\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"63\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#315B9A\" font-weight=\"600\">Economic support</text><text x=\"73\" y=\"350\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• reserve</text><text x=\"73\" y=\"392\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• collateral</text><text x=\"73\" y=\"434\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• hedge</text><text x=\"73\" y=\"476\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• mechanism</text><line x1=\"275\" y1=\"410\" x2=\"303\" y2=\"410\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"303\" y=\"245\" width=\"230\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#5F7DB5\" stroke-width=\"2\"/><text x=\"321\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#5F7DB5\" font-weight=\"600\">Mint / issuance</text><text x=\"331\" y=\"350\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• issuer or protocol</text><text x=\"331\" y=\"392\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• eligibility rules</text><line x1=\"533\" y1=\"410\" x2=\"561\" y2=\"410\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"561\" y=\"245\" width=\"230\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"579\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#3A7D78\" font-weight=\"600\">Circulation</text><text x=\"589\" y=\"350\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• wallets</text><text x=\"589\" y=\"392\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• venues</text><text x=\"589\" y=\"434\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• payments / DeFi</text><line x1=\"791\" y1=\"410\" x2=\"819\" y2=\"410\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"819\" y=\"245\" width=\"230\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"837\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#C97B63\" font-weight=\"600\">Price deviation</text><text x=\"847\" y=\"350\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• premium or discount</text><text x=\"847\" y=\"392\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• liquidity stress</text><line x1=\"1049\" y1=\"410\" x2=\"1077\" y2=\"410\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1077\" y=\"245\" width=\"230\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"1095\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#6B65A8\" font-weight=\"600\">Stabilisation response</text><text x=\"1105\" y=\"350\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• redemption</text><text x=\"1105\" y=\"392\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• arbitrage</text><text x=\"1105\" y=\"434\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• liquidation</text><text x=\"1105\" y=\"476\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• hedge / supply</text><line x1=\"1307\" y1=\"410\" x2=\"1335\" y2=\"410\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1335\" y=\"245\" width=\"230\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#517A63\" stroke-width=\"2\"/><text x=\"1353\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#517A63\" font-weight=\"600\">Burn / settlement</text><text x=\"1363\" y=\"350\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• claim reduced</text><text x=\"1363\" y=\"392\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• balance restored</text><rect x=\"310\" y=\"690\" width=\"980\" height=\"86\" rx=\"14\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"800\" y=\"740\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">Where is the loss absorbed when the mechanism is stressed?</text></svg>",
+    "STB-D02": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Stablecoin vs Adjacent Digital Money</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:27px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs>\n<marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker>\n</defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Stablecoin vs Adjacent Digital Money</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Digital form does not make these instruments economically identical.</text><rect x=\"65\" y=\"220\" width=\"345\" height=\"470\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"93\" y=\"270\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">Stablecoin</text><text x=\"99\" y=\"340\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Private issuer / protocol</text><text x=\"99\" y=\"405\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Reference-value target</text><text x=\"99\" y=\"470\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Redemption varies by design</text><text x=\"99\" y=\"535\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Reserve/collateral/hedge</text><rect x=\"445\" y=\"220\" width=\"345\" height=\"470\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"473\" y=\"270\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">CBDC</text><text x=\"479\" y=\"340\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Central-bank liability</text><text x=\"479\" y=\"405\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Sovereign money</text><text x=\"479\" y=\"470\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Rules set by central bank</text><text x=\"479\" y=\"535\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Not a stablecoin</text><rect x=\"825\" y=\"220\" width=\"345\" height=\"470\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"853\" y=\"270\" class=\"t l\" text-anchor=\"start\" fill=\"#3A7D78\">Tokenised deposit</text><text x=\"859\" y=\"340\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Commercial-bank liability</text><text x=\"859\" y=\"405\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Deposit claim</text><text x=\"859\" y=\"470\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Bank redemption/payment rules</text><text x=\"859\" y=\"535\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Tokenised representation</text><rect x=\"1205\" y=\"220\" width=\"345\" height=\"470\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#517A63\" stroke-width=\"2\"/><text x=\"1233\" y=\"270\" class=\"t l\" text-anchor=\"start\" fill=\"#517A63\">Tokenised fund share</text><text x=\"1239\" y=\"340\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Fund / security claim</text><text x=\"1239\" y=\"405\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Portfolio-backed</text><text x=\"1239\" y=\"470\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Fund dealing / market exit</text><text x=\"1239\" y=\"535\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• Not money by definition</text><rect x=\"445\" y=\"755\" width=\"710\" height=\"52\" rx=\"26.0\" fill=\"#EEF3F9\"/><text x=\"800.0\" y=\"787.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\" font-weight=\"600\">Compare issuer/obligor · legal claim · redemption · backing · transfer rail</text></svg>",
+    "STB-D03": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Mechanism-first Stablecoin Taxonomy</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:27px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Mechanism-first Stablecoin Taxonomy</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Use labels as teaching groups. Classify the mechanism that exists today.</text><rect x=\"80\" y=\"200\" width=\"1440\" height=\"125\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"110\" y=\"242\" class=\"t s\" text-anchor=\"start\" fill=\"#315B9A\" font-weight=\"600\">1 · Economic support</text><rect x=\"400\" y=\"235\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"500\" y=\"262\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"500\" dy=\"0\">cash / T-bills</tspan></text><rect x=\"615\" y=\"235\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"715\" y=\"262\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"715\" dy=\"0\">crypto</tspan><tspan x=\"715\" dy=\"21\">collateral</tspan></text><rect x=\"830\" y=\"235\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"930\" y=\"262\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"930\" dy=\"0\">hedged</tspan><tspan x=\"930\" dy=\"21\">backing</tspan></text><rect x=\"1045\" y=\"235\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"1145\" y=\"262\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"1145\" dy=\"0\">endogenous</tspan><tspan x=\"1145\" dy=\"21\">token</tspan></text><rect x=\"1260\" y=\"235\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"1360\" y=\"262\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"1360\" dy=\"0\">mixed</tspan></text><rect x=\"80\" y=\"350\" width=\"1440\" height=\"125\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"110\" y=\"392\" class=\"t s\" text-anchor=\"start\" fill=\"#3A7D78\" font-weight=\"600\">2 · Exit / redemption</text><rect x=\"400\" y=\"385\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"500\" y=\"412\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"500\" dy=\"0\">issuer</tspan><tspan x=\"500\" dy=\"21\">redemption</tspan></text><rect x=\"615\" y=\"385\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"715\" y=\"412\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"715\" dy=\"0\">collateral</tspan><tspan x=\"715\" dy=\"21\">redemption</tspan></text><rect x=\"830\" y=\"385\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"930\" y=\"412\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"930\" dy=\"0\">restricted direct</tspan><tspan x=\"930\" dy=\"21\">mint / redeem</tspan></text><rect x=\"1045\" y=\"385\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"1145\" y=\"412\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"1145\" dy=\"0\">secondary-</tspan><tspan x=\"1145\" dy=\"21\">market exit</tspan></text><rect x=\"1260\" y=\"385\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"1360\" y=\"412\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"1360\" dy=\"0\">multiple paths</tspan></text><rect x=\"80\" y=\"500\" width=\"1440\" height=\"125\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"110\" y=\"542\" class=\"t s\" text-anchor=\"start\" fill=\"#6B65A8\" font-weight=\"600\">3 · Stabilisation</text><rect x=\"400\" y=\"535\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"500\" y=\"562\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"500\" dy=\"0\">primary-market</tspan><tspan x=\"500\" dy=\"21\">arbitrage</tspan></text><rect x=\"615\" y=\"535\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"715\" y=\"562\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"715\" dy=\"0\">liquidation +</tspan><tspan x=\"715\" dy=\"21\">redemption</tspan></text><rect x=\"830\" y=\"535\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"930\" y=\"562\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"930\" dy=\"0\">delta hedge</tspan></text><rect x=\"1045\" y=\"535\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"1145\" y=\"562\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"1145\" dy=\"0\">supply / endogenous</tspan><tspan x=\"1145\" dy=\"21\">arbitrage</tspan></text><rect x=\"1260\" y=\"535\" width=\"200\" height=\"62\" rx=\"12\" fill=\"#F8FAFC\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"1360\" y=\"562\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\"><tspan x=\"1360\" dy=\"0\">combined</tspan></text><rect x=\"85\" y=\"665\" width=\"270\" height=\"82\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"220\" y=\"715\" class=\"t s\" text-anchor=\"middle\" fill=\"#315B9A\" font-weight=\"600\">Fiat-reserve-backed</text><rect x=\"372\" y=\"665\" width=\"270\" height=\"82\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"507\" y=\"715\" class=\"t s\" text-anchor=\"middle\" fill=\"#3A7D78\" font-weight=\"600\">Crypto-collateralised</text><rect x=\"659\" y=\"665\" width=\"270\" height=\"82\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"794\" y=\"715\" class=\"t s\" text-anchor=\"middle\" fill=\"#6B65A8\" font-weight=\"600\">Synthetic / hedged</text><rect x=\"946\" y=\"665\" width=\"270\" height=\"82\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"1081\" y=\"715\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">Algorithmic</text><rect x=\"1233\" y=\"665\" width=\"270\" height=\"82\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#94A3B8\" stroke-width=\"2\"/><text x=\"1368\" y=\"715\" class=\"t s\" text-anchor=\"middle\" fill=\"#94A3B8\" font-weight=\"600\">Hybrid / boundary</text><text x=\"800\" y=\"815\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">Classify the current mechanism — not the project&#x27;s historical reputation.</text></svg>",
+    "STB-D04": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Stablecoin Regulatory Evolution</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:27px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs>\n<marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker>\n</defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Stablecoin Regulatory Evolution</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">From perimeter questions to issuer obligations and system-level monitoring.</text><rect x=\"50\" y=\"250\" width=\"280\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"70\" y=\"295\" class=\"t s\" text-anchor=\"start\" fill=\"#315B9A\" font-weight=\"600\">Risk &amp; perimeter</text><text x=\"78\" y=\"365\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• classification</text><text x=\"78\" y=\"421\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• AML/CFT</text><text x=\"78\" y=\"477\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• consumer / stability risk</text><line x1=\"330\" y1=\"415\" x2=\"360\" y2=\"415\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"360\" y=\"250\" width=\"280\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#5F7DB5\" stroke-width=\"2\"/><text x=\"380\" y=\"295\" class=\"t s\" text-anchor=\"start\" fill=\"#5F7DB5\" font-weight=\"600\">Stability obligations</text><text x=\"388\" y=\"365\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• reserves</text><text x=\"388\" y=\"421\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• redemption</text><text x=\"388\" y=\"477\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• governance / resilience</text><line x1=\"640\" y1=\"415\" x2=\"670\" y2=\"415\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"670\" y=\"250\" width=\"280\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"690\" y=\"295\" class=\"t s\" text-anchor=\"start\" fill=\"#3A7D78\" font-weight=\"600\">International baseline</text><text x=\"698\" y=\"365\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• FSB 2023</text><text x=\"698\" y=\"421\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• cross-border coordination</text><line x1=\"950\" y1=\"415\" x2=\"980\" y2=\"415\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"980\" y=\"250\" width=\"280\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"1000\" y=\"295\" class=\"t s\" text-anchor=\"start\" fill=\"#6B65A8\" font-weight=\"600\">Dedicated issuer regimes</text><text x=\"1008\" y=\"365\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• MiCA 2024</text><text x=\"1008\" y=\"421\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• US + HK 2025</text><text x=\"1008\" y=\"477\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• UK 2026</text><line x1=\"1260\" y1=\"415\" x2=\"1290\" y2=\"415\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1290\" y=\"250\" width=\"280\" height=\"330\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"1310\" y=\"295\" class=\"t s\" text-anchor=\"start\" fill=\"#C97B63\" font-weight=\"600\">Systemic &amp; cross-border</text><text x=\"1318\" y=\"365\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• implementation gaps</text><text x=\"1318\" y=\"421\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• payment-system role</text><text x=\"1318\" y=\"477\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\">• data monitoring</text><rect x=\"300\" y=\"690\" width=\"1000\" height=\"90\" rx=\"14\" fill=\"#FBFCFE\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"800\" y=\"730\" class=\"t s\" text-anchor=\"middle\" fill=\"#667085\" font-weight=\"600\">This page explains regulatory evolution, not today&#x27;s country-by-country permission status.</text><text x=\"800\" y=\"765\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\">See /regulatory and /regional-developments for current jurisdiction status.</text></svg>",
+    "STB-D05": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Fiat-reserve-backed Stablecoin Flow</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:27px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs>\n<marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker>\n</defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Fiat-reserve-backed: Reserve + Redemption + Arbitrage</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Direct issuer access and secondary ownership are not the same relationship.</text><rect x=\"65\" y=\"250\" width=\"270\" height=\"260\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"83\" y=\"298\" class=\"t s\" text-anchor=\"start\" fill=\"#315B9A\" font-weight=\"600\">Reserve assets</text><text x=\"83\" y=\"365\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"83\" dy=\"0\">cash / T-bills</tspan><tspan x=\"83\" dy=\"34\">custodian / bank</tspan></text><line x1=\"335\" y1=\"380\" x2=\"370\" y2=\"380\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"370\" y=\"250\" width=\"270\" height=\"260\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#5F7DB5\" stroke-width=\"2\"/><text x=\"388\" y=\"298\" class=\"t s\" text-anchor=\"start\" fill=\"#5F7DB5\" font-weight=\"600\">Issuer</text><text x=\"388\" y=\"365\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"388\" dy=\"0\">mint / burn rules</tspan><tspan x=\"388\" dy=\"34\">legal / compliance</tspan></text><line x1=\"640\" y1=\"380\" x2=\"675\" y2=\"380\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"675\" y=\"250\" width=\"270\" height=\"260\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"693\" y=\"298\" class=\"t s\" text-anchor=\"start\" fill=\"#3A7D78\" font-weight=\"600\">Eligible direct customer</text><text x=\"693\" y=\"365\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"693\" dy=\"0\">institutional / approved</tspan><tspan x=\"693\" dy=\"34\">mint &amp; redeem</tspan></text><line x1=\"945\" y1=\"380\" x2=\"980\" y2=\"380\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"980\" y=\"250\" width=\"270\" height=\"260\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"998\" y=\"298\" class=\"t s\" text-anchor=\"start\" fill=\"#6B65A8\" font-weight=\"600\">Stablecoin in circulation</text><text x=\"998\" y=\"365\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"998\" dy=\"0\">wallets / exchanges</tspan><tspan x=\"998\" dy=\"34\">payments / DeFi</tspan></text><line x1=\"1250\" y1=\"380\" x2=\"1285\" y2=\"380\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1285\" y=\"250\" width=\"270\" height=\"260\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"1303\" y=\"298\" class=\"t s\" text-anchor=\"start\" fill=\"#C97B63\" font-weight=\"600\">Secondary holders</text><text x=\"1303\" y=\"365\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1303\" dy=\"0\">may not redeem directly</tspan><tspan x=\"1303\" dy=\"34\">market exit may differ</tspan></text><line x1=\"925\" y1=\"530\" x2=\"640\" y2=\"650\" stroke=\"#3A7D78\" stroke-width=\"4\" marker-end=\"url(#a)\" stroke-dasharray=\"10 8\"/><line x1=\"640\" y1=\"650\" x2=\"335\" y2=\"530\" stroke=\"#3A7D78\" stroke-width=\"4\" marker-end=\"url(#a)\" stroke-dasharray=\"10 8\"/><text x=\"640\" y=\"690\" class=\"t xs\" text-anchor=\"middle\" fill=\"#3A7D78\" font-weight=\"600\">eligible redemption / reserve payout / burn</text><rect x=\"400\" y=\"760\" width=\"800\" height=\"70\" rx=\"14\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"800\" y=\"803\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">Reserve backing ≠ identical direct issuer redemption access for every holder.</text></svg>",
+    "STB-D06": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Crypto-collateralised Stablecoin Flow</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:27px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs>\n<marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker>\n</defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Crypto-collateralised: Overcollateralisation + Liquidation</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">The peg and solvency depend on collateral value, liquidation execution and redemption/arbitrage.</text><rect x=\"100\" y=\"245\" width=\"300\" height=\"130\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"250\" y=\"300\" class=\"t l\" text-anchor=\"middle\" fill=\"#315B9A\">Crypto collateral</text><text x=\"250\" y=\"338\" class=\"t xs\" text-anchor=\"middle\" fill=\"#667085\">WETH / wstETH / rETH etc.</text><line x1=\"400\" y1=\"310\" x2=\"480\" y2=\"310\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"480\" y=\"245\" width=\"300\" height=\"130\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"630\" y=\"300\" class=\"t l\" text-anchor=\"middle\" fill=\"#3A7D78\">Borrowing position</text><text x=\"630\" y=\"338\" class=\"t xs\" text-anchor=\"middle\" fill=\"#667085\">debt + collateral ratio</text><line x1=\"780\" y1=\"310\" x2=\"860\" y2=\"310\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"860\" y=\"245\" width=\"300\" height=\"130\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"1010\" y=\"300\" class=\"t l\" text-anchor=\"middle\" fill=\"#6B65A8\">Stablecoin minted</text><text x=\"1010\" y=\"338\" class=\"t xs\" text-anchor=\"middle\" fill=\"#667085\">circulates / used elsewhere</text><line x1=\"630\" y1=\"375\" x2=\"630\" y2=\"485\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"390\" y=\"485\" width=\"480\" height=\"120\" rx=\"18\" fill=\"#F5FAF7\" stroke=\"#517A63\" stroke-width=\"2\"/><text x=\"630\" y=\"530\" class=\"t s\" text-anchor=\"middle\" fill=\"#517A63\" font-weight=\"600\">SAFE</text><text x=\"630\" y=\"565\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\">collateral ratio remains sufficient</text><line x1=\"1010\" y1=\"375\" x2=\"1010\" y2=\"485\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"900\" y=\"485\" width=\"480\" height=\"120\" rx=\"18\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"1140\" y=\"530\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">UNSAFE</text><text x=\"1140\" y=\"565\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\">liquidation → debt reduction / collateral sale</text><rect x=\"155\" y=\"705\" width=\"300\" height=\"44\" rx=\"22.0\" fill=\"#EEF3F9\"/><text x=\"305.0\" y=\"733.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#315B9A\" font-weight=\"600\">oracle</text><rect x=\"500\" y=\"705\" width=\"300\" height=\"44\" rx=\"22.0\" fill=\"#EEF3F9\"/><text x=\"650.0\" y=\"733.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#315B9A\" font-weight=\"600\">chain congestion</text><rect x=\"845\" y=\"705\" width=\"300\" height=\"44\" rx=\"22.0\" fill=\"#EEF3F9\"/><text x=\"995.0\" y=\"733.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#315B9A\" font-weight=\"600\">collateral liquidity</text><rect x=\"1190\" y=\"705\" width=\"255\" height=\"44\" rx=\"22.0\" fill=\"#EEF3F9\"/><text x=\"1317.5\" y=\"733.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#315B9A\" font-weight=\"600\">bad debt</text><text x=\"800\" y=\"815\" class=\"t s\" text-anchor=\"middle\" fill=\"#667085\" font-weight=\"600\">Peg support may also use redemption and secondary-market arbitrage.</text></svg>",
+    "STB-D07": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Synthetic / Hedged Stablecoin Flow</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:27px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs>\n<marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker>\n</defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Synthetic / Hedged: Backing + Hedge</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Stability depends on both asset backing and the performance of the hedge/custody stack.</text><rect x=\"80\" y=\"230\" width=\"310\" height=\"180\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"100\" y=\"280\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">Backing assets</text><text x=\"100\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"100\" dy=\"0\">crypto assets</tspan><tspan x=\"100\" dy=\"30\">staked assets</tspan></text><line x1=\"390\" y1=\"320\" x2=\"445\" y2=\"320\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"445\" y=\"230\" width=\"310\" height=\"180\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"465\" y=\"280\" class=\"t l\" text-anchor=\"start\" fill=\"#3A7D78\">Custody / OES</text><text x=\"465\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"465\" dy=\"0\">custodians</tspan><tspan x=\"465\" dy=\"30\">settlement infrastructure</tspan></text><line x1=\"755\" y1=\"320\" x2=\"810\" y2=\"320\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"810\" y=\"230\" width=\"310\" height=\"180\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"830\" y=\"280\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">Derivative hedge</text><text x=\"830\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"830\" dy=\"0\">short / offsetting exposure</tspan><tspan x=\"830\" dy=\"30\">exchange venues</tspan></text><line x1=\"1120\" y1=\"320\" x2=\"1175\" y2=\"320\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1175\" y=\"230\" width=\"310\" height=\"180\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"1195\" y=\"280\" class=\"t l\" text-anchor=\"start\" fill=\"#C97B63\">Synthetic dollar exposure</text><text x=\"1195\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1195\" dy=\"0\">USDe-like token</tspan><tspan x=\"1195\" dy=\"30\">secondary liquidity</tspan></text><rect x=\"220\" y=\"500\" width=\"520\" height=\"130\" rx=\"18\" fill=\"#F8F7FC\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"480\" y=\"545\" class=\"t s\" text-anchor=\"middle\" fill=\"#6B65A8\" font-weight=\"600\">Hedge maintenance</text><text x=\"480\" y=\"585\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\">funding · basis · PnL · execution</text><line x1=\"480\" y1=\"500\" x2=\"835\" y2=\"410\" stroke=\"#6B65A8\" stroke-width=\"4\" marker-end=\"url(#a)\" stroke-dasharray=\"10 8\"/><rect x=\"850\" y=\"500\" width=\"300\" height=\"130\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"1000\" y=\"545\" class=\"t s\" text-anchor=\"middle\" fill=\"#3A7D78\" font-weight=\"600\">Eligible direct counterparty</text><text x=\"1000\" y=\"585\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\">whitelisted mint / redeem</text><rect x=\"1200\" y=\"500\" width=\"300\" height=\"130\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#94A3B8\" stroke-width=\"2\"/><text x=\"1350\" y=\"545\" class=\"t s\" text-anchor=\"middle\" fill=\"#94A3B8\" font-weight=\"600\">Secondary holder</text><text x=\"1350\" y=\"585\" class=\"t xs\" text-anchor=\"middle\" fill=\"#1F2937\">market access ≠ same rights</text><rect x=\"380\" y=\"750\" width=\"840\" height=\"70\" rx=\"14\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"800\" y=\"793\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">Synthetic / hedged ≠ classic endogenous algorithmic stablecoin.</text></svg>",
+    "STB-D08": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Algorithmic Reflexive Failure</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:27px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Algorithmic Stablecoin: Intended Loop vs Reflexive Stress Loop</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">TerraUSD is used here as the historical case for a reflexive endogenous-asset failure mode.</text><text x=\"110\" y=\"215\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">Intended arbitrage loop</text><rect x=\"85\" y=\"255\" width=\"315\" height=\"112\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"242\" y=\"308\" class=\"t s\" text-anchor=\"middle\" fill=\"#315B9A\"><tspan x=\"242\" dy=\"0\">Below peg</tspan></text><line x1=\"400\" y1=\"311\" x2=\"435\" y2=\"311\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"435\" y=\"255\" width=\"315\" height=\"112\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"592\" y=\"308\" class=\"t s\" text-anchor=\"middle\" fill=\"#3A7D78\"><tspan x=\"592\" dy=\"0\">Buy / convert</tspan><tspan x=\"592\" dy=\"27\">stablecoin</tspan></text><line x1=\"750\" y1=\"311\" x2=\"785\" y2=\"311\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"785\" y=\"255\" width=\"315\" height=\"112\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"942\" y=\"308\" class=\"t s\" text-anchor=\"middle\" fill=\"#6B65A8\"><tspan x=\"942\" dy=\"0\">Endogenous token /</tspan><tspan x=\"942\" dy=\"27\">supply adjustment</tspan></text><line x1=\"1100\" y1=\"311\" x2=\"1135\" y2=\"311\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1135\" y=\"255\" width=\"315\" height=\"112\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#517A63\" stroke-width=\"2\"/><text x=\"1292\" y=\"308\" class=\"t s\" text-anchor=\"middle\" fill=\"#517A63\"><tspan x=\"1292\" dy=\"0\">Intended return</tspan><tspan x=\"1292\" dy=\"27\">toward peg</tspan></text><text x=\"110\" y=\"455\" class=\"t l\" text-anchor=\"start\" fill=\"#C97B63\">Reflexive stress loop</text><rect x=\"45\" y=\"510\" width=\"270\" height=\"116\" rx=\"18\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"180.0\" y=\"560\" class=\"t xs\" text-anchor=\"middle\" fill=\"#C97B63\"><tspan x=\"180.0\" dy=\"0\">Confidence</tspan><tspan x=\"180.0\" dy=\"23\">falls</tspan></text><line x1=\"315\" y1=\"568\" x2=\"350\" y2=\"568\" stroke=\"#C97B63\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"350\" y=\"510\" width=\"270\" height=\"116\" rx=\"18\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"485.0\" y=\"560\" class=\"t xs\" text-anchor=\"middle\" fill=\"#C97B63\"><tspan x=\"485.0\" dy=\"0\">Stablecoin</tspan><tspan x=\"485.0\" dy=\"23\">selling rises</tspan></text><line x1=\"620\" y1=\"568\" x2=\"655\" y2=\"568\" stroke=\"#C97B63\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"655\" y=\"510\" width=\"270\" height=\"116\" rx=\"18\" fill=\"#FFF5F5\" stroke=\"#A65A5A\" stroke-width=\"2\"/><text x=\"790.0\" y=\"560\" class=\"t xs\" text-anchor=\"middle\" fill=\"#A65A5A\"><tspan x=\"790.0\" dy=\"0\">Endogenous token</tspan><tspan x=\"790.0\" dy=\"23\">issuance rises</tspan></text><line x1=\"925\" y1=\"568\" x2=\"960\" y2=\"568\" stroke=\"#C97B63\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"960\" y=\"510\" width=\"270\" height=\"116\" rx=\"18\" fill=\"#FFF5F5\" stroke=\"#A65A5A\" stroke-width=\"2\"/><text x=\"1095.0\" y=\"560\" class=\"t xs\" text-anchor=\"middle\" fill=\"#A65A5A\"><tspan x=\"1095.0\" dy=\"0\">Endogenous token</tspan><tspan x=\"1095.0\" dy=\"23\">price falls</tspan></text><line x1=\"1230\" y1=\"568\" x2=\"1265\" y2=\"568\" stroke=\"#C97B63\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1265\" y=\"510\" width=\"270\" height=\"116\" rx=\"18\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"1400.0\" y=\"560\" class=\"t xs\" text-anchor=\"middle\" fill=\"#C97B63\"><tspan x=\"1400.0\" dy=\"0\">Arbitrage capacity /</tspan><tspan x=\"1400.0\" dy=\"23\">confidence weakens</tspan></text><line x1=\"1435\" y1=\"626\" x2=\"1435\" y2=\"700\" stroke=\"#C97B63\" stroke-width=\"4\" marker-end=\"url(#a)\" stroke-dasharray=\"10 8\"/><line x1=\"1435\" y1=\"700\" x2=\"180\" y2=\"700\" stroke=\"#C97B63\" stroke-width=\"4\" marker-end=\"url(#a)\" stroke-dasharray=\"10 8\"/><line x1=\"180\" y1=\"700\" x2=\"180\" y2=\"626\" stroke=\"#C97B63\" stroke-width=\"4\" marker-end=\"url(#a)\" stroke-dasharray=\"10 8\"/><text x=\"800\" y=\"765\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">More redemptions / selling can weaken the same asset expected to absorb the stress.</text></svg>",
+    "STB-D09": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Hybrid and Boundary Cases</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:27px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs>\n<marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker>\n</defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Hybrid &amp; Boundary Cases</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Classify today&#x27;s economic mechanism, not the project&#x27;s historical reputation.</text><rect x=\"590\" y=\"325\" width=\"420\" height=\"180\" rx=\"80\" fill=\"#F3F7FC\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"800\" y=\"395\" class=\"t l\" text-anchor=\"middle\" fill=\"#315B9A\">Classify today&#x27;s</text><text x=\"800\" y=\"435\" class=\"t l\" text-anchor=\"middle\" fill=\"#315B9A\">economic mechanism</text><rect x=\"90\" y=\"225\" width=\"390\" height=\"430\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"285\" y=\"275\" class=\"t l\" text-anchor=\"middle\" fill=\"#6B65A8\">Mechanism migration</text><text x=\"135\" y=\"345\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• reserve mix changes</text><text x=\"135\" y=\"403\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• new redemption path</text><text x=\"135\" y=\"461\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• RWA / tokenised Treasuries</text><text x=\"135\" y=\"519\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• governance / issuer changes</text><text x=\"135\" y=\"577\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• hybrid stabilisation</text><line x1=\"480\" y1=\"440\" x2=\"590\" y2=\"415\" stroke=\"#6B65A8\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1120\" y=\"225\" width=\"390\" height=\"430\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"1315\" y=\"275\" class=\"t l\" text-anchor=\"middle\" fill=\"#3A7D78\">Adjacent digital money</text><text x=\"1165\" y=\"345\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• CBDC</text><text x=\"1165\" y=\"403\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• tokenised deposit</text><text x=\"1165\" y=\"461\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• tokenised MMF / Treasury share</text><text x=\"1165\" y=\"519\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• yield-bearing wrapper</text><text x=\"1165\" y=\"577\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">• other tokenised claims</text><line x1=\"1120\" y1=\"440\" x2=\"1010\" y2=\"415\" stroke=\"#3A7D78\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"290\" y=\"720\" width=\"1020\" height=\"82\" rx=\"14\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"800\" y=\"756\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">Current frxUSD example: reserve-backed / fiat-redeemable under current documentation.</text><text x=\"800\" y=\"786\" class=\"t xs\" text-anchor=\"middle\" fill=\"#667085\">Historical project labels should not override the current mechanism.</text></svg>"
+  },
+  "hashes": {
+    "STB-D01-stablecoin-lifecycle.svg": "af8eda999898aaf8d33dc0fa431b55c67f01ad3ab068526cbe7e742123b1a6ac",
+    "STB-D02-money-boundaries.svg": "7077e3ebac4feda0a9e2c11fc70865e2d8cd41b8199c8df2d544c3f1c3e85db0",
+    "STB-D03-taxonomy-matrix.svg": "b2ef19baa2f3fac9f656db15603d04578b2499602071ff33ccbb0a2570f5f02e",
+    "STB-D04-regulatory-evolution.svg": "286315814f137b3aa1900f3e08ac5b7987cbd5a270b935c19035cde15bdb815c",
+    "STB-D05-fiat-backed-flow.svg": "b6a33fc66e426c11e926b82fcb7a441fe6708a43dd0a61099f3b57306286df5d",
+    "STB-D06-crypto-collateral-flow.svg": "f3a438562e0ef63f817158aba8e60db6c1b6115e7c349cb8ce790f4c71d4d226",
+    "STB-D07-synthetic-flow.svg": "ca6ac6b7b77dcd03c0b890a3b62915d0f1b83e1b868ce8160f796c93b0029129",
+    "STB-D08-algorithmic-death-spiral.svg": "b88cc28a4a3c791ea3b929fabca6287fadbd133d974129564ccb8c40c343cd86",
+    "STB-D09-boundary-map.svg": "21b596e38ceeecf1f35f81cfefdcbea007b18f53d5b2753c3987b1fb2d5a2490"
+  }
+}

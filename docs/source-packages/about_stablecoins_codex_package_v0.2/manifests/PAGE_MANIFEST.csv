@@ -1,0 +1,11 @@
+﻿route,title_zh,title_en,action,status,audience,primary_question,module_order,visual_assets
+/about-stablecoins,关于稳定币,About Stablecoins,REWRITE,READY_FOR_CODEX,intro/general,先理解机制，再理解稳定币,hero>four-questions>why-stablecoins>money-boundaries>next,STB-D01;STB-D02
+/about-stablecoins/history,稳定币发展历程,Stablecoin History,REWRITE,READY_FOR_CODEX,intro/general;research,稳定币的稳定机制如何一步步演化并接受压力测试？,hero>causal-timeline>lessons>next,STB-T01
+/about-stablecoins/types,稳定币类别,Stablecoin Types,REWRITE,READY_FOR_CODEX,intro/general;research,如何按经济机制而不是营销标签分类？,hero>three-axis-taxonomy>five-groups>classification-warnings>type-nav,STB-D03
+/about-stablecoins/applications,稳定币应用,Stablecoin Applications,REWRITE,READY_FOR_CODEX,intro/general;enterprise,稳定币可以解决什么任务，和真实采用有什么区别？,hero>application-vs-adoption>application-matrix>constraints>links,STB-D10
+/about-stablecoins/regulatory-evolution,监管演进,Regulatory Evolution,REWRITE,READY_FOR_CODEX,intro/general;research,稳定币监管为什么从风险提示走向发行、赎回和跨境监督？,hero>five-stages>milestones>current-regulation-links,STB-D04
+/about-stablecoins/types/fiat-backed,法币储备型,Fiat-reserve-backed,REWRITE,READY_FOR_CODEX,intro/general;research,储备、一级赎回和套利怎样维持锚定？,hero>mechanism>peg>inspection-checklist>examples>risks,STB-D05
+/about-stablecoins/types/crypto-backed,加密资产抵押型,Crypto-collateralised,REWRITE,READY_FOR_CODEX,intro/general;research,超额抵押、清算和赎回怎样应对加密资产波动？,hero>mechanism>bold>dai-history>stress-path>risks,STB-D06
+/about-stablecoins/types/synthetic,合成型,Synthetic / Hedged,REWRITE,READY_FOR_CODEX,intro/general;research,对冲如何把高波动 backing 转化为接近美元的风险暴露？,hero>mechanism>usde>rights>risk-stack>boundary,STB-D07
+/about-stablecoins/types/algorithmic,算法型,Algorithmic,REWRITE,READY_FOR_CODEX,intro/general;research,为什么内生套利稳定机制可能在信心冲击下自我强化？,hero>mechanism>death-spiral>ust-case>lessons>boundary,STB-D08
+/about-stablecoins/types/other,混合与边界案例,Hybrid & Boundary Cases,REWRITE,READY_FOR_CODEX,intro/general;research,为什么项目应按今天的经济机制分类，而不是永久沿用历史标签？,hero>mechanism-migration>frxusd>adjacent-money>checklist,STB-D09

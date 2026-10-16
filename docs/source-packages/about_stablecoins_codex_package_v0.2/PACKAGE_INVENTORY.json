@@ -1,0 +1,158 @@
+[
+  {
+    "path": "00_README.md",
+    "bytes": 2127
+  },
+  {
+    "path": "CODEX_HANDOFF.md",
+    "bytes": 3579
+  },
+  {
+    "path": "FINAL_COPY_QA.md",
+    "bytes": 2471
+  },
+  {
+    "path": "NAVIGATION_SPEC.md",
+    "bytes": 1820
+  },
+  {
+    "path": "PACKAGE_INVENTORY.json",
+    "bytes": 1108
+  },
+  {
+    "path": "PACKAGE_STATUS.md",
+    "bytes": 1205
+  },
+  {
+    "path": "RESEARCH_BASELINE_V0.1.md",
+    "bytes": 7538
+  },
+  {
+    "path": "content/CONTENT_MASTER.en.md",
+    "bytes": 3496
+  },
+  {
+    "path": "content/CONTENT_MASTER.zh-CN.md",
+    "bytes": 16434
+  },
+  {
+    "path": "data/ABOUT_NAV.json",
+    "bytes": 1498
+  },
+  {
+    "path": "data/APPLICATION_MATRIX.csv",
+    "bytes": 1695
+  },
+  {
+    "path": "data/HISTORY_TIMELINE.json",
+    "bytes": 2703
+  },
+  {
+    "path": "data/REGULATORY_EVOLUTION.json",
+    "bytes": 1176
+  },
+  {
+    "path": "data/TYPE_MECHANISM_MATRIX.csv",
+    "bytes": 1702
+  },
+  {
+    "path": "manifests/ASSET_MANIFEST.csv",
+    "bytes": 2245
+  },
+  {
+    "path": "manifests/PAGE_MANIFEST.csv",
+    "bytes": 2539
+  },
+  {
+    "path": "manifests/SOURCE_MANIFEST.csv",
+    "bytes": 6562
+  },
+  {
+    "path": "reference/CURRENT_ABOUT_PAGES_REFERENCE.md",
+    "bytes": 39945
+  },
+  {
+    "path": "visuals/VISUAL_QA.md",
+    "bytes": 2898
+  },
+  {
+    "path": "visuals/VISUAL_SCRIPTS.md",
+    "bytes": 4384
+  },
+  {
+    "path": "visuals/final/STB-D01-stablecoin-lifecycle.svg",
+    "bytes": 4487
+  },
+  {
+    "path": "visuals/final/STB-D02-money-boundaries.svg",
+    "bytes": 3557
+  },
+  {
+    "path": "visuals/final/STB-D03-taxonomy-matrix.svg",
+    "bytes": 6582
+  },
+  {
+    "path": "visuals/final/STB-D04-regulatory-evolution.svg",
+    "bytes": 4184
+  },
+  {
+    "path": "visuals/final/STB-D05-fiat-backed-flow.svg",
+    "bytes": 3932
+  },
+  {
+    "path": "visuals/final/STB-D06-crypto-collateral-flow.svg",
+    "bytes": 3803
+  },
+  {
+    "path": "visuals/final/STB-D07-synthetic-flow.svg",
+    "bytes": 4066
+  },
+  {
+    "path": "visuals/final/STB-D08-algorithmic-death-spiral.svg",
+    "bytes": 4796
+  },
+  {
+    "path": "visuals/final/STB-D09-boundary-map.svg",
+    "bytes": 3240
+  },
+  {
+    "path": "visuals/previews/STB-D01-stablecoin-lifecycle.png",
+    "bytes": 42726
+  },
+  {
+    "path": "visuals/previews/STB-D02-money-boundaries.png",
+    "bytes": 40022
+  },
+  {
+    "path": "visuals/previews/STB-D03-taxonomy-matrix.png",
+    "bytes": 52148
+  },
+  {
+    "path": "visuals/previews/STB-D04-regulatory-evolution.png",
+    "bytes": 39938
+  },
+  {
+    "path": "visuals/previews/STB-D05-fiat-backed-flow.png",
+    "bytes": 40258
+  },
+  {
+    "path": "visuals/previews/STB-D06-crypto-collateral-flow.png",
+    "bytes": 40542
+  },
+  {
+    "path": "visuals/previews/STB-D07-synthetic-flow.png",
+    "bytes": 47523
+  },
+  {
+    "path": "visuals/previews/STB-D08-algorithmic-death-spiral.png",
+    "bytes": 45597
+  },
+  {
+    "path": "visuals/previews/STB-D09-boundary-map.png",
+    "bytes": 50072
+  },
+  {
+    "path": "visuals/previews/contact_sheet.png",
+    "bytes": 396784
+  }
+]
