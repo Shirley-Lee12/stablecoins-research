@@ -1,0 +1,3 @@
+﻿route,title_zh,title_en,action,status,audience,primary_question,module_order,visual_assets,notes
+/,稳定币学术研究平台,Stablecoin Research Hub,REWRITE,READY_FOR_CODEX,general;research;enterprise,这个网站能帮我理解什么？哪些研究已经完成？从哪里开始？,hero>question-entry>current-research>research-status>evidence-principles>about-platform,HOME-D01;HOME-D02,Do not lead with team/project plans; lead with user questions and available evidence.
+/research,我们的研究,Our Research,REWRITE,READY_FOR_CODEX,research;enterprise;general,哪些成果已完成？量化研究做到哪一步？哪些系统还没有上线？,hero>pipeline>55-risk-framework>quantitative-research>evidence-modules>outputs>not-live>next-stage,RES-D01;RES-D02;RES-D03,"Explicitly separate completed conceptual output, interim empirical results, validation in progress, and planned monitoring."

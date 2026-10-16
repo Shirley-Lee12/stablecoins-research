@@ -1,253 +1,238 @@
-import React from "react";
 import { Link } from "wouter";
+import {
+  ArrowRight,
+  BookOpen,
+  Globe2,
+  Workflow,
+  BarChart3,
+  Microscope,
+} from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { BRAND } from "@/lib/brand";
 import {
-  BookOpen, Globe, ChevronRight, Database, Microscope,
-  Target, Lightbulb, CheckCircle2, GraduationCap, Radar, Shapes,
-  Waypoints, ExternalLink
-} from "lucide-react";
-import { ContentEdgeNav } from "@/components/content-edge-nav";
+  QUESTIONS,
+  MATURITY,
+  PUBLIC_SUPPORT_LINE,
+  EVIDENCE_KINDS,
+  RESEARCH_BOUNDARY,
+  TAXONOMY_BOUNDARY,
+} from "@/data/home-research";
+import {
+  HubText,
+  HubSection,
+  HubBoundary,
+  HubLink,
+  HubCite,
+  ResearchState,
+  ResearchRecord,
+  ResearchFigure,
+  ResearchSourceNote,
+} from "@/components/home-research-ui";
 
-/* ─────── nav section cards ─────── */
-const sections = [
-  { href: "/about-stablecoins", icon: BookOpen, en: "About Stablecoins", zh: "关于稳定币", descEn: "Mechanisms, taxonomy, and foundational concepts.", descZh: "稳定币基本概念、运作机制与分类体系。" },
-  { href: "/about-stablecoins/types", icon: Shapes, en: "Stablecoin Types", zh: "稳定币分类", descEn: "Compare mechanisms, projects, status, and market scale.", descZh: "比较不同机制、稳定币项目、运行状态与市场规模。" },
-  { href: "/about-stablecoins/applications", icon: Waypoints, en: "Applications", zh: "稳定币应用", descEn: "Payments, settlement, savings, trading, and regional patterns.", descZh: "支付、结算、储值、交易及区域应用特征。" },
-  { href: "/research", icon: Microscope, en: "Our Research", zh: "我们的研究", descEn: "The full-lifecycle risk framework, accepted paper and continuing research.", descZh: "全生命周期风险框架、已接收论文与持续研究成果。" },
-  { href: "/academic-resources", icon: Database, en: "Resources", zh: "资源库", descEn: "Curated papers, reports, and data sources.", descZh: "精选学术论文、研究报告及相关数据资源。" },
-  { href: "/regulatory", icon: Globe, en: "Regulatory Status", zh: "监管现状", descEn: "Cross-jurisdiction comparison, official documents, and policy status.", descZh: "跨辖区监管比较、官方文件与政策实施状态。" },
-];
-
-/* ─────── accomplishments ─────── */
-const accomplished = {
-  en: [
-    { year: "2026", text: "Developed a full-lifecycle, multi-dimensional stablecoin risk framework covering 55 atomic risks." },
-    { year: "2026", text: "The English paper based on this framework was accepted by AI-DEFIT 2026." },
-    { year: "Ongoing", text: "Maintaining a curated stablecoin resource library and a primary-source regulatory comparison for continued research." },
-  ],
-  zh: [
-    { year: "2026", text: "构建覆盖55项原子风险的稳定币全生命周期多维风险框架。" },
-    { year: "2026", text: "基于该框架形成的英文论文获AI-DEFIT 2026会议接收。" },
-    { year: "持续进行", text: "持续维护稳定币专题资源库，并以官方一手来源更新跨辖区监管比较。" },
-  ],
-};
-
-/* ─────── research agenda ─────── */
-const agenda = {
-  en: [
-    { icon: Radar, title: "Stablecoin Risk Early-Warning Platform", desc: "Building measurable indicators and monitoring methods across 55 atomic risks to support interpretable, timely warning signals." },
-    { icon: Globe, title: "Cross-border Regulatory Mapping", desc: "Producing a comprehensive, live regulatory atlas comparing stablecoin frameworks across the EU, US, China, Singapore, and emerging markets." },
-    { icon: Lightbulb, title: "CBDC & Stablecoin Interoperability", desc: "Investigating technical and legal pathways for CBDC–stablecoin coexistence and cross-border settlement mechanisms." },
-    { icon: GraduationCap, title: "Financial Inclusion Research", desc: "Studying how stablecoins can expand access to financial services in underbanked regions across Southeast Asia and Africa." },
-    { icon: Target, title: "Policy Recommendations", desc: "Translating research findings into evidence-based policy briefs for Chinese regulators, central banks, and international bodies." },
-  ],
-  zh: [
-    { icon: Radar, title: "稳定币风险预警平台", desc: "围绕55项原子风险建立可量化指标与持续监测方法，形成及时且可解释的风险预警信号。" },
-    { icon: Globe, title: "跨境监管图谱", desc: "制作综合性动态监管图谱，对比欧盟、美国、中国、新加坡及新兴市场的稳定币监管框架。" },
-    { icon: Lightbulb, title: "央行数字货币与稳定币互操作性", desc: "探索央行数字货币与稳定币共存的技术与法律路径，以及跨境结算机制。" },
-    { icon: GraduationCap, title: "普惠金融研究", desc: "研究稳定币如何扩大东南亚及非洲欠发达地区金融服务的可及性。" },
-    { icon: Target, title: "政策建议", desc: "将研究成果转化为面向中国监管机构、央行及国际机构的循证政策简报。" },
-  ],
-};
-
-/* ─────── team ─────── */
-const team = [
-  { initials: "XL", nameEn: "Xueli Li", nameZh: "李雪丽", roleEn: "Project lead", roleZh: "课题组组长", areaEn: "ZIBS · iMF", areaZh: "ZIBS · 金融科技硕士" },
-  { initials: "YC", nameEn: "Yang Chen", nameZh: "杨晨", roleEn: "Research group member", roleZh: "课题组成员", areaEn: "ZIBS · MBA", areaZh: "ZIBS · MBA" },
-  { initials: "ZC", nameEn: "Tsanhua Chou", nameZh: "周赞华", roleEn: "Research group member", roleZh: "课题组成员", areaEn: "ZIBS · iMF", areaZh: "ZIBS · 金融科技硕士" },
-  { initials: "HJ", nameEn: "Hui Jin", nameZh: "金辉", roleEn: "Research group member", roleZh: "课题组成员", areaEn: "ZIBS · MBA", areaZh: "ZIBS · MBA" },
-  { initials: "YL", nameEn: "Yitong Lin", nameZh: "林奕彤", roleEn: "Research group member", roleZh: "课题组成员", areaEn: "University of Colorado Denver", areaZh: "科罗拉多大学丹佛分校" },
-];
-
+const icons = [BookOpen, Globe2, Workflow, BarChart3, Microscope];
 export default function HomeOverview() {
   const { t, language } = useLanguage();
-
   return (
-    <div className="max-w-5xl mx-auto space-y-14 pb-12">
-      <ContentEdgeNav label={t("On this page", "本页目录")} items={[
-        { id: "hub-introduction", label: t("Introduction", "平台概览") },
-        { id: "hub-mission", label: t("Mission", "研究使命") },
-        { id: "hub-work", label: t("Our work", "研究成果") },
-        { id: "hub-agenda", label: t("Agenda", "研究计划") },
-        { id: "hub-team", label: t("Team", "团队成员") },
-        { id: "hub-modules", label: t("Platform", "平台功能") },
-      ]} />
-
-      {/* ── HERO ── */}
-      <div id="hub-introduction" className="relative border-l-4 border-primary py-7 pl-7 md:py-10 md:pl-12">
-        <div className="relative z-10 max-w-3xl">
-          <div className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-primary">
-            {t("Zhejiang University · AIF · Academic Research", "浙江大学 · AIF · 学术研究")}
-          </div>
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-primary leading-tight mb-4">
-            {t(BRAND.name.en, BRAND.name.zh)}
-          </h1>
-          <p className="mb-6 max-w-3xl text-lg leading-8 text-foreground/78">
-            {t(
-              "An academic research platform exploring the economics, technology, regulation, and global impact of stablecoins.",
-              "聚焦稳定币的经济、技术、监管与全球影响，提供研究成果、学术资源与市场数据。"
-            )}
+    <div
+      data-home-research="home"
+      className="mx-auto w-full min-w-0 max-w-[1280px] px-1 pb-8 sm:px-4"
+    >
+      <header id="hero" className="pb-9 pt-3 sm:pb-12">
+        <p className="mb-4 text-xs font-semibold tracking-wider text-primary">
+          {t(
+            "Zhejiang University · AIF · Stablecoin Research",
+            "浙江大学 · AIF · 稳定币研究",
+          )}
+        </p>
+        <h1 className="max-w-4xl font-serif text-4xl font-bold leading-tight tracking-tight text-primary sm:text-5xl">
+          {t(BRAND.name.en, BRAND.name.zh)}
+        </h1>
+        {language === "zh" && (
+          <p className="mt-2 text-sm font-medium tracking-wide text-primary">
+            {t(BRAND.name.en, BRAND.name.en)}
           </p>
-          <p className="mb-6 text-sm font-medium text-primary">{t(BRAND.sponsorship.en, BRAND.sponsorship.zh)}</p>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-primary">
-            {[
-              t("Stablecoin Economics", "稳定币经济学"),
-              t("DeFi & Monetary Policy", "DeFi与货币政策"),
-              t("Regulatory Frameworks", "监管框架"),
-              t("CBDC Research", "央行数字货币研究"),
-              t("Financial Inclusion", "普惠金融"),
-            ].map((tag) => (
-              <span key={tag} className="inline-flex items-center gap-2 before:h-1.5 before:w-1.5 before:bg-chart-2">
-                {tag}
-              </span>
-            ))}
-          </div>
+        )}
+        <p className="mt-5 max-w-4xl text-lg leading-8 text-muted-foreground">
+          {t(
+            "Understand stablecoins through mechanisms, live products, regulation, market evidence, risk transmission and emerging payment infrastructure.",
+            "从稳定机制、真实产品和监管规则，到市场数据、风险传导与新型支付基础设施，用可核验的证据理解稳定币正在如何连接传统金融与数字资产世界。",
+          )}
+        </p>
+        <p className="mt-4 text-sm leading-7 text-muted-foreground">
+          <HubText text={PUBLIC_SUPPORT_LINE} />
+          <HubCite ids={["SRC-HR-02", "SRC-HR-03"]} />
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href="/about-stablecoins"
+            className="inline-flex min-h-11 items-center gap-3 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            {t("Start with stablecoins", "从稳定币开始")}
+            <ArrowRight size={16} />
+          </Link>
+          <Link
+            href="/research"
+            className="inline-flex min-h-11 items-center gap-3 rounded-md border border-primary/40 px-5 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 focus-visible:outline focus-visible:outline-2"
+          >
+            {t("Explore our research", "查看我们的研究")}
+            <ArrowRight size={16} />
+          </Link>
         </div>
-      </div>
+      </header>
 
-      {/* ── ABOUT / MISSION ── */}
-      <section id="hub-mission" className="editorial-section space-y-5">
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-            {t("About the Hub", "关于平台")}
-          </h2>
-          <div className="h-px flex-1 bg-border" />
+      <HubSection
+        id="question-entry"
+        number="01"
+        title={["Start with a question", "从一个问题开始"]}
+      >
+        <div className="divide-y divide-border border-y border-border">
+          {QUESTIONS.map((q, i) => {
+            const Icon = icons[i];
+            return (
+              <Link
+                key={q.href}
+                href={q.href}
+                className="group grid min-w-0 grid-cols-[1.5rem_minmax(0,1fr)_1rem] items-start gap-4 py-5 transition-colors hover:bg-primary/3 focus-visible:outline focus-visible:outline-2 sm:grid-cols-[2rem_minmax(0,0.95fr)_minmax(0,1fr)_1rem] sm:items-center"
+              >
+                <Icon className="mt-1 text-primary" size={21} />
+                <h3 className="text-base font-semibold leading-7 group-hover:text-primary sm:text-lg">
+                  <HubText text={q.title} />
+                </h3>
+                <p className="col-start-2 row-start-2 min-w-0 text-sm leading-7 text-muted-foreground sm:col-start-auto sm:row-start-auto">
+                  <HubText text={q.detail} />
+                </p>
+                <ArrowRight
+                  className="col-start-3 row-start-1 mt-1 text-primary transition-transform group-hover:translate-x-1 sm:col-start-auto sm:row-start-auto"
+                  size={16}
+                />
+              </Link>
+            );
+          })}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <h3 className="font-serif font-semibold text-lg text-primary">{t("Our Mission", "研究使命")}</h3>
-            <p className="editorial-copy">
-              {t(
-                "We bridge academic research and practical policy-making in the rapidly evolving stablecoin landscape. Our mission is to produce high-quality, evidence-based research that informs regulators, central banks, financial institutions, and the broader public on the opportunities and risks associated with stablecoins.",
-                "我们致力于在快速演变的稳定币领域架起学术研究与实际政策制定之间的桥梁。我们的使命是产出高质量、以证据为基础的研究成果，为监管机构、中央银行、金融机构及广大公众了解稳定币相关机遇与风险提供参考。"
-              )}
-            </p>
-          </div>
-          <div className="space-y-3">
-            <h3 className="font-serif font-semibold text-lg text-primary">{t("Research Focus", "研究方向")}</h3>
-            <p className="editorial-copy">
-              {t(
-                "Our core research areas span stablecoin monetary economics, systemic risk, decentralized finance (DeFi), cross-border payment infrastructure, CBDC–stablecoin interplay, global regulatory frameworks, and financial inclusion in emerging economies.",
-                "我们的核心研究领域涵盖稳定币货币经济学、系统性风险、去中心化金融（DeFi）、跨境支付基础设施、央行数字货币与稳定币互动、全球监管框架以及新兴经济体的普惠金融。"
-              )}
-            </p>
-          </div>
-        </div>
-      </section>
+        <ResearchFigure
+          id="HOME-D01"
+          title={["Research Hub Map", "研究平台导航图"]}
+          mobileSummary={[
+            "Five connected questions lead to mechanisms, regional evidence, agentic payments, market data and research. Use the links above to choose a starting point.",
+            "五个相互联系的问题分别通向稳定机制、区域证据、智能体支付、市场数据和研究。可通过上方入口选择起点。",
+          ]}
+        />
+      </HubSection>
 
-      {/* ── ACCOMPLISHMENTS ── */}
-      <section id="hub-work" className="editorial-section space-y-5">
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-            {t("What We Have Done", "我们做了什么")}
-          </h2>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-        <div className="relative space-y-0 border-l-2 border-primary/25 pl-7">
-          {(language === "zh" ? accomplished.zh : accomplished.en).map((item, i) => (
-            <div key={i} className="relative grid gap-2 border-b border-border py-5 sm:grid-cols-[5rem_1fr] sm:gap-5">
-              <CheckCircle2 className="absolute -left-[2.25rem] top-6 h-4 w-4 bg-background text-primary" />
-              <span className="text-sm font-semibold tabular-nums text-primary">{item.year}</span>
-              <p className="text-base leading-7 text-foreground/80">{item.text}</p>
-            </div>
+      <HubSection
+        id="current-research"
+        number="02"
+        title={[
+          "Research and evidence available now",
+          "当前可查看的研究与证据",
+        ]}
+      >
+        <div className="grid gap-8 md:grid-cols-3">
+          {["risk-framework", "asia-research", "agentic-payments"].map((id) => (
+            <ResearchRecord key={id} id={id} compact />
           ))}
         </div>
-      </section>
+        <HubBoundary text={TAXONOMY_BOUNDARY} />
+      </HubSection>
 
-      {/* ── RESEARCH AGENDA ── */}
-      <section id="hub-agenda" className="editorial-section space-y-5">
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-            {t("Research Agenda", "研究计划")}
-          </h2>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-        <div className="grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
-          {(language === "zh" ? agenda.zh : agenda.en).map((item, i) => (
-            <article key={i} className="border-t-2 border-primary/25 pt-5">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-primary/8">
-                    <item.icon className="h-4 w-4 text-primary" />
-                  </div>
-                  <h3 className="text-base font-semibold">{item.title}</h3>
+      <HubSection
+        id="research-status"
+        number="03"
+        title={["Where is the research now?", "研究正在推进到哪里？"]}
+        intro={[
+          "Completed outputs, interim empirical results, validation and future plans remain separate.",
+          "区分已完成成果、中期实证结果、进行中的验证与未来计划，不把“计划”写成“成果”。",
+        ]}
+      >
+        <div className="grid gap-x-7 gap-y-8 sm:grid-cols-2 xl:grid-cols-4">
+          {MATURITY.map((group, i) => (
+            <article
+              key={group.title[0]}
+              className={`border-t-2 pt-4 ${i === 3 ? "border-dashed border-border" : "border-primary/40"}`}
+            >
+              <h3 className="text-base font-semibold">
+                <HubText text={group.title} />
+              </h3>
+              {group.status && (
+                <div className="mt-3">
+                  <ResearchState status={group.status} />
                 </div>
-                <p className="mt-3 text-[15px] leading-7 text-foreground/75">{item.desc}</p>
+              )}
+              <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
+                {group.items.map((item) => (
+                  <li key={item[0]}>
+                    <HubText text={item} />
+                  </li>
+                ))}
+              </ul>
             </article>
           ))}
         </div>
-      </section>
+        <ResearchFigure
+          id="HOME-D02"
+          title={["Research Maturity", "研究成熟度"]}
+          mobileSummary={[
+            "Completed conceptual outputs and evidence modules are public. TE/Hawkes have interim results; validation is in progress; continuous monitoring and warning signals are planned.",
+            "概念成果与证据专题已公开；TE / Hawkes 已有中期结果；验证仍在进行；持续监测与预警信号属于未来计划。",
+          ]}
+        />
+        <HubBoundary text={RESEARCH_BOUNDARY} />
+        <HubLink
+          href="/research"
+          text={["Inspect the research status", "查看研究阶段与边界"]}
+        />
+      </HubSection>
 
-      {/* ── TEAM ── */}
-      <section id="hub-team" className="editorial-section space-y-5">
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-            {t("Our Team", "团队成员")}
-          </h2>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-4 border-y border-border py-5">
-          <div><p className="text-xs font-semibold uppercase tracking-wider text-primary">{t("Academic adviser", "课题指导")}</p><p className="mt-1 text-lg font-semibold">{t("Professor Ruidong Zhang", "张瑞东教授")}</p><p className="mt-1 text-sm text-foreground/62">{t(BRAND.institution.en, BRAND.institution.zh)}</p></div>
-          <a href="https://zibs.zju.edu.cn/2024/0529/c81819a2924735/page.htm" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">{t("Faculty profile", "教师主页")}<ExternalLink className="h-4 w-4" /></a>
-        </div>
-        <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
-          {team.map((member) => (
-            <div key={member.initials} className="flex items-start gap-4 border-b border-border py-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-primary/10 font-serif text-sm font-bold text-primary">
-                {member.initials}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold leading-snug truncate">{language === "zh" ? member.nameZh : member.nameEn}</p>
-                <p className="text-xs text-primary/80 mt-0.5 leading-snug">{language === "zh" ? member.roleZh : member.roleEn}</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-snug">{language === "zh" ? member.areaZh : member.areaEn}</p>
-              </div>
-            </div>
+      <HubSection
+        id="evidence-principles"
+        number="04"
+        title={[
+          "Data and evidence, not a stack of conclusions",
+          "数据与证据，而不是结论堆叠",
+        ]}
+      >
+        <div className="flex flex-wrap gap-x-5 gap-y-3">
+          {EVIDENCE_KINDS.map((kind, i) => (
+            <span
+              key={kind[0]}
+              className="inline-flex items-baseline gap-2 text-sm"
+            >
+              <span className="font-mono text-xs text-primary">0{i + 1}</span>
+              <HubText text={kind} />
+            </span>
           ))}
         </div>
-      </section>
-
-      {/* ── PLATFORM MODULES ── */}
-      <section id="hub-modules" className="editorial-section space-y-5">
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-            {t("Platform Modules", "功能模块")}
-          </h2>
-          <div className="h-px flex-1 bg-border" />
+        <p className="mt-5 max-w-4xl text-sm leading-7 text-muted-foreground">
+          {t(
+            "Important changing facts retain their sources and verification dates. UNKNOWN is not filled with speculation.",
+            "重要动态事实保留来源和核验日期。UNKNOWN 不用推测补齐。",
+          )}
+        </p>
+        <div className="mt-3">
+          <HubLink
+            href="/market-data"
+            text={["View data and methods", "查看数据与方法"]}
+          />
         </div>
-        <div className="grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-          {sections.map((s) => (
-            <Link key={s.href} href={s.href}>
-              <div className="group h-full cursor-pointer border-t-2 border-primary/25 pt-5 transition-colors hover:border-primary">
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center bg-primary/8">
-                    <s.icon className="h-4 w-4 text-primary" />
-                  </div>
-                  <h3 className="flex items-center justify-between text-base font-semibold transition-colors group-hover:text-primary">
-                    {t(s.en, s.zh)}
-                    <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
-                  </h3>
-                  <p className="mt-3 text-sm leading-6 text-foreground/72">{t(s.descEn, s.descZh)}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      </HubSection>
 
-      {/* ── FOOTER ── */}
-      <div className="border-t border-border pt-8 pb-2">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold text-foreground">{t(BRAND.sponsorship.en, BRAND.sponsorship.zh)}</p>
-            <a href={BRAND.institutionUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary hover:underline">{t("AIF official website", "AIF 官网")}<ExternalLink className="h-3 w-3" /></a>
-          </div>
-          <p className="text-xs text-muted-foreground">{t(`© ${new Date().getFullYear()} ${BRAND.name.en}`, `© ${new Date().getFullYear()} ${BRAND.name.zh}`)}</p>
-        </div>
-      </div>
-
+      <HubSection
+        id="about-platform"
+        number="05"
+        title={["About the Hub", "关于平台"]}
+      >
+        <p className="max-w-4xl text-base leading-8 text-muted-foreground">
+          {t(
+            "Stablecoin Research Hub organises stablecoin mechanisms, regulation, market data, research methods and emerging payment infrastructure for general users, researchers and industry participants.",
+            "Stablecoin Research Hub 面向普通用户、研究者和产业参与者，组织稳定币机制、监管、市场数据、研究方法和新型支付基础设施。",
+          )}
+        </p>
+        <p className="mt-4 text-sm leading-7">
+          <HubText text={PUBLIC_SUPPORT_LINE} />
+          <HubCite ids={["SRC-HR-02", "SRC-HR-03"]} />
+        </p>
+      </HubSection>
+      <ResearchSourceNote />
     </div>
   );
 }

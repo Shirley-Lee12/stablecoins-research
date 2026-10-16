@@ -1,0 +1,37 @@
+{
+  "COMPLETED_CONCEPTUAL_OUTPUT": {
+    "label_zh": "概念研究已完成",
+    "label_en": "Conceptual output complete",
+    "public_style": "completed"
+  },
+  "PUBLIC_PRESENTED_OUTPUT": {
+    "label_zh": "已公开 / 已汇报",
+    "label_en": "Public / presented",
+    "public_style": "completed"
+  },
+  "COMPLETED_EVIDENCE_MODULE": {
+    "label_zh": "证据专题已完成",
+    "label_en": "Evidence module complete",
+    "public_style": "completed"
+  },
+  "INTERIM_EMPIRICAL_RESULTS": {
+    "label_zh": "中期实证结果",
+    "label_en": "Interim empirical results",
+    "public_style": "in_progress"
+  },
+  "INTERIM_RESEARCH_RESULTS": {
+    "label_zh": "阶段性研究结果",
+    "label_en": "Interim research results",
+    "public_style": "in_progress"
+  },
+  "VALIDATION_IN_PROGRESS": {
+    "label_zh": "验证进行中",
+    "label_en": "Validation in progress",
+    "public_style": "in_progress"
+  },
+  "PLANNED": {
+    "label_zh": "未来计划",
+    "label_en": "Planned",
+    "public_style": "planned"
+  }
+}

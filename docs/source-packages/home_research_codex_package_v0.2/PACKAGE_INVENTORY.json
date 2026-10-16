@@ -1,0 +1,118 @@
+[
+  {
+    "path": "00_README.md",
+    "bytes": 2140
+  },
+  {
+    "path": "CODEX_HANDOFF.md",
+    "bytes": 3378
+  },
+  {
+    "path": "FINAL_COPY_QA.md",
+    "bytes": 2063
+  },
+  {
+    "path": "PACKAGE_INVENTORY.json",
+    "bytes": 1078
+  },
+  {
+    "path": "PACKAGE_STATUS.md",
+    "bytes": 912
+  },
+  {
+    "path": "content/HOME_CONTENT_MASTER.en.md",
+    "bytes": 1600
+  },
+  {
+    "path": "content/HOME_CONTENT_MASTER.zh-CN.md",
+    "bytes": 3927
+  },
+  {
+    "path": "content/RESEARCH_CONTENT_MASTER.en.md",
+    "bytes": 2053
+  },
+  {
+    "path": "content/RESEARCH_CONTENT_MASTER.zh-CN.md",
+    "bytes": 5084
+  },
+  {
+    "path": "data/RESEARCH_STATUS.json",
+    "bytes": 5233
+  },
+  {
+    "path": "data/STATUS_LABELS.json",
+    "bytes": 1029
+  },
+  {
+    "path": "manifests/ASSET_MANIFEST.csv",
+    "bytes": 1163
+  },
+  {
+    "path": "manifests/PAGE_MANIFEST.csv",
+    "bytes": 908
+  },
+  {
+    "path": "manifests/SOURCE_MANIFEST.csv",
+    "bytes": 2186
+  },
+  {
+    "path": "reference/CURRENT_SITE_REFERENCE.md",
+    "bytes": 1991
+  },
+  {
+    "path": "reference/current-homepage-not-to-copy.jpg",
+    "bytes": 204458
+  },
+  {
+    "path": "visuals/VISUAL_QA.md",
+    "bytes": 2025
+  },
+  {
+    "path": "visuals/VISUAL_SCRIPTS.md",
+    "bytes": 3296
+  },
+  {
+    "path": "visuals/final/HOME-D01-research-hub-map.svg",
+    "bytes": 4174
+  },
+  {
+    "path": "visuals/final/HOME-D02-research-maturity.svg",
+    "bytes": 5075
+  },
+  {
+    "path": "visuals/final/RES-D01-research-pipeline-status.svg",
+    "bytes": 5415
+  },
+  {
+    "path": "visuals/final/RES-D02-quantitative-research-map.svg",
+    "bytes": 3866
+  },
+  {
+    "path": "visuals/final/RES-D03-taxonomy-to-measurement.svg",
+    "bytes": 3779
+  },
+  {
+    "path": "visuals/previews/HOME-D01-research-hub-map.png",
+    "bytes": 59797
+  },
+  {
+    "path": "visuals/previews/HOME-D02-research-maturity.png",
+    "bytes": 41812
+  },
+  {
+    "path": "visuals/previews/RES-D01-research-pipeline-status.png",
+    "bytes": 50751
+  },
+  {
+    "path": "visuals/previews/RES-D02-quantitative-research-map.png",
+    "bytes": 42529
+  },
+  {
+    "path": "visuals/previews/RES-D03-taxonomy-to-measurement.png",
+    "bytes": 44583
+  },
+  {
+    "path": "visuals/previews/contact_sheet.png",
+    "bytes": 243960
+  }
+]

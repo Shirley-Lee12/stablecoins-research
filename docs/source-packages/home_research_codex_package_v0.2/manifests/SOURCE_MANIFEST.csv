@@ -1,0 +1,10 @@
+﻿source_id,topic,organization,title,date,url,source_type,use_for,status,last_verified
+SRC-HR-01,Homepage/Research,Project handoff package,Existing homepage and research-page export,2026-10-15,,PROJECT_INTERNAL,Reference only; old public copy and structure,REFERENCE_ONLY,2026-10-16
+SRC-HR-02,Institution,Zhejiang University International Business School,"AIF, Zhejiang University",2024-07-17,https://zibs.zju.edu.cn/enzibs/2024/0717/c82385a2947280/page.htm,UNIVERSITY_OFFICIAL,Official English name and institutional description of AIF,VERIFIED,2026-10-16
+SRC-HR-03,Institution,Zhejiang University,Education & Research — Academy of Internet Finance,current,https://www.zju.edu.cn/english/74908/main.htm,UNIVERSITY_OFFICIAL,AIF listed as a Zhejiang University research institute/center,VERIFIED,2026-10-16
+SRC-HR-04,Research output,AI-DEFIT 2026,Conference programme,2026-09-30,https://www.lait.fe.uni-lj.si/AI-DEFIT/program.html,CONFERENCE_OFFICIAL,Programme lists the stablecoin paper in Online Session 1,VERIFIED,2026-10-16
+SRC-HR-05,Research status,Approved project research baseline,55-risk conceptual framework / public conference baseline,2026-09-30,,PROJECT_RESEARCH_BASELINE,"Completed conceptual output; 55 is taxonomy, not direct empirical-node count",VERIFIED_INTERNAL,2026-10-16
+SRC-HR-06,Quantitative research,Current thesis research status,TE/Hawkes interim result packages,2026-10-06,,PROJECT_RESEARCH_BASELINE,Interim empirical results; reproducibility/validation not fully closed,VERIFIED_INTERNAL,2026-10-16
+SRC-HR-07,Research module,Agentic Payments V0.2,Approved local baseline commit 5b197191...,2026-10-15,,APPROVED_LOCAL_BASELINE,Completed public evidence module,VERIFIED_INTERNAL,2026-10-16
+SRC-HR-08,Research module,Asia Stablecoin Development V0.2,Approved local baseline commit 889f577...,2026-10-16,,APPROVED_LOCAL_BASELINE,Completed public evidence module,VERIFIED_INTERNAL,2026-10-16
+SRC-HR-09,Institution,Stablecoin Research Hub project governance,Approved institutional support wording,2026-10-15,,PROJECT_GOVERNANCE,"Exact public line: Sponsored by the Academy of Internet Finance (AIF), Zhejiang University.",VERIFIED_INTERNAL,2026-10-16

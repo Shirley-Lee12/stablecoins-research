@@ -1,0 +1,7 @@
+﻿asset_id,asset_type,page_route,module_id,filename,title,purpose,source_type,source_url,status
+HOME-D01,diagram,/,question-entry,HOME-D01-research-hub-map.svg,Research Hub Map,把全站按用户问题组织为稳定机制、区域发展、智能体支付、市场数据和研究,ORIGINAL,,READY
+HOME-D02,diagram,/,research-status,HOME-D02-research-maturity.svg,Research Maturity,区分 completed / empirical / validation / planned,ORIGINAL,,READY
+RES-D01,diagram,/research,pipeline,RES-D01-research-pipeline-status.svg,Research Pipeline & Status,从 conceptual framework 到 monitoring 的研究状态链,ORIGINAL,,READY
+RES-D02,diagram,/research,quantitative-map,RES-D02-quantitative-research-map.svg,Quantitative Research Map,TE/Hawkes/stress/cases 的关系与边界,ORIGINAL,,READY
+RES-D03,diagram,/research,taxonomy-boundary,RES-D03-taxonomy-to-measurement.svg,From Taxonomy to Measurement,解释55风险框架与当前量化节点不是一一对应,ORIGINAL,,READY
+HOME-S01,reference_image,/,current-home,current-homepage-not-to-copy.jpg,Current Homepage Screenshot,理解当前视觉语言，不作为新版目标,PROJECT_INTERNAL,,REFERENCE_ONLY

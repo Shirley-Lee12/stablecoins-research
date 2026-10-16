@@ -1,0 +1,79 @@
+[
+  {
+    "id": "risk-framework",
+    "title_zh": "全生命周期多维风险框架",
+    "title_en": "Full-Lifecycle Multi-Dimensional Risk Framework",
+    "status": "COMPLETED_CONCEPTUAL_OUTPUT",
+    "public": true,
+    "summary_zh": "形成55项原子风险的概念分类，并从生命周期与风险放大两个维度分析稳定币风险。",
+    "summary_en": "A conceptual taxonomy of 55 atomic risks, analysed across lifecycle stages and risk-amplification roles.",
+    "important_boundary_zh": "55项风险是概念分解结果，不等于当前量化模型直接使用55个节点。",
+    "important_boundary_en": "The 55-risk taxonomy is a conceptual decomposition, not a claim that the current empirical model uses 55 direct nodes."
+  },
+  {
+    "id": "conference-paper",
+    "title_zh": "AI-DEFIT 2026 会议论文与汇报",
+    "title_en": "AI-DEFIT 2026 Paper & Presentation",
+    "status": "PUBLIC_PRESENTED_OUTPUT",
+    "public": true,
+    "summary_zh": "论文《Establishing a Multi-Dimensional Risk Framework over the Full Lifecycle of Stablecoins》进入AI-DEFIT 2026会议议程并完成汇报。",
+    "summary_en": "The paper “Establishing a Multi-Dimensional Risk Framework over the Full Lifecycle of Stablecoins” appears in the AI-DEFIT 2026 programme and was presented.",
+    "important_boundary_zh": "该成果主要是定性框架与映射，不应描述为已验证的实时风险系统。",
+    "important_boundary_en": "This output is primarily a qualitative framework and mapping exercise, not a validated real-time risk system."
+  },
+  {
+    "id": "asia-research",
+    "title_zh": "亚洲稳定币发展研究",
+    "title_en": "Asia Stablecoin Development Research",
+    "status": "COMPLETED_EVIDENCE_MODULE",
+    "public": true,
+    "summary_zh": "基于官方一手资料比较中国内地、香港、新加坡和阿联酋的监管边界、发行人牌照、产品状态与用户可用性。",
+    "summary_en": "Official-source comparison of regulatory perimeters, issuer licences, product status and user access across Mainland China, Hong Kong, Singapore and the UAE.",
+    "important_boundary_zh": "不做主观“开放度”排名。",
+    "important_boundary_en": "No subjective openness ranking."
+  },
+  {
+    "id": "agentic-payments",
+    "title_zh": "智能体支付专题研究",
+    "title_en": "Agentic Payments Research",
+    "status": "COMPLETED_EVIDENCE_MODULE",
+    "public": true,
+    "summary_zh": "梳理智能体支付的授权、支付执行、支付轨道、协议与产品边界，并分析稳定币在机器支付中的位置。",
+    "summary_en": "Evidence-based mapping of authorization, payment execution, rails, protocols and products in agentic payments, including where stablecoins fit.",
+    "important_boundary_zh": "稳定币是潜在支付轨道之一，不是智能体支付的必要条件。",
+    "important_boundary_en": "Stablecoins are one possible payment rail, not a prerequisite for agentic payments."
+  },
+  {
+    "id": "quantitative-te-hawkes",
+    "title_zh": "风险传导量化：Transfer Entropy + Hawkes",
+    "title_en": "Quantitative Risk Transmission: Transfer Entropy + Hawkes",
+    "status": "INTERIM_EMPIRICAL_RESULTS",
+    "public": false,
+    "summary_zh": "已经形成中期实证结果包，用于分析风险信号的有向传导与极端事件的自激/交叉激发。",
+    "summary_en": "Interim empirical result packages exist for directed risk-signal transmission and self-/cross-excitation of extreme events.",
+    "important_boundary_zh": "结果仍需继续完成复现、稳健性和解释验证；不是生产级实时预测模型。",
+    "important_boundary_en": "Reproducibility, robustness and interpretation validation are still being completed; this is not a production real-time prediction model."
+  },
+  {
+    "id": "stress-cases",
+    "title_zh": "压力情景与历史事件验证",
+    "title_en": "Stress Scenarios & Historical Case Validation",
+    "status": "INTERIM_RESEARCH_RESULTS",
+    "public": false,
+    "summary_zh": "已形成压力情景、历史事件案例和下游整合的阶段结果。",
+    "summary_en": "Stage results exist for stress scenarios, historical-event cases and downstream integration.",
+    "important_boundary_zh": "不能描述为已部署的压力测试服务或自动化风险平台。",
+    "important_boundary_en": "Do not describe these as a deployed stress-testing service or automated risk platform."
+  },
+  {
+    "id": "monitoring-platform",
+    "title_zh": "持续监测与早期预警平台",
+    "title_en": "Continuous Monitoring & Early-Warning Platform",
+    "status": "PLANNED",
+    "public": false,
+    "summary_zh": "未来计划将量化指标、风险传导结果与事件验证整合为可解释的监测与预警界面。",
+    "summary_en": "Planned future integration of quantitative indicators, transmission results and event validation into an interpretable monitoring interface.",
+    "important_boundary_zh": "当前没有上线的实时风险概率、脱锚概率或生产级预警系统。",
+    "important_boundary_en": "There is currently no live real-time risk probability, depeg probability or production early-warning system."
+  }
+]
