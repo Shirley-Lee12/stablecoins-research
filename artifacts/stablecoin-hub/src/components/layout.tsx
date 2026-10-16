@@ -55,6 +55,7 @@ import {
   ArrowUp,
   Puzzle,
   MapPinned,
+  Workflow,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -88,6 +89,18 @@ const ROUTE_LABELS: Record<string, { en: string; zh: string }> = {
   "/regional-developments/hong-kong": { en: "Hong Kong", zh: "中国香港" },
   "/regional-developments/singapore": { en: "Singapore", zh: "新加坡" },
   "/regional-developments/uae": { en: "United Arab Emirates", zh: "阿联酋" },
+  "/agentic-payments": { en: "Agentic Payments", zh: "智能体支付" },
+  "/agentic-payments/protocols": { en: "Protocols & Mechanisms", zh: "协议与机制" },
+  "/agentic-payments/scenarios": { en: "Applications & Risks", zh: "应用与风险" },
+  "/agentic-payments/ecosystem": { en: "Ecosystem & Developments", zh: "生态与进展" },
+  "/agentic-payments/protocols/ap2": { en: "AP2", zh: "AP2" },
+  "/agentic-payments/protocols/acp": { en: "ACP", zh: "ACP" },
+  "/agentic-payments/protocols/amp": { en: "AMP", zh: "AMP" },
+  "/agentic-payments/protocols/x402": { en: "x402", zh: "x402" },
+  "/agentic-payments/protocols/apop": { en: "APOP", zh: "APOP" },
+  "/agentic-payments/protocols/mpp": { en: "MPP", zh: "MPP" },
+  "/agentic-payments/protocols/act": { en: "ACT", zh: "ACT" },
+  "/agentic-payments/protocols/ucp": { en: "UCP", zh: "UCP" },
   "/admin": { en: "Admin Center", zh: "管理中心" },
   "/profile": { en: "My Profile", zh: "个人资料" },
   "/my-contributions": { en: "My Contributions", zh: "我的贡献" },
@@ -161,6 +174,12 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { href: "/regional-developments", labelEn: "Asia", labelZh: "亚洲", matchPrefix: "/regional-developments/" },
     ],
+  },
+  {
+    href: "/agentic-payments",
+    labelEn: "Agentic Payments",
+    labelZh: "智能体支付",
+    icon: Workflow,
   },
   {
     href: "/research",

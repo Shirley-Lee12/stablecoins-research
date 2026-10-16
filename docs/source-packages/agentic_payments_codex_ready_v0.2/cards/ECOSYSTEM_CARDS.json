@@ -1,0 +1,101 @@
+[
+  {
+    "id": "google",
+    "name": "Google",
+    "role": "Standard setter + AI/commerce surface",
+    "protocols": "AP2;UCP",
+    "products": "Gemini/Google commerce surfaces",
+    "payment_infra": "Payment-neutral; integrates existing payment methods",
+    "stablecoin": "AP2 compatible; UCP indirect",
+    "status": "Protocol + ecosystem",
+    "last_verified": "2026-10-15"
+  },
+  {
+    "id": "openai-stripe",
+    "name": "OpenAI + Stripe",
+    "role": "AI surface + commerce integration + payment infrastructure",
+    "protocols": "ACP;MPP (Stripe+Tempo)",
+    "products": "ChatGPT Instant Checkout; Stripe agentic commerce tools",
+    "payment_infra": "Merchant PSP; Stripe Shared Payment Tokens; stablecoin/card support varies by protocol",
+    "stablecoin": "MPP direct; ACP indirect",
+    "status": "Production product + open specs",
+    "last_verified": "2026-10-15"
+  },
+  {
+    "id": "x402",
+    "name": "x402 Foundation / Coinbase origin",
+    "role": "Internet-native machine-payment standard",
+    "protocols": "x402",
+    "products": "Facilitators/SDK ecosystem",
+    "payment_infra": "HTTP-native payment coordination",
+    "stablecoin": "Strong direct relevance",
+    "status": "Vendor-neutral open governance",
+    "last_verified": "2026-10-15"
+  },
+  {
+    "id": "alipay",
+    "name": "Alipay / Ant Group",
+    "role": "Consumer wallet + AI commerce + merchant payments",
+    "protocols": "ACT;A402 method in Machine Pay",
+    "products": "Agent Pay;Machine Pay;AI Wallet;Vibe Pay;Skill Pay;Token Pay",
+    "payment_infra": "Alipay acquiring/risk/account infrastructure",
+    "stablecoin": "No verified direct link",
+    "status": "Production product ecosystem",
+    "last_verified": "2026-10-15"
+  },
+  {
+    "id": "ant-international",
+    "name": "Ant International",
+    "role": "Wallet/APM interoperability + global merchant/payment infrastructure",
+    "protocols": "AMP",
+    "products": "Antom Agentic Payments;AgentSafePay;AFA;EasySafePay",
+    "payment_infra": "Alipay+ wallets/APMs;WhaleRTP wholesale settlement",
+    "stablecoin": "AMP settlement asset unknown; WhaleRTP tokenised deposits != stablecoin",
+    "status": "Phase I rollout + products",
+    "last_verified": "2026-10-15"
+  },
+  {
+    "id": "unionpay",
+    "name": "China UnionPay",
+    "role": "Card-network trust, identity and authorization framework",
+    "protocols": "APOP;AVOP",
+    "products": "Intelligent bank card;Payment Skills",
+    "payment_infra": "UnionPay card/bank network",
+    "stablecoin": "No verified direct link",
+    "status": "Production-system validation + rollout",
+    "last_verified": "2026-10-15"
+  },
+  {
+    "id": "jd",
+    "name": "JD.com",
+    "role": "E-commerce + own payment + enterprise agents",
+    "protocols": "No independent public agent-payment protocol found",
+    "products": "JD AI Shopping;JD AI Pay;JoyAgent",
+    "payment_infra": "JD Pay: bank cards;JD balance;Baitiao;bank/QR rails",
+    "stablecoin": "No verified direct link",
+    "status": "Production products",
+    "last_verified": "2026-10-15"
+  },
+  {
+    "id": "meta",
+    "name": "Meta",
+    "role": "Personal/merchant agents + secure credential integration",
+    "protocols": "No independent public agent-payment protocol found",
+    "products": "Muse;Meta Business Agent;WhatsApp Business AI",
+    "payment_infra": "Stripe Link one-time-use card;UPI;Shop Pay announced",
+    "stablecoin": "No verified direct link",
+    "status": "Product rollout",
+    "last_verified": "2026-10-15"
+  },
+  {
+    "id": "x-xai",
+    "name": "X / xAI",
+    "role": "Agent + platform-native financial account",
+    "protocols": "No independent public agent-payment protocol found",
+    "products": "Grok Bot;X Money",
+    "payment_infra": "Cross River stored value;Visa X Card;ACH;Stripe Link",
+    "stablecoin": "No verified direct link",
+    "status": "Select-user/product rollout; agent payment capability",
+    "last_verified": "2026-10-15"
+  }
+]

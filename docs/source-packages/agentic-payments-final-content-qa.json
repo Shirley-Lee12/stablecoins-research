@@ -1,0 +1,58 @@
+{
+  "version": "0.2-final-content-qa-2026-10-15",
+  "authorized_scope": "User-requested final content QA: first-party sources for three timeline gaps and explicit APOP event/publication date distinction. The original V0.2 package remains immutable.",
+  "additional_sources": [
+    {
+      "source_id": "SRC-ANTOM-01",
+      "topic": "Antom Agentic Payment Solution",
+      "organization": "Ant International",
+      "title": "Antom agentic payment solution launch",
+      "date": "2025-09-04",
+      "url": "https://www.ant-intl.com/en/news/detail/?current=3&id=ant-internationals-antom-debuts-agentic-payment-solution-pioneering-apm-checkout-solution-and-trusted-ai-for-secure-transactions&redirect=news&tag=ANTOM",
+      "source_type": "official announcement",
+      "use_for": "Product announcement on 2025-09-04; card-based capabilities described as pilots, not general availability or a stablecoin requirement.",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "source_id": "SRC-CAC-01",
+      "topic": "China agent governance guidance",
+      "organization": "Cyberspace Administration of China",
+      "title": "智能体规范应用与创新发展实施意见",
+      "date": "2026-05-08",
+      "url": "https://www.cac.gov.cn/2026-05/08/c_1779979789523320.htm",
+      "source_type": "official policy document",
+      "use_for": "Official publication on 2026-05-08 about agent application and governance; not a payment protocol or stablecoin approval.",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-15"
+    }
+  ],
+  "timeline_source_updates": [
+    {
+      "date": "2025-09-04",
+      "title": "Antom Agentic Payment Solution",
+      "source_id": "SRC-ANTOM-01",
+      "status": "VERIFIED"
+    },
+    {
+      "date": "2026-05-08",
+      "title": "China CAC agent governance guidance",
+      "source_id": "SRC-CAC-01",
+      "status": "VERIFIED"
+    },
+    {
+      "date": "2026-08-24",
+      "title": "China agentic-payment self-regulatory convention",
+      "source_id": "",
+      "status": "UNKNOWN",
+      "reason": "No readable and verifiable first-party notice was obtained. Reposts are not accepted as substitutes; the linked WeChat original could not be read."
+    }
+  ],
+  "apop_dates": {
+    "event_date": "2026-04-02",
+    "publication_date": "2026-04-03",
+    "source_id": "SRC-APOP-01",
+    "authority": "Explicitly confirmed by the user for final content QA"
+  },
+  "remaining_source_gaps": 1
+}

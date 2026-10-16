@@ -17,6 +17,7 @@ import AboutApplicationsPage from "@/pages/about-applications";
 import StablecoinMechanismPage from "@/pages/stablecoin-mechanism";
 import AboutRegulatoryEvolutionPage from "@/pages/about-regulatory-evolution";
 import Research from "@/pages/research";
+import { AgenticPaymentsOverview, AgenticProtocolsPage, AgenticProtocolDetail, AgenticScenariosPage, AgenticEcosystemPage, AgenticLegacyProtocolRedirect } from "@/pages/agentic-payments";
 import AcademicResources from "@/pages/academic-resources";
 import Experts from "@/pages/experts";
 import AuthorPage from "@/pages/author";
@@ -70,6 +71,12 @@ function Router() {
         <Route path="/regional-developments/hong-kong" component={HongKongDevelopmentPage} />
         <Route path="/regional-developments/singapore" component={SingaporeDevelopmentPage} />
         <Route path="/regional-developments/uae" component={UaeDevelopmentPage} />
+        <Route path="/agentic-payments" component={AgenticPaymentsOverview} />
+        <Route path="/agentic-payments/protocols" component={AgenticProtocolsPage} />
+        <Route path="/agentic-payments/protocols/:id" component={AgenticProtocolDetail} />
+        <Route path="/agentic-payments/scenarios" component={AgenticScenariosPage} />
+        <Route path="/agentic-payments/ecosystem" component={AgenticEcosystemPage} />
+        <Route path="/protocols/:id" component={AgenticLegacyProtocolRedirect} />
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/verify-email" component={VerifyEmailPage} />
         <Route path="/admin" component={AdminCenter} />

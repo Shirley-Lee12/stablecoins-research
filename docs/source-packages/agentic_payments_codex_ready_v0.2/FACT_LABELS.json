@@ -1,0 +1,28 @@
+{
+  "artifact_type": {
+    "PROTOCOL": "Public technical protocol/standard/framework",
+    "PROTOCOL_FRAMEWORK": "Protocol framework; may not expose all field-level specs publicly",
+    "PAYMENT_METHOD_SPEC": "Documented payment method/spec embedded in a product ecosystem",
+    "PRODUCT": "End-user or merchant-facing product",
+    "INFRASTRUCTURE": "Underlying account/network/settlement infrastructure",
+    "DEVELOPER_TOOL": "Integration/developer tool, not a payment protocol"
+  },
+  "maturity": {
+    "PRODUCTION": "Real production product or transaction capability",
+    "PRODUCTION_VALIDATION": "Validated on production systems; not equivalent to general availability",
+    "ROLLOUT": "Phased or selected-partner rollout",
+    "PILOT": "Limited pilot",
+    "REFERENCE_IMPLEMENTATION": "Reference code/demo implementation",
+    "RESEARCH": "Research or sandbox exploration",
+    "PARTNERSHIP": "Partnership/interoperability announcement",
+    "UNKNOWN": "Insufficient first-party evidence"
+  },
+  "stablecoin_relation": {
+    "DIRECT": "Stablecoin is an explicit/native payment path",
+    "COMPATIBLE": "Protocol explicitly supports stablecoins but is payment-agnostic",
+    "INDIRECT": "Stablecoin could appear only through lower payment infrastructure",
+    "NO_VERIFIED_LINK": "No verified direct stablecoin relationship",
+    "UNKNOWN": "Payment/settlement asset not publicly verified",
+    "BLOCKCHAIN_NOT_STABLECOIN": "Blockchain/tokenisation is used, but this is not evidence of stablecoin settlement"
+  }
+}

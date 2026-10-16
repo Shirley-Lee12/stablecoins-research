@@ -1,0 +1,142 @@
+[
+  {
+    "date": "2025-05-06",
+    "type": "protocol_release",
+    "title": "x402 launched",
+    "org": "Coinbase / x402",
+    "source_id": "SRC-X402-01"
+  },
+  {
+    "date": "2025-09-04",
+    "type": "product_launch",
+    "title": "Antom Agentic Payment Solution",
+    "org": "Ant International / Antom",
+    "source_id": ""
+  },
+  {
+    "date": "2025-09-16",
+    "type": "protocol_release",
+    "title": "Google AP2 announced",
+    "org": "Google",
+    "source_id": "SRC-AP2-01"
+  },
+  {
+    "date": "2025-09-29",
+    "type": "protocol_and_product",
+    "title": "ACP + ChatGPT Instant Checkout",
+    "org": "OpenAI + Stripe",
+    "source_id": "SRC-ACP-01"
+  },
+  {
+    "date": "2025-11-28",
+    "type": "product_evidence",
+    "title": "JD AI Shopping user agreement",
+    "org": "JD.com",
+    "source_id": "SRC-JD-01"
+  },
+  {
+    "date": "2025-12-11",
+    "type": "protocol_evolution",
+    "title": "x402 V2",
+    "org": "x402",
+    "source_id": "SRC-X402-01"
+  },
+  {
+    "date": "2026-01-11",
+    "type": "protocol_release",
+    "title": "UCP announced",
+    "org": "Google + partners",
+    "source_id": "SRC-UCP-01"
+  },
+  {
+    "date": "2026-01-16",
+    "type": "protocol_release",
+    "title": "ACT released",
+    "org": "Alipay ecosystem",
+    "source_id": "SRC-ACT-01"
+  },
+  {
+    "date": "2026-03-18",
+    "type": "protocol_release",
+    "title": "MPP announced",
+    "org": "Stripe + Tempo",
+    "source_id": "SRC-MPP-01"
+  },
+  {
+    "date": "2026-04-02",
+    "type": "production_validation",
+    "title": "APOP released + 5 production-system validation trades",
+    "org": "China UnionPay",
+    "source_id": "SRC-APOP-01"
+  },
+  {
+    "date": "2026-04-28",
+    "type": "protocol_release",
+    "title": "AMP launched",
+    "org": "Ant International",
+    "source_id": "SRC-AMP-01"
+  },
+  {
+    "date": "2026-05",
+    "type": "product_scale",
+    "title": "Alipay AI Wallet / AI Pay scale disclosure",
+    "org": "Ant Group",
+    "source_id": "SRC-ACT-02"
+  },
+  {
+    "date": "2026-05-08",
+    "type": "regulation",
+    "title": "China CAC agent governance guidance",
+    "org": "CAC",
+    "source_id": ""
+  },
+  {
+    "date": "2026-06-03",
+    "type": "product_scale",
+    "title": "Meta Business Agent expansion",
+    "org": "Meta",
+    "source_id": "SRC-META-02"
+  },
+  {
+    "date": "2026-07-14",
+    "type": "governance",
+    "title": "x402 Foundation operational launch",
+    "org": "Linux Foundation / x402 Foundation",
+    "source_id": "SRC-X402-02"
+  },
+  {
+    "date": "2026-08-24",
+    "type": "industry_rule",
+    "title": "China agentic-payment self-regulatory convention",
+    "org": "Payment & Clearing Association of China",
+    "source_id": ""
+  },
+  {
+    "date": "2026-09-01",
+    "type": "product_capability",
+    "title": "Grok Bot purchase approval via Stripe Link",
+    "org": "xAI",
+    "source_id": "SRC-XAI-01"
+  },
+  {
+    "date": "2026-09-08",
+    "type": "product_launch",
+    "title": "Meta Muse launched",
+    "org": "Meta",
+    "source_id": "SRC-META-01"
+  },
+  {
+    "date": "2026-09-11",
+    "type": "rollout",
+    "title": "AMP Phase I rollout / KYA interoperability work",
+    "org": "Ant International",
+    "source_id": "SRC-AMP-02"
+  },
+  {
+    "date": "2026-10-11",
+    "type": "product_capability",
+    "title": "Grok Bot can pay with X Money or Stripe Link",
+    "org": "xAI",
+    "source_id": "SRC-XAI-01"
+  }
+]
