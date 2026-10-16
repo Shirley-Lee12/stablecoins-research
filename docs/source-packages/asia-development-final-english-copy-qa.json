@@ -1,0 +1,31 @@
+{
+  "scope": "English presentation copy only; user-authorised corrections after V0.2 local construction",
+  "date": "2026-10-16",
+  "last_verified": "2026-10-16",
+  "source_archive_modified": false,
+  "unknowns_modified": false,
+  "chinese_copy_baseline": [
+    {
+      "path": "artifacts/stablecoin-hub/src/data/asia-developments.ts",
+      "strings": 134,
+      "sha256": "b69e204e2cd1818b751818ee36875060b604506da3f961eebc3f0ab6e6779dec"
+    },
+    {
+      "path": "artifacts/stablecoin-hub/src/pages/asia-development.tsx",
+      "strings": 106,
+      "sha256": "6a1c5f0fb78c14280616b435e16fd4b3fcc2cf49c19d5ee7c3f8f8778bd558d5"
+    },
+    {
+      "path": "artifacts/stablecoin-hub/src/components/asia-development-ui.tsx",
+      "strings": 66,
+      "sha256": "2c1435b1c50419af564e611762e98c6f74b9092d8f3587a8f22b4d83ec752d40"
+    }
+  ],
+  "svg_copy_only_override": {
+    "asset_id": "REG-M01",
+    "before": "Private stablecoin: restricted",
+    "after": "Private stablecoin issuance/business: prohibited or strictly restricted",
+    "geometry": "Existing shapes, paths and relationships unchanged; longer English label wrapped into two lines in the same box",
+    "original_svg_files_modified": false
+  }
+}

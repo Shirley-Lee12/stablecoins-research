@@ -1,0 +1,8 @@
+﻿jurisdiction,regulator,framework,regime_status,issuer_status,token_market_status,retail_access,critical_distinction,source_ids,last_verified
+Mainland China,PBOC + multi-agency,Private virtual currency/stablecoin/RWA framework,PRIVATE_STABLECOIN_PROHIBITION,No private issuer licensing pathway,No lawful private local stablecoin market,N/A,e-CNY is CBDC,SRC-CN-01;SRC-CN-02,2026-10-16
+Hong Kong,HKMA,Stablecoins Ordinance issuer licensing,DEDICATED_ISSUER_REGIME_LIVE,2 licensed issuers,HKDAP Beta live; RedCoin forthcoming,HKDAP institutional/corporate beta,Licence != availability,SRC-HK-01;SRC-HK-02;SRC-HK-04;SRC-HK-08,2026-10-16
+Singapore,MAS,MAS-SCS design + PS Act implementation consultation,IMPLEMENTATION_PENDING,Future MAS-SCS label pending implementation,XSGD/XUSD live under PSA/DPT,Provider-dependent,MPI/DPT != MAS-SCS issuer licence,SRC-SG-01;SRC-SG-02;SRC-SG-03;SRC-SG-04,2026-10-16
+UAE onshore,CBUAE,Payment Token Services Regulation,PAYMENT_TOKEN_REGIME_LIVE,3 current Dirham issuer entities,AE Coin/AEDZ live; AEDC details unknown,Issuer/agent-dependent,Financial Free Zones excluded,SRC-UAE-01;SRC-UAE-02,2026-10-16
+Dubai excl DIFC,VARA,VA / FRVA regime,FRVA_REGIME_LIVE,Category 1 approvals; AED FRVA excluded,Do not infer AED token from VARA,Activity-dependent,AED FRVA -> CBUAE,SRC-UAE-09;SRC-UAE-10,2026-10-16
+ADGM,FSRA,FRT regime,FRT_REGIME_LIVE,FRT issuance regulated,Multiple issuer permissions,Some explicitly non-retail,Accepted FRT requirement,SRC-UAE-11;SRC-UAE-12;SRC-UAE-13;SRC-UAE-14;SRC-UAE-15,2026-10-16
+DIFC,DFSA,Crypto Token framework,CRYPTO_TOKEN_REGIME_LIVE,Firm authorization + suitability assessment,Product-specific,Product-specific,Separate from VARA,SRC-UAE-16;SRC-UAE-17,2026-10-16

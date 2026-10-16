@@ -1,0 +1,1024 @@
+{
+  "version": "0.2",
+  "baseline": "2026-10-16",
+  "regulatory": [
+    {
+      "jurisdiction": "Mainland China",
+      "regulator": "PBOC + multi-agency",
+      "framework": "Private virtual currency/stablecoin/RWA framework",
+      "regime_status": "PRIVATE_STABLECOIN_PROHIBITION",
+      "issuer_status": "No private issuer licensing pathway",
+      "token_market_status": "No lawful private local stablecoin market",
+      "retail_access": "N/A",
+      "critical_distinction": "e-CNY is CBDC",
+      "source_ids": "SRC-CN-01;SRC-CN-02",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "Hong Kong",
+      "regulator": "HKMA",
+      "framework": "Stablecoins Ordinance issuer licensing",
+      "regime_status": "DEDICATED_ISSUER_REGIME_LIVE",
+      "issuer_status": "2 licensed issuers",
+      "token_market_status": "HKDAP Beta live; RedCoin forthcoming",
+      "retail_access": "HKDAP institutional/corporate beta",
+      "critical_distinction": "Licence != availability",
+      "source_ids": "SRC-HK-01;SRC-HK-02;SRC-HK-04;SRC-HK-08",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "Singapore",
+      "regulator": "MAS",
+      "framework": "MAS-SCS design + PS Act implementation consultation",
+      "regime_status": "IMPLEMENTATION_PENDING",
+      "issuer_status": "Future MAS-SCS label pending implementation",
+      "token_market_status": "XSGD/XUSD live under PSA/DPT",
+      "retail_access": "Provider-dependent",
+      "critical_distinction": "MPI/DPT != MAS-SCS issuer licence",
+      "source_ids": "SRC-SG-01;SRC-SG-02;SRC-SG-03;SRC-SG-04",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "UAE onshore",
+      "regulator": "CBUAE",
+      "framework": "Payment Token Services Regulation",
+      "regime_status": "PAYMENT_TOKEN_REGIME_LIVE",
+      "issuer_status": "3 current Dirham issuer entities",
+      "token_market_status": "AE Coin/AEDZ live; AEDC details unknown",
+      "retail_access": "Issuer/agent-dependent",
+      "critical_distinction": "Financial Free Zones excluded",
+      "source_ids": "SRC-UAE-01;SRC-UAE-02",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "Dubai excl DIFC",
+      "regulator": "VARA",
+      "framework": "VA / FRVA regime",
+      "regime_status": "FRVA_REGIME_LIVE",
+      "issuer_status": "Category 1 approvals; AED FRVA excluded",
+      "token_market_status": "Do not infer AED token from VARA",
+      "retail_access": "Activity-dependent",
+      "critical_distinction": "AED FRVA -> CBUAE",
+      "source_ids": "SRC-UAE-09;SRC-UAE-10",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "ADGM",
+      "regulator": "FSRA",
+      "framework": "FRT regime",
+      "regime_status": "FRT_REGIME_LIVE",
+      "issuer_status": "FRT issuance regulated",
+      "token_market_status": "Multiple issuer permissions",
+      "retail_access": "Some explicitly non-retail",
+      "critical_distinction": "Accepted FRT requirement",
+      "source_ids": "SRC-UAE-11;SRC-UAE-12;SRC-UAE-13;SRC-UAE-14;SRC-UAE-15",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "DIFC",
+      "regulator": "DFSA",
+      "framework": "Crypto Token framework",
+      "regime_status": "CRYPTO_TOKEN_REGIME_LIVE",
+      "issuer_status": "Firm authorization + suitability assessment",
+      "token_market_status": "Product-specific",
+      "retail_access": "Product-specific",
+      "critical_distinction": "Separate from VARA",
+      "source_ids": "SRC-UAE-16;SRC-UAE-17",
+      "last_verified": "2026-10-16"
+    }
+  ],
+  "products": [
+    {
+      "jurisdiction": "Mainland China",
+      "product": "Private stablecoin",
+      "issuer_or_provider": "—",
+      "reference_currency": "—",
+      "regulatory_basis": "—",
+      "status": "NOT_PERMITTED",
+      "current_access": "—",
+      "channel_or_chain": "—",
+      "critical_note": "No public private-stablecoin issuer market",
+      "source_ids": "SRC-CN-01",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "Mainland/HK",
+      "product": "e-CNY",
+      "issuer_or_provider": "PBOC",
+      "reference_currency": "RMB",
+      "regulatory_basis": "CBDC",
+      "status": "LIVE_CROSS_BORDER_RETAIL_PILOT",
+      "current_access": "HK wallet users",
+      "channel_or_chain": "FPS top-up; merchants",
+      "critical_note": "Not stablecoin",
+      "source_ids": "SRC-CN-02",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "Hong Kong",
+      "product": "HKDAP",
+      "issuer_or_provider": "Anchorpoint",
+      "reference_currency": "HKD",
+      "regulatory_basis": "FRS01",
+      "status": "BETA_LIVE",
+      "current_access": "Institutional/corporate",
+      "channel_or_chain": "Authorised distributors; Ethereum beta",
+      "critical_note": "Retail not yet",
+      "source_ids": "SRC-HK-02;SRC-HK-04;SRC-HK-05;SRC-HK-06;SRC-HK-07",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "Hong Kong",
+      "product": "HSBC RedCoin",
+      "issuer_or_provider": "HSBC",
+      "reference_currency": "HKD",
+      "regulatory_basis": "FRS02",
+      "status": "FORTHCOMING_NOT_ISSUED",
+      "current_access": "Not yet available",
+      "channel_or_chain": "PayMe/HSBC App planned",
+      "critical_note": "Do not label live",
+      "source_ids": "SRC-HK-02;SRC-HK-08;SRC-HK-09",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "Singapore",
+      "product": "XSGD",
+      "issuer_or_provider": "StraitsX",
+      "reference_currency": "SGD",
+      "regulatory_basis": "MPI/DPT current framework",
+      "status": "LIVE",
+      "current_access": "Provider onboarding",
+      "channel_or_chain": "Wallet/exchange/fintech",
+      "critical_note": "Not MAS-SCS-labelled token",
+      "source_ids": "SRC-SG-04;SRC-SG-05",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "Singapore",
+      "product": "XUSD",
+      "issuer_or_provider": "StraitsX",
+      "reference_currency": "USD",
+      "regulatory_basis": "MPI/DPT current framework",
+      "status": "LIVE",
+      "current_access": "Provider onboarding",
+      "channel_or_chain": "Wallet/exchange/DeFi",
+      "critical_note": "Not MAS-SCS-labelled token",
+      "source_ids": "SRC-SG-04;SRC-SG-06",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "Singapore",
+      "product": "USDC services",
+      "issuer_or_provider": "Circle Singapore",
+      "reference_currency": "USD",
+      "regulatory_basis": "MPI/DPT service licence",
+      "status": "SERVICE_LIVE",
+      "current_access": "Product-dependent",
+      "channel_or_chain": "Circle services",
+      "critical_note": "MPI != MAS-SCS token label",
+      "source_ids": "SRC-SG-07;SRC-SG-08",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "UAE onshore",
+      "product": "AE Coin (AEC)",
+      "issuer_or_provider": "AED Stablecoin LLC",
+      "reference_currency": "AED",
+      "regulatory_basis": "CBUAE Dirham issuer",
+      "status": "LIVE",
+      "current_access": "Via appointed agents",
+      "channel_or_chain": "Agent distribution",
+      "critical_note": "Issuer states B2B-only",
+      "source_ids": "SRC-UAE-02;SRC-UAE-05;SRC-UAE-06",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "UAE onshore",
+      "product": "Zand AED (AEDZ)",
+      "issuer_or_provider": "Zand Trust",
+      "reference_currency": "AED",
+      "regulatory_basis": "CBUAE Dirham issuer",
+      "status": "LIVE",
+      "current_access": "Product-dependent",
+      "channel_or_chain": "Public multi-chain",
+      "critical_note": "Dynamic reserve data must be dated",
+      "source_ids": "SRC-UAE-02;SRC-UAE-07;SRC-UAE-08",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "UAE onshore",
+      "product": "AEDC token",
+      "issuer_or_provider": "AEDC Stable Coin LLC",
+      "reference_currency": "AED",
+      "regulatory_basis": "CBUAE Dirham issuer",
+      "status": "PRODUCT_DETAILS_UNKNOWN",
+      "current_access": "UNKNOWN",
+      "channel_or_chain": "UNKNOWN",
+      "critical_note": "Licence verified only",
+      "source_ids": "SRC-UAE-02",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "ADGM",
+      "product": "USDL",
+      "issuer_or_provider": "Paxos Issuance MENA",
+      "reference_currency": "USD",
+      "regulatory_basis": "FSRA FRT issuance",
+      "status": "ISSUER_PERMISSION_VERIFIED",
+      "current_access": "No retail clients",
+      "channel_or_chain": "ADGM",
+      "critical_note": "Do not infer broad public availability",
+      "source_ids": "SRC-UAE-13",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "ADGM",
+      "product": "Universal Digital FRT",
+      "issuer_or_provider": "Universal Digital INTL",
+      "reference_currency": "UNKNOWN",
+      "regulatory_basis": "FSRA FRT issuance",
+      "status": "PRODUCT_DETAILS_PARTIAL",
+      "current_access": "No retail clients",
+      "channel_or_chain": "ADGM",
+      "critical_note": "More first-party product evidence needed",
+      "source_ids": "SRC-UAE-14",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "jurisdiction": "ADGM",
+      "product": "JD Coinlink FRT",
+      "issuer_or_provider": "JD Coinlink Middle East",
+      "reference_currency": "UNKNOWN",
+      "regulatory_basis": "FSRA FRT issuance",
+      "status": "PRODUCT_DETAILS_UNKNOWN",
+      "current_access": "UNKNOWN",
+      "channel_or_chain": "ADGM",
+      "critical_note": "Permission != product launch",
+      "source_ids": "SRC-UAE-15",
+      "last_verified": "2026-10-16"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "2025-08-01",
+      "jurisdiction": "Hong Kong",
+      "type": "LAW_REGIME",
+      "title": "Stablecoin issuer licensing regime takes effect",
+      "source_ids": [
+        "SRC-HK-01"
+      ]
+    },
+    {
+      "date": "2026-01-01",
+      "jurisdiction": "ADGM",
+      "type": "LAW_REGIME",
+      "title": "Updated FSRA FRT framework takes effect",
+      "source_ids": [
+        "SRC-UAE-11"
+      ]
+    },
+    {
+      "date": "2026-01-12",
+      "jurisdiction": "DIFC",
+      "type": "LAW_REGIME",
+      "title": "Updated DFSA Crypto Token framework takes effect",
+      "source_ids": [
+        "SRC-UAE-16"
+      ]
+    },
+    {
+      "date": "2026-02-06",
+      "jurisdiction": "Mainland China",
+      "type": "LAW_REGIME",
+      "title": "2026 multi-agency virtual currency/stablecoin notice",
+      "source_ids": [
+        "SRC-CN-01"
+      ]
+    },
+    {
+      "date": "2026-04-10",
+      "jurisdiction": "Hong Kong",
+      "type": "LICENCE",
+      "title": "HKMA grants first two stablecoin issuer licences",
+      "source_ids": [
+        "SRC-HK-02",
+        "SRC-HK-03"
+      ]
+    },
+    {
+      "date": "2026-08-12",
+      "jurisdiction": "Hong Kong",
+      "type": "BETA_ROLLOUT",
+      "title": "HKDAP Beta Access starts",
+      "source_ids": [
+        "SRC-HK-04",
+        "SRC-HK-05"
+      ]
+    },
+    {
+      "date": "2026-08-24",
+      "jurisdiction": "Hong Kong",
+      "type": "DISTRIBUTION",
+      "title": "Standard Chartered becomes first bank distributor of HKDAP",
+      "source_ids": [
+        "SRC-HK-07"
+      ]
+    },
+    {
+      "date": "2026-09-01",
+      "jurisdiction": "Singapore",
+      "type": "CONSULTATION",
+      "title": "MAS opens PS Act amendments consultation",
+      "source_ids": [
+        "SRC-SG-02",
+        "SRC-SG-03"
+      ]
+    },
+    {
+      "date": "2026-09-30",
+      "jurisdiction": "Hong Kong",
+      "type": "PRODUCT_STATUS",
+      "title": "HSBC names RedCoin and confirms it has not yet issued stablecoins",
+      "source_ids": [
+        "SRC-HK-08"
+      ]
+    },
+    {
+      "date": "2026-10-16",
+      "jurisdiction": "Singapore",
+      "type": "CONSULTATION",
+      "title": "MAS stablecoin implementation consultation closes",
+      "source_ids": [
+        "SRC-SG-02"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "SRC-CN-01",
+      "topic": "Mainland China",
+      "organization": "PBOC + seven agencies / Shanghai government authoritative repost",
+      "title": "银发〔2026〕42号",
+      "date": "2026-02-06",
+      "url": "https://www.shanghai.gov.cn/rzfwgj/20260320/ca5d3b3b19504111a379d730560f4274.html",
+      "source_type": "GOVERNMENT_REPOST",
+      "use_for": "Current stablecoin/virtual-currency/RWA baseline; supersedes 2021",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-CN-02",
+      "topic": "e-CNY",
+      "organization": "Hong Kong Monetary Authority",
+      "title": "e-CNY",
+      "date": "2026-07-17",
+      "url": "https://www.hkma.gov.hk/eng/smart-consumers/e-cny/",
+      "source_type": "REGULATOR",
+      "use_for": "HK wallet access, limits and cross-boundary retail use",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-HK-01",
+      "topic": "Hong Kong",
+      "organization": "Hong Kong Monetary Authority",
+      "title": "Regulatory Regime for Stablecoin Issuers",
+      "date": "current",
+      "url": "https://www.hkma.gov.hk/eng/key-functions/international-financial-centre/stablecoin-issuers/",
+      "source_type": "REGULATOR",
+      "use_for": "Regime effective 1 Aug 2025",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-HK-02",
+      "topic": "Hong Kong",
+      "organization": "Hong Kong Monetary Authority",
+      "title": "Register of Licensed Stablecoin Issuers",
+      "date": "2026-04-23",
+      "url": "https://www.hkma.gov.hk/eng/regulatory-resources/registers/register-of-licensed-stablecoin-issuers/",
+      "source_type": "REGULATOR_REGISTER",
+      "use_for": "Anchorpoint FRS01; HSBC FRS02",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-HK-03",
+      "topic": "Hong Kong",
+      "organization": "Hong Kong Monetary Authority",
+      "title": "Robust development of regulated stablecoin ecosystem",
+      "date": "2026-04-10",
+      "url": "https://www.hkma.gov.hk/eng/news-and-media/insight/2026/04/20260410/",
+      "source_type": "REGULATOR",
+      "use_for": "First two licences",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-HK-04",
+      "topic": "HKDAP",
+      "organization": "Anchorpoint",
+      "title": "HKDAP Whitepaper",
+      "date": "2026-08-12",
+      "url": "https://anchorpoint.hk/hkdap-whitepaper/",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Par value, reserve trust, Beta start",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-HK-05",
+      "topic": "HKDAP",
+      "organization": "Anchorpoint",
+      "title": "Transparency",
+      "date": "current",
+      "url": "https://anchorpoint.hk/transparency/",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Beta access/user restriction",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-HK-06",
+      "topic": "HKDAP",
+      "organization": "Anchorpoint",
+      "title": "FAQs",
+      "date": "current",
+      "url": "https://anchorpoint.hk/faqs/",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Beta, retail after Full Launch, Ethereum beta",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-HK-07",
+      "topic": "HKDAP",
+      "organization": "Standard Chartered",
+      "title": "First bank distributor of HKDAP",
+      "date": "2026-08-24",
+      "url": "https://www.sc.com/en/press-release/standard-chartered-becomes-first-bank-distributor-of-hkdap-to-unlock-real-economy-benefits-of-hkd-stablecoins/",
+      "source_type": "DISTRIBUTOR_PRIMARY",
+      "use_for": "Institutional distribution",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-HK-08",
+      "topic": "RedCoin",
+      "organization": "HSBC",
+      "title": "HSBC names stablecoin HSBC RedCoin",
+      "date": "2026-09-30",
+      "url": "https://www.about.hsbc.com.hk/news-and-media/hsbc-names-stablecoin-hsbc-redcoin",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Not yet issued; naming/status",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-HK-09",
+      "topic": "RedCoin",
+      "organization": "HSBC",
+      "title": "HSBC RedCoin product page",
+      "date": "current",
+      "url": "https://www.hsbc.com.hk/stablecoins/",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Planned PayMe/HSBC app use",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-SG-01",
+      "topic": "Singapore",
+      "organization": "MAS",
+      "title": "MAS Finalises Stablecoin Regulatory Framework",
+      "date": "2023-08-15",
+      "url": "https://www.mas.gov.sg/news/media-releases/2023/mas-finalises-stablecoin-regulatory-framework",
+      "source_type": "REGULATOR",
+      "use_for": "2023 policy design",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-SG-02",
+      "topic": "Singapore",
+      "organization": "MAS",
+      "title": "Consultation on PS Act amendments for stablecoins",
+      "date": "2026-09-01",
+      "url": "https://www.mas.gov.sg/publications/consultations/2026/consultation-on-proposed-amendments-to-the-payment-services-act-for-stablecoin-regulation",
+      "source_type": "REGULATOR",
+      "use_for": "Legislative implementation; closes 16 Oct 2026",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-SG-03",
+      "topic": "Singapore",
+      "organization": "MAS",
+      "title": "MAS Consults on Legislative Amendments",
+      "date": "2026-09-01",
+      "url": "https://www.mas.gov.sg/news/media-releases/2026/mas-consults-on-legislative-amendments-to-implement-stablecoin-regulatory-framework",
+      "source_type": "REGULATOR",
+      "use_for": "Future MAS-regulated label",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-SG-04",
+      "topic": "StraitsX",
+      "organization": "MAS FID",
+      "title": "DPT Major Payment Institutions",
+      "date": "current",
+      "url": "https://eservices.mas.gov.sg/fid/institution/print?activity=Digital+Payment+Token+Service&category=Major+Payment+Institution",
+      "source_type": "REGULATOR_REGISTER",
+      "use_for": "Existing MPI/DPT status",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-SG-05",
+      "topic": "XSGD",
+      "organization": "StraitsX",
+      "title": "XSGD",
+      "date": "current",
+      "url": "https://www.straitsx.com/xsgd",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "1:1 SGD, attestations, live use",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-SG-06",
+      "topic": "XUSD",
+      "organization": "StraitsX",
+      "title": "XUSD",
+      "date": "current",
+      "url": "https://www.straitsx.com/xusd",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "1:1 USD, attestations, live",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-SG-07",
+      "topic": "Circle Singapore",
+      "organization": "MAS FID",
+      "title": "Circle Internet Singapore",
+      "date": "current",
+      "url": "https://eservices.mas.gov.sg/fid/institution/detail/412248-CIRCLE-INTERNET-SINGAPORE-PTE-LTD",
+      "source_type": "REGULATOR_REGISTER",
+      "use_for": "MPI + DPT + transfer services",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-SG-08",
+      "topic": "Circle Singapore",
+      "organization": "Circle",
+      "title": "Licenses",
+      "date": "current",
+      "url": "https://www.circle.com/legal/licenses",
+      "source_type": "PROVIDER_PRIMARY",
+      "use_for": "Singapore MPI licence",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-01",
+      "topic": "UAE CBUAE",
+      "organization": "CBUAE",
+      "title": "Payment Token Services Regulation",
+      "date": "in force",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/payment-token-services-regulation",
+      "source_type": "REGULATOR",
+      "use_for": "Onshore payment-token perimeter",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-02",
+      "topic": "UAE CBUAE",
+      "organization": "CBUAE",
+      "title": "Licensing Register",
+      "date": "current",
+      "url": "https://centralbank.ae/en/licensing",
+      "source_type": "REGULATOR_REGISTER",
+      "use_for": "Dirham token issuer/conversion/custody licences",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-03",
+      "topic": "UAE CBUAE",
+      "organization": "CBUAE",
+      "title": "Article 21: Issuance and Redemption",
+      "date": "in force",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/article-21-issuance-and-redemption-payment-tokens",
+      "source_type": "REGULATOR",
+      "use_for": "Par redemption timing",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-04",
+      "topic": "UAE CBUAE",
+      "organization": "CBUAE",
+      "title": "Article 12: Restrictions",
+      "date": "in force",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/article-12-restrictions-payment-tokens",
+      "source_type": "REGULATOR",
+      "use_for": "AED denomination/no time-based interest",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-05",
+      "topic": "AE Coin",
+      "organization": "AED Stablecoin LLC",
+      "title": "AE Coin",
+      "date": "current",
+      "url": "https://aecoin.com/",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "1 AEC=1 AED; product identity",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-06",
+      "topic": "AE Coin",
+      "organization": "AED Stablecoin LLC",
+      "title": "Privacy Policy",
+      "date": "current",
+      "url": "https://aecoin.com/privacy-policy.php?lang=en",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Issuer B2B-only; agent distribution",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-07",
+      "topic": "Zand AED",
+      "organization": "Zand Trust",
+      "title": "Zand AED",
+      "date": "current",
+      "url": "https://zandtrust.com/en",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "1 AED=1 AEDZ; product live",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-08",
+      "topic": "Zand AED",
+      "organization": "Zand Trust",
+      "title": "Transparency",
+      "date": "2026-09-25 snapshot",
+      "url": "https://zandtrust.com/en/transparency",
+      "source_type": "ISSUER_PRIMARY",
+      "use_for": "Reserve composition; dated snapshot",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-09",
+      "topic": "Dubai VARA",
+      "organization": "VARA",
+      "title": "Virtual Asset Issuance Rulebook",
+      "date": "2025-06-19 effective",
+      "url": "https://rulebooks.vara.ae/rulebook/virtual-asset-issuance-rulebook",
+      "source_type": "REGULATOR",
+      "use_for": "Dubai scope excl DIFC",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-10",
+      "topic": "Dubai VARA",
+      "organization": "VARA",
+      "title": "FRVA Issuance Rules",
+      "date": "current",
+      "url": "https://rulebooks.vara.ae/entiresection/316",
+      "source_type": "REGULATOR",
+      "use_for": "AED FRVA -> CBUAE; payment-use restriction",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-11",
+      "topic": "ADGM",
+      "organization": "ADGM FSRA",
+      "title": "FRT framework finalised",
+      "date": "2025-10-31 / effective 2026-01-01",
+      "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-regulated-activities-involving-fiat-referenced-tokens",
+      "source_type": "REGULATOR",
+      "use_for": "Accepted FRT framework",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-12",
+      "topic": "ADGM",
+      "organization": "ADGM FSRA",
+      "title": "Digital Assets / Accepted FRT list",
+      "date": "current",
+      "url": "https://www.adgm.com/business-areas/digital-assets",
+      "source_type": "REGULATOR",
+      "use_for": "Accepted FRT concept/list",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-13",
+      "topic": "ADGM Paxos",
+      "organization": "ADGM Public Register",
+      "title": "Paxos Issuance MENA",
+      "date": "current",
+      "url": "https://www.adgm.com/public-registers/fsra/firms/financial-firms/paxos-issuance-mena-ltd-220167",
+      "source_type": "REGULATOR_REGISTER",
+      "use_for": "USDL only; no retail",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-14",
+      "topic": "ADGM Universal",
+      "organization": "ADGM Public Register",
+      "title": "Universal Digital INTL",
+      "date": "current",
+      "url": "https://www.adgm.com/public-registers/fsra/firms/financial-firms/universal-digital-intl-limited-250089",
+      "source_type": "REGULATOR_REGISTER",
+      "use_for": "FRT issuance; no retail",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-15",
+      "topic": "ADGM JD",
+      "organization": "ADGM Public Register",
+      "title": "Jingdong Coinlink Technology Middle East",
+      "date": "2026-01-06",
+      "url": "https://www.adgm.com/public-registers/fsra/firms/financial-firms/jingdong-coinlink-technology-middle-east-limited-250072",
+      "source_type": "REGULATOR_REGISTER",
+      "use_for": "FRT issuance permission",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-16",
+      "topic": "DIFC",
+      "organization": "DFSA",
+      "title": "Updated Crypto Token Regulatory Framework",
+      "date": "2026-01-12",
+      "url": "https://www.dfsa.ae/news/dfsa-implements-major-updates-crypto-token-regulatory-framework-enhancing-market-integrity-and-supporting-innovation-difc",
+      "source_type": "REGULATOR",
+      "use_for": "DIFC framework effective",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-UAE-17",
+      "topic": "DIFC",
+      "organization": "DFSA",
+      "title": "Crypto Token Regulation",
+      "date": "current",
+      "url": "https://www.dfsa.ae/crypto",
+      "source_type": "REGULATOR",
+      "use_for": "Current DFSA perimeter",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    }
+  ],
+  "pages": [
+    {
+      "route": "/regional-developments",
+      "title_zh": "亚洲稳定币发展",
+      "title_en": "Asia Stablecoin Development",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "general;research;enterprise",
+      "primary_question": "四地真正差异是什么？谁已发牌、谁已发行、谁能用？",
+      "module_order": "hero>four-paths>regulatory-matrix>product-availability>misconceptions>timeline",
+      "visual_assets": "REG-M01;REG-D04;REG-T01"
+    },
+    {
+      "route": "/mainland-china",
+      "title_zh": "中国内地",
+      "title_en": "Mainland China",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "general;research;enterprise",
+      "primary_question": "为什么没有私人稳定币发牌路线，但仍在推进数字货币？",
+      "module_order": "hero>2026-rule>boundary-diagram>e-cny>user-meaning>sources",
+      "visual_assets": "REG-D01"
+    },
+    {
+      "route": "/hong-kong",
+      "title_zh": "中国香港",
+      "title_en": "Hong Kong",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "general;research;enterprise",
+      "primary_question": "两张牌照后，哪些 token 真正上线、谁能用？",
+      "module_order": "hero>licensees>hkdap>redcoin>licence-vs-availability>sources",
+      "visual_assets": "REG-D02;REG-D04"
+    },
+    {
+      "route": "/singapore",
+      "title_zh": "新加坡",
+      "title_en": "Singapore",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "general;research;enterprise",
+      "primary_question": "为什么产品已 live，但 MAS-SCS 专门制度仍在立法实施？",
+      "module_order": "hero>two-tracks>xsgd-xusd>circle>framework-labels>sources",
+      "visual_assets": "REG-D03;REG-D04"
+    },
+    {
+      "route": "/uae",
+      "title_zh": "阿联酋",
+      "title_en": "United Arab Emirates",
+      "action": "REWRITE",
+      "status": "READY_FOR_CODEX",
+      "audience": "general;research;enterprise",
+      "primary_question": "为什么必须先区分监管辖区，再谈 stablecoin 产品？",
+      "module_order": "hero>four-perimeters>cbuae>ae-coin>aedz>vara-adgm-difc>sources",
+      "visual_assets": "REG-M02;REG-D04"
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "REG-M01",
+      "asset_type": "map_schematic",
+      "page_route": "/regional-developments",
+      "module_id": "four-paths",
+      "filename": "REG-M01-asia-development-map.svg",
+      "title": "Asia Stablecoin Development Map",
+      "purpose": "四地制度路径与成熟度比较",
+      "source_url": "ORIGINAL",
+      "source_org": "",
+      "rights_note": "",
+      "status": "READY"
+    },
+    {
+      "asset_id": "REG-D01",
+      "asset_type": "diagram",
+      "page_route": "/mainland-china",
+      "module_id": "boundary",
+      "filename": "REG-D01-mainland-digital-money-boundary.svg",
+      "title": "Mainland Digital Money Boundary",
+      "purpose": "private stablecoin / e-CNY / approved tokenised infrastructure",
+      "source_url": "ORIGINAL",
+      "source_org": "",
+      "rights_note": "",
+      "status": "READY"
+    },
+    {
+      "asset_id": "REG-D02",
+      "asset_type": "diagram",
+      "page_route": "/hong-kong",
+      "module_id": "licence-vs-access",
+      "filename": "REG-D02-hk-licence-availability.svg",
+      "title": "Hong Kong Licence vs Availability",
+      "purpose": "license/token live/distributor/retail access",
+      "source_url": "ORIGINAL",
+      "source_org": "",
+      "rights_note": "",
+      "status": "READY"
+    },
+    {
+      "asset_id": "REG-D03",
+      "asset_type": "diagram",
+      "page_route": "/singapore",
+      "module_id": "two-tracks",
+      "filename": "REG-D03-singapore-framework-vs-market.svg",
+      "title": "Singapore Framework vs Live Market",
+      "purpose": "MAS-SCS future regime vs current PSA/DPT products",
+      "source_url": "ORIGINAL",
+      "source_org": "",
+      "rights_note": "",
+      "status": "READY"
+    },
+    {
+      "asset_id": "REG-M02",
+      "asset_type": "jurisdiction_map",
+      "page_route": "/uae",
+      "module_id": "regulatory-perimeters",
+      "filename": "REG-M02-uae-regulatory-perimeters.svg",
+      "title": "UAE Regulatory Perimeters",
+      "purpose": "CBUAE / VARA / ADGM / DIFC",
+      "source_url": "ORIGINAL",
+      "source_org": "",
+      "rights_note": "",
+      "status": "READY"
+    },
+    {
+      "asset_id": "REG-D04",
+      "asset_type": "matrix_ui",
+      "page_route": "/regional-developments",
+      "module_id": "product-status",
+      "filename": "product-availability-matrix",
+      "title": "Product Availability Matrix",
+      "purpose": "跨四地 licence/token/access/channel 比较",
+      "source_url": "DATA_UI",
+      "source_org": "",
+      "rights_note": "",
+      "status": "READY_DATA"
+    },
+    {
+      "asset_id": "REG-T01",
+      "asset_type": "timeline",
+      "page_route": "/regional-developments",
+      "module_id": "timeline",
+      "filename": "asia-stablecoin-timeline",
+      "title": "2025–2026 Timeline",
+      "purpose": "law/licence/token launch/beta/consultation",
+      "source_url": "DATA_UI",
+      "source_org": "",
+      "rights_note": "",
+      "status": "READY_DATA"
+    },
+    {
+      "asset_id": "REG-S01",
+      "asset_type": "official_visual",
+      "page_route": "/hong-kong",
+      "module_id": "hkdap",
+      "filename": "hkdap-official-visual",
+      "title": "HKDAP official visual",
+      "purpose": "产品证据",
+      "source_url": "https://anchorpoint.hk/",
+      "source_org": "Anchorpoint",
+      "rights_note": "",
+      "status": "SOURCE_ONLY"
+    },
+    {
+      "asset_id": "REG-S02",
+      "asset_type": "official_visual",
+      "page_route": "/hong-kong",
+      "module_id": "redcoin",
+      "filename": "redcoin-official-visual",
+      "title": "HSBC RedCoin official visual",
+      "purpose": "产品证据",
+      "source_url": "https://www.hsbc.com.hk/stablecoins/",
+      "source_org": "HSBC",
+      "rights_note": "",
+      "status": "SOURCE_ONLY"
+    },
+    {
+      "asset_id": "REG-S03",
+      "asset_type": "official_visual",
+      "page_route": "/singapore",
+      "module_id": "xsgd",
+      "filename": "xsgd-official-visual",
+      "title": "XSGD official visual",
+      "purpose": "产品证据",
+      "source_url": "https://www.straitsx.com/xsgd",
+      "source_org": "StraitsX",
+      "rights_note": "",
+      "status": "SOURCE_ONLY"
+    },
+    {
+      "asset_id": "REG-S04",
+      "asset_type": "official_visual",
+      "page_route": "/uae",
+      "module_id": "aecoin",
+      "filename": "aecoin-official-visual",
+      "title": "AE Coin official visual",
+      "purpose": "产品证据",
+      "source_url": "https://aecoin.com/",
+      "source_org": "AED Stablecoin LLC",
+      "rights_note": "",
+      "status": "SOURCE_ONLY"
+    },
+    {
+      "asset_id": "REG-S05",
+      "asset_type": "official_visual",
+      "page_route": "/uae",
+      "module_id": "aedz",
+      "filename": "aedz-official-visual",
+      "title": "Zand AED official visual",
+      "purpose": "产品与储备证据",
+      "source_url": "https://zandtrust.com/en",
+      "source_org": "Zand Trust",
+      "rights_note": "",
+      "status": "SOURCE_ONLY"
+    }
+  ],
+  "copy": {
+    "zh": "# 亚洲稳定币发展｜Content Master zh-CN V0.1\n\n> 动态状态基于 2026-10-16。\n\n# A. `/regional-developments`｜亚洲稳定币发展\n\n## HERO\n**H1** 亚洲不是一条统一的稳定币路线\n\n**Lead**\n中国内地、香港、新加坡和阿联酋都在建设数字货币与链上金融基础设施，但对私人稳定币采取了完全不同的制度路径。真正需要比较的不是“谁更开放”，而是：谁允许发行、谁已经发牌、token 是否真的上线、谁能使用，以及资金在哪个监管边界内流通。\n\n## A1｜四条不同路线\n### 中国内地\n私人稳定币：禁止 / 严格限制  \n数字货币主线：e-CNY\n\n### 中国香港\n专门发牌制度：已实施  \n产品：进入分阶段发行  \nHKDAP 已进入机构/企业 Beta Access；HSBC RedCoin 已命名但尚未发行。\n\n### 新加坡\n框架设计：成熟  \n专门制度实施：仍在立法咨询  \nXSGD/XUSD 已在现有 PSA/DPT 体系下运行，但不等于 MAS-SCS issuer framework 已全面生效。\n\n### 阿联酋\n产品活跃，但监管是多辖区结构  \nCBUAE 管理 onshore Payment Tokens；VARA、ADGM/FSRA、DIFC/DFSA 各有不同边界。AE Coin 与 Zand AED 已有可核实 AED stablecoin 产品。\n\n**Visual** REG-M01\n\n## A2｜从规则看到真实可用\n使用 `REGULATORY_MATRIX.csv` + `PRODUCT_AVAILABILITY.csv`，默认比较：\nissuer regime / licensed issuer / token live / current access / distribution channel / payment use / stablecoin-CBDC distinction。\n\n## A3｜四个常见误区\n1. “中国禁止稳定币，所以没有数字货币发展。”——错误，e-CNY 是不同制度路线。\n2. “香港发了两张牌，所以两个 token 都已面向公众。”——错误。\n3. “StraitsX/Circle 有 MAS 牌照，所以 token 已是 MAS-SCS regulated stablecoin。”——错误。\n4. “UAE stablecoin 都由 VARA 管。”——错误。\n\n# B. `/mainland-china`｜中国内地\n\n## HERO\n**H1** 中国内地的路径不是“私人稳定币 + 牌照”，而是“私人虚拟货币高压管控 + e-CNY”\n\n**Lead**\n2026 年最新通知把稳定币、境外人民币稳定币、境外虚拟货币发行与 RWA 代币化纳入更明确边界；与此同时，数字人民币继续作为央行法定数字货币推进跨境零售使用。\n\n## B1｜2026 年规则\n- 虚拟货币不具有法偿性；\n- 境内相关金融业务被禁止；\n- 境外主体不得非法向境内提供相关服务；\n- 未经同意不得在境外发行挂钩人民币的稳定币；\n- 未经同意，境内主体及其控制的境外主体不得在境外发行虚拟货币；\n- 金融/支付机构不得提供账户、划转、清算结算支持；\n- RWA tokenisation 进入更明确监管边界。\n\n当前基线：银发〔2026〕42号；2021 旧通知已废止。\n\n## B2｜三个概念不要混\n**Private stablecoin**：当前内地不存在面向公众的合法私人稳定币发行交易市场。  \n**e-CNY**：PBOC 发行的 CBDC/法定数字货币，不是 stablecoin。  \n**Approved tokenised infrastructure**：RWA tokenisation 原则受限，但存在主管部门同意、特定金融基础设施边界。\n\n**Visual** REG-D01\n\n## B3｜跨境 e-CNY\n香港试点已支持香港手机号钱包、无需内地银行账户、FPS 增值和跨境零售支付；香港钱包当前不支持 P2P。\n\n**Key line**\n中国的政策不是“拒绝数字货币”，而是对发行主体与法律属性作出不同选择。\n\n# C. `/hong-kong`｜中国香港\n\n## HERO\n**H1** 香港已经从“写规则”进入“发牌 + 分阶段发行”\n\n**Lead**\n制度自 2025 年 8 月实施；2026 年 4 月 HKMA 发出首批两张牌照。但用户真正需要知道的是：牌照之后 token 是否发行、谁能获得、通过什么渠道使用。\n\n## C1｜两家持牌发行人\n**Anchorpoint Financial** — FRS01 — 2026-04-10 — HKDAP — `BETA ACCESS LIVE`  \n**HSBC** — FRS02 — 2026-04-10 — HSBC RedCoin — `FORTHCOMING / NOT ISSUED`\n\n## C2｜HKDAP\n- 1 HKDAP = HKD1\n- Beta Access: 2026-08-12\n- Beta 期间 Ethereum mainnet\n- select authorised distributors\n- institutional/corporate users\n- reserve assets 为持有人利益按信托结构持有\n- Standard Chartered 为首家银行 authorised distributor\n\n**Do not label:** Retail live\n\n## C3｜HSBC RedCoin\n截至 2026-09-30，HSBC 明确尚未在香港发行 stablecoin。\n\n计划：\n- PayMe\n- HSBC HK App\n- P2P\n- P2M participating merchants\n- tokenised investment\n\n**Visual** REG-D02\n\n## C4｜判断产品看四件事\nissuer licence → token launch → authorised distributor/channel → user eligibility\n\n# D. `/singapore`｜新加坡\n\n## HERO\n**H1** 新加坡的稳定币市场已经在运行，但专门 MAS-SCS 发牌制度仍在完成立法落地\n\n**Lead**\nMAS 2023 年完成 framework 设计；2026 年 9 月就 PS Act 修法咨询以正式实施。与此同时，XSGD/XUSD 已在现有 PSA/DPT 监管体系运行。\n\n## D1｜两条并行轨道\n**Future MAS-SCS:** 2023 framework → 2026 legislative consultation → future MAS-regulated issuer/token label  \n**Existing market:** PSA → MPI/DPT → XSGD/XUSD/Circle services\n\n**Visual** REG-D03\n\n## D2｜XSGD / XUSD\nXSGD：1:1 SGD、月度储备鉴证、1:1 赎回、live。  \nXUSD：1:1 USD、月度储备鉴证、live。\n\n正确表述：\n`live under existing PSA / DPT / MPI framework`\n\n错误表述：\n`already MAS-regulated stablecoin under MAS-SCS`\n\n## D3｜Circle / USDC\nCircle Internet Singapore 是 MAS Major Payment Institution，可提供 DPT、国内和跨境转账等服务。这能证明机构受监管，不能自动证明 USDC 已获得 MAS-SCS token label。\n\n# E. `/uae`｜阿联酋\n\n## HERO\n**H1** 阿联酋不是一个 stablecoin licence box，而是多个监管边界并存\n\n**Lead**\nAED payment token、Dubai virtual asset、ADGM fiat-referenced token 与 DIFC crypto-token activity 并不由同一监管机构负责。理解阿联酋，第一步是先看 jurisdiction 和 activity。\n\n## E1｜四个监管边界\n**CBUAE** — onshore Payment Token Services；AED payment token/payment use  \n**VARA** — Dubai excl. DIFC；VA/FRVA；AED-referenced token 归 CBUAE  \n**ADGM / FSRA** — FRT issuance + Accepted FRT  \n**DIFC / DFSA** — Crypto Token framework\n\n**Visual** REG-M02\n\n## E2｜CBUAE Payment Tokens\n- Regulation 自 2024-08-31 in force\n- issuance / conversion / custody-transfer\n- AED token issuance by licensed Dirham Payment Token Issuers\n- par redemption\n- no time-based interest/reward\n- Financial Free Zones excluded\n\n当前 register 包括 AED StableCoin、Zand Trust、AEDC Stable Coin。\n\n## E3｜AE Coin\nIssuer: AED Stablecoin LLC  \n1 AEC = 1 AED  \n状态：`LICENSED + LIVE PRODUCT + AGENT-DISTRIBUTED`  \nIssuer 第一方披露 B2B-only；终端 custody/transfer/conversion 由 appointed agents 承担。\n\n## E4｜Zand AED (AEDZ)\n1 AED = 1 AEDZ；CBUAE-regulated issuer；public multi-chain；1:1 redemption；reserve transparency。  \n状态：`LICENSED + LIVE PRODUCT + PUBLIC MULTI-CHAIN`\n\n动态 reserve/circulation 数字必须带 as-of date。\n\n## E5｜VARA / ADGM / DIFC\nVARA：AED-referenced FRVA 归 CBUAE；VARA FRVA 不得用于 UAE goods/services payment。  \nADGM：Issuing FRT 是 regulated activity；Paxos USDL / Universal Digital / JD Coinlink 等 issuer permissions 必须与具体产品 launch 分开。  \nDIFC：2026-01-12 更新 Crypto Token framework 生效，firms 进行 documented suitability assessment。\n\n## E6｜核心问题\n“某 token 在 UAE 合规”信息不足。必须追问：\nWhich jurisdiction? Which activity? Issuer or service licence? Payment or investment use? Retail or institutional?\n",
+    "en": "# Asia Stablecoin Development｜Content Master en V0.1\nStatus baseline: 2026-10-16.\n\n## `/regional-developments`\n### Asia is not following one stablecoin path.\nMainland China restricts private stablecoins while advancing e-CNY. Hong Kong has an active issuer-licensing regime and phased token launches. Singapore has live products under its existing PSA/DPT framework while the dedicated MAS-SCS regime is still being legislatively implemented. The UAE combines multiple regulatory perimeters rather than one national stablecoin licence.\n\n## `/mainland-china`\n### Mainland China is pursuing CBDC, not a private-stablecoin licensing model.\nThe 2026 multi-agency notice keeps virtual-currency business under a prohibition framework and explicitly addresses fiat-referenced stablecoins, offshore RMB-referenced issuance, offshore issuance by Mainland-controlled entities, and RWA tokenisation. e-CNY is CBDC/legal tender, not a stablecoin.\n\n## `/hong-kong`\n### Hong Kong has moved from legislation to licensing and phased distribution.\nAnchorpoint FRS01 and HSBC FRS02 are active licences. HKDAP is live in institutional/corporate Beta Access; HSBC RedCoin was still not issued as of 30 September 2026.\n\n## `/singapore`\n### Stablecoins are live, but the dedicated MAS-SCS regime is still completing legislative implementation.\nMAS finalised policy design in 2023 and opened a PS Act amendments consultation on 1 September 2026. XSGD/XUSD are live under the existing PSA/DPT/MPI environment. Do not label them MAS-SCS regulated stablecoins.\n\n## `/uae`\n### The UAE is a multi-perimeter stablecoin market.\nCBUAE governs onshore Payment Tokens; VARA governs Dubai virtual assets excluding DIFC; ADGM/FSRA has an FRT regime; DIFC/DFSA has a separate Crypto Token framework. AE Coin and Zand AED are live AED products under CBUAE-licensed issuers.\n"
+  },
+  "researchBaseline": "# 亚洲稳定币发展｜Research Baseline V0.1\n\n截止：2026-10-16。生产内容仅采用 Source Manifest 中官方/第一方来源。\n\n## 1. 总体框架\n四地不能只按“监管宽松度”排序。网站必须同时比较：监管对象、专门发行制度、牌照、token 是否上线、用户可用性、分发渠道、支付用途和辖区边界。\n\n## 2. 中国内地\n2026-02-06 银发〔2026〕42号成为当前基线，并废止 2021 年旧通知。通知明确：虚拟货币不具法偿性；相关业务属非法金融活动；未经同意不得在境外发行挂钩人民币的稳定币；未经同意境内主体及其控制的境外主体不得在境外发行虚拟货币；金融/支付机构不得为相关业务提供账户、资金划转和清算结算；RWA 代币化原则上受限，保留主管部门同意并依托特定金融基础设施的边界。\n\ne-CNY 是中国人民银行发行的 CBDC/法定数字货币，不是 stablecoin。香港跨境 e-CNY 钱包可用香港手机号开立、无需内地银行账户、可经 FPS 增值，当前用于跨境零售支付且不支持香港钱包 P2P。\n\n页面核心：`private stablecoin/virtual currency`、`e-CNY`、`approved tokenised infrastructure` 三条路径必须分开。\n\n## 3. 中国香港\nStablecoins Ordinance 发牌制度自 2025-08-01 实施。HKMA 注册册目前显示：\n- Anchorpoint Financial Limited — FRS01 — 2026-04-10\n- HSBC — FRS02 — 2026-04-10\n\nHKDAP：\n- 1 HKDAP = HKD1\n- Beta Access 2026-08-12 开始\n- Beta 期间 Ethereum mainnet\n- select authorised distributors + institutional/corporate users\n- reserve assets 至少覆盖流通面值，并按信托结构为持有人利益持有\n- Full Launch 最早目标 2026 年底，当前不应写 retail live\n- Standard Chartered 2026-08-24 成为首家银行 authorised distributor\n\nHSBC RedCoin：\n- HSBC 2026-09-30 明确尚未发行香港稳定币\n- 产品已命名，计划通过 PayMe / HSBC HK App\n- 计划 P2P、P2M、tokenised investment\n当前状态应写 `LICENSED + FORTHCOMING / NOT ISSUED`。\n\n## 4. 新加坡\nMAS 2023-08-15 完成 stablecoin framework 政策设计，覆盖新加坡发行、挂钩 SGD 或 G10 currency 的 SCS，并提出储备、资本、赎回、披露要求。\n\n但 MAS 2026-09-01 又就 Payment Services Act 修法公开咨询，以正式实施 stablecoin framework；咨询截止 2026-10-16。只有未来在该框架下获牌的发行人/token 才可使用 “MAS-regulated stablecoin issuer / MAS-regulated stablecoin” 标签。\n\n与此同时，XSGD/XUSD 已在现有 PSA/DPT/MPI 体系下运行：\n- XSGD 1:1 SGD，月度储备鉴证，可 1:1 赎回\n- XUSD 1:1 USD，月度储备鉴证\n因此不能把“产品已存在”写成“MAS-SCS 专门发牌框架已全面生效”。\n\nCircle Internet Singapore 是 MAS Major Payment Institution，可提供 DPT、国内/跨境转账等服务，但这不等于 USDC 已是 MAS-SCS token。\n\n## 5. 阿联酋\nUAE 必须分监管辖区。\n\n### CBUAE\nPayment Token Services Regulation C 2/2024 自 2024-08-31 生效，覆盖 issuance / conversion / custody & transfer。Dirham Payment Token 只能以 AED 计价；按面值赎回；不得按持有时间支付利息/奖励；Financial Free Zones 不在该规则 territorial scope。\n\n当前 CBUAE register 包括：\n- AED StableCoin LLC — Dirham Payment Token Issuance\n- Zand Trust LLC — Dirham Payment Token Issuance\n- AEDC Stable Coin LLC — Dirham Payment Token Issuance\n- AEDC Network and Distribution — Conversion + Custody/Transfer\n\nAE Coin：\n- issuer AED Stablecoin LLC\n- 1 AEC = 1 AED\n- issuer 第一方披露为 B2B-only，终端 custody/transfer/conversion 由 appointed agents 承担\n当前可标 `CBUAE-LICENSED + LIVE PRODUCT + AGENT-DISTRIBUTED`。\n\nZand AED (AEDZ)：\n- 1 AED = 1 AEDZ\n- public multi-chain\n- 1:1 redemption\n- reserve transparency，现金 + UAE Monetary Bills\n当前可标 `CBUAE-LICENSED + LIVE PRODUCT + PUBLIC MULTI-CHAIN`。\n动态 reserve/circulation 数字必须带 as-of 日期。\n\nAEDC：牌照可核实，但 token 名称、上线时间、用户可用性、chain 当前保留 UNKNOWN。\n\n### VARA\nVARA 覆盖 Dubai mainland/free zones，DIFC 除外。AED-referenced FRVA 不由 VARA 批准，归 CBUAE；VARA FRVA 不能作为 UAE 内 goods/services 的支付方式。\n\n### ADGM / FSRA\n有独立 FRT regime。Issuing FRT 是 regulated activity；涉及 FRT 的受监管活动只能使用 Accepted FRT。\n公开 register：\n- Paxos Issuance MENA — USDL only；no retail clients\n- Universal Digital INTL — FRT issuance；no retail clients\n- Jingdong Coinlink Middle East — FRT issuance effective 2026-01-06\n牌照/permission 不自动证明具体 token 已面向市场上线。\n\n### DIFC / DFSA\n2026-01-12 更新 Crypto Token framework 生效；由 firms 负责 documented suitability assessment，不再依赖监管机构的 Recognised Crypto Token list。\n\n## 6. 关键 UNKNOWN\n- AEDC token exact identity / launch / retail / chain\n- JD Coinlink ADGM specific token/product launch\n- Universal Digital product details if shown in main comparison\n- MAS-SCS final legislative implementation timing\n- HSBC RedCoin actual launch date\n- HKDAP Full Launch actual timing\n",
+  "svg": {
+    "REG-D01": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Mainland Digital Money Boundary</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Mainland China: Digital-Money Boundary</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Private stablecoin, e-CNY and approved tokenisation are legally different paths.</text><rect x=\"70\" y=\"205\" width=\"475\" height=\"500\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#A65A5A\" stroke-width=\"2\"/><text x=\"105\" y=\"260\" class=\"t l\" text-anchor=\"start\" fill=\"#A65A5A\">Private stablecoin / virtual currency</text><text x=\"115\" y=\"330\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"142\" y=\"330\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"142\" dy=\"0\">Private issuance / trading</tspan></text><text x=\"115\" y=\"388\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"142\" y=\"388\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"142\" dy=\"0\">Offshore RMB-linked stablecoin</tspan></text><text x=\"115\" y=\"446\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"142\" y=\"446\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"142\" dy=\"0\">Offshore issuance by Mainland-</tspan><tspan x=\"142\" dy=\"28\">controlled entities</tspan></text><rect x=\"105\" y=\"620\" width=\"405\" height=\"48\" rx=\"24.0\" fill=\"#F1F4F8\"/><text x=\"307.5\" y=\"651.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#A65A5A\" font-weight=\"600\">PROHIBITED / RESTRICTED</text><rect x=\"585\" y=\"205\" width=\"475\" height=\"500\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"620\" y=\"260\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">e-CNY / CBDC</text><text x=\"630\" y=\"330\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"657\" y=\"330\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"657\" dy=\"0\">Issued by PBOC</tspan></text><text x=\"630\" y=\"388\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"657\" y=\"388\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"657\" dy=\"0\">Legal tender / sovereign money</tspan></text><text x=\"630\" y=\"446\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"657\" y=\"446\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"657\" dy=\"0\">Cross-boundary retail pilots</tspan></text><rect x=\"620\" y=\"620\" width=\"405\" height=\"48\" rx=\"24.0\" fill=\"#F1F4F8\"/><text x=\"822.5\" y=\"651.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#315B9A\" font-weight=\"600\">OFFICIAL DIGITAL MONEY ROUTE</text><rect x=\"1100\" y=\"205\" width=\"475\" height=\"500\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"1135\" y=\"260\" class=\"t l\" text-anchor=\"start\" fill=\"#3A7D78\">Approved tokenised activity</text><text x=\"1145\" y=\"330\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"1172\" y=\"330\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1172\" dy=\"0\">RWA tokenisation generally restricted</tspan></text><text x=\"1145\" y=\"388\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"1172\" y=\"388\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1172\" dy=\"0\">Exceptions require approval</tspan></text><text x=\"1145\" y=\"446\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"1172\" y=\"446\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1172\" dy=\"0\">Specific financial infrastructure</tspan></text><rect x=\"1135\" y=\"620\" width=\"405\" height=\"48\" rx=\"24.0\" fill=\"#F1F4F8\"/><text x=\"1337.5\" y=\"651.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#3A7D78\" font-weight=\"600\">APPROVAL-BOUND</text><rect x=\"200\" y=\"760\" width=\"1200\" height=\"72\" rx=\"14\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"800\" y=\"805\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">Hong Kong stablecoin licence does not create Mainland distribution permission.</text></svg>",
+    "REG-D02": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Hong Kong Licence vs Availability</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Hong Kong: Licence ≠ Availability</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">A licence is the first gate. Token launch, distribution and user eligibility are separate.</text><text x=\"90\" y=\"227\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">Anchorpoint / HKDAP</text><rect x=\"90\" y=\"260\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#EEF4FA\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"108\" y=\"297\" class=\"t s\" text-anchor=\"start\" fill=\"#315B9A\" font-weight=\"600\">Licence</text><text x=\"108\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"108\" dy=\"0\">FRS01</tspan><tspan x=\"108\" dy=\"27\">10 Apr 2026</tspan></text><line x1=\"310\" y1=\"335\" x2=\"335\" y2=\"335\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"335\" y=\"260\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#EEF4FA\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"353\" y=\"297\" class=\"t s\" text-anchor=\"start\" fill=\"#315B9A\" font-weight=\"600\">Token</text><text x=\"353\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"353\" dy=\"0\">HKDAP</tspan></text><line x1=\"555\" y1=\"335\" x2=\"580\" y2=\"335\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"580\" y=\"260\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#EEF4FA\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"598\" y=\"297\" class=\"t s\" text-anchor=\"start\" fill=\"#315B9A\" font-weight=\"600\">Access</text><text x=\"598\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"598\" dy=\"0\">Beta live</tspan><tspan x=\"598\" dy=\"27\">12 Aug</tspan></text><line x1=\"800\" y1=\"335\" x2=\"825\" y2=\"335\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"825\" y=\"260\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#EEF4FA\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"843\" y=\"297\" class=\"t s\" text-anchor=\"start\" fill=\"#315B9A\" font-weight=\"600\">Distribution</text><text x=\"843\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"843\" dy=\"0\">Authorised</tspan><tspan x=\"843\" dy=\"27\">distributors</tspan></text><line x1=\"1045\" y1=\"335\" x2=\"1070\" y2=\"335\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1070\" y=\"260\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#EEF4FA\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"1088\" y=\"297\" class=\"t s\" text-anchor=\"start\" fill=\"#315B9A\" font-weight=\"600\">Users</text><text x=\"1088\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1088\" dy=\"0\">Institutional</tspan><tspan x=\"1088\" dy=\"27\">/ corporate</tspan></text><line x1=\"1290\" y1=\"335\" x2=\"1315\" y2=\"335\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1315\" y=\"260\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#F3F4F6\" stroke=\"#94A3B8\" stroke-width=\"2\"/><text x=\"1333\" y=\"297\" class=\"t s\" text-anchor=\"start\" fill=\"#94A3B8\" font-weight=\"600\">Retail</text><text x=\"1333\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1333\" dy=\"0\">Full Launch</tspan><tspan x=\"1333\" dy=\"27\">target</tspan></text><text x=\"90\" y=\"532\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">HSBC / RedCoin</text><rect x=\"90\" y=\"565\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#EEF4FA\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"108\" y=\"602\" class=\"t s\" text-anchor=\"start\" fill=\"#6B65A8\" font-weight=\"600\">Licence</text><text x=\"108\" y=\"640\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"108\" dy=\"0\">FRS02</tspan><tspan x=\"108\" dy=\"27\">10 Apr 2026</tspan></text><line x1=\"310\" y1=\"640\" x2=\"335\" y2=\"640\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"335\" y=\"565\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#EEF4FA\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"353\" y=\"602\" class=\"t s\" text-anchor=\"start\" fill=\"#6B65A8\" font-weight=\"600\">Product</text><text x=\"353\" y=\"640\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"353\" dy=\"0\">RedCoin</tspan><tspan x=\"353\" dy=\"27\">named</tspan></text><line x1=\"555\" y1=\"640\" x2=\"580\" y2=\"640\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"580\" y=\"565\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#F3F4F6\" stroke=\"#94A3B8\" stroke-width=\"2\"/><text x=\"598\" y=\"602\" class=\"t s\" text-anchor=\"start\" fill=\"#94A3B8\" font-weight=\"600\">Channel</text><text x=\"598\" y=\"640\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"598\" dy=\"0\">PayMe / HSBC</tspan><tspan x=\"598\" dy=\"27\">App planned</tspan></text><line x1=\"800\" y1=\"640\" x2=\"825\" y2=\"640\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"825\" y=\"565\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#F3F4F6\" stroke=\"#94A3B8\" stroke-width=\"2\"/><text x=\"843\" y=\"602\" class=\"t s\" text-anchor=\"start\" fill=\"#94A3B8\" font-weight=\"600\">Token</text><text x=\"843\" y=\"640\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"843\" dy=\"0\">Not yet issued</tspan><tspan x=\"843\" dy=\"27\">30 Sep</tspan></text><line x1=\"1045\" y1=\"640\" x2=\"1070\" y2=\"640\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1070\" y=\"565\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#F3F4F6\" stroke=\"#94A3B8\" stroke-width=\"2\"/><text x=\"1088\" y=\"602\" class=\"t s\" text-anchor=\"start\" fill=\"#94A3B8\" font-weight=\"600\">Users</text><text x=\"1088\" y=\"640\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1088\" dy=\"0\">Not yet</tspan><tspan x=\"1088\" dy=\"27\">available</tspan></text><line x1=\"1290\" y1=\"640\" x2=\"1315\" y2=\"640\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1315\" y=\"565\" width=\"220\" height=\"150\" rx=\"14\" fill=\"#F3F4F6\" stroke=\"#94A3B8\" stroke-width=\"2\"/><text x=\"1333\" y=\"602\" class=\"t s\" text-anchor=\"start\" fill=\"#94A3B8\" font-weight=\"600\">Retail</text><text x=\"1333\" y=\"640\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1333\" dy=\"0\">Launch</tspan><tspan x=\"1333\" dy=\"27\">forthcoming</tspan></text><rect x=\"465\" y=\"825\" width=\"670\" height=\"48\" rx=\"24.0\" fill=\"#EEF3F9\"/><text x=\"800.0\" y=\"856.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\" font-weight=\"600\">Licence → token launch → distribution → user eligibility</text></svg>",
+    "REG-D03": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Singapore Framework vs Live Market</title>\n<rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs>\n<marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\">\n<path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/>\n</marker>\n</defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Singapore: Framework vs Live Market</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Policy design and existing product activity are moving on parallel tracks.</text><text x=\"100\" y=\"220\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">Track A · Dedicated MAS-SCS regime</text><rect x=\"120\" y=\"270\" width=\"380\" height=\"120\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"145\" y=\"305\" class=\"t s\" text-anchor=\"start\" fill=\"#6B65A8\" font-weight=\"600\">2023</text><text x=\"145\" y=\"350\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Framework design finalised</text><line x1=\"500\" y1=\"330\" x2=\"550\" y2=\"330\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"550\" y=\"270\" width=\"380\" height=\"120\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"575\" y=\"305\" class=\"t s\" text-anchor=\"start\" fill=\"#6B65A8\" font-weight=\"600\">2026</text><text x=\"575\" y=\"350\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">PS Act amendments consultation</text><line x1=\"930\" y1=\"330\" x2=\"980\" y2=\"330\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"980\" y=\"270\" width=\"380\" height=\"120\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"1005\" y=\"305\" class=\"t s\" text-anchor=\"start\" fill=\"#6B65A8\" font-weight=\"600\">Future</text><text x=\"1005\" y=\"350\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">MAS-SCS issuer/token label</text><text x=\"100\" y=\"500\" class=\"t l\" text-anchor=\"start\" fill=\"#3A7D78\">Track B · Existing PSA / DPT market</text><rect x=\"120\" y=\"550\" width=\"380\" height=\"120\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"145\" y=\"585\" class=\"t s\" text-anchor=\"start\" fill=\"#3A7D78\" font-weight=\"600\">PSA</text><text x=\"145\" y=\"630\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Current legal framework</text><line x1=\"500\" y1=\"610\" x2=\"550\" y2=\"610\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"550\" y=\"550\" width=\"380\" height=\"120\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"575\" y=\"585\" class=\"t s\" text-anchor=\"start\" fill=\"#3A7D78\" font-weight=\"600\">MPI / DPT</text><text x=\"575\" y=\"630\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Regulated providers</text><line x1=\"930\" y1=\"610\" x2=\"980\" y2=\"610\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"980\" y=\"550\" width=\"380\" height=\"120\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"1005\" y=\"585\" class=\"t s\" text-anchor=\"start\" fill=\"#3A7D78\" font-weight=\"600\">Live products</text><text x=\"1005\" y=\"630\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">XSGD · XUSD · Circle services</text><rect x=\"250\" y=\"760\" width=\"1100\" height=\"72\" rx=\"14\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"800\" y=\"805\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">Existing regulated DPT activity ≠ future MAS-SCS issuer licence</text></svg>",
+    "REG-M01": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Asia Stablecoin Development Map</title>\n<rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs>\n<marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\">\n<path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/>\n</marker>\n</defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Asia Stablecoin Development</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Four jurisdictions, four different policy and product paths — not an openness ranking.</text><rect x=\"90\" y=\"220\" width=\"675\" height=\"220\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#A65A5A\" stroke-width=\"2\"/><rect x=\"90\" y=\"220\" width=\"14\" height=\"220\" rx=\"7\" fill=\"#A65A5A\"/><text x=\"130\" y=\"270\" class=\"t l\" text-anchor=\"start\" fill=\"#A65A5A\">Mainland China</text><text x=\"130\" y=\"320\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Private stablecoin: restricted</text><text x=\"130\" y=\"360\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Digital-money route: e-CNY</text><text x=\"130\" y=\"400\" class=\"m s\" text-anchor=\"start\">No public private stablecoin issuer market</text><rect x=\"835\" y=\"220\" width=\"675\" height=\"220\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><rect x=\"835\" y=\"220\" width=\"14\" height=\"220\" rx=\"7\" fill=\"#315B9A\"/><text x=\"875\" y=\"270\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">Hong Kong</text><text x=\"875\" y=\"320\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Dedicated issuer regime: live</text><text x=\"875\" y=\"360\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">2 licensed issuers</text><text x=\"875\" y=\"400\" class=\"m s\" text-anchor=\"start\">HKDAP beta live · RedCoin forthcoming</text><rect x=\"90\" y=\"520\" width=\"675\" height=\"220\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><rect x=\"90\" y=\"520\" width=\"14\" height=\"220\" rx=\"7\" fill=\"#6B65A8\"/><text x=\"130\" y=\"570\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">Singapore</text><text x=\"130\" y=\"620\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Framework design: finalised</text><text x=\"130\" y=\"660\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Implementation: consultation</text><text x=\"130\" y=\"700\" class=\"m s\" text-anchor=\"start\">XSGD / XUSD live under PSA/DPT</text><rect x=\"835\" y=\"520\" width=\"675\" height=\"220\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><rect x=\"835\" y=\"520\" width=\"14\" height=\"220\" rx=\"7\" fill=\"#3A7D78\"/><text x=\"875\" y=\"570\" class=\"t l\" text-anchor=\"start\" fill=\"#3A7D78\">United Arab Emirates</text><text x=\"875\" y=\"620\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Multi-perimeter market</text><text x=\"875\" y=\"660\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">CBUAE AED payment tokens live</text><text x=\"875\" y=\"700\" class=\"m s\" text-anchor=\"start\">VARA · ADGM · DIFC separate</text><rect x=\"510\" y=\"785\" width=\"580\" height=\"52\" rx=\"26.0\" fill=\"#EEF3F9\"/><text x=\"800.0\" y=\"818.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\" font-weight=\"600\">Compare: law · licence · token · access · channel</text></svg>",
+    "REG-M02": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>UAE Regulatory Perimeters</title>\n<rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs>\n<marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\">\n<path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/>\n</marker>\n</defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">UAE: Regulatory Perimeters</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Always identify the jurisdiction before interpreting a stablecoin or token approval.</text><rect x=\"585\" y=\"350\" width=\"430\" height=\"160\" rx=\"80\" fill=\"#FBFCFE\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"800\" y=\"410\" class=\"t l\" text-anchor=\"middle\" fill=\"#1F2937\">Which jurisdiction?</text><text x=\"800\" y=\"450\" class=\"t s\" text-anchor=\"middle\" fill=\"#667085\">Which activity? Which user?</text><rect x=\"100\" y=\"220\" width=\"430\" height=\"190\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"130\" y=\"270\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">CBUAE</text><text x=\"130\" y=\"315\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">UAE onshore</text><text x=\"130\" y=\"360\" class=\"m s\" text-anchor=\"start\">Payment Tokens · AED issuance/payment</text><rect x=\"1050\" y=\"220\" width=\"430\" height=\"190\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"1080\" y=\"270\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">VARA</text><text x=\"1080\" y=\"315\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Dubai excl. DIFC</text><text x=\"1080\" y=\"360\" class=\"m s\" text-anchor=\"start\">VA / FRVA · AED reference → CBUAE</text><rect x=\"100\" y=\"570\" width=\"430\" height=\"190\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"130\" y=\"620\" class=\"t l\" text-anchor=\"start\" fill=\"#3A7D78\">ADGM / FSRA</text><text x=\"130\" y=\"665\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Abu Dhabi financial free zone</text><text x=\"130\" y=\"710\" class=\"m s\" text-anchor=\"start\">FRT issuance · Accepted FRT</text><rect x=\"1050\" y=\"570\" width=\"430\" height=\"190\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#517A63\" stroke-width=\"2\"/><text x=\"1080\" y=\"620\" class=\"t l\" text-anchor=\"start\" fill=\"#517A63\">DIFC / DFSA</text><text x=\"1080\" y=\"665\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">Dubai financial free zone</text><text x=\"1080\" y=\"710\" class=\"m s\" text-anchor=\"start\">Crypto Token framework</text><line x1=\"530\" y1=\"315\" x2=\"585\" y2=\"385\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"1050\" y1=\"315\" x2=\"1015\" y2=\"385\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"530\" y1=\"665\" x2=\"585\" y2=\"475\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"1050\" y1=\"665\" x2=\"1015\" y2=\"475\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"455\" y=\"820\" width=\"690\" height=\"48\" rx=\"24.0\" fill=\"#EEF3F9\"/><text x=\"800.0\" y=\"851.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\" font-weight=\"600\">Licence · activity · token status · user access are separate</text></svg>"
+  },
+  "hashes": {
+    "REG-D01-mainland-digital-money-boundary.svg": "c38b2ca95f169429937110e5fb705a5d1b01210f56c6ce411a83ecac0ce86102",
+    "REG-D02-hk-licence-availability.svg": "3c7f6e659ed397fe70027ac24f5c4e2aff4e487b91c10ab7505407cb8f7c7680",
+    "REG-D03-singapore-framework-vs-market.svg": "ef8127fddd88b8003eeb7f95d678df599222822d3dcbf5069bcaa6b562639810",
+    "REG-M01-asia-development-map.svg": "3ceed82ba543fa98e5008987e70c3aca5cc81187e709debfc85a9718737b2bda",
+    "REG-M02-uae-regulatory-perimeters.svg": "23b4cbf04d554fa31cf9e0de7fafe0baa8ecd5db5829ef60808ff3fcc4ca861c"
+  }
+}

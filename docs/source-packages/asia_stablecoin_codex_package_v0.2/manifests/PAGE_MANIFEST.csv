@@ -1,0 +1,6 @@
+﻿route,title_zh,title_en,action,status,audience,primary_question,module_order,visual_assets
+/regional-developments,亚洲稳定币发展,Asia Stablecoin Development,REWRITE,READY_FOR_CODEX,general;research;enterprise,四地真正差异是什么？谁已发牌、谁已发行、谁能用？,hero>four-paths>regulatory-matrix>product-availability>misconceptions>timeline,REG-M01;REG-D04;REG-T01
+/mainland-china,中国内地,Mainland China,REWRITE,READY_FOR_CODEX,general;research;enterprise,为什么没有私人稳定币发牌路线，但仍在推进数字货币？,hero>2026-rule>boundary-diagram>e-cny>user-meaning>sources,REG-D01
+/hong-kong,中国香港,Hong Kong,REWRITE,READY_FOR_CODEX,general;research;enterprise,两张牌照后，哪些 token 真正上线、谁能用？,hero>licensees>hkdap>redcoin>licence-vs-availability>sources,REG-D02;REG-D04
+/singapore,新加坡,Singapore,REWRITE,READY_FOR_CODEX,general;research;enterprise,为什么产品已 live，但 MAS-SCS 专门制度仍在立法实施？,hero>two-tracks>xsgd-xusd>circle>framework-labels>sources,REG-D03;REG-D04
+/uae,阿联酋,United Arab Emirates,REWRITE,READY_FOR_CODEX,general;research;enterprise,为什么必须先区分监管辖区，再谈 stablecoin 产品？,hero>four-perimeters>cbuae>ae-coin>aedz>vara-adgm-difc>sources,REG-M02;REG-D04

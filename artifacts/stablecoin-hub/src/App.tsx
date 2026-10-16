@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Redirect, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -67,10 +67,14 @@ function Router() {
         <Route path="/market-data" component={MarketData} />
         <Route path="/quantitative" component={Quantitative} />
         <Route path="/regional-developments" component={AsiaDevelopmentOverviewPage} />
-        <Route path="/regional-developments/mainland-china" component={MainlandChinaDevelopmentPage} />
-        <Route path="/regional-developments/hong-kong" component={HongKongDevelopmentPage} />
-        <Route path="/regional-developments/singapore" component={SingaporeDevelopmentPage} />
-        <Route path="/regional-developments/uae" component={UaeDevelopmentPage} />
+        <Route path="/mainland-china" component={MainlandChinaDevelopmentPage} />
+        <Route path="/hong-kong" component={HongKongDevelopmentPage} />
+        <Route path="/singapore" component={SingaporeDevelopmentPage} />
+        <Route path="/uae" component={UaeDevelopmentPage} />
+        <Route path="/regional-developments/mainland-china"><Redirect replace to="/mainland-china" /></Route>
+        <Route path="/regional-developments/hong-kong"><Redirect replace to="/hong-kong" /></Route>
+        <Route path="/regional-developments/singapore"><Redirect replace to="/singapore" /></Route>
+        <Route path="/regional-developments/uae"><Redirect replace to="/uae" /></Route>
         <Route path="/agentic-payments" component={AgenticPaymentsOverview} />
         <Route path="/agentic-payments/protocols" component={AgenticProtocolsPage} />
         <Route path="/agentic-payments/protocols/:id" component={AgenticProtocolDetail} />

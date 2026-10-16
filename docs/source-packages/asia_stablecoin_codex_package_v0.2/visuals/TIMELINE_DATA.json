@@ -1,0 +1,95 @@
+[
+  {
+    "date": "2025-08-01",
+    "jurisdiction": "Hong Kong",
+    "type": "LAW_REGIME",
+    "title": "Stablecoin issuer licensing regime takes effect",
+    "source_ids": [
+      "SRC-HK-01"
+    ]
+  },
+  {
+    "date": "2026-01-01",
+    "jurisdiction": "ADGM",
+    "type": "LAW_REGIME",
+    "title": "Updated FSRA FRT framework takes effect",
+    "source_ids": [
+      "SRC-UAE-11"
+    ]
+  },
+  {
+    "date": "2026-01-12",
+    "jurisdiction": "DIFC",
+    "type": "LAW_REGIME",
+    "title": "Updated DFSA Crypto Token framework takes effect",
+    "source_ids": [
+      "SRC-UAE-16"
+    ]
+  },
+  {
+    "date": "2026-02-06",
+    "jurisdiction": "Mainland China",
+    "type": "LAW_REGIME",
+    "title": "2026 multi-agency virtual currency/stablecoin notice",
+    "source_ids": [
+      "SRC-CN-01"
+    ]
+  },
+  {
+    "date": "2026-04-10",
+    "jurisdiction": "Hong Kong",
+    "type": "LICENCE",
+    "title": "HKMA grants first two stablecoin issuer licences",
+    "source_ids": [
+      "SRC-HK-02",
+      "SRC-HK-03"
+    ]
+  },
+  {
+    "date": "2026-08-12",
+    "jurisdiction": "Hong Kong",
+    "type": "BETA_ROLLOUT",
+    "title": "HKDAP Beta Access starts",
+    "source_ids": [
+      "SRC-HK-04",
+      "SRC-HK-05"
+    ]
+  },
+  {
+    "date": "2026-08-24",
+    "jurisdiction": "Hong Kong",
+    "type": "DISTRIBUTION",
+    "title": "Standard Chartered becomes first bank distributor of HKDAP",
+    "source_ids": [
+      "SRC-HK-07"
+    ]
+  },
+  {
+    "date": "2026-09-01",
+    "jurisdiction": "Singapore",
+    "type": "CONSULTATION",
+    "title": "MAS opens PS Act amendments consultation",
+    "source_ids": [
+      "SRC-SG-02",
+      "SRC-SG-03"
+    ]
+  },
+  {
+    "date": "2026-09-30",
+    "jurisdiction": "Hong Kong",
+    "type": "PRODUCT_STATUS",
+    "title": "HSBC names RedCoin and confirms it has not yet issued stablecoins",
+    "source_ids": [
+      "SRC-HK-08"
+    ]
+  },
+  {
+    "date": "2026-10-16",
+    "jurisdiction": "Singapore",
+    "type": "CONSULTATION",
+    "title": "MAS stablecoin implementation consultation closes",
+    "source_ids": [
+      "SRC-SG-02"
+    ]
+  }
+]

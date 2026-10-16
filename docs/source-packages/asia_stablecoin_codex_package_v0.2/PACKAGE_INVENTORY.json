@@ -1,0 +1,110 @@
+[
+  {
+    "path": "00_README.md",
+    "bytes": 1448
+  },
+  {
+    "path": "CODEX_HANDOFF.md",
+    "bytes": 3100
+  },
+  {
+    "path": "PACKAGE_INVENTORY.json",
+    "bytes": 892
+  },
+  {
+    "path": "PACKAGE_STATUS.md",
+    "bytes": 1024
+  },
+  {
+    "path": "RESEARCH_BASELINE_V0.1.md",
+    "bytes": 5211
+  },
+  {
+    "path": "content/CONTENT_MASTER.en.md",
+    "bytes": 1839
+  },
+  {
+    "path": "content/CONTENT_MASTER.zh-CN.md",
+    "bytes": 7617
+  },
+  {
+    "path": "manifests/ASSET_MANIFEST.csv",
+    "bytes": 2107
+  },
+  {
+    "path": "manifests/PAGE_MANIFEST.csv",
+    "bytes": 1325
+  },
+  {
+    "path": "manifests/SOURCE_MANIFEST.csv",
+    "bytes": 7638
+  },
+  {
+    "path": "matrices/PRODUCT_AVAILABILITY.csv",
+    "bytes": 2306
+  },
+  {
+    "path": "matrices/REGULATORY_MATRIX.csv",
+    "bytes": 1739
+  },
+  {
+    "path": "visuals/OFFICIAL_VISUAL_STATUS.md",
+    "bytes": 762
+  },
+  {
+    "path": "visuals/TIMELINE_DATA.json",
+    "bytes": 2085
+  },
+  {
+    "path": "visuals/VISUAL_QA.md",
+    "bytes": 1369
+  },
+  {
+    "path": "visuals/VISUAL_SCRIPTS.md",
+    "bytes": 2442
+  },
+  {
+    "path": "visuals/final/REG-D01-mainland-digital-money-boundary.svg",
+    "bytes": 4342
+  },
+  {
+    "path": "visuals/final/REG-D02-hk-licence-availability.svg",
+    "bytes": 6598
+  },
+  {
+    "path": "visuals/final/REG-D03-singapore-framework-vs-market.svg",
+    "bytes": 3612
+  },
+  {
+    "path": "visuals/final/REG-M01-asia-development-map.svg",
+    "bytes": 3359
+  },
+  {
+    "path": "visuals/final/REG-M02-uae-regulatory-perimeters.svg",
+    "bytes": 3327
+  },
+  {
+    "path": "visuals/previews/REG-D01-mainland-digital-money-boundary.png",
+    "bytes": 46165
+  },
+  {
+    "path": "visuals/previews/REG-D02-hk-licence-availability.png",
+    "bytes": 50068
+  },
+  {
+    "path": "visuals/previews/REG-D03-singapore-framework-vs-market.png",
+    "bytes": 40682
+  },
+  {
+    "path": "visuals/previews/REG-M01-asia-development-map.png",
+    "bytes": 43532
+  },
+  {
+    "path": "visuals/previews/REG-M02-uae-regulatory-perimeters.png",
+    "bytes": 46033
+  },
+  {
+    "path": "visuals/previews/contact_sheet.png",
+    "bytes": 229808
+  }
+]

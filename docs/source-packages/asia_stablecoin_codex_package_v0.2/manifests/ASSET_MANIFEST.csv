@@ -1,0 +1,13 @@
+﻿asset_id,asset_type,page_route,module_id,filename,title,purpose,source_url,source_org,rights_note,status
+REG-M01,map_schematic,/regional-developments,four-paths,REG-M01-asia-development-map.svg,Asia Stablecoin Development Map,四地制度路径与成熟度比较,ORIGINAL,,,READY
+REG-D01,diagram,/mainland-china,boundary,REG-D01-mainland-digital-money-boundary.svg,Mainland Digital Money Boundary,private stablecoin / e-CNY / approved tokenised infrastructure,ORIGINAL,,,READY
+REG-D02,diagram,/hong-kong,licence-vs-access,REG-D02-hk-licence-availability.svg,Hong Kong Licence vs Availability,license/token live/distributor/retail access,ORIGINAL,,,READY
+REG-D03,diagram,/singapore,two-tracks,REG-D03-singapore-framework-vs-market.svg,Singapore Framework vs Live Market,MAS-SCS future regime vs current PSA/DPT products,ORIGINAL,,,READY
+REG-M02,jurisdiction_map,/uae,regulatory-perimeters,REG-M02-uae-regulatory-perimeters.svg,UAE Regulatory Perimeters,CBUAE / VARA / ADGM / DIFC,ORIGINAL,,,READY
+REG-D04,matrix_ui,/regional-developments,product-status,product-availability-matrix,Product Availability Matrix,跨四地 licence/token/access/channel 比较,DATA_UI,,,READY_DATA
+REG-T01,timeline,/regional-developments,timeline,asia-stablecoin-timeline,2025–2026 Timeline,law/licence/token launch/beta/consultation,DATA_UI,,,READY_DATA
+REG-S01,official_visual,/hong-kong,hkdap,hkdap-official-visual,HKDAP official visual,产品证据,https://anchorpoint.hk/,Anchorpoint,,SOURCE_ONLY
+REG-S02,official_visual,/hong-kong,redcoin,redcoin-official-visual,HSBC RedCoin official visual,产品证据,https://www.hsbc.com.hk/stablecoins/,HSBC,,SOURCE_ONLY
+REG-S03,official_visual,/singapore,xsgd,xsgd-official-visual,XSGD official visual,产品证据,https://www.straitsx.com/xsgd,StraitsX,,SOURCE_ONLY
+REG-S04,official_visual,/uae,aecoin,aecoin-official-visual,AE Coin official visual,产品证据,https://aecoin.com/,AED Stablecoin LLC,,SOURCE_ONLY
+REG-S05,official_visual,/uae,aedz,aedz-official-visual,Zand AED official visual,产品与储备证据,https://zandtrust.com/en,Zand Trust,,SOURCE_ONLY

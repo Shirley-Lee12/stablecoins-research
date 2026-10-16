@@ -89,6 +89,10 @@ const ROUTE_LABELS: Record<string, { en: string; zh: string }> = {
   "/regional-developments/hong-kong": { en: "Hong Kong", zh: "中国香港" },
   "/regional-developments/singapore": { en: "Singapore", zh: "新加坡" },
   "/regional-developments/uae": { en: "United Arab Emirates", zh: "阿联酋" },
+  "/mainland-china": { en: "Mainland China", zh: "中国内地" },
+  "/hong-kong": { en: "Hong Kong", zh: "中国香港" },
+  "/singapore": { en: "Singapore", zh: "新加坡" },
+  "/uae": { en: "United Arab Emirates", zh: "阿联酋" },
   "/agentic-payments": { en: "Agentic Payments", zh: "智能体支付" },
   "/agentic-payments/protocols": { en: "Protocols & Mechanisms", zh: "协议与机制" },
   "/agentic-payments/scenarios": { en: "Applications & Risks", zh: "应用与风险" },
@@ -115,6 +119,7 @@ interface NavChild {
   labelEn: string;
   labelZh: string;
   matchPrefix?: string;
+  aliases?: string[];
 }
 interface NavItem {
   href: string;
@@ -172,7 +177,7 @@ const NAV_ITEMS: NavItem[] = [
     labelZh: "稳定币发展",
     icon: MapPinned,
     children: [
-      { href: "/regional-developments", labelEn: "Asia", labelZh: "亚洲", matchPrefix: "/regional-developments/" },
+      { href: "/regional-developments", labelEn: "Asia", labelZh: "亚洲", matchPrefix: "/regional-developments/", aliases: ["/mainland-china", "/hong-kong", "/singapore", "/uae"] },
     ],
   },
   {
@@ -223,6 +228,13 @@ const NAV_ITEMS: NavItem[] = [
 // ── Breadcrumb builder ────────────────────────────────────────────────────────
 function useBreadcrumbs(location: string, language: string) {
   if (location === "/") return [{ label: language === "zh" ? "首页" : "Home" }];
+  if (["/mainland-china", "/hong-kong", "/singapore", "/uae"].includes(location)) {
+    return [
+      { href: "/", label: language === "zh" ? "首页" : "Home" },
+      { href: "/regional-developments", label: language === "zh" ? "亚洲稳定币发展" : "Asia Stablecoin Development" },
+      { label: language === "zh" ? ROUTE_LABELS[location].zh : ROUTE_LABELS[location].en },
+    ];
+  }
   const crumbs: { href?: string; label: string }[] = [
     { href: "/", label: language === "zh" ? "首页" : "Home" },
   ];
@@ -311,7 +323,7 @@ function SidebarNavItem({
   const isParentActive =
     (item.href === "/" && location === "/") ||
     (item.href !== "/" && location.startsWith(item.href)) ||
-    item.children?.some((child) => location.startsWith(child.href));
+    item.children?.some((child) => location.startsWith(child.href) || child.aliases?.includes(location));
   const hasChildren = !!item.children?.length;
   const isOpen = openMap[item.href] ?? false;
 
@@ -373,6 +385,7 @@ function SidebarNavItem({
         <div className="ml-7 mt-0.5 mb-0.5 flex flex-col gap-0.5 border-l border-sidebar-border/60 pl-3">
           {item.children!.map((child) => {
             const childActive = location === child.href
+              || Boolean(child.aliases?.includes(location))
               || Boolean(child.matchPrefix && location.startsWith(child.matchPrefix))
               || (child.href === "/about-stablecoins/types" && location.startsWith(`${child.href}/`));
             return (

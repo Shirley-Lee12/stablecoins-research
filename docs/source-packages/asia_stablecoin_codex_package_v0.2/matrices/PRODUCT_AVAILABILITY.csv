@@ -1,0 +1,14 @@
+﻿jurisdiction,product,issuer_or_provider,reference_currency,regulatory_basis,status,current_access,channel_or_chain,critical_note,source_ids,last_verified
+Mainland China,Private stablecoin,—,—,—,NOT_PERMITTED,—,—,No public private-stablecoin issuer market,SRC-CN-01,2026-10-16
+Mainland/HK,e-CNY,PBOC,RMB,CBDC,LIVE_CROSS_BORDER_RETAIL_PILOT,HK wallet users,FPS top-up; merchants,Not stablecoin,SRC-CN-02,2026-10-16
+Hong Kong,HKDAP,Anchorpoint,HKD,FRS01,BETA_LIVE,Institutional/corporate,Authorised distributors; Ethereum beta,Retail not yet,SRC-HK-02;SRC-HK-04;SRC-HK-05;SRC-HK-06;SRC-HK-07,2026-10-16
+Hong Kong,HSBC RedCoin,HSBC,HKD,FRS02,FORTHCOMING_NOT_ISSUED,Not yet available,PayMe/HSBC App planned,Do not label live,SRC-HK-02;SRC-HK-08;SRC-HK-09,2026-10-16
+Singapore,XSGD,StraitsX,SGD,MPI/DPT current framework,LIVE,Provider onboarding,Wallet/exchange/fintech,Not MAS-SCS-labelled token,SRC-SG-04;SRC-SG-05,2026-10-16
+Singapore,XUSD,StraitsX,USD,MPI/DPT current framework,LIVE,Provider onboarding,Wallet/exchange/DeFi,Not MAS-SCS-labelled token,SRC-SG-04;SRC-SG-06,2026-10-16
+Singapore,USDC services,Circle Singapore,USD,MPI/DPT service licence,SERVICE_LIVE,Product-dependent,Circle services,MPI != MAS-SCS token label,SRC-SG-07;SRC-SG-08,2026-10-16
+UAE onshore,AE Coin (AEC),AED Stablecoin LLC,AED,CBUAE Dirham issuer,LIVE,Via appointed agents,Agent distribution,Issuer states B2B-only,SRC-UAE-02;SRC-UAE-05;SRC-UAE-06,2026-10-16
+UAE onshore,Zand AED (AEDZ),Zand Trust,AED,CBUAE Dirham issuer,LIVE,Product-dependent,Public multi-chain,Dynamic reserve data must be dated,SRC-UAE-02;SRC-UAE-07;SRC-UAE-08,2026-10-16
+UAE onshore,AEDC token,AEDC Stable Coin LLC,AED,CBUAE Dirham issuer,PRODUCT_DETAILS_UNKNOWN,UNKNOWN,UNKNOWN,Licence verified only,SRC-UAE-02,2026-10-16
+ADGM,USDL,Paxos Issuance MENA,USD,FSRA FRT issuance,ISSUER_PERMISSION_VERIFIED,No retail clients,ADGM,Do not infer broad public availability,SRC-UAE-13,2026-10-16
+ADGM,Universal Digital FRT,Universal Digital INTL,UNKNOWN,FSRA FRT issuance,PRODUCT_DETAILS_PARTIAL,No retail clients,ADGM,More first-party product evidence needed,SRC-UAE-14,2026-10-16
+ADGM,JD Coinlink FRT,JD Coinlink Middle East,UNKNOWN,FSRA FRT issuance,PRODUCT_DETAILS_UNKNOWN,UNKNOWN,ADGM,Permission != product launch,SRC-UAE-15,2026-10-16
