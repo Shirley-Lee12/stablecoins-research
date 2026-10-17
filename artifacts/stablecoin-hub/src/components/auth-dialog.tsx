@@ -167,7 +167,7 @@ export function AuthDialog({ open, onOpenChange, initialView = "login", loginNot
                 <Label htmlFor="login-password">{t("Password", "密码")}</Label>
                 <div className="relative">
                   <Input id="login-password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="••••••••" value={form.password} onChange={update("password")} required className="pr-10" />
-                  <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  <button type="button" aria-label={showPassword ? t("Hide password", "隐藏密码") : t("Show password", "显示密码")} aria-pressed={showPassword} onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
@@ -216,7 +216,7 @@ export function AuthDialog({ open, onOpenChange, initialView = "login", loginNot
                 <Label htmlFor="reg-password">{t("Password", "密码")}</Label>
                 <div className="relative">
                   <Input id="reg-password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder={t("Min. 8 chars, upper + lower + digit", "至少8位，含大小写字母和数字")} value={form.password} onChange={update("password")} required className="pr-10" />
-                  <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  <button type="button" aria-label={showPassword ? t("Hide password", "隐藏密码") : t("Show password", "显示密码")} aria-pressed={showPassword} onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>

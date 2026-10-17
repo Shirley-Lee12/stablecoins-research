@@ -88,6 +88,7 @@ common["@/components/ui/sheet"] = Object.fromEntries(
 const ui = load(resolve(hub, "components/directory-ui.tsx"), common);
 const pages = load(resolve(hub, "pages/academic-directory-v02.tsx"), {
   ...common,
+  wouter: { useSearch: () => "", useLocation: () => ["/academic-resources", () => {}] },
   "@/components/directory-ui": ui,
   "@/hooks/use-public-directory": {
     usePublicDirectory: () => ({ result, retry: () => {} }),

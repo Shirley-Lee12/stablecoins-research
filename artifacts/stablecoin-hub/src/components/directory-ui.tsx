@@ -11,6 +11,7 @@ import {
 import {
   directoryPackage as pack,
   EVIDENCE,
+  directoryUiLabel,
   resourceThemes,
   type DirectoryResource,
   type DirectoryResearcher,
@@ -171,7 +172,7 @@ export function SafeSource({
   );
 }
 export function ResourceCard({ resource: r }: { resource: DirectoryResource }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const themes = resourceThemes(r);
   const doi = r.doi
     ? `https://doi.org/${r.doi.replace(/^https?:\/\/(dx\.)?doi\.org\//i, "")}`
@@ -211,7 +212,7 @@ export function ResourceCard({ resource: r }: { resource: DirectoryResource }) {
         {t("Access", "获取方式")}:{" "}
         {r.access === "Yes"
           ? t("Open full text", "可公开获取全文")
-          : r.access ||
+          : (r.access ? directoryUiLabel(r.access, language) : null) ||
             t(
               "Not recorded · check the original source",
               "未记录 · 请查看原始来源",

@@ -282,3 +282,60 @@ export async function fetchDirectory<T>(
     throw Error("INVALID_PUBLIC_DIRECTORY");
   return data;
 }
+
+/** Controlled UI vocabulary only. Unknown metadata and source text stay verbatim. */
+export const DIRECTORY_UI_ZH: Record<string, string> = {
+  "Academic researcher": "学术研究者",
+  "Legal / academic researcher": "法律 / 学术研究者",
+  "Central-bank researcher": "央行研究者",
+  "Policy researcher": "政策研究者",
+  "Institutional researcher": "机构研究者",
+  "Abstract / subscription": "摘要 / 订阅获取",
+  "Publisher access": "出版方获取",
+  English: "英语",
+  Chinese: "中文",
+  Yes: "可公开获取全文",
+  University: "高校",
+  "Central bank": "中央银行",
+  "International institution": "国际机构",
+};
+export function directoryUiLabel(value: string, language: string): string {
+  return language === "zh"
+    ? DIRECTORY_UI_ZH[value] || value
+    : value === "Yes"
+      ? "Open full text"
+      : value;
+}
+export function librarySearchHref(query: string): string {
+  const q = query.trim();
+  return q
+    ? `/academic-resources?q=${encodeURIComponent(q)}`
+    : "/academic-resources";
+}
+export function libraryRequest(search: string): {
+  query: string;
+  resourceId: number | null;
+  hasResourceId: boolean;
+} {
+  const params = new URL(
+    `https://local.invalid/${search.startsWith("?") ? search : `?${search}`}`,
+  ).searchParams;
+  const raw = params.get("id");
+  const id = raw !== null && /^[1-9]\d*$/.test(raw) ? Number(raw) : NaN;
+  return {
+    query: params.get("q") || "",
+    resourceId: Number.isSafeInteger(id) ? id : null,
+    hasResourceId: raw !== null,
+  };
+}
+export function requestedPublicResources(
+  records: DirectoryResource[],
+  filters: ResourceFilters,
+  request: ReturnType<typeof libraryRequest>,
+) {
+  if (request.hasResourceId)
+    return records.filter(
+      (r) => r.status === "approved" && r.id === request.resourceId,
+    );
+  return filterResources(records, filters);
+}

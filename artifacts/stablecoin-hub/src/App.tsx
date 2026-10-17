@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/lib/language-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { AuthProvider } from "@/lib/auth-context";
+import { PageMetadata } from "@/components/page-metadata";
 import { Layout } from "@/components/layout";
 import NotFound from "@/pages/not-found";
 
@@ -124,6 +125,7 @@ function App() {
           <LanguageProvider>
             <TooltipProvider>
               <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <PageMetadata />
                 <Router />
               </WouterRouter>
               <Toaster />

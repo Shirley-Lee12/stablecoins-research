@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useLanguage } from "@/lib/language-context";
+import { GlobalSearch } from "@/components/global-search";
 import { BRAND } from "@/lib/brand";
 import { useTheme } from "@/lib/theme-context";
 import { authenticatedFetch, useAuth } from "@/lib/auth-context";
@@ -84,6 +85,7 @@ const ROUTE_LABELS: Record<string, { en: string; zh: string }> = {
   "/market-data/on-chain": { en: "On-chain", zh: "链上数据" },
   "/market-data/issuers-reserves": { en: "Issuers & Reserves", zh: "发行方与储备" },
   "/market-data/macro": { en: "Macro", zh: "宏观数据" },
+  "/market-data/adoption": { en: "Adoption", zh: "采用" },
   "/regional-developments": { en: "Stablecoin Developments", zh: "稳定币发展" },
   "/regional-developments/mainland-china": { en: "Mainland China", zh: "中国内地" },
   "/regional-developments/hong-kong": { en: "Hong Kong", zh: "中国香港" },
@@ -206,6 +208,15 @@ const NAV_ITEMS: NavItem[] = [
 // ── Breadcrumb builder ────────────────────────────────────────────────────────
 function useBreadcrumbs(location: string, language: string) {
   if (location === "/") return [{ label: language === "zh" ? "首页" : "Home" }];
+  if (location.startsWith("/authors/")) {
+    let name = location.slice("/authors/".length);
+    try { name = decodeURIComponent(name); } catch { /* retain the visible URL segment */ }
+    return [
+      { href: "/", label: language === "zh" ? "首页" : "Home" },
+      { href: "/experts", label: language === "zh" ? "研究者与机构" : "Researchers & Institutions" },
+      { label: name },
+    ];
+  }
   if (["/mainland-china", "/hong-kong", "/singapore", "/uae"].includes(location)) {
     return [
       { href: "/", label: language === "zh" ? "首页" : "Home" },
@@ -237,46 +248,6 @@ function useBreadcrumbs(location: string, language: string) {
 }
 
 // ── Global Search ─────────────────────────────────────────────────────────────
-function GlobalSearch({ language }: { language: string }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [focused, setFocused] = useState(false);
-
-  // ⌘K / Ctrl+K shortcut
-  useEffect(() => {
-    function handler(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
-    }
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, []);
-
-  return (
-    <div
-      className={cn(
-        "hidden 2xl:flex items-center gap-2 w-full max-w-[280px] h-8 px-3 rounded-md border transition-all text-sm text-muted-foreground bg-muted/40",
-        focused
-          ? "border-primary/50 ring-2 ring-primary/20 bg-background"
-          : "border-border/60 hover:border-border",
-      )}
-    >
-      <Search className="h-3.5 w-3.5 shrink-0" />
-      <input
-        ref={inputRef}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        placeholder={language === "zh" ? "搜索内容…" : "Search…"}
-        className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/70 text-xs"
-      />
-      <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded border border-border/50 bg-muted px-1.5 font-mono text-[10px] text-muted-foreground/60 shrink-0">
-        ⌘K
-      </kbd>
-    </div>
-  );
-}
-
 // ── Sidebar NavItem (with optional Collapsible) ───────────────────────────────
 function SidebarNavItem({
   item,
@@ -523,6 +494,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex h-dvh overflow-hidden bg-background font-sans text-foreground">
       {/* ── Sidebar ── */}
       <aside
+        id="site-navigation"
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground flex flex-col transition-[transform,width] duration-300 ease-in-out border-r border-sidebar-border lg:static lg:translate-x-0",
           !isSidebarOpen && "-translate-x-full",
@@ -566,6 +538,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 e.preventDefault();
                 setIsSidebarOpen(false);
               }}
+              aria-label={t("Close navigation", "关闭导航")}
+              aria-expanded={isSidebarOpen}
+              aria-controls="site-navigation"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -620,6 +595,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
               size="icon"
               className="lg:hidden h-8 w-8 shrink-0"
               onClick={() => setIsSidebarOpen(true)}
+              aria-label={t("Open navigation", "打开导航")}
+              aria-expanded={isSidebarOpen}
+              aria-controls="site-navigation"
             >
               <Menu className="h-4 w-4" />
             </Button>
@@ -662,7 +640,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           {/* CENTER — global search */}
           <div className="flex justify-center shrink-0">
-            <GlobalSearch language={language} />
+            <GlobalSearch />
           </div>
 
           {/* RIGHT — controls */}
@@ -683,6 +661,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-foreground"
               onClick={toggleTheme}
+              aria-label={theme === "light" ? t("Dark mode", "深色模式") : t("Light mode", "浅色模式")}
               title={
                 theme === "light"
                   ? t("Dark mode", "深色模式")
@@ -701,7 +680,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative h-8 w-8 text-muted-foreground hover:text-foreground" title={t("Messages", "消息中心")}>
+                  <Button variant="ghost" size="icon" className="relative h-8 w-8 text-muted-foreground hover:text-foreground" title={t("Messages", "消息中心")} aria-label={t("Messages", "消息中心")}>
                     <Bell className="h-4 w-4" />
                     {notifications.some((item) => !item.read) && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-background" />}
                   </Button>
@@ -725,6 +704,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Button
                     variant="ghost"
                     className="h-8 w-8 rounded-full border border-border hover:border-primary/40 p-0"
+                    aria-label={t("Account menu", "账户菜单")}
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
@@ -829,6 +809,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 sm:hidden"
+                  aria-label={t("Sign In", "登录")}
                   onClick={() => openAuth("login")}
                 >
                   <LogIn className="h-4 w-4" />

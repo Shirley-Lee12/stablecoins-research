@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useSearch } from "wouter";
 import { useLanguage } from "@/lib/language-context";
 import { usePublicDirectory } from "@/hooks/use-public-directory";
 import {
   directoryPackage as pack,
   EMPTY_FILTERS,
+  libraryRequest,
+  requestedPublicResources,
+  directoryUiLabel,
   EVIDENCE,
   evidence,
-  filterResources,
   filterResearchers,
   institutionGroups,
   yearOf,
@@ -22,14 +25,24 @@ import {
   ResearcherCard,
 } from "@/components/directory-ui";
 export function LibraryPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const search = useSearch();
+  const [, navigate] = useLocation();
+  const request = useMemo(() => libraryRequest(search), [search]);
   const { result, retry } = usePublicDirectory<DirectoryResource>("resources");
-  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [filters, setFilters] = useState(() => ({
+    ...EMPTY_FILTERS,
+    search: request.query,
+  }));
   const [page, setPage] = useState(1);
+  useEffect(() => {
+    setFilters({ ...EMPTY_FILTERS, search: request.query });
+    setPage(1);
+  }, [search, request.query]);
   const records = result.state === "success" ? result.data.records : [];
   const filtered = useMemo(
-    () => filterResources(records, filters),
-    [records, filters],
+    () => requestedPublicResources(records, filters, request),
+    [records, filters, request],
   );
   const update = (key: string, value: string) => {
     setFilters((f) => ({ ...f, [key]: value }));
@@ -69,7 +82,10 @@ export function LibraryPage() {
       key: "language",
       label: t("Language", "语言"),
       options: [
-        ...options(records.map((r) => r.language)),
+        ...options(records.map((r) => r.language)).map((o) => ({
+          ...o,
+          label: directoryUiLabel(o.label, language),
+        })),
         ...(records.some((r) => !r.language)
           ? [
               {
@@ -93,11 +109,7 @@ export function LibraryPage() {
               },
             ]
           : []),
-      ].map((o) =>
-        o.value === "Yes"
-          ? { ...o, label: t("Open full text", "可公开获取全文") }
-          : o,
-      ),
+      ].map((o) => ({ ...o, label: directoryUiLabel(o.label, language) })),
     },
     {
       key: "author",
@@ -144,63 +156,89 @@ export function LibraryPage() {
           )}
         </p>
       </header>
-      <section aria-label={t("Research themes", "研究主题")}>
-        <h2 className="mb-3 text-lg font-semibold">
-          {t("Browse by research question / theme", "按研究问题 / 主题浏览")}
-        </h2>
-        <div className="flex max-w-full gap-2 overflow-x-auto pb-3 lg:flex-wrap">
-          {[
-            { id: "", en: "All themes", zh: "全部主题" },
-            ...pack.taxonomy.research_themes,
-          ].map((theme) => (
-            <button
-              key={theme.id}
-              aria-pressed={filters.theme === theme.id}
-              onClick={() => update("theme", theme.id)}
-              className={`min-h-11 shrink-0 rounded-sm border px-3 py-2 text-left text-sm ${filters.theme === theme.id ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}
-            >
-              {t(theme.en, theme.zh)}
-            </button>
-          ))}
-        </div>
-      </section>
-      <section className="border-t border-border py-6">
-        <label className="block text-sm font-semibold">
-          {t("Search the library", "搜索资源库")}
-          <input
-            type="search"
-            className={control + " mt-3 mb-5"}
-            placeholder={t(
-              "Title, author, institution, theme or keyword",
-              "标题、作者、机构、主题或关键词",
+      {request.hasResourceId && (
+        <div
+          className="mb-6 border-l-2 border-primary pl-4 text-sm leading-7"
+          role="status"
+        >
+          <p>
+            {t(
+              "Showing the requested public resource. Other library filters are not applied.",
+              "正在定位指定的公开资源，不叠加其他资源库筛选。",
             )}
-            value={filters.search}
-            onChange={(e) => update("search", e.target.value)}
-          />
-        </label>
-        <FilterPanel>
-          {facets.map((f) => (
-            <DirectorySelect
-              key={f.key}
-              label={f.label}
-              value={filters[f.key as keyof typeof filters]}
-              options={f.options}
-              onChange={(v) => update(f.key, v)}
-            />
-          ))}
-        </FilterPanel>
-        {Object.entries(filters).some(([k, v]) => k !== "sort" && v) && (
+          </p>
           <button
-            className="mt-4 min-h-11 text-sm text-primary underline"
-            onClick={() => {
-              setFilters(EMPTY_FILTERS);
-              setPage(1);
-            }}
+            className="min-h-11 text-primary underline"
+            onClick={() => navigate("/academic-resources")}
           >
-            {t("Clear filters", "清除筛选")}
+            {t("Browse all resources", "浏览全部资源")}
           </button>
-        )}
-      </section>
+        </div>
+      )}
+      {!request.hasResourceId && (
+        <>
+          <section aria-label={t("Research themes", "研究主题")}>
+            <h2 className="mb-3 text-lg font-semibold">
+              {t(
+                "Browse by research question / theme",
+                "按研究问题 / 主题浏览",
+              )}
+            </h2>
+            <div className="flex max-w-full gap-2 overflow-x-auto pb-3 lg:flex-wrap">
+              {[
+                { id: "", en: "All themes", zh: "全部主题" },
+                ...pack.taxonomy.research_themes,
+              ].map((theme) => (
+                <button
+                  key={theme.id}
+                  aria-pressed={filters.theme === theme.id}
+                  onClick={() => update("theme", theme.id)}
+                  className={`min-h-11 shrink-0 rounded-sm border px-3 py-2 text-left text-sm ${filters.theme === theme.id ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}
+                >
+                  {t(theme.en, theme.zh)}
+                </button>
+              ))}
+            </div>
+          </section>
+          <section className="border-t border-border py-6">
+            <label className="block text-sm font-semibold">
+              {t("Search the library", "搜索资源库")}
+              <input
+                type="search"
+                className={control + " mt-3 mb-5"}
+                placeholder={t(
+                  "Title, author, institution, theme or keyword",
+                  "标题、作者、机构、主题或关键词",
+                )}
+                value={filters.search}
+                onChange={(e) => update("search", e.target.value)}
+              />
+            </label>
+            <FilterPanel>
+              {facets.map((f) => (
+                <DirectorySelect
+                  key={f.key}
+                  label={f.label}
+                  value={filters[f.key as keyof typeof filters]}
+                  options={f.options}
+                  onChange={(v) => update(f.key, v)}
+                />
+              ))}
+            </FilterPanel>
+            {Object.entries(filters).some(([k, v]) => k !== "sort" && v) && (
+              <button
+                className="mt-4 min-h-11 text-sm text-primary underline"
+                onClick={() => {
+                  setFilters(EMPTY_FILTERS);
+                  setPage(1);
+                }}
+              >
+                {t("Clear filters", "清除筛选")}
+              </button>
+            )}
+          </section>
+        </>
+      )}
       {result.state !== "success" ? (
         <DirectoryMessage kind="resource" state={result.state} retry={retry} />
       ) : (
@@ -212,7 +250,17 @@ export function LibraryPage() {
             )}
             : {filtered.length}
           </p>
-          {!filtered.length ? (
+          {request.hasResourceId && !filtered.length ? (
+            <p
+              role="status"
+              className="border-t border-border py-8 text-sm text-muted-foreground"
+            >
+              {t(
+                "The requested public resource is unavailable. It may not exist or may not be approved for public display.",
+                "指定的公开资源不可用，可能不存在或尚未获准公开展示。",
+              )}
+            </p>
+          ) : !filtered.length ? (
             <DirectoryMessage
               kind="resource"
               state={records.length ? "zero" : "empty"}
@@ -273,7 +321,7 @@ export function LibraryPage() {
   );
 }
 export function ResearchersPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { result, retry } =
     usePublicDirectory<DirectoryResearcher>("researchers");
   const [search, setSearch] = useState("");
@@ -335,7 +383,10 @@ export function ResearchersPage() {
           <DirectorySelect
             label={t("Researcher type", "研究者类型")}
             value={type}
-            options={opts(records.map((r) => r.researcherType))}
+            options={opts(records.map((r) => r.researcherType)).map((o) => ({
+              ...o,
+              label: directoryUiLabel(o.label, language),
+            }))}
             onChange={setType}
           />
           <DirectorySelect
@@ -417,7 +468,8 @@ export function ResearchersPage() {
                     {g.name}
                   </h3>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    {g.type} · {g.location}
+                    {g.type ? directoryUiLabel(g.type, language) : g.type} ·{" "}
+                    {g.location}
                   </p>
                   {g.publicationTimeOnly && (
                     <p className="mt-2 text-xs font-medium">

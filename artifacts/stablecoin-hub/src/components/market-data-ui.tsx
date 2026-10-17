@@ -271,7 +271,7 @@ export function MetricValue({ metric: m }: { metric: DataMetric }) {
       className={`mt-3 text-3xl font-semibold tabular-nums ${m.freshness_state === "LAST_SUCCESSFUL_SNAPSHOT" ? "text-muted-foreground" : "text-primary"}`}
     >
       {value}
-      <span className="ml-2 text-sm font-normal">{m.unit}</span>
+      {m.unit === "USD/year" ? <span className="text-sm font-normal">{t("/year", "/年")}</span> : m.unit !== "USD" && <span className="ml-2 text-sm font-normal">{m.unit}</span>}
     </p>
   );
 }
