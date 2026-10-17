@@ -41,9 +41,9 @@ import ChangePasswordPage from "@/pages/change-password";
 import VerifyEmailPage from "@/pages/verify-email";
 import ConnectorPage from "@/pages/connector";
 import {
-  QuantDimensionA,
-  QuantDimensionB,
-} from "@/pages/placeholder";
+  LifecycleMapping as QuantDimensionA,
+  AmplificationMapping as QuantDimensionB,
+} from "@/pages/risk-framework";
 
 const queryClient = new QueryClient();
 

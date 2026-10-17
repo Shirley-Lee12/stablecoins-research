@@ -1,0 +1,21 @@
+{
+  "section": "Stablecoin Risk Framework",
+  "routes": [
+    {
+      "route": "/quantitative",
+      "zh": "稳定币风险框架",
+      "en": "Risk Framework"
+    },
+    {
+      "route": "/quantitative/dimension-a",
+      "zh": "生命周期映射",
+      "en": "Lifecycle Mapping"
+    },
+    {
+      "route": "/quantitative/dimension-b",
+      "zh": "放大与传导映射",
+      "en": "Amplification & Transmission"
+    }
+  ],
+  "legacy_url_note": "URLs retained for compatibility; public labels no longer use Quantitative Indicators / Dimension A / Dimension B."
+}

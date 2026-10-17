@@ -1,0 +1,5 @@
+﻿level,label,meaning,representative_risks
+T0,"Foundation, Backing & Issuance","Where backing, legal/technical foundations and issuance arrangements are established.",C5 — Asset-Liability Maturity Mismatch; C14 — Lack of Bankruptcy Remoteness for Reserves
+T1,"Circulation, Trading & Settlement","Where tokens circulate, trade and settle without necessarily becoming embedded in layered financial positions.",C22 — Deficient Secondary Market Order Book Depth; U1 — Underlying Public Blockchain Network Congestion
+T2,Protocol Embedding & Layered Finance,"Where stablecoins become collateral, liquidity positions or other embedded financial positions inside protocols.",U18 — DeFi Nested Collateralization Risks; U24 — Excessive Credit Expansion via AMO Algorithms
+T3,"Redemption, Deleveraging & Liquidation","Where positions exit, redeem, deleverage or liquidate.",C26 — Asymmetric Redemption Channels; U25 — Unbuffered Cascading Liquidations

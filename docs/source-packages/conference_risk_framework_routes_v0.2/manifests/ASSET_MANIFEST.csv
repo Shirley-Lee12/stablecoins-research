@@ -1,0 +1,8 @@
+﻿asset_id,asset_type,route,title,purpose,implementation,status
+RF-D01,conceptual_diagram,/quantitative,Risk decomposition flow,Stablecoin system → risk modules → atomic risks → two-dimensional mapping,HTML_SVG_UI,READY_FOR_IMPLEMENTATION
+RF-D02,two_dimension_map,/quantitative,Two complementary dimensions,T lifecycle location vs L causal role,HTML_SVG_UI,READY_FOR_IMPLEMENTATION
+RF-T01,current_future_table,/quantitative,Current study vs future research,Separate completed conceptual framework from future quantification,TABLE_UI,READY_FOR_IMPLEMENTATION
+T-D01,lifecycle_diagram,/quantitative/dimension-a,T0–T3 lifecycle map,Four lifecycle stages with representative risks,HTML_SVG_UI,READY_FOR_IMPLEMENTATION
+T-T01,lifecycle_boundary_table,/quantitative/dimension-a,T-stage boundaries,Especially T1 vs T2,TABLE_UI,READY_FOR_IMPLEMENTATION
+L-D01,amplification_diagram,/quantitative/dimension-b,L0–L3 amplification/transmission map,Trigger → vulnerability → amplification → cross-system outcomes,HTML_SVG_UI,READY_FOR_IMPLEMENTATION
+L-T01,dimension_distinction_table,/quantitative/dimension-b,T/L distinction,"L0 vs L1, L1 vs L2, T0 vs L1, T3 vs L3",TABLE_UI,READY_FOR_IMPLEMENTATION

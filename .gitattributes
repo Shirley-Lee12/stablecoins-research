@@ -5,3 +5,4 @@ docs/source-packages/market_data_dashboard_package_v0.2/** -text whitespace=-bla
 artifacts/stablecoin-hub/public/about-stablecoins/v0.2/*.svg -text
 docs/source-packages/regulatory_overview_package_v0.2/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 docs/source-packages/academic_resources_experts_package_v0.2/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/source-packages/conference_risk_framework_routes_v0.2/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol

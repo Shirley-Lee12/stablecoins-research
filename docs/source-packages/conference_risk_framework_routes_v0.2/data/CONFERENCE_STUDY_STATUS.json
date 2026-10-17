@@ -1,0 +1,39 @@
+{
+  "title": "Establishing a Multi-Dimensional Risk Framework over the Full Lifecycle of Stablecoins",
+  "author": "Xueli Li",
+  "institution": "Zhejiang University",
+  "presentation_date": "October 2026",
+  "current_study": {
+    "atomic_risks": 55,
+    "dimensions": [
+      {
+        "id": "T",
+        "name": "Lifecycle Dimension",
+        "levels": [
+          "T0",
+          "T1",
+          "T2",
+          "T3"
+        ]
+      },
+      {
+        "id": "L",
+        "name": "Amplification & Transmission Dimension",
+        "levels": [
+          "L0",
+          "L1",
+          "L2",
+          "L3"
+        ]
+      }
+    ]
+  },
+  "future_research": [
+    "Risk-specific indicator sets and composite measures where appropriate",
+    "Quantify transmission and amplification",
+    "Dynamic monitoring and early warning",
+    "Regulatory coverage evaluation",
+    "Blind-spot identification",
+    "Regulatory optimisation recommendations"
+  ]
+}

@@ -1,0 +1,5 @@
+﻿level,label,meaning,representative_risks_or_outcomes
+L0,Initial Trigger,A shock that directly initiates the risk episode.,C1 — Macro Interest Rate Shocks; U2 — Layer 2 Sequencer Downtime
+L1,Structural Vulnerability,A pre-existing weakness that shapes susceptibility to shocks.,C5 — Asset-Liability Maturity Mismatch; C22 — Deficient Secondary Market Order Book Depth
+L2,Dynamic Amplification,Activated reactions or feedback loops that magnify an initial shock.,U21 — High Friction Inducing Arbitrage Failure; U25 — Unbuffered Cascading Liquidations
+L3,Cross-System Transmission / Outcomes,"Effects that propagate beyond the focal stablecoin into other stablecoins, DeFi, broader crypto or traditional financial markets.",Other stablecoins; DeFi protocols; broader crypto markets; traditional financial markets

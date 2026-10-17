@@ -1,0 +1,8 @@
+﻿id,topic,description,status
+FUT-01,Risk-specific indicator sets,Translate atomic risks into pre-specified measurement designs with dedicated indicators.,FUTURE_RESEARCH
+FUT-02,Composite measures where appropriate,Develop composite measures only where conceptually justified.,FUTURE_RESEARCH
+FUT-03,Quantify transmission and amplification,Estimate directional transmission and dynamic amplification across quantified risk units and market states.,FUTURE_RESEARCH
+FUT-04,Dynamic monitoring and early warning,"Develop time-varying monitoring, stress detection and tiered early-warning tools.",FUTURE_RESEARCH
+FUT-05,Regulatory coverage mapping,Map major regulatory regimes against the submitted atomic-risk framework.,FUTURE_RESEARCH
+FUT-06,Blind-spot identification,Measure regulatory coverage gaps across risk dimensions and lifecycle locations.,FUTURE_RESEARCH
+FUT-07,Regulatory optimisation recommendations,Develop targeted recommendations for regulatory framework improvement.,FUTURE_RESEARCH

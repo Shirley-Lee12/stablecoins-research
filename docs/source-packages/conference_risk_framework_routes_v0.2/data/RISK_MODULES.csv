@@ -1,0 +1,8 @@
+﻿module,name,domain,representative_risks
+M1,Backing Assets & Balance Sheet,Financial & institutional,C5 — Asset-Liability Maturity Mismatch; C10 — Insufficient Reserve Market Capacity
+M2,"Issuer Transparency, Legal Structure & Custody",Financial & institutional,C11 — Balance Sheet Transparency Time-Lag; C16 — Custodian Credit Default
+M3,"Fiat Settlement, Regulation & Redemption",Financial & institutional,C17 — Fiat Clearing Temporal Mismatch; C26 — Asymmetric Redemption Channels
+M4,"Secondary Markets, Token Holders & Confidence",Financial & institutional,C22 — Deficient Secondary Market Order Book Depth; C25 — Erosion of the Credit Foundation
+M5,"Technical Infrastructure, Code, Cryptography & Information",Crypto-native technical & DeFi,U1 — Underlying Public Blockchain Network Congestion; U8 — Smart Contract Vulnerabilities
+M6,Governance & Privileged Control,Crypto-native technical & DeFi,C13 — Highly Centralized Governance Permissions; U15 — DAO Governance Proposal Manipulation
+M7,"DeFi Integration, On-Chain Markets & Endogenous Mechanisms",Crypto-native technical & DeFi,U18 — DeFi Nested Collateralization Risks; U25 — Unbuffered Cascading Liquidations

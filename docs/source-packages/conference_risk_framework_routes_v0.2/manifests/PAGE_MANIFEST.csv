@@ -1,0 +1,4 @@
+﻿route,title_zh,title_en,action,status,audience,primary_question,module_order,visual_assets
+/quantitative,稳定币风险框架,Stablecoin Risk Framework,P0_REBUILD,READY_FOR_CODEX,research;student;policy,会议研究当前完成了什么风险框架，哪些量化工作仍是未来研究？,hero>atomic-risk-definition>decomposition-method>risk-modules>two-dimensions>current-vs-future,RF-D01;RF-D02;RF-T01
+/quantitative/dimension-a,生命周期映射（T0–T3）,Lifecycle Mapping (T0–T3),P0_REBUILD,READY_FOR_CODEX,research;student,风险主要在哪个稳定币运行阶段进入、形成或变得相关？,hero>T0>T1>T2>T3>boundary-notes,T-D01;T-T01
+/quantitative/dimension-b,放大与传导映射（L0–L3）,Amplification & Transmission Mapping (L0–L3),P0_REBUILD,READY_FOR_CODEX,research;student;policy,风险在触发、结构脆弱性、动态放大和跨系统外溢链条中扮演什么角色？,hero>L0>L1>L2>L3>distinctions>future-quantification-boundary,L-D01;L-T01

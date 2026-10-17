@@ -1,0 +1,219 @@
+{
+  "version": "0.2",
+  "study": {
+    "title": "Establishing a Multi-Dimensional Risk Framework over the Full Lifecycle of Stablecoins",
+    "author": "Xueli Li",
+    "institution": "Zhejiang University",
+    "presentation_date": "October 2026",
+    "current_study": {
+      "atomic_risks": 55,
+      "dimensions": [
+        {
+          "id": "T",
+          "name": "Lifecycle Dimension",
+          "levels": [
+            "T0",
+            "T1",
+            "T2",
+            "T3"
+          ]
+        },
+        {
+          "id": "L",
+          "name": "Amplification & Transmission Dimension",
+          "levels": [
+            "L0",
+            "L1",
+            "L2",
+            "L3"
+          ]
+        }
+      ]
+    },
+    "future_research": [
+      "Risk-specific indicator sets and composite measures where appropriate",
+      "Quantify transmission and amplification",
+      "Dynamic monitoring and early warning",
+      "Regulatory coverage evaluation",
+      "Blind-spot identification",
+      "Regulatory optimisation recommendations"
+    ]
+  },
+  "nav": [
+    {
+      "route": "/quantitative",
+      "zh": "稳定币风险框架",
+      "en": "Risk Framework"
+    },
+    {
+      "route": "/quantitative/dimension-a",
+      "zh": "生命周期映射",
+      "en": "Lifecycle Mapping"
+    },
+    {
+      "route": "/quantitative/dimension-b",
+      "zh": "放大与传导映射",
+      "en": "Amplification & Transmission"
+    }
+  ],
+  "modules": [
+    {
+      "module": "M1",
+      "name": "Backing Assets & Balance Sheet",
+      "domain": "Financial & institutional",
+      "representative_risks": "C5 — Asset-Liability Maturity Mismatch; C10 — Insufficient Reserve Market Capacity"
+    },
+    {
+      "module": "M2",
+      "name": "Issuer Transparency, Legal Structure & Custody",
+      "domain": "Financial & institutional",
+      "representative_risks": "C11 — Balance Sheet Transparency Time-Lag; C16 — Custodian Credit Default"
+    },
+    {
+      "module": "M3",
+      "name": "Fiat Settlement, Regulation & Redemption",
+      "domain": "Financial & institutional",
+      "representative_risks": "C17 — Fiat Clearing Temporal Mismatch; C26 — Asymmetric Redemption Channels"
+    },
+    {
+      "module": "M4",
+      "name": "Secondary Markets, Token Holders & Confidence",
+      "domain": "Financial & institutional",
+      "representative_risks": "C22 — Deficient Secondary Market Order Book Depth; C25 — Erosion of the Credit Foundation"
+    },
+    {
+      "module": "M5",
+      "name": "Technical Infrastructure, Code, Cryptography & Information",
+      "domain": "Crypto-native technical & DeFi",
+      "representative_risks": "U1 — Underlying Public Blockchain Network Congestion; U8 — Smart Contract Vulnerabilities"
+    },
+    {
+      "module": "M6",
+      "name": "Governance & Privileged Control",
+      "domain": "Crypto-native technical & DeFi",
+      "representative_risks": "C13 — Highly Centralized Governance Permissions; U15 — DAO Governance Proposal Manipulation"
+    },
+    {
+      "module": "M7",
+      "name": "DeFi Integration, On-Chain Markets & Endogenous Mechanisms",
+      "domain": "Crypto-native technical & DeFi",
+      "representative_risks": "U18 — DeFi Nested Collateralization Risks; U25 — Unbuffered Cascading Liquidations"
+    }
+  ],
+  "lifecycle": [
+    {
+      "level": "T0",
+      "label": "Foundation, Backing & Issuance",
+      "meaning": "Where backing, legal/technical foundations and issuance arrangements are established.",
+      "representative_risks": "C5 — Asset-Liability Maturity Mismatch; C14 — Lack of Bankruptcy Remoteness for Reserves"
+    },
+    {
+      "level": "T1",
+      "label": "Circulation, Trading & Settlement",
+      "meaning": "Where tokens circulate, trade and settle without necessarily becoming embedded in layered financial positions.",
+      "representative_risks": "C22 — Deficient Secondary Market Order Book Depth; U1 — Underlying Public Blockchain Network Congestion"
+    },
+    {
+      "level": "T2",
+      "label": "Protocol Embedding & Layered Finance",
+      "meaning": "Where stablecoins become collateral, liquidity positions or other embedded financial positions inside protocols.",
+      "representative_risks": "U18 — DeFi Nested Collateralization Risks; U24 — Excessive Credit Expansion via AMO Algorithms"
+    },
+    {
+      "level": "T3",
+      "label": "Redemption, Deleveraging & Liquidation",
+      "meaning": "Where positions exit, redeem, deleverage or liquidate.",
+      "representative_risks": "C26 — Asymmetric Redemption Channels; U25 — Unbuffered Cascading Liquidations"
+    }
+  ],
+  "amplification": [
+    {
+      "level": "L0",
+      "label": "Initial Trigger",
+      "meaning": "A shock that directly initiates the risk episode.",
+      "representative_risks_or_outcomes": "C1 — Macro Interest Rate Shocks; U2 — Layer 2 Sequencer Downtime"
+    },
+    {
+      "level": "L1",
+      "label": "Structural Vulnerability",
+      "meaning": "A pre-existing weakness that shapes susceptibility to shocks.",
+      "representative_risks_or_outcomes": "C5 — Asset-Liability Maturity Mismatch; C22 — Deficient Secondary Market Order Book Depth"
+    },
+    {
+      "level": "L2",
+      "label": "Dynamic Amplification",
+      "meaning": "Activated reactions or feedback loops that magnify an initial shock.",
+      "representative_risks_or_outcomes": "U21 — High Friction Inducing Arbitrage Failure; U25 — Unbuffered Cascading Liquidations"
+    },
+    {
+      "level": "L3",
+      "label": "Cross-System Transmission / Outcomes",
+      "meaning": "Effects that propagate beyond the focal stablecoin into other stablecoins, DeFi, broader crypto or traditional financial markets.",
+      "representative_risks_or_outcomes": "Other stablecoins; DeFi protocols; broader crypto markets; traditional financial markets"
+    }
+  ],
+  "future": [
+    {
+      "id": "FUT-01",
+      "topic": "Risk-specific indicator sets",
+      "description": "Translate atomic risks into pre-specified measurement designs with dedicated indicators.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-02",
+      "topic": "Composite measures where appropriate",
+      "description": "Develop composite measures only where conceptually justified.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-03",
+      "topic": "Quantify transmission and amplification",
+      "description": "Estimate directional transmission and dynamic amplification across quantified risk units and market states.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-04",
+      "topic": "Dynamic monitoring and early warning",
+      "description": "Develop time-varying monitoring, stress detection and tiered early-warning tools.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-05",
+      "topic": "Regulatory coverage mapping",
+      "description": "Map major regulatory regimes against the submitted atomic-risk framework.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-06",
+      "topic": "Blind-spot identification",
+      "description": "Measure regulatory coverage gaps across risk dimensions and lifecycle locations.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-07",
+      "topic": "Regulatory optimisation recommendations",
+      "description": "Develop targeted recommendations for regulatory framework improvement.",
+      "status": "FUTURE_RESEARCH"
+    }
+  ],
+  "hashes": {
+    "00_README.md": "8ff79c746cbfd24bc78a1dc0eab5ca445c16d4206e49a4f6cd314771e5a85a05",
+    "01_WEBSITE_THESIS_BOUNDARY.md": "ecffbda5eeb5a7140757df5332db9fdf9edcde56d71a6914fbfab1ca9e2cf244",
+    "CODEX_HANDOFF.md": "33dc842207874ac808c4ba421dafe490d934e55319bf021590b5912636726a42",
+    "PACKAGE_INVENTORY.json": "14272428b7883c051b5b3a56ab94d6a15a1fbc2e6743cfc7f419c3e196fa3ad3",
+    "PACKAGE_STATUS.md": "1938e3cfedd51f9656d702a4efb247413d60827bac0fc0b4cac2c6870de89eb5",
+    "components/RISK_FRAMEWORK_COMPONENT_SPEC.md": "01d7e555d5b9d0c6a2c08a5f8d27baeb80798fdc0d2a192a8998b69e82f31180",
+    "content/CONTENT_MASTER.en.md": "ab8ced2a1e49d6e1dda44144f63c40d35ad7e138ad3ed4cf4f9819e3e899fd9a",
+    "content/CONTENT_MASTER.zh-CN.md": "45979ee5c4cce52bb0accfa2fbceae0b049c889bbb4cffa050fb0ff040107011",
+    "data/AMPLIFICATION_MAPPING.csv": "e1ca57b210251ef8d06db563e5d56e32827374653a2eef08d37257694afc8ecd",
+    "data/CONFERENCE_STUDY_STATUS.json": "60a26130f6b35dd12646b2c2b91c0437f7984ae1b0e0093727757df31525af97",
+    "data/FUTURE_RESEARCH_ROADMAP.csv": "c15c653805924213ac2499280244881525c5ba3e5fa19c15cf10b5a6967d9afa",
+    "data/LIFECYCLE_MAPPING.csv": "b678567fc971ab699638619796dd9bcb2a8b79eaf5b7e96a35fac4488992c1c4",
+    "data/RISK_FRAMEWORK_NAV.json": "a922365d35b8be967f1c17ed48cf462837a30255e00b2dab50d03f4202d9e0d0",
+    "data/RISK_MODULES.csv": "11269274351edecc95d47ef1d7b8ae632d4e1d0db3ab8ccf62f75fbe780ef258",
+    "manifests/ASSET_MANIFEST.csv": "706c73c11d03f04048490c5d5100e41fbbf97dfdc1bb79c3848946e82a611206",
+    "manifests/PAGE_MANIFEST.csv": "c451c26867459c772c7c650983b8c54b9b0ca97ca621175df0b46a7bc4f230d5",
+    "manifests/SOURCE_MANIFEST.csv": "61551639be946f9ae904dea845de84d8386ee9891b8f4f6e135ece06951c71e3",
+    "qa/FINAL_BOUNDARY_QA.md": "fe046240b923b32ce6b28855775bd980b118fbfef48c97ac836d2a70f301f559"
+  }
+}

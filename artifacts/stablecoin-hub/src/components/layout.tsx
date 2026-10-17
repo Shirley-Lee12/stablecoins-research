@@ -76,9 +76,9 @@ const ROUTE_LABELS: Record<string, { en: string; zh: string }> = {
   "/academic-resources": { en: "Stablecoin Research Library", zh: "稳定币研究资源库" },
   "/experts": { en: "Researchers & Institutions", zh: "研究者与机构" },
   "/regulatory": { en: "Regulatory Status", zh: "监管现状" },
-  "/quantitative": { en: "Quantitative Indicators", zh: "量化指标" },
-  "/quantitative/dimension-a": { en: "Dimension A", zh: "维度 A" },
-  "/quantitative/dimension-b": { en: "Dimension B", zh: "维度 B" },
+  "/quantitative": { en: "Stablecoin Risk Framework", zh: "稳定币风险框架" },
+  "/quantitative/dimension-a": { en: "Lifecycle Mapping (T0–T3)", zh: "生命周期映射（T0–T3）" },
+  "/quantitative/dimension-b": { en: "Amplification & Transmission Mapping (L0–L3)", zh: "放大与传导映射（L0–L3）" },
   "/market-data": { en: "Market Data", zh: "市场数据" },
   "/market-data/market": { en: "Market", zh: "市场" },
   "/market-data/on-chain": { en: "On-chain", zh: "链上数据" },
@@ -184,8 +184,8 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/quantitative",
-    labelEn: "Quantitative Indicators",
-    labelZh: "量化指标",
+    labelEn: "Risk Framework",
+    labelZh: "风险框架",
     icon: BarChart,
   },
   {

@@ -1,0 +1,100 @@
+{
+  "archive_bytes": 25397,
+  "archive_sha256": "514ed177fd07e4e22350bd8ef3241c6125618ab5075b2b76dba4c7391458ac62",
+  "files_verified": 18,
+  "inventory_covers": 17,
+  "inventory_excludes_own_file": true,
+  "metadata_discrepancies": [],
+  "files": [
+    {
+      "path": "PACKAGE_INVENTORY.json",
+      "bytes": 1181,
+      "sha256": "14272428b7883c051b5b3a56ab94d6a15a1fbc2e6743cfc7f419c3e196fa3ad3"
+    },
+    {
+      "path": "00_README.md",
+      "bytes": 1652,
+      "sha256": "8ff79c746cbfd24bc78a1dc0eab5ca445c16d4206e49a4f6cd314771e5a85a05"
+    },
+    {
+      "path": "CODEX_HANDOFF.md",
+      "bytes": 8246,
+      "sha256": "33dc842207874ac808c4ba421dafe490d934e55319bf021590b5912636726a42"
+    },
+    {
+      "path": "PACKAGE_STATUS.md",
+      "bytes": 1438,
+      "sha256": "1938e3cfedd51f9656d702a4efb247413d60827bac0fc0b4cac2c6870de89eb5"
+    },
+    {
+      "path": "01_WEBSITE_THESIS_BOUNDARY.md",
+      "bytes": 1900,
+      "sha256": "ecffbda5eeb5a7140757df5332db9fdf9edcde56d71a6914fbfab1ca9e2cf244"
+    },
+    {
+      "path": "qa/FINAL_BOUNDARY_QA.md",
+      "bytes": 3283,
+      "sha256": "fe046240b923b32ce6b28855775bd980b118fbfef48c97ac836d2a70f301f559"
+    },
+    {
+      "path": "components/RISK_FRAMEWORK_COMPONENT_SPEC.md",
+      "bytes": 2853,
+      "sha256": "01d7e555d5b9d0c6a2c08a5f8d27baeb80798fdc0d2a192a8998b69e82f31180"
+    },
+    {
+      "path": "manifests/SOURCE_MANIFEST.csv",
+      "bytes": 316,
+      "sha256": "61551639be946f9ae904dea845de84d8386ee9891b8f4f6e135ece06951c71e3"
+    },
+    {
+      "path": "manifests/PAGE_MANIFEST.csv",
+      "bytes": 994,
+      "sha256": "c451c26867459c772c7c650983b8c54b9b0ca97ca621175df0b46a7bc4f230d5"
+    },
+    {
+      "path": "manifests/ASSET_MANIFEST.csv",
+      "bytes": 1211,
+      "sha256": "706c73c11d03f04048490c5d5100e41fbbf97dfdc1bb79c3848946e82a611206"
+    },
+    {
+      "path": "content/CONTENT_MASTER.zh-CN.md",
+      "bytes": 10948,
+      "sha256": "45979ee5c4cce52bb0accfa2fbceae0b049c889bbb4cffa050fb0ff040107011"
+    },
+    {
+      "path": "content/CONTENT_MASTER.en.md",
+      "bytes": 5943,
+      "sha256": "ab8ced2a1e49d6e1dda44144f63c40d35ad7e138ad3ed4cf4f9819e3e899fd9a"
+    },
+    {
+      "path": "data/RISK_MODULES.csv",
+      "bytes": 1210,
+      "sha256": "11269274351edecc95d47ef1d7b8ae632d4e1d0db3ab8ccf62f75fbe780ef258"
+    },
+    {
+      "path": "data/AMPLIFICATION_MAPPING.csv",
+      "bytes": 830,
+      "sha256": "e1ca57b210251ef8d06db563e5d56e32827374653a2eef08d37257694afc8ecd"
+    },
+    {
+      "path": "data/LIFECYCLE_MAPPING.csv",
+      "bytes": 963,
+      "sha256": "b678567fc971ab699638619796dd9bcb2a8b79eaf5b7e96a35fac4488992c1c4"
+    },
+    {
+      "path": "data/CONFERENCE_STUDY_STATUS.json",
+      "bytes": 949,
+      "sha256": "60a26130f6b35dd12646b2c2b91c0437f7984ae1b0e0093727757df31525af97"
+    },
+    {
+      "path": "data/RISK_FRAMEWORK_NAV.json",
+      "bytes": 571,
+      "sha256": "a922365d35b8be967f1c17ed48cf462837a30255e00b2dab50d03f4202d9e0d0"
+    },
+    {
+      "path": "data/FUTURE_RESEARCH_ROADMAP.csv",
+      "bytes": 1006,
+      "sha256": "c15c653805924213ac2499280244881525c5ba3e5fa19c15cf10b5a6967d9afa"
+    }
+  ]
+}
