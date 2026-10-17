@@ -1,20 +1,14 @@
-import {
-  readFile,
-  writeFile,
-  mkdir,
-  readdir,
-  copyFile,
-} from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createHash } from "node:crypto";
-
-// Deterministic import of the supplied source package; no old page content or network.
 const root = resolve(import.meta.dirname, "..");
 const source = resolve(
   root,
-  "docs/source-packages/home_research_codex_package_v0.2",
+  "docs/source-packages/conference_risk_framework_routes_v0.2",
 );
-const read = (path) => readFile(resolve(source, path), "utf8");
+// The earlier home source archive is retained as provenance, not as current research status.
+// Only the approved conference identity, mappings and roadmap feed runtime research metadata.
+const read = (p) => readFile(resolve(source, p), "utf8");
 function csv(text) {
   const rows = [];
   let row = [],
@@ -41,49 +35,66 @@ function csv(text) {
     row.push(cell.replace(/\r$/, ""));
     rows.push(row);
   }
-  const headers = rows.shift().map((h) => h.replace(/^\uFEFF/, ""));
+  const keys = rows.shift().map((s) => s.replace(/^\uFEFF/, ""));
   return rows
     .filter((r) => r.some(Boolean))
-    .map((r) => Object.fromEntries(headers.map((h, i) => [h, r[i] ?? ""])));
+    .map((r) => Object.fromEntries(keys.map((k, i) => [k, r[i] || ""])));
 }
+const study = JSON.parse(await read("data/CONFERENCE_STUDY_STATUS.json"));
+const previousSources = csv(
+  await readFile(
+    resolve(
+      root,
+      "docs/source-packages/home_research_codex_package_v0.2/manifests/SOURCE_MANIFEST.csv",
+    ),
+    "utf8",
+  ),
+);
+const sources = previousSources.filter((s) =>
+  ["SRC-HR-02", "SRC-HR-03", "SRC-HR-04"].includes(s.source_id),
+);
+const paper = "/media/research/ai-defit-2026-stablecoin-risk-framework.pdf";
+const bytes = await readFile(
+  resolve(root, "artifacts/stablecoin-hub/public" + paper),
+);
+if (!bytes.subarray(0, 5).equals(Buffer.from("%PDF-")))
+  throw Error("Public conference paper unavailable");
 const data = {
   version: "0.2",
-  baseline: "2026-10-16",
-  research: JSON.parse(await read("data/RESEARCH_STATUS.json")),
-  labels: JSON.parse(await read("data/STATUS_LABELS.json")),
-  pages: csv(await read("manifests/PAGE_MANIFEST.csv")),
-  sources: csv(await read("manifests/SOURCE_MANIFEST.csv")),
-  assets: csv(await read("manifests/ASSET_MANIFEST.csv")),
-  copy: {
-    home: {
-      zh: await read("content/HOME_CONTENT_MASTER.zh-CN.md"),
-      en: await read("content/HOME_CONTENT_MASTER.en.md"),
-    },
-    research: {
-      zh: await read("content/RESEARCH_CONTENT_MASTER.zh-CN.md"),
-      en: await read("content/RESEARCH_CONTENT_MASTER.en.md"),
-    },
+  boundary_revision: "2026-10-17",
+  study,
+  conference: "AI-DEFIT 2026",
+  acceptance: "ACCEPTED_CONFERENCE_PAPER",
+  lifecycle: csv(await read("data/LIFECYCLE_MAPPING.csv")),
+  amplification: csv(await read("data/AMPLIFICATION_MAPPING.csv")),
+  modules: csv(await read("data/RISK_MODULES.csv")),
+  future: csv(await read("data/FUTURE_RESEARCH_ROADMAP.csv")),
+  sources,
+  navigation_svg: await readFile(
+    resolve(
+      root,
+      "docs/source-packages/home_research_codex_package_v0.2/visuals/final/HOME-D01-research-hub-map.svg",
+    ),
+    "utf8",
+  ).then((svg) =>
+    svg
+      .replace("Framework · measurement · TE", "Framework · atomic risks")
+      .replace("Hawkes · validation", "Lifecycle · transmission mapping"),
+  ),
+  paper: {
+    url: paper,
+    bytes: bytes.length,
+    sha256: createHash("sha256").update(bytes).digest("hex"),
   },
-  svg: {},
-  hashes: {},
+  labels: {
+    CURRENT_STUDY: { label_en: "Current study", label_zh: "当前研究" },
+    ACCEPTED_CONFERENCE_PAPER: {
+      label_en: "Accepted conference paper",
+      label_zh: "会议论文已接收",
+    },
+    FUTURE_RESEARCH: { label_en: "Future research", label_zh: "未来研究" },
+  },
 };
-const dest = resolve(
-  root,
-  "artifacts/stablecoin-hub/public/home-research/v0.2",
-);
-await mkdir(dest, { recursive: true });
-for (const filename of (
-  await readdir(resolve(source, "visuals/final"))
-).sort()) {
-  const raw = await read(`visuals/final/${filename}`);
-  const id = filename.match(/^(HOME-D\d+|RES-D\d+)/)[0];
-  data.svg[id] = raw;
-  data.hashes[filename] = createHash("sha256").update(raw).digest("hex");
-  await copyFile(
-    resolve(source, "visuals/final", filename),
-    resolve(dest, filename),
-  );
-}
 await writeFile(
   resolve(
     root,
@@ -92,5 +103,5 @@ await writeFile(
   JSON.stringify(data, null, 2) + "\n",
 );
 console.info(
-  `Home/Research V${data.version}: ${data.research.length} research records, ${data.sources.length} source records, ${Object.keys(data.svg).length} frozen SVGs.`,
+  "Home/Research: conference-only runtime metadata; two current-study records and future directions are separate.",
 );

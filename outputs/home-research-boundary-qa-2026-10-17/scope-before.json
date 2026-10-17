@@ -1,0 +1,62 @@
+{
+  "quantitative_routes": {
+    "artifacts/stablecoin-hub/src/pages/quantitative.tsx": "2aea99d6205d1a265d000cbc507e673ee7354bbf003788c372c0ec90a61a5aeb",
+    "artifacts/stablecoin-hub/src/pages/risk-framework.tsx": "1dd53abffe638de069e6523f4a6c03ec5192605162be8c16c9950fdafd2fd3fa",
+    "artifacts/stablecoin-hub/src/components/risk-framework-ui.tsx": "238b79bee5a070c165ec6523214a3b2b394e6af0744d553e0d7858039467bed1",
+    "artifacts/stablecoin-hub/src/data/conference-risk-framework.ts": "61f9ca3358d8b1ff08fc4a2e04d27c03c1c6a06c60f7d41aaa4a0a74e04e4494",
+    "artifacts/stablecoin-hub/src/data/conference-risk-framework-v02.generated.json": "603484a001a8cf803c3ae589babb7fafd20e143511de91dc80d57b1c2bb04fee",
+    "scripts/tests/conference-risk-framework.test.ts": "37f3a2a2ab7d376314949700bd4d89f373f4f595c400c2911f066b0fa0ae7446"
+  },
+  "scope_before": {
+    "artifacts/stablecoin-hub/src/pages/home-overview.tsx": "0956d1d01b43f7b3ee47b3ab5c69631ac320f4d3ee90efdea8341cd18858a8ee",
+    "artifacts/stablecoin-hub/src/pages/research.tsx": "97f31c7c2d7a80ee99decf044b4616cab585a97dddfc7905a44770346c05ca0f",
+    "artifacts/stablecoin-hub/src/data/home-research.ts": "8c8770d10a7c844d154b42454b4445421d87782520ba92d273031a04d3496e48",
+    "artifacts/stablecoin-hub/src/data/home-research-english-copy.ts": "fa8f9a03fc1ceb424c8102cc631d7e70fdddfc2d9a5d1fe8156e58a6681ec059",
+    "artifacts/stablecoin-hub/src/data/home-research-v02.generated.json": "b3877e7c3d8943a76b01610c6e5ba500d7060e52b1c4063857168f4491d886e1",
+    "artifacts/stablecoin-hub/src/components/home-research-ui.tsx": "c18b535d62ca1eac469abf4775ce712be758feda7145ff4802f708b4a100dfd1",
+    "scripts/tests/home-research.test.ts": "ab296d1f26d5d4381e85c634bbd24a1c8c7f9c6b9143dc7aad0f18ef10dfe302",
+    "scripts/prepare-home-research-package.mjs": "d62943f9de910cffa172c4033c0d26338bb4ed0d1c2a70f98959ecdc924c5de1"
+  },
+  "frozen_provenance": {
+    "docs/source-packages/home_research_codex_package_v0.2/PACKAGE_INVENTORY.json": "79715f10e57e369c701b992abcf2a33036c1323d11979a8a2ce1c6a5ea68e639",
+    "docs/source-packages/home_research_codex_package_v0.2/CODEX_HANDOFF.md": "bc6253e4ab58d1282cd0c8957bd772d32d254ed6c465be0d22a2fbcdc0652550",
+    "docs/source-packages/home_research_codex_package_v0.2/FINAL_COPY_QA.md": "1d0cbde8c7b6d14a436dcc0e35a86b9e702e21ceecb33c80eaa66c65bbe83dd8",
+    "docs/source-packages/home_research_codex_package_v0.2/00_README.md": "79fe4546ab781b1ef24ae864a7d4aaa892f1ad94939a0887583464cb4c1ecf3b",
+    "docs/source-packages/home_research_codex_package_v0.2/PACKAGE_STATUS.md": "cea0f36d1fb3f6765db984119e7019efbca5baa6ee54d929e3bb4a743c34b10c",
+    "docs/source-packages/home_research_codex_package_v0.2/content/HOME_CONTENT_MASTER.zh-CN.md": "dc01bd83ca7f32b34badcbca6113090af3b10ac4c3a2a395e2322bcd7d3ef06a",
+    "docs/source-packages/home_research_codex_package_v0.2/content/RESEARCH_CONTENT_MASTER.en.md": "45c5d69e9f4efc112a52c2ad176de46054dda52d73dabccf063aceeebde7283b",
+    "docs/source-packages/home_research_codex_package_v0.2/content/RESEARCH_CONTENT_MASTER.zh-CN.md": "f35222814f6a227c13ab97ccd33340ff2d828d689f2d3b7e30383101c49c5129",
+    "docs/source-packages/home_research_codex_package_v0.2/content/HOME_CONTENT_MASTER.en.md": "cfc4dc0efe01104ebb1b611c50c2f6cf04dbb281239a67b91b3a1f9125803d21",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/VISUAL_QA.md": "553c042e5bdc849f9a0fb431a565f44ca309986d127f422cf55ec66700f1b6e3",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/VISUAL_SCRIPTS.md": "3cb969cc7ddb919bbb437040bace3eae0937dac45a6544f3809bed223a3cdb2e",
+    "docs/source-packages/home_research_codex_package_v0.2/manifests/ASSET_MANIFEST.csv": "778f611bb2472507c7e273168d3c813810a9c63ea344856ede0509859ff3f108",
+    "docs/source-packages/home_research_codex_package_v0.2/manifests/SOURCE_MANIFEST.csv": "34f27b17bcfee7c411bc7f82fd2ca97dcdd5992d809cc8ab7b449bdd3cfaff2e",
+    "docs/source-packages/home_research_codex_package_v0.2/manifests/PAGE_MANIFEST.csv": "7ae436ec017805098fa704f6fdd36b378f542cce616ff735d7821e7fd90fc5a3",
+    "docs/source-packages/home_research_codex_package_v0.2/data/STATUS_LABELS.json": "982b73f590d088f8d1a40df7d00c70158b7fc8b54e6f1aeeb561283f9f9604c7",
+    "docs/source-packages/home_research_codex_package_v0.2/data/RESEARCH_STATUS.json": "8caa0596089a2bba4ae3c19aff3d61ed4ca36a79e605f112d6d18067c5f54f14",
+    "docs/source-packages/home_research_codex_package_v0.2/reference/current-homepage-not-to-copy.jpg": "3a196284e9b385c3e296fdb9f43748487fa4d43ef0c87e29edf10374914b679b",
+    "docs/source-packages/home_research_codex_package_v0.2/reference/CURRENT_SITE_REFERENCE.md": "6b88a0ac8cfa670e332f1af63e1e6cc37718b572ec53403caaadc0e88d1aafb0",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/final/RES-D03-taxonomy-to-measurement.svg": "23bb1f54214623c49a9297b693b49ccb8ce0c7dfacf4c4ce14c01c50c1ad0d86",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/final/RES-D02-quantitative-research-map.svg": "068e842b115a441e1f99d26f185afa9aa1de08102257f9fe6129805be52aa183",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/final/HOME-D02-research-maturity.svg": "5b578cbbc02e5c3700d4cf5250e1cc2611224000cfb78b06dedb8ac718924d76",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/final/RES-D01-research-pipeline-status.svg": "831cc87a92c883a57b3058915c76baf8b7abb98c4315d247b8e4114970a4cafa",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/final/HOME-D01-research-hub-map.svg": "84ab2aab1562a99a84f6d86672eccb3ab3e1909d03208db241253585b7d12b78",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/previews/HOME-D02-research-maturity.png": "524515d4c34c45f5b2dee0a760ddcccb5558403259ad53eb4ff21435f6673563",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/previews/RES-D02-quantitative-research-map.png": "40ba085c0d4b35e3df38bcf94e6b11cd15f21db808c37d395fe07ee45c334c00",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/previews/RES-D03-taxonomy-to-measurement.png": "0edfa9ea768b35490acafedd374dddd1ea746373f4b619e8e6ab33f81a1bca9e",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/previews/HOME-D01-research-hub-map.png": "2cd38d5395fd8d1c126b8000e0377ecd19eff130b7a3572abdfddabff4893045",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/previews/RES-D01-research-pipeline-status.png": "37c0563279b4978248a05481a274263d5d1d2e1c85a56089363cf4af36ee0816",
+    "docs/source-packages/home_research_codex_package_v0.2/visuals/previews/contact_sheet.png": "cbd122613ce7603b4187ff45730aaa5817251e3043af5bdad0c624d795a8f9a9",
+    "artifacts/stablecoin-hub/public/home-research/v0.2/RES-D03-taxonomy-to-measurement.svg": "23bb1f54214623c49a9297b693b49ccb8ce0c7dfacf4c4ce14c01c50c1ad0d86",
+    "artifacts/stablecoin-hub/public/home-research/v0.2/RES-D02-quantitative-research-map.svg": "068e842b115a441e1f99d26f185afa9aa1de08102257f9fe6129805be52aa183",
+    "artifacts/stablecoin-hub/public/home-research/v0.2/HOME-D02-research-maturity.svg": "5b578cbbc02e5c3700d4cf5250e1cc2611224000cfb78b06dedb8ac718924d76",
+    "artifacts/stablecoin-hub/public/home-research/v0.2/RES-D01-research-pipeline-status.svg": "831cc87a92c883a57b3058915c76baf8b7abb98c4315d247b8e4114970a4cafa",
+    "artifacts/stablecoin-hub/public/home-research/v0.2/HOME-D01-research-hub-map.svg": "84ab2aab1562a99a84f6d86672eccb3ab3e1909d03208db241253585b7d12b78"
+  },
+  "existing_public_paper": {
+    "url": "/media/research/ai-defit-2026-stablecoin-risk-framework.pdf",
+    "sha256": "25eaf2418c2cb6c1a3fb20302203608973650f736893bd4b66811fe8bc54344d",
+    "bytes": 11838783,
+    "already_tracked_public_asset": true
+  }
+}

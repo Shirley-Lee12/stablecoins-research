@@ -1,161 +1,188 @@
 {
   "version": "0.2",
-  "baseline": "2026-10-16",
-  "research": [
+  "boundary_revision": "2026-10-17",
+  "study": {
+    "title": "Establishing a Multi-Dimensional Risk Framework over the Full Lifecycle of Stablecoins",
+    "author": "Xueli Li",
+    "institution": "Zhejiang University",
+    "presentation_date": "October 2026",
+    "current_study": {
+      "atomic_risks": 55,
+      "dimensions": [
+        {
+          "id": "T",
+          "name": "Lifecycle Dimension",
+          "levels": [
+            "T0",
+            "T1",
+            "T2",
+            "T3"
+          ]
+        },
+        {
+          "id": "L",
+          "name": "Amplification & Transmission Dimension",
+          "levels": [
+            "L0",
+            "L1",
+            "L2",
+            "L3"
+          ]
+        }
+      ]
+    },
+    "future_research": [
+      "Risk-specific indicator sets and composite measures where appropriate",
+      "Quantify transmission and amplification",
+      "Dynamic monitoring and early warning",
+      "Regulatory coverage evaluation",
+      "Blind-spot identification",
+      "Regulatory optimisation recommendations"
+    ]
+  },
+  "conference": "AI-DEFIT 2026",
+  "acceptance": "ACCEPTED_CONFERENCE_PAPER",
+  "lifecycle": [
     {
-      "id": "risk-framework",
-      "title_zh": "全生命周期多维风险框架",
-      "title_en": "Full-Lifecycle Multi-Dimensional Risk Framework",
-      "status": "COMPLETED_CONCEPTUAL_OUTPUT",
-      "public": true,
-      "summary_zh": "形成55项原子风险的概念分类，并从生命周期与风险放大两个维度分析稳定币风险。",
-      "summary_en": "A conceptual taxonomy of 55 atomic risks, analysed across lifecycle stages and risk-amplification roles.",
-      "important_boundary_zh": "55项风险是概念分解结果，不等于当前量化模型直接使用55个节点。",
-      "important_boundary_en": "The 55-risk taxonomy is a conceptual decomposition, not a claim that the current empirical model uses 55 direct nodes."
+      "level": "T0",
+      "label": "Foundation, Backing & Issuance",
+      "meaning": "Where backing, legal/technical foundations and issuance arrangements are established.",
+      "representative_risks": "C5 — Asset-Liability Maturity Mismatch; C14 — Lack of Bankruptcy Remoteness for Reserves"
     },
     {
-      "id": "conference-paper",
-      "title_zh": "AI-DEFIT 2026 会议论文与汇报",
-      "title_en": "AI-DEFIT 2026 Paper & Presentation",
-      "status": "PUBLIC_PRESENTED_OUTPUT",
-      "public": true,
-      "summary_zh": "论文《Establishing a Multi-Dimensional Risk Framework over the Full Lifecycle of Stablecoins》进入AI-DEFIT 2026会议议程并完成汇报。",
-      "summary_en": "The paper “Establishing a Multi-Dimensional Risk Framework over the Full Lifecycle of Stablecoins” appears in the AI-DEFIT 2026 programme and was presented.",
-      "important_boundary_zh": "该成果主要是定性框架与映射，不应描述为已验证的实时风险系统。",
-      "important_boundary_en": "This output is primarily a qualitative framework and mapping exercise, not a validated real-time risk system."
+      "level": "T1",
+      "label": "Circulation, Trading & Settlement",
+      "meaning": "Where tokens circulate, trade and settle without necessarily becoming embedded in layered financial positions.",
+      "representative_risks": "C22 — Deficient Secondary Market Order Book Depth; U1 — Underlying Public Blockchain Network Congestion"
     },
     {
-      "id": "asia-research",
-      "title_zh": "亚洲稳定币发展研究",
-      "title_en": "Asia Stablecoin Development Research",
-      "status": "COMPLETED_EVIDENCE_MODULE",
-      "public": true,
-      "summary_zh": "基于官方一手资料比较中国内地、香港、新加坡和阿联酋的监管边界、发行人牌照、产品状态与用户可用性。",
-      "summary_en": "Official-source comparison of regulatory perimeters, issuer licences, product status and user access across Mainland China, Hong Kong, Singapore and the UAE.",
-      "important_boundary_zh": "不做主观“开放度”排名。",
-      "important_boundary_en": "No subjective openness ranking."
+      "level": "T2",
+      "label": "Protocol Embedding & Layered Finance",
+      "meaning": "Where stablecoins become collateral, liquidity positions or other embedded financial positions inside protocols.",
+      "representative_risks": "U18 — DeFi Nested Collateralization Risks; U24 — Excessive Credit Expansion via AMO Algorithms"
     },
     {
-      "id": "agentic-payments",
-      "title_zh": "智能体支付专题研究",
-      "title_en": "Agentic Payments Research",
-      "status": "COMPLETED_EVIDENCE_MODULE",
-      "public": true,
-      "summary_zh": "梳理智能体支付的授权、支付执行、支付轨道、协议与产品边界，并分析稳定币在机器支付中的位置。",
-      "summary_en": "Evidence-based mapping of authorization, payment execution, rails, protocols and products in agentic payments, including where stablecoins fit.",
-      "important_boundary_zh": "稳定币是潜在支付轨道之一，不是智能体支付的必要条件。",
-      "important_boundary_en": "Stablecoins are one possible payment rail, not a prerequisite for agentic payments."
-    },
-    {
-      "id": "quantitative-te-hawkes",
-      "title_zh": "风险传导量化：Transfer Entropy + Hawkes",
-      "title_en": "Quantitative Risk Transmission: Transfer Entropy + Hawkes",
-      "status": "INTERIM_EMPIRICAL_RESULTS",
-      "public": false,
-      "summary_zh": "已经形成中期实证结果包，用于分析风险信号的有向传导与极端事件的自激/交叉激发。",
-      "summary_en": "Interim empirical result packages exist for directed risk-signal transmission and self-/cross-excitation of extreme events.",
-      "important_boundary_zh": "结果仍需继续完成复现、稳健性和解释验证；不是生产级实时预测模型。",
-      "important_boundary_en": "Reproducibility, robustness and interpretation validation are still being completed; this is not a production real-time prediction model."
-    },
-    {
-      "id": "stress-cases",
-      "title_zh": "压力情景与历史事件验证",
-      "title_en": "Stress Scenarios & Historical Case Validation",
-      "status": "INTERIM_RESEARCH_RESULTS",
-      "public": false,
-      "summary_zh": "已形成压力情景、历史事件案例和下游整合的阶段结果。",
-      "summary_en": "Stage results exist for stress scenarios, historical-event cases and downstream integration.",
-      "important_boundary_zh": "不能描述为已部署的压力测试服务或自动化风险平台。",
-      "important_boundary_en": "Do not describe these as a deployed stress-testing service or automated risk platform."
-    },
-    {
-      "id": "monitoring-platform",
-      "title_zh": "持续监测与早期预警平台",
-      "title_en": "Continuous Monitoring & Early-Warning Platform",
-      "status": "PLANNED",
-      "public": false,
-      "summary_zh": "未来计划将量化指标、风险传导结果与事件验证整合为可解释的监测与预警界面。",
-      "summary_en": "Planned future integration of quantitative indicators, transmission results and event validation into an interpretable monitoring interface.",
-      "important_boundary_zh": "当前没有上线的实时风险概率、脱锚概率或生产级预警系统。",
-      "important_boundary_en": "There is currently no live real-time risk probability, depeg probability or production early-warning system."
+      "level": "T3",
+      "label": "Redemption, Deleveraging & Liquidation",
+      "meaning": "Where positions exit, redeem, deleverage or liquidate.",
+      "representative_risks": "C26 — Asymmetric Redemption Channels; U25 — Unbuffered Cascading Liquidations"
     }
   ],
-  "labels": {
-    "COMPLETED_CONCEPTUAL_OUTPUT": {
-      "label_zh": "概念研究已完成",
-      "label_en": "Conceptual output complete",
-      "public_style": "completed"
+  "amplification": [
+    {
+      "level": "L0",
+      "label": "Initial Trigger",
+      "meaning": "A shock that directly initiates the risk episode.",
+      "representative_risks_or_outcomes": "C1 — Macro Interest Rate Shocks; U2 — Layer 2 Sequencer Downtime"
     },
-    "PUBLIC_PRESENTED_OUTPUT": {
-      "label_zh": "已公开 / 已汇报",
-      "label_en": "Public / presented",
-      "public_style": "completed"
+    {
+      "level": "L1",
+      "label": "Structural Vulnerability",
+      "meaning": "A pre-existing weakness that shapes susceptibility to shocks.",
+      "representative_risks_or_outcomes": "C5 — Asset-Liability Maturity Mismatch; C22 — Deficient Secondary Market Order Book Depth"
     },
-    "COMPLETED_EVIDENCE_MODULE": {
-      "label_zh": "证据专题已完成",
-      "label_en": "Evidence module complete",
-      "public_style": "completed"
+    {
+      "level": "L2",
+      "label": "Dynamic Amplification",
+      "meaning": "Activated reactions or feedback loops that magnify an initial shock.",
+      "representative_risks_or_outcomes": "U21 — High Friction Inducing Arbitrage Failure; U25 — Unbuffered Cascading Liquidations"
     },
-    "INTERIM_EMPIRICAL_RESULTS": {
-      "label_zh": "中期实证结果",
-      "label_en": "Interim empirical results",
-      "public_style": "in_progress"
-    },
-    "INTERIM_RESEARCH_RESULTS": {
-      "label_zh": "阶段性研究结果",
-      "label_en": "Interim research results",
-      "public_style": "in_progress"
-    },
-    "VALIDATION_IN_PROGRESS": {
-      "label_zh": "验证进行中",
-      "label_en": "Validation in progress",
-      "public_style": "in_progress"
-    },
-    "PLANNED": {
-      "label_zh": "未来计划",
-      "label_en": "Planned",
-      "public_style": "planned"
+    {
+      "level": "L3",
+      "label": "Cross-System Transmission / Outcomes",
+      "meaning": "Effects that propagate beyond the focal stablecoin into other stablecoins, DeFi, broader crypto or traditional financial markets.",
+      "representative_risks_or_outcomes": "Other stablecoins; DeFi protocols; broader crypto markets; traditional financial markets"
     }
-  },
-  "pages": [
+  ],
+  "modules": [
     {
-      "route": "/",
-      "title_zh": "稳定币学术研究平台",
-      "title_en": "Stablecoin Research Hub",
-      "action": "REWRITE",
-      "status": "READY_FOR_CODEX",
-      "audience": "general;research;enterprise",
-      "primary_question": "这个网站能帮我理解什么？哪些研究已经完成？从哪里开始？",
-      "module_order": "hero>question-entry>current-research>research-status>evidence-principles>about-platform",
-      "visual_assets": "HOME-D01;HOME-D02",
-      "notes": "Do not lead with team/project plans; lead with user questions and available evidence."
+      "module": "M1",
+      "name": "Backing Assets & Balance Sheet",
+      "domain": "Financial & institutional",
+      "representative_risks": "C5 — Asset-Liability Maturity Mismatch; C10 — Insufficient Reserve Market Capacity"
     },
     {
-      "route": "/research",
-      "title_zh": "我们的研究",
-      "title_en": "Our Research",
-      "action": "REWRITE",
-      "status": "READY_FOR_CODEX",
-      "audience": "research;enterprise;general",
-      "primary_question": "哪些成果已完成？量化研究做到哪一步？哪些系统还没有上线？",
-      "module_order": "hero>pipeline>55-risk-framework>quantitative-research>evidence-modules>outputs>not-live>next-stage",
-      "visual_assets": "RES-D01;RES-D02;RES-D03",
-      "notes": "Explicitly separate completed conceptual output, interim empirical results, validation in progress, and planned monitoring."
+      "module": "M2",
+      "name": "Issuer Transparency, Legal Structure & Custody",
+      "domain": "Financial & institutional",
+      "representative_risks": "C11 — Balance Sheet Transparency Time-Lag; C16 — Custodian Credit Default"
+    },
+    {
+      "module": "M3",
+      "name": "Fiat Settlement, Regulation & Redemption",
+      "domain": "Financial & institutional",
+      "representative_risks": "C17 — Fiat Clearing Temporal Mismatch; C26 — Asymmetric Redemption Channels"
+    },
+    {
+      "module": "M4",
+      "name": "Secondary Markets, Token Holders & Confidence",
+      "domain": "Financial & institutional",
+      "representative_risks": "C22 — Deficient Secondary Market Order Book Depth; C25 — Erosion of the Credit Foundation"
+    },
+    {
+      "module": "M5",
+      "name": "Technical Infrastructure, Code, Cryptography & Information",
+      "domain": "Crypto-native technical & DeFi",
+      "representative_risks": "U1 — Underlying Public Blockchain Network Congestion; U8 — Smart Contract Vulnerabilities"
+    },
+    {
+      "module": "M6",
+      "name": "Governance & Privileged Control",
+      "domain": "Crypto-native technical & DeFi",
+      "representative_risks": "C13 — Highly Centralized Governance Permissions; U15 — DAO Governance Proposal Manipulation"
+    },
+    {
+      "module": "M7",
+      "name": "DeFi Integration, On-Chain Markets & Endogenous Mechanisms",
+      "domain": "Crypto-native technical & DeFi",
+      "representative_risks": "U18 — DeFi Nested Collateralization Risks; U25 — Unbuffered Cascading Liquidations"
+    }
+  ],
+  "future": [
+    {
+      "id": "FUT-01",
+      "topic": "Risk-specific indicator sets",
+      "description": "Translate atomic risks into pre-specified measurement designs with dedicated indicators.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-02",
+      "topic": "Composite measures where appropriate",
+      "description": "Develop composite measures only where conceptually justified.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-03",
+      "topic": "Quantify transmission and amplification",
+      "description": "Estimate directional transmission and dynamic amplification across quantified risk units and market states.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-04",
+      "topic": "Dynamic monitoring and early warning",
+      "description": "Develop time-varying monitoring, stress detection and tiered early-warning tools.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-05",
+      "topic": "Regulatory coverage mapping",
+      "description": "Map major regulatory regimes against the submitted atomic-risk framework.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-06",
+      "topic": "Blind-spot identification",
+      "description": "Measure regulatory coverage gaps across risk dimensions and lifecycle locations.",
+      "status": "FUTURE_RESEARCH"
+    },
+    {
+      "id": "FUT-07",
+      "topic": "Regulatory optimisation recommendations",
+      "description": "Develop targeted recommendations for regulatory framework improvement.",
+      "status": "FUTURE_RESEARCH"
     }
   ],
   "sources": [
-    {
-      "source_id": "SRC-HR-01",
-      "topic": "Homepage/Research",
-      "organization": "Project handoff package",
-      "title": "Existing homepage and research-page export",
-      "date": "2026-10-15",
-      "url": "",
-      "source_type": "PROJECT_INTERNAL",
-      "use_for": "Reference only; old public copy and structure",
-      "status": "REFERENCE_ONLY",
-      "last_verified": "2026-10-16"
-    },
     {
       "source_id": "SRC-HR-02",
       "topic": "Institution",
@@ -191,164 +218,26 @@
       "use_for": "Programme lists the stablecoin paper in Online Session 1",
       "status": "VERIFIED",
       "last_verified": "2026-10-16"
-    },
-    {
-      "source_id": "SRC-HR-05",
-      "topic": "Research status",
-      "organization": "Approved project research baseline",
-      "title": "55-risk conceptual framework / public conference baseline",
-      "date": "2026-09-30",
-      "url": "",
-      "source_type": "PROJECT_RESEARCH_BASELINE",
-      "use_for": "Completed conceptual output; 55 is taxonomy, not direct empirical-node count",
-      "status": "VERIFIED_INTERNAL",
-      "last_verified": "2026-10-16"
-    },
-    {
-      "source_id": "SRC-HR-06",
-      "topic": "Quantitative research",
-      "organization": "Current thesis research status",
-      "title": "TE/Hawkes interim result packages",
-      "date": "2026-10-06",
-      "url": "",
-      "source_type": "PROJECT_RESEARCH_BASELINE",
-      "use_for": "Interim empirical results; reproducibility/validation not fully closed",
-      "status": "VERIFIED_INTERNAL",
-      "last_verified": "2026-10-16"
-    },
-    {
-      "source_id": "SRC-HR-07",
-      "topic": "Research module",
-      "organization": "Agentic Payments V0.2",
-      "title": "Approved local baseline commit 5b197191...",
-      "date": "2026-10-15",
-      "url": "",
-      "source_type": "APPROVED_LOCAL_BASELINE",
-      "use_for": "Completed public evidence module",
-      "status": "VERIFIED_INTERNAL",
-      "last_verified": "2026-10-16"
-    },
-    {
-      "source_id": "SRC-HR-08",
-      "topic": "Research module",
-      "organization": "Asia Stablecoin Development V0.2",
-      "title": "Approved local baseline commit 889f577...",
-      "date": "2026-10-16",
-      "url": "",
-      "source_type": "APPROVED_LOCAL_BASELINE",
-      "use_for": "Completed public evidence module",
-      "status": "VERIFIED_INTERNAL",
-      "last_verified": "2026-10-16"
-    },
-    {
-      "source_id": "SRC-HR-09",
-      "topic": "Institution",
-      "organization": "Stablecoin Research Hub project governance",
-      "title": "Approved institutional support wording",
-      "date": "2026-10-15",
-      "url": "",
-      "source_type": "PROJECT_GOVERNANCE",
-      "use_for": "Exact public line: Sponsored by the Academy of Internet Finance (AIF), Zhejiang University.",
-      "status": "VERIFIED_INTERNAL",
-      "last_verified": "2026-10-16"
     }
   ],
-  "assets": [
-    {
-      "asset_id": "HOME-D01",
-      "asset_type": "diagram",
-      "page_route": "/",
-      "module_id": "question-entry",
-      "filename": "HOME-D01-research-hub-map.svg",
-      "title": "Research Hub Map",
-      "purpose": "把全站按用户问题组织为稳定机制、区域发展、智能体支付、市场数据和研究",
-      "source_type": "ORIGINAL",
-      "source_url": "",
-      "status": "READY"
-    },
-    {
-      "asset_id": "HOME-D02",
-      "asset_type": "diagram",
-      "page_route": "/",
-      "module_id": "research-status",
-      "filename": "HOME-D02-research-maturity.svg",
-      "title": "Research Maturity",
-      "purpose": "区分 completed / empirical / validation / planned",
-      "source_type": "ORIGINAL",
-      "source_url": "",
-      "status": "READY"
-    },
-    {
-      "asset_id": "RES-D01",
-      "asset_type": "diagram",
-      "page_route": "/research",
-      "module_id": "pipeline",
-      "filename": "RES-D01-research-pipeline-status.svg",
-      "title": "Research Pipeline & Status",
-      "purpose": "从 conceptual framework 到 monitoring 的研究状态链",
-      "source_type": "ORIGINAL",
-      "source_url": "",
-      "status": "READY"
-    },
-    {
-      "asset_id": "RES-D02",
-      "asset_type": "diagram",
-      "page_route": "/research",
-      "module_id": "quantitative-map",
-      "filename": "RES-D02-quantitative-research-map.svg",
-      "title": "Quantitative Research Map",
-      "purpose": "TE/Hawkes/stress/cases 的关系与边界",
-      "source_type": "ORIGINAL",
-      "source_url": "",
-      "status": "READY"
-    },
-    {
-      "asset_id": "RES-D03",
-      "asset_type": "diagram",
-      "page_route": "/research",
-      "module_id": "taxonomy-boundary",
-      "filename": "RES-D03-taxonomy-to-measurement.svg",
-      "title": "From Taxonomy to Measurement",
-      "purpose": "解释55风险框架与当前量化节点不是一一对应",
-      "source_type": "ORIGINAL",
-      "source_url": "",
-      "status": "READY"
-    },
-    {
-      "asset_id": "HOME-S01",
-      "asset_type": "reference_image",
-      "page_route": "/",
-      "module_id": "current-home",
-      "filename": "current-homepage-not-to-copy.jpg",
-      "title": "Current Homepage Screenshot",
-      "purpose": "理解当前视觉语言，不作为新版目标",
-      "source_type": "PROJECT_INTERNAL",
-      "source_url": "",
-      "status": "REFERENCE_ONLY"
-    }
-  ],
-  "copy": {
-    "home": {
-      "zh": "# Homepage｜Content Master zh-CN V0.1\n\nRoute: `/`\n\n## HERO\n\n**Eyebrow**  \n浙江大学 · AIF · 稳定币研究\n\n**H1**  \n稳定币学术研究平台\n\n**English label**  \nStablecoin Research Hub\n\n**Lead**  \n从稳定机制、真实产品和监管规则，到市场数据、风险传导与新型支付基础设施，用可核验的证据理解稳定币正在如何连接传统金融与数字资产世界。\n\n**Institution line**  \n由浙江大学金融科技研究院（AIF）支持。\n\n**Primary CTA**  \n从稳定币开始\n\n**Secondary CTA**  \n查看我们的研究\n\n---\n\n## H1｜从一个问题开始\n\n### 稳定币到底如何维持价格？\n理解储备、抵押、赎回、套利、清算和不同稳定机制。\n\n→ `/about-stablecoins`\n\n### 亚洲哪些稳定币已经真正上线？\n区分政策允许、发行人牌照、token 上线、分销渠道和当前用户准入。\n\n→ `/regional-developments`\n\n### AI 真的能替用户付款吗？\n理解 Agent 的身份、授权、资金控制、支付协议与 stablecoin rail。\n\n→ `/agentic-payments`\n\n### 当前市场和链上发生了什么？\n查看供应、价格稳定性、链上活动、发行人储备、宏观环境和采用证据。\n\n→ `/market-data`\n\n### 稳定币风险怎样形成并传播？\n进入课题组的风险框架、量化传导研究和研究状态。\n\n→ `/research`\n\n**Visual**  \nHOME-D01 Research Hub Map\n\n---\n\n## H2｜当前可查看的研究与证据\n\n### 全生命周期风险框架\n已完成概念研究。\n\n55 项原子风险用于系统拆解稳定币在生命周期不同阶段可能面临的金融、制度、技术与协议风险，并从生命周期位置与风险放大作用进行交叉分析。\n\n**Status**  \nCompleted conceptual output\n\n**Boundary**  \n55 项风险不是当前量化模型直接使用的 55 个模型节点。\n\n→ `/research`\n\n### 亚洲稳定币发展\n已完成专题内容与证据核验。\n\n对中国内地、香港、新加坡和阿联酋分别核验监管边界、发行人牌照、产品是否上线、用户准入与分销渠道。\n\n**Status**  \nEvidence module complete\n\n→ `/regional-developments`\n\n### 智能体支付\n已完成专题内容与证据核验。\n\n从“谁授权 AI”到“钱怎么走”，区分 Protocol、Product、Infrastructure，并解释 stablecoin 在机器支付中的真实位置。\n\n**Status**  \nEvidence module complete\n\n→ `/agentic-payments`\n\n---\n\n## H3｜研究正在推进到哪里？\n\n采用三层状态，不把“计划”写成“成果”。\n\n### 已完成 / 可公开查看\n- 全生命周期 55 项风险概念框架\n- AI-DEFIT 2026 会议论文与汇报\n- 亚洲稳定币发展专题\n- 智能体支付专题\n\n### 实证研究进行中\n- 风险指标与可量化节点构建\n- Transfer Entropy 风险传导网络\n- 多元 Hawkes 极端事件互激\n- 压力情景与历史事件验证\n- 稳健性、可复现性与解释验证\n\n### 未来计划\n- 持续风险监测界面\n- 可解释的预警信号\n- 更系统的监管覆盖映射\n- 动态市场与研究数据整合\n\n**Critical line**  \n当前网站不提供“实时脱锚概率”或已验证的生产级风险预警评分。\n\n**Visual**  \nHOME-D02 Research Maturity\n\n---\n\n## H4｜数据与证据，而不是结论堆叠\n\n本站区分：\n- official rule\n- licence\n- product launch\n- beta / pilot\n- distribution\n- observed adoption\n- research inference\n\n重要动态事实保留来源和核验日期。UNKNOWN 不用推测补齐。\n\n**CTA**  \n查看数据与方法\n\n→ `/market-data`\n\n---\n\n## H5｜关于平台\n\nStablecoin Research Hub 面向普通用户、研究者和产业参与者，组织稳定币机制、监管、市场数据、研究方法和新型支付基础设施。\n\n由浙江大学金融科技研究院（AIF）支持。\n\n**Do not add on homepage**\n- 大段团队成员名单\n- 尚未完成的“研究计划”卡片墙\n- 资源数量 KPI\n- 未验证实时风险分数\n- 合作方 logo 墙\n",
-      "en": "# Homepage｜Content Master en V0.1\n\nRoute: `/`\n\n## Hero\n**Stablecoin Research Hub**\n\nUnderstand stablecoins through mechanisms, real products, regulation, market evidence, risk transmission and emerging payment infrastructure.\n\nSponsored by the Academy of Internet Finance (AIF), Zhejiang University.\n\nPrimary CTA: Start with stablecoins  \nSecondary CTA: Explore our research\n\n## Start with a question\n- How do stablecoins maintain value? → About Stablecoins\n- Which stablecoins are actually live in Asia? → Regional Developments\n- Can AI agents really pay on a user's behalf? → Agentic Payments\n- What is happening in markets and on-chain activity? → Market Data\n- How do stablecoin risks form and propagate? → Research\n\n## Research and evidence available now\n- Full-lifecycle conceptual risk framework\n- Asia stablecoin development evidence module\n- Agentic payments evidence module\n\n## Research status\n**Completed / public**\n- 55-risk conceptual framework\n- AI-DEFIT 2026 paper and presentation\n- Asia Stablecoin Development\n- Agentic Payments\n\n**Empirical work in progress**\n- measurable risk indicators and nodes\n- Transfer Entropy transmission analysis\n- multivariate Hawkes event dynamics\n- stress scenarios and historical-event validation\n- reproducibility, robustness and interpretation checks\n\n**Planned**\n- continuous monitoring interface\n- interpretable warning signals\n- regulatory-coverage mapping\n- integrated research/market data\n\n**Critical boundary**\nThe website does not currently provide a validated real-time depeg probability or production-grade early-warning score.\n"
-    },
-    "research": {
-      "zh": "# Research｜Content Master zh-CN V0.1\n\nRoute: `/research`\n\n## HERO\n\n**Eyebrow**  \nOur Research · 稳定币风险与市场结构\n\n**H1**  \n从概念风险框架，到可量化的风险传导研究\n\n**Lead**  \n我们的研究先回答“稳定币有哪些结构性风险”，再逐步把可测量风险转化为数据、事件与网络关系。当前已经形成公开的概念框架和多个专题证据模块，并进入 Transfer Entropy、Hawkes、压力情景和历史事件验证的实证阶段；持续监测与早期预警仍是后续目标，而不是已经上线的产品。\n\n---\n\n## R1｜研究不是一张“已完成系统”流程图\n\n### 1. Conceptual framework — 已完成\n识别并组织稳定币的金融、制度、技术、治理和 DeFi 风险。\n\n### 2. Measurement design — 已完成主要设计 / 持续修订\n把概念风险转化为可辩护、可获取、可比较的量化指标与研究节点。\n\n### 3. Audited data — 已建立研究数据链\n围绕发行、储备、赎回、链上活动、协议机制、宏观与市场变量进行数据获取和审计。\n\n### 4. Transmission models — 已有中期实证结果\nTransfer Entropy 用于识别有向、时变的风险信号传导；多元 Hawkes 用于分析极端事件的自激与交叉激发。\n\n### 5. Validation — 正在收口\n历史事件、压力情景、样本外表现、稳健性与本地可复现性仍需继续验证。\n\n### 6. Monitoring / early warning — 未来计划\n只有当测量、模型与验证链条足够稳定后，才进入持续监测和可解释预警。\n\n**Visual**  \nRES-D01 Research Pipeline & Status\n\n---\n\n## R2｜已完成的概念研究：55 项原子风险\n\n已接收并在 AI-DEFIT 2026 展示的研究建立了一个全生命周期风险框架，将稳定币风险拆解为 55 项概念上相对独立的原子风险，并从：\n\n- 生命周期位置\n- 风险放大 / 传导作用\n\n两个维度进行交叉分析。\n\n### 55 的正确含义\n55 是概念分类结果，不是要求把 55 个变量全部同时放进一个统计模型。\n\n当前量化阶段会根据：\n- 经济含义\n- 可测量性\n- 数据质量\n- 时间频率\n- 节点之间的可比较性\n\n把理论风险进一步转化为更适合实证分析的量化节点。\n\n**Link**\nAI-DEFIT 2026 programme\n\n---\n\n## R3｜当前量化研究\n\n### Transfer Entropy\n研究问题：\n哪些风险信号会领先并传导到其他风险状态？\n\n当前状态：\n已有中期实证结果包；网络表现为稀疏、集中且随时间变化。\n\n**Do not claim**\n实时因果图 / 生产监测网络。\n\n### Multivariate Hawkes\n研究问题：\n某类极端风险事件是否会增加其他风险事件在短期内发生的条件强度？\n\n当前状态：\n已有中期拟合结果与交叉激发结构，但样本外表现和解释仍需谨慎验证。\n\n**Do not claim**\n已验证实时预测模型。\n\n### Stress scenarios & historical events\n研究问题：\n在宏观与加密市场共同压力下，风险会沿哪些路径被放大？历史脱锚/清算事件能否支持模型解释？\n\n当前状态：\n已有阶段性情景和案例结果；完整本地复现与整合验证仍在继续。\n\n**Visual**\nRES-D02 Quantitative Research Map\n\n---\n\n## R4｜研究证据模块\n\n### 亚洲稳定币发展\n监管制度不是“有/没有”二选一。我们分别核验发行人牌照、token 上线、用户可用性和辖区边界。\n\n→ `/regional-developments`\n\n### 智能体支付\nAgentic Payment 不是 stablecoin payment 的同义词。研究重点是身份、授权、支付执行、支付轨道和责任。\n\n→ `/agentic-payments`\n\n这些模块与风险量化研究并列：它们提供制度、产品和基础设施层的事实证据，而不是被强行塞进同一个风险分数。\n\n---\n\n## R5｜研究产出\n\n### AI-DEFIT 2026\n**Establishing a Multi-Dimensional Risk Framework over the Full Lifecycle of Stablecoins**\n\nStatus:\nConference programme / presentation completed.\n\nContribution:\n55-risk conceptual taxonomy + lifecycle × amplification mapping.\n\n### Current empirical research\nTransfer Entropy + Multivariate Hawkes + stress/case validation.\n\nStatus:\nInterim results available; validation and reproducibility still in progress.\n\n### Monitoring platform\nStatus:\nPlanned.\n\n---\n\n## R6｜明确没有上线的东西\n\n当前本站不应出现以下表述：\n\n- 实时稳定币风险概率\n- 实时脱锚概率\n- 已完成模型校准\n- 已验证生产级预警系统\n- 已部署实时 Hawkes / TE 风险引擎\n- 已与支付网关合作获取某类指标（除非以后有正式证据）\n\n更准确的状态语言：\n\n- conceptual framework complete\n- measurement specification developed\n- interim empirical results\n- validation in progress\n- monitoring platform planned\n\n---\n\n## R7｜下一阶段\n\n下一阶段研究重点不是“再增加更多指标”，而是提高：\n\n- measurement validity\n- data reproducibility\n- robustness\n- out-of-sample validation\n- event interpretation\n- stress-scenario consistency\n\n只有这些环节稳定后，监测和预警才有足够研究基础。\n",
-      "en": "# Research｜Content Master en V0.1\n\nRoute: `/research`\n\n## Hero\n### From a conceptual risk framework to measurable risk-transmission research\n\nOur research begins by asking what structural risks stablecoins face, then translates measurable risks into data, events and network relationships. The public conceptual framework and evidence modules are complete. Transfer Entropy, multivariate Hawkes, stress scenarios and historical-event validation have reached interim empirical stages. Continuous monitoring and early warning remain future objectives, not deployed products.\n\n## Research pipeline and status\n1. Conceptual framework — completed\n2. Measurement design — major design completed; continuing refinement\n3. Audited data — research data chain established\n4. Transmission models — interim empirical results\n5. Validation — ongoing\n6. Monitoring / early warning — planned\n\n## Completed conceptual research: 55 atomic risks\nThe AI-DEFIT 2026 research decomposes stablecoin risk into 55 conceptually distinct atomic risks and maps them across lifecycle position and amplification/transmission role.\n\n**Boundary:** 55 is a conceptual taxonomy result, not a requirement to place 55 variables directly into one empirical model.\n\n## Current quantitative research\n### Transfer Entropy\nInterim empirical result packages exist for directed and time-varying risk-signal transmission.\n\n### Multivariate Hawkes\nInterim fitted results and cross-excitation structures exist, but out-of-sample performance and interpretation still require careful validation.\n\n### Stress scenarios & historical events\nStage results exist; full local reproducibility and integrated validation remain in progress.\n\n## What is not live\nThe website does not currently provide:\n- real-time stablecoin risk probabilities\n- real-time depeg probabilities\n- a production-grade early-warning system\n- a deployed live TE/Hawkes risk engine\n\nUse status language:\n- conceptual framework complete\n- interim empirical results\n- validation in progress\n- monitoring platform planned\n"
-    }
+  "navigation_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Stablecoin Research Hub Map</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Stablecoin Research Hub</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Start with a question, then move into mechanisms, evidence, data or research.</text><rect x=\"575\" y=\"335\" width=\"450\" height=\"180\" rx=\"90\" fill=\"#F3F7FC\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"800\" y=\"405\" class=\"t l\" text-anchor=\"middle\" fill=\"#315B9A\">Stablecoin</text><text x=\"800\" y=\"445\" class=\"t l\" text-anchor=\"middle\" fill=\"#315B9A\">Research Hub</text><rect x=\"80\" y=\"190\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"108\" y=\"238\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">How stablecoins work</text><text x=\"108\" y=\"280\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"108\" dy=\"0\">Reserve · collateral · redemption</tspan><tspan x=\"108\" dy=\"27\">arbitrage · liquidation</tspan></text><text x=\"506\" y=\"335\" class=\"t s\" text-anchor=\"end\" fill=\"#315B9A\" font-weight=\"600\">/about-stablecoins</text><rect x=\"1070\" y=\"190\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"1098\" y=\"238\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">Where they are actually live</text><text x=\"1098\" y=\"280\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"1098\" dy=\"0\">Regulation · licence · token status</tspan><tspan x=\"1098\" dy=\"27\">user access</tspan></text><text x=\"1496\" y=\"335\" class=\"t s\" text-anchor=\"end\" fill=\"#6B65A8\" font-weight=\"600\">/regional-developments</text><rect x=\"80\" y=\"570\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"108\" y=\"618\" class=\"t l\" text-anchor=\"start\" fill=\"#3A7D78\">How AI agents can pay</text><text x=\"108\" y=\"660\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"108\" dy=\"0\">Identity · authorization · execution</tspan><tspan x=\"108\" dy=\"27\">payment rails</tspan></text><text x=\"506\" y=\"715\" class=\"t s\" text-anchor=\"end\" fill=\"#3A7D78\" font-weight=\"600\">/agentic-payments</text><rect x=\"1070\" y=\"570\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#517A63\" stroke-width=\"2\"/><text x=\"1098\" y=\"618\" class=\"t l\" text-anchor=\"start\" fill=\"#517A63\">What markets and chains show</text><text x=\"1098\" y=\"660\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"1098\" dy=\"0\">Supply · price · on-chain activity</tspan><tspan x=\"1098\" dy=\"27\">reserves · macro · adoption</tspan></text><text x=\"1496\" y=\"715\" class=\"t s\" text-anchor=\"end\" fill=\"#517A63\" font-weight=\"600\">/market-data</text><rect x=\"565\" y=\"665\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"593\" y=\"713\" class=\"t l\" text-anchor=\"start\" fill=\"#C97B63\">How risks form and propagate</text><text x=\"593\" y=\"755\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"593\" dy=\"0\">Framework · atomic risks</tspan><tspan x=\"593\" dy=\"27\">Lifecycle · transmission mapping</tspan></text><text x=\"991\" y=\"810\" class=\"t s\" text-anchor=\"end\" fill=\"#C97B63\" font-weight=\"600\">/research</text><line x1=\"575\" y1=\"370\" x2=\"530\" y2=\"300\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"1025\" y1=\"370\" x2=\"1070\" y2=\"300\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"575\" y1=\"485\" x2=\"530\" y2=\"625\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"1025\" y1=\"485\" x2=\"1070\" y2=\"625\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"800\" y1=\"515\" x2=\"800\" y2=\"665\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/></svg>",
+  "paper": {
+    "url": "/media/research/ai-defit-2026-stablecoin-risk-framework.pdf",
+    "bytes": 11838783,
+    "sha256": "25eaf2418c2cb6c1a3fb20302203608973650f736893bd4b66811fe8bc54344d"
   },
-  "svg": {
-    "HOME-D01": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Stablecoin Research Hub Map</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Stablecoin Research Hub</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Start with a question, then move into mechanisms, evidence, data or research.</text><rect x=\"575\" y=\"335\" width=\"450\" height=\"180\" rx=\"90\" fill=\"#F3F7FC\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"800\" y=\"405\" class=\"t l\" text-anchor=\"middle\" fill=\"#315B9A\">Stablecoin</text><text x=\"800\" y=\"445\" class=\"t l\" text-anchor=\"middle\" fill=\"#315B9A\">Research Hub</text><rect x=\"80\" y=\"190\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"108\" y=\"238\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">How stablecoins work</text><text x=\"108\" y=\"280\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"108\" dy=\"0\">Reserve · collateral · redemption</tspan><tspan x=\"108\" dy=\"27\">arbitrage · liquidation</tspan></text><text x=\"506\" y=\"335\" class=\"t s\" text-anchor=\"end\" fill=\"#315B9A\" font-weight=\"600\">/about-stablecoins</text><rect x=\"1070\" y=\"190\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"1098\" y=\"238\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">Where they are actually live</text><text x=\"1098\" y=\"280\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"1098\" dy=\"0\">Regulation · licence · token status</tspan><tspan x=\"1098\" dy=\"27\">user access</tspan></text><text x=\"1496\" y=\"335\" class=\"t s\" text-anchor=\"end\" fill=\"#6B65A8\" font-weight=\"600\">/regional-developments</text><rect x=\"80\" y=\"570\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"108\" y=\"618\" class=\"t l\" text-anchor=\"start\" fill=\"#3A7D78\">How AI agents can pay</text><text x=\"108\" y=\"660\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"108\" dy=\"0\">Identity · authorization · execution</tspan><tspan x=\"108\" dy=\"27\">payment rails</tspan></text><text x=\"506\" y=\"715\" class=\"t s\" text-anchor=\"end\" fill=\"#3A7D78\" font-weight=\"600\">/agentic-payments</text><rect x=\"1070\" y=\"570\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#517A63\" stroke-width=\"2\"/><text x=\"1098\" y=\"618\" class=\"t l\" text-anchor=\"start\" fill=\"#517A63\">What markets and chains show</text><text x=\"1098\" y=\"660\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"1098\" dy=\"0\">Supply · price · on-chain activity</tspan><tspan x=\"1098\" dy=\"27\">reserves · macro · adoption</tspan></text><text x=\"1496\" y=\"715\" class=\"t s\" text-anchor=\"end\" fill=\"#517A63\" font-weight=\"600\">/market-data</text><rect x=\"565\" y=\"665\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"593\" y=\"713\" class=\"t l\" text-anchor=\"start\" fill=\"#C97B63\">How risks form and propagate</text><text x=\"593\" y=\"755\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"593\" dy=\"0\">Framework · measurement · TE</tspan><tspan x=\"593\" dy=\"27\">Hawkes · validation</tspan></text><text x=\"991\" y=\"810\" class=\"t s\" text-anchor=\"end\" fill=\"#C97B63\" font-weight=\"600\">/research</text><line x1=\"575\" y1=\"370\" x2=\"530\" y2=\"300\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"1025\" y1=\"370\" x2=\"1070\" y2=\"300\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"575\" y1=\"485\" x2=\"530\" y2=\"625\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"1025\" y1=\"485\" x2=\"1070\" y2=\"625\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"800\" y1=\"515\" x2=\"800\" y2=\"665\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/></svg>",
-    "HOME-D02": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Research Maturity</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Research Maturity</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Completed outputs, interim results, validation and future plans must remain visibly distinct.</text><rect x=\"60\" y=\"205\" width=\"355\" height=\"500\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"88\" y=\"260\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">Completed / Public</text><text x=\"98\" y=\"325\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"122\" y=\"325\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"122\" dy=\"0\">55-risk conceptual framework</tspan></text><text x=\"98\" y=\"387\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"122\" y=\"387\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"122\" dy=\"0\">AI-DEFIT 2026 paper</tspan></text><text x=\"98\" y=\"449\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"122\" y=\"449\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"122\" dy=\"0\">Asia Stablecoin Development</tspan></text><text x=\"98\" y=\"511\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"122\" y=\"511\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"122\" dy=\"0\">Agentic Payments</tspan></text><rect x=\"450\" y=\"205\" width=\"355\" height=\"500\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"478\" y=\"260\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">Interim empirical results</text><text x=\"488\" y=\"325\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"512\" y=\"325\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"512\" dy=\"0\">Measurable risk nodes</tspan></text><text x=\"488\" y=\"387\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"512\" y=\"387\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"512\" dy=\"0\">Transfer Entropy</tspan></text><text x=\"488\" y=\"449\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"512\" y=\"449\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"512\" dy=\"0\">Multivariate Hawkes</tspan></text><text x=\"488\" y=\"511\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"512\" y=\"511\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"512\" dy=\"0\">Stress / case result packages</tspan></text><rect x=\"840\" y=\"205\" width=\"355\" height=\"500\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"868\" y=\"260\" class=\"t l\" text-anchor=\"start\" fill=\"#3A7D78\">Validation in progress</text><text x=\"878\" y=\"325\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"902\" y=\"325\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"902\" dy=\"0\">Robustness</tspan></text><text x=\"878\" y=\"387\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"902\" y=\"387\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"902\" dy=\"0\">Reproducibility</tspan></text><text x=\"878\" y=\"449\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"902\" y=\"449\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"902\" dy=\"0\">Out-of-sample evaluation</tspan></text><text x=\"878\" y=\"511\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"902\" y=\"511\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"902\" dy=\"0\">Event interpretation</tspan></text><rect x=\"1230\" y=\"205\" width=\"355\" height=\"500\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#94A3B8\" stroke-width=\"2\"/><text x=\"1258\" y=\"260\" class=\"t l\" text-anchor=\"start\" fill=\"#94A3B8\">Planned</text><text x=\"1268\" y=\"325\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"1292\" y=\"325\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1292\" dy=\"0\">Continuous monitoring</tspan></text><text x=\"1268\" y=\"387\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"1292\" y=\"387\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1292\" dy=\"0\">Interpretable warnings</tspan></text><text x=\"1268\" y=\"449\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">•</text><text x=\"1292\" y=\"449\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1292\" dy=\"0\">Integrated research +</tspan><tspan x=\"1292\" dy=\"25\">market data</tspan></text><rect x=\"310\" y=\"760\" width=\"980\" height=\"72\" rx=\"14\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"800\" y=\"805\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">No live depeg probability or production-grade early-warning score.</text></svg>",
-    "RES-D01": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Research Pipeline and Status</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.xs{font-size:18px} .s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Research Pipeline &amp; Status</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Arrows show research dependency — not that every stage is finished.</text><rect x=\"38\" y=\"245\" width=\"235\" height=\"345\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"56\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#315B9A\"><tspan x=\"56\" dy=\"0\">Conceptual</tspan><tspan x=\"56\" dy=\"24\">framework</tspan></text><rect x=\"56\" y=\"360\" width=\"199\" height=\"38\" rx=\"19.0\" fill=\"#F1F4F8\"/><text x=\"155.5\" y=\"385.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#315B9A\" font-weight=\"600\">COMPLETED</text><text x=\"56\" y=\"450\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"56\" dy=\"0\">55-risk taxonomy</tspan><tspan x=\"56\" dy=\"30\">lifecycle × amplification</tspan></text><line x1=\"273\" y1=\"417\" x2=\"302\" y2=\"417\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"302\" y=\"245\" width=\"235\" height=\"345\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#5F7DB5\" stroke-width=\"2\"/><text x=\"320\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#5F7DB5\"><tspan x=\"320\" dy=\"0\">Measurement</tspan><tspan x=\"320\" dy=\"24\">design</tspan></text><rect x=\"320\" y=\"360\" width=\"199\" height=\"38\" rx=\"19.0\" fill=\"#F1F4F8\"/><text x=\"419.5\" y=\"385.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#5F7DB5\" font-weight=\"600\">REFINING</text><text x=\"320\" y=\"450\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"320\" dy=\"0\">construct → indicator</tspan><tspan x=\"320\" dy=\"30\">data feasibility</tspan></text><line x1=\"537\" y1=\"417\" x2=\"566\" y2=\"417\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"566\" y=\"245\" width=\"235\" height=\"345\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"584\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#3A7D78\"><tspan x=\"584\" dy=\"0\">Audited</tspan><tspan x=\"584\" dy=\"24\">data</tspan></text><rect x=\"584\" y=\"360\" width=\"199\" height=\"38\" rx=\"19.0\" fill=\"#F1F4F8\"/><text x=\"683.5\" y=\"385.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#3A7D78\" font-weight=\"600\">ESTABLISHED</text><text x=\"584\" y=\"450\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"584\" dy=\"0\">issuance · reserves</tspan><tspan x=\"584\" dy=\"30\">chain · market · macro</tspan></text><line x1=\"801\" y1=\"417\" x2=\"830\" y2=\"417\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"830\" y=\"245\" width=\"235\" height=\"345\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"848\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#6B65A8\"><tspan x=\"848\" dy=\"0\">Transmission</tspan><tspan x=\"848\" dy=\"24\">models</tspan></text><rect x=\"848\" y=\"360\" width=\"199\" height=\"38\" rx=\"19.0\" fill=\"#F1F4F8\"/><text x=\"947.5\" y=\"385.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#6B65A8\" font-weight=\"600\">INTERIM</text><text x=\"848\" y=\"450\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"848\" dy=\"0\">Transfer Entropy</tspan><tspan x=\"848\" dy=\"30\">Multivariate Hawkes</tspan></text><line x1=\"1065\" y1=\"417\" x2=\"1094\" y2=\"417\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1094\" y=\"245\" width=\"235\" height=\"345\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"1112\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#C97B63\"><tspan x=\"1112\" dy=\"0\">Validation</tspan></text><rect x=\"1112\" y=\"360\" width=\"199\" height=\"38\" rx=\"19.0\" fill=\"#F1F4F8\"/><text x=\"1211.5\" y=\"385.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">IN PROGRESS</text><text x=\"1112\" y=\"450\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1112\" dy=\"0\">cases · stress · robustness</tspan><tspan x=\"1112\" dy=\"30\">reproducibility · OOS</tspan></text><line x1=\"1329\" y1=\"417\" x2=\"1358\" y2=\"417\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1358\" y=\"245\" width=\"235\" height=\"345\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#94A3B8\" stroke-width=\"2\"/><text x=\"1376\" y=\"293\" class=\"t s\" text-anchor=\"start\" fill=\"#94A3B8\"><tspan x=\"1376\" dy=\"0\">Monitoring</tspan></text><rect x=\"1376\" y=\"360\" width=\"199\" height=\"38\" rx=\"19.0\" fill=\"#F1F4F8\"/><text x=\"1475.5\" y=\"385.0\" class=\"t xs\" text-anchor=\"middle\" fill=\"#94A3B8\" font-weight=\"600\">PLANNED</text><text x=\"1376\" y=\"450\" class=\"t xs\" text-anchor=\"start\" fill=\"#1F2937\"><tspan x=\"1376\" dy=\"0\">continuous signals</tspan><tspan x=\"1376\" dy=\"30\">interpretable warnings</tspan></text><rect x=\"235\" y=\"690\" width=\"1130\" height=\"95\" rx=\"16\" fill=\"#FBFCFE\" stroke=\"#C8D2E1\" stroke-width=\"2\"/><text x=\"800\" y=\"730\" class=\"t s\" text-anchor=\"middle\" fill=\"#667085\" font-weight=\"600\">Current public state</text><text x=\"800\" y=\"765\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\">Conceptual outputs are public; quantitative models remain research-stage and under validation.</text></svg>",
-    "RES-D02": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Quantitative Research Map</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Quantitative Risk-Transmission Research</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Continuous risk states and extreme events are analysed through complementary models.</text><text x=\"120\" y=\"210\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">Continuous risk states</text><rect x=\"100\" y=\"260\" width=\"600\" height=\"90\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"400\" y=\"315\" class=\"t s\" text-anchor=\"middle\" fill=\"#315B9A\" font-weight=\"600\">Measured risk indicators / nodes</text><line x1=\"400\" y1=\"350\" x2=\"400\" y2=\"385\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"100\" y=\"385\" width=\"600\" height=\"90\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#5F7DB5\" stroke-width=\"2\"/><text x=\"400\" y=\"440\" class=\"t s\" text-anchor=\"middle\" fill=\"#5F7DB5\" font-weight=\"600\">Rolling windows</text><line x1=\"400\" y1=\"475\" x2=\"400\" y2=\"510\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"100\" y=\"510\" width=\"600\" height=\"90\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"400\" y=\"565\" class=\"t s\" text-anchor=\"middle\" fill=\"#6B65A8\" font-weight=\"600\">Transfer Entropy</text><line x1=\"400\" y1=\"600\" x2=\"400\" y2=\"635\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"100\" y=\"635\" width=\"600\" height=\"90\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"400\" y=\"690\" class=\"t s\" text-anchor=\"middle\" fill=\"#3A7D78\" font-weight=\"600\">Directed, time-varying transmission network</text><text x=\"900\" y=\"210\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">Extreme events</text><rect x=\"880\" y=\"260\" width=\"600\" height=\"90\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#5F7DB5\" stroke-width=\"2\"/><text x=\"1180\" y=\"315\" class=\"t s\" text-anchor=\"middle\" fill=\"#5F7DB5\" font-weight=\"600\">Threshold / event construction</text><line x1=\"1180\" y1=\"350\" x2=\"1180\" y2=\"385\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"880\" y=\"385\" width=\"600\" height=\"90\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"1180\" y=\"440\" class=\"t s\" text-anchor=\"middle\" fill=\"#6B65A8\" font-weight=\"600\">Multivariate Hawkes</text><line x1=\"1180\" y1=\"475\" x2=\"1180\" y2=\"510\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"880\" y=\"510\" width=\"600\" height=\"90\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"1180\" y=\"565\" class=\"t s\" text-anchor=\"middle\" fill=\"#3A7D78\" font-weight=\"600\">Self-excitation / cross-excitation</text><rect x=\"230\" y=\"690\" width=\"1140\" height=\"95\" rx=\"16\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"800\" y=\"730\" class=\"t s\" text-anchor=\"middle\" fill=\"#C97B63\" font-weight=\"600\">Validation layer</text><text x=\"800\" y=\"765\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\">Historical cases · stress scenarios · robustness · out-of-sample · reproducibility</text><line x1=\"800\" y1=\"785\" x2=\"800\" y2=\"830\" stroke=\"#94A3B8\" stroke-width=\"4\" marker-end=\"url(#a)\" stroke-dasharray=\"10 8\"/><rect x=\"575\" y=\"835\" width=\"450\" height=\"42\" rx=\"21.0\" fill=\"#EEF2F7\"/><text x=\"800.0\" y=\"863.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#94A3B8\" font-weight=\"600\">Future: monitoring / interpretable warnings</text></svg>",
-    "RES-D03": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>From Taxonomy to Measurement</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">From Taxonomy to Measurement</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">The 55-risk framework is a conceptual decomposition — not a fixed empirical node count.</text><rect x=\"80\" y=\"250\" width=\"400\" height=\"350\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"280\" y=\"305\" class=\"t l\" text-anchor=\"middle\" fill=\"#315B9A\">55 atomic risks</text><text x=\"280\" y=\"345\" class=\"t s\" text-anchor=\"middle\" fill=\"#667085\">Completed conceptual taxonomy</text><rect x=\"130\" y=\"395\" width=\"300\" height=\"34\" rx=\"17.0\" fill=\"#EEF3F9\"/><text x=\"280.0\" y=\"419.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\" font-weight=\"600\">financial</text><rect x=\"130\" y=\"437\" width=\"300\" height=\"34\" rx=\"17.0\" fill=\"#EEF3F9\"/><text x=\"280.0\" y=\"461.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\" font-weight=\"600\">institutional</text><rect x=\"130\" y=\"479\" width=\"300\" height=\"34\" rx=\"17.0\" fill=\"#EEF3F9\"/><text x=\"280.0\" y=\"503.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\" font-weight=\"600\">technical</text><rect x=\"130\" y=\"521\" width=\"300\" height=\"34\" rx=\"17.0\" fill=\"#EEF3F9\"/><text x=\"280.0\" y=\"545.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\" font-weight=\"600\">governance</text><rect x=\"130\" y=\"563\" width=\"300\" height=\"34\" rx=\"17.0\" fill=\"#EEF3F9\"/><text x=\"280.0\" y=\"587.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#1F2937\" font-weight=\"600\">DeFi / market</text><line x1=\"480\" y1=\"425\" x2=\"575\" y2=\"425\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"575\" y=\"215\" width=\"450\" height=\"420\" rx=\"18\" fill=\"#FBFCFE\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"800\" y=\"270\" class=\"t l\" text-anchor=\"middle\" fill=\"#6B65A8\">Measurement screening</text><text x=\"650\" y=\"335\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">✓ economic construct</text><text x=\"650\" y=\"390\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">✓ measurable proxy</text><text x=\"650\" y=\"445\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">✓ data quality</text><text x=\"650\" y=\"500\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">✓ time frequency</text><text x=\"650\" y=\"555\" class=\"t s\" text-anchor=\"start\" fill=\"#1F2937\">✓ comparability</text><line x1=\"1025\" y1=\"425\" x2=\"1120\" y2=\"425\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><rect x=\"1120\" y=\"250\" width=\"400\" height=\"350\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"1320\" y=\"305\" class=\"t l\" text-anchor=\"middle\" fill=\"#3A7D78\">Empirical risk nodes</text><text x=\"1320\" y=\"345\" class=\"t s\" text-anchor=\"middle\" fill=\"#667085\">Measurable representation</text><text x=\"1320\" y=\"395\" class=\"t s\" text-anchor=\"middle\" fill=\"#667085\">for quantitative analysis</text><rect x=\"1170\" y=\"475\" width=\"300\" height=\"42\" rx=\"21.0\" fill=\"#EEF6F5\"/><text x=\"1320.0\" y=\"503.0\" class=\"t s\" text-anchor=\"middle\" fill=\"#3A7D78\" font-weight=\"600\">node count not fixed</text><rect x=\"300\" y=\"710\" width=\"1000\" height=\"84\" rx=\"14\" fill=\"#FFF9F4\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"800\" y=\"760\" class=\"t l\" text-anchor=\"middle\" fill=\"#C97B63\">55 ≠ 55 direct model nodes</text></svg>"
-  },
-  "hashes": {
-    "HOME-D01-research-hub-map.svg": "84ab2aab1562a99a84f6d86672eccb3ab3e1909d03208db241253585b7d12b78",
-    "HOME-D02-research-maturity.svg": "5b578cbbc02e5c3700d4cf5250e1cc2611224000cfb78b06dedb8ac718924d76",
-    "RES-D01-research-pipeline-status.svg": "831cc87a92c883a57b3058915c76baf8b7abb98c4315d247b8e4114970a4cafa",
-    "RES-D02-quantitative-research-map.svg": "068e842b115a441e1f99d26f185afa9aa1de08102257f9fe6129805be52aa183",
-    "RES-D03-taxonomy-to-measurement.svg": "23bb1f54214623c49a9297b693b49ccb8ce0c7dfacf4c4ce14c01c50c1ad0d86"
+  "labels": {
+    "CURRENT_STUDY": {
+      "label_en": "Current study",
+      "label_zh": "当前研究"
+    },
+    "ACCEPTED_CONFERENCE_PAPER": {
+      "label_en": "Accepted conference paper",
+      "label_zh": "会议论文已接收"
+    },
+    "FUTURE_RESEARCH": {
+      "label_en": "Future research",
+      "label_zh": "未来研究"
+    }
   }
 }

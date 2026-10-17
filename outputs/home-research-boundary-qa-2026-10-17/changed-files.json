@@ -1,0 +1,76 @@
+{
+  "implementation_test_documentation_count": 14,
+  "files": [
+    {
+      "path": "artifacts/stablecoin-hub/src/pages/home-overview.tsx",
+      "state": "modified",
+      "sha256": "8b94f5700f708e8843bd9c7be9ae816029c8769760d6bf64b2e2e5026b678f85"
+    },
+    {
+      "path": "artifacts/stablecoin-hub/src/pages/research.tsx",
+      "state": "modified",
+      "sha256": "46ad187d1efa84f7f345e8cfa714797d122f86aa63ed922a17967dfbcd391bb8"
+    },
+    {
+      "path": "artifacts/stablecoin-hub/src/data/home-research.ts",
+      "state": "modified",
+      "sha256": "10aad0061837f031a1c816098198f0d7c6802ba173d936dd29186d85f044d279"
+    },
+    {
+      "path": "artifacts/stablecoin-hub/src/data/home-research-english-copy.ts",
+      "state": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "artifacts/stablecoin-hub/src/data/home-research-v02.generated.json",
+      "state": "modified",
+      "sha256": "0e3b8d035c9ea02bd996b57ac7770233014db978893b312fcb460e1a4f7ee204"
+    },
+    {
+      "path": "artifacts/stablecoin-hub/src/components/home-research-ui.tsx",
+      "state": "modified",
+      "sha256": "5b821ca3243a127db469a01b549159719068796c87e1b8c2f0c6546ff0071359"
+    },
+    {
+      "path": "scripts/tests/home-research.test.ts",
+      "state": "modified",
+      "sha256": "cc901d3ba352e3f228b0a55da8871f6f740982738fb023b9ccac1a1eabc01f72"
+    },
+    {
+      "path": "scripts/prepare-home-research-package.mjs",
+      "state": "modified",
+      "sha256": "a0321f0370e67b0143b3cc0e9e486e758b4f994e3bf2b275f3f9a819d0d95cb4"
+    },
+    {
+      "path": "artifacts/stablecoin-hub/public/home-research/v0.2/RES-D03-taxonomy-to-measurement.svg",
+      "state": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "artifacts/stablecoin-hub/public/home-research/v0.2/RES-D02-quantitative-research-map.svg",
+      "state": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "artifacts/stablecoin-hub/public/home-research/v0.2/HOME-D02-research-maturity.svg",
+      "state": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "artifacts/stablecoin-hub/public/home-research/v0.2/RES-D01-research-pipeline-status.svg",
+      "state": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "artifacts/stablecoin-hub/public/home-research/v0.2/HOME-D01-research-hub-map.svg",
+      "state": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "docs/planning/42-HomepageResearch研究边界纠正与验收.md",
+      "state": "new",
+      "sha256": "721b578cd091a5669edb5fa69b4747bee94cfcbfec3259cf29ea0c37b6ef9245"
+    }
+  ],
+  "qa_directory": "outputs/home-research-boundary-qa-2026-10-17/"
+}

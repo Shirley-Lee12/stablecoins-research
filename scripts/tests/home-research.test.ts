@@ -1,367 +1,423 @@
-import assert from "node:assert/strict";
 import { test } from "node:test";
-import { readFileSync, readdirSync } from "node:fs";
+import assert from "node:assert/strict";
+import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { createRequire } from "node:module";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
+import vm from "node:vm";
 import ts from "typescript";
-import {
-  RESEARCH_RECORD_ENGLISH,
-  FIGURE_ENGLISH_REPLACEMENTS,
-  applyFigureEnglishCopy,
-} from "../../artifacts/stablecoin-hub/src/data/home-research-english-copy.ts";
-
-const root = resolve(import.meta.dirname, "../..");
-const source = resolve(
-  root,
-  "docs/source-packages/home_research_codex_package_v0.2",
-);
-const read = (path: string) => readFileSync(resolve(root, path), "utf8");
-const original = (path: string) => readFileSync(resolve(source, path), "utf8");
-const data = JSON.parse(
+const root = resolve(import.meta.dirname, "../.."),
+  hub = resolve(root, "artifacts/stablecoin-hub/src");
+const read = (p: string) => readFileSync(resolve(root, p), "utf8");
+const pack = JSON.parse(
   read("artifacts/stablecoin-hub/src/data/home-research-v02.generated.json"),
 );
-const home = read("artifacts/stablecoin-hub/src/pages/home-overview.tsx");
-const research = read("artifacts/stablecoin-hub/src/pages/research.tsx");
-const adapter = read("artifacts/stablecoin-hub/src/data/home-research.ts");
-const ui = read("artifacts/stablecoin-hub/src/components/home-research-ui.tsx");
-
-test("the original 29-file source package remains unchanged", () => {
+const conference = JSON.parse(
+  read(
+    "artifacts/stablecoin-hub/src/data/conference-risk-framework-v02.generated.json",
+  ),
+);
+const req = createRequire(
+  resolve(root, "artifacts/stablecoin-hub/package.json"),
+);
+const React = req("react"),
+  { renderToStaticMarkup } = req("react-dom/server");
+function load(path: string, overrides: Record<string, any> = {}) {
+  const source = readFileSync(path, "utf8").replaceAll(
+    "import.meta.env",
+    '({BASE_URL:"/"})',
+  );
+  const code = ts.transpileModule(source, {
+    compilerOptions: {
+      target: ts.ScriptTarget.ES2022,
+      module: ts.ModuleKind.CommonJS,
+      jsx: ts.JsxEmit.ReactJSX,
+      esModuleInterop: true,
+    },
+  }).outputText;
+  const exports: any = {};
+  vm.runInNewContext(code, {
+    exports,
+    require: (id: string) => {
+      assert.ok(id in overrides, "Unexpected import " + id);
+      return overrides[id];
+    },
+  });
+  return exports;
+}
+const confData = load(resolve(hub, "data/conference-risk-framework.ts"), {
+  "./conference-risk-framework-v02.generated.json": conference,
+});
+const data = load(resolve(hub, "data/home-research.ts"), {
+  "./home-research-v02.generated.json": pack,
+  "./conference-risk-framework": confData,
+});
+const brand = load(resolve(hub, "lib/brand.ts"));
+let language = "en";
+const common: any = {
+  "react/jsx-runtime": req("react/jsx-runtime"),
+  react: React,
+  "lucide-react": req("lucide-react"),
+  wouter: {
+    Link: ({ children, ...props }: any) =>
+      React.createElement("a", props, children),
+  },
+  "@/lib/language-context": {
+    useLanguage: () => ({
+      language,
+      t: (en: string, zh: string) => (language === "en" ? en : zh),
+    }),
+  },
+  "@/data/home-research": data,
+};
+// Render all source popovers/tooltips and dialog bodies, including responsive copies.
+// This deliberately scans more than the closed-dialog DOM so concealment cannot pass.
+for (const [part, names] of Object.entries({
+  tooltip: ["Tooltip", "TooltipContent", "TooltipTrigger"],
+  popover: ["Popover", "PopoverContent", "PopoverTrigger"],
+  dialog: [
+    "Dialog",
+    "DialogContent",
+    "DialogDescription",
+    "DialogHeader",
+    "DialogTitle",
+    "DialogTrigger",
+  ],
+}))
+  common[`@/components/ui/${part}`] = Object.fromEntries(
+    names.map((name) => [
+      name,
+      ({ children, asChild, ...props }: any) =>
+        React.createElement(
+          "div",
+          Object.fromEntries(
+            Object.entries(props).filter(
+              ([k]) => k === "className" || k.startsWith("data-"),
+            ),
+          ),
+          children,
+        ),
+    ]),
+  );
+const ui = load(resolve(hub, "components/home-research-ui.tsx"), common);
+const home = load(resolve(hub, "pages/home-overview.tsx"), {
+  ...common,
+  "@/lib/brand": brand,
+  "@/components/home-research-ui": ui,
+}).default;
+const research = load(resolve(hub, "pages/research.tsx"), {
+  ...common,
+  "@/components/home-research-ui": ui,
+}).default;
+function render(page: any, lang = "en") {
+  language = lang;
+  return renderToStaticMarkup(React.createElement(page));
+}
+const strip = (s: string) =>
+  s
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/g, " ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#x27;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+const METHOD =
+  /Transfer Entropy|\bTE\b|conditional TE|group transfer entropy|\bEGTE\b|Hawkes|\bBOCD\b|\bGNN\b|\bXPENN\b|\bPCA\b|转移熵|传递熵|条件熵|霍克斯|自激模型|互激模型/i;
+const THESIS_STATUS =
+  /empirical network results|event extraction results|model estimates|model validation|measurement validation|robustness testing|thesis.stage|Stage 3[AB]|measurement specification|candidate indicator screening|Tier [123].*measurement|中期实证|阶段性实证|模型拟合|模型验证|测量验证|稳健性检验|样本外验证|已建立研究数据链|候选指标筛选|量化节点筛选/i;
+const CASE =
+  /stress testing|stress.test(?:ing)? results|historical event case analysis|Treasury.yield shock|redemption.rate simulation|liquidation.loss simulation|\b(?:LCR|NSFR|VaR|CoVaR)\b|压力测试|压力情景.*结果|历史.*案例.*(?:结果|验证)|赎回率模拟|清算损失模拟/i;
+const LEGACY =
+  /stablecoin de.?peg risk index|real.time (?:de.?peg|risk) probability|model calibrat|calibrated model|Q3 2024|2024年第三季度|adoption turnover rate|payment.gateway (?:partnership|cooperation)|operational early.warning system|production monitoring system|live risk engine|脱锚概率|脱锚风险指数|模型校准|支付网关合作|风险预警平台|可运行的预警系统|全球采用流转率/i;
+for (const [name, page] of [
+  ["home", home],
+  ["research", research],
+] as const)
+  for (const lang of ["en", "zh"]) {
+    test(`${name} ${lang} actual rendered body and all popup variants exclude thesis-only methods`, () =>
+      assert.doesNotMatch(strip(render(page, lang)), METHOD));
+    test(`${name} ${lang} actual rendered body excludes thesis empirical status, stress and case claims`, () => {
+      const html = render(page, lang);
+      assert.doesNotMatch(strip(html), THESIS_STATUS);
+      assert.doesNotMatch(strip(html), CASE);
+    });
+    test(`${name} ${lang} actual rendered body excludes legacy product claims`, () =>
+      assert.doesNotMatch(strip(render(page, lang)), LEGACY));
+    test(`${name} ${lang} preserves conference identity, acceptance, 55 and both mappings`, () => {
+      const text = strip(render(page, lang));
+      assert.ok(text.includes(pack.study.title));
+      assert.match(text, /AI-DEFIT/);
+      assert.match(text, /2026/);
+      assert.match(
+        text,
+        lang === "en"
+          ? /accepted conference paper/i
+          : /已接收会议论文|会议论文已接收/,
+      );
+      assert.match(
+        text,
+        lang === "en"
+          ? /55 atomic risks in the submitted framework/
+          : /已提交框架中的 55 个 atomic risks/,
+      );
+      assert.match(text, /T0–T3/);
+      assert.match(text, /L0–L3/);
+    });
+  }
+test("word-boundary method detection does not flag ordinary words or conference names", () => {
+  assert.doesNotMatch(
+    "Stablecoin research, completed framework, institution and AI-DEFIT",
+    METHOD,
+  );
+  assert.match("TE / Hawkes", METHOD);
+  assert.match("conditional TE", METHOD);
+});
+test("current study is only the framework and its accepted conference paper; future has a separate state", () => {
+  assert.deepEqual(
+    Array.from(data.RESEARCH_RECORDS, (r: any) => r.id),
+    ["risk-framework", "conference-paper"],
+  );
+  assert.deepEqual(Object.keys(pack.labels), [
+    "CURRENT_STUDY",
+    "ACCEPTED_CONFERENCE_PAPER",
+    "FUTURE_RESEARCH",
+  ]);
+  for (const page of [home, research]) {
+    const html = render(page);
+    assert.match(html, /data-home-current-study/);
+    assert.match(html, /data-home-future-research/);
+    assert.match(html, /not existing results and are not yet implemented/);
+    assert.match(
+      html,
+      /not constitute a validated model or a live monitoring product/,
+    );
+    assert.equal((html.match(/data-future-direction=/g) || []).length, 7);
+  }
+});
+test("both responsive variants retain source UI and current/future labels", () => {
+  for (const page of [home, research])
+    for (const lang of ["en", "zh"]) {
+      const h = render(page, lang);
+      assert.match(h, /data-research-status="CURRENT_STUDY"/);
+      assert.match(h, /data-research-status="FUTURE_RESEARCH"/);
+      assert.doesNotMatch(
+        h,
+        /data-home-(?:current-study|future-research)[^>]*class="[^"]*(?:hidden|sr-only)/,
+      );
+      assert.match(h, /sm:hidden/);
+      assert.match(h, /sm:inline/);
+    }
+});
+test("shared active metadata and constants are clean; retired English overrides cannot reintroduce claims", () => {
+  const content =
+    JSON.stringify(pack) +
+    JSON.stringify(data.RESEARCH_RECORDS) +
+    JSON.stringify(data.FRAMEWORK_STEPS) +
+    JSON.stringify(data.CONTRIBUTIONS);
+  assert.doesNotMatch(content, METHOD);
+  assert.doesNotMatch(content, THESIS_STATUS);
+  assert.doesNotMatch(content, LEGACY);
+  assert.equal(
+    existsSync(resolve(hub, "data/home-research-english-copy.ts")),
+    false,
+  );
+  for (const name of [
+    "HOME-D02",
+    "RES-D01",
+    "RES-D02",
+    "RES-D03",
+    "PROJECT_RESEARCH_BASELINE",
+    "INTERIM_EMPIRICAL_RESULTS",
+  ])
+    assert.ok(!content.includes(name));
+});
+test("runtime generator cannot reimport old research statuses, masters or empirical diagrams", () => {
+  const source = read("scripts/prepare-home-research-package.mjs");
+  assert.match(source, /conference_risk_framework_routes_v0\.2/);
+  assert.doesNotMatch(
+    source,
+    /read\("data\/RESEARCH_STATUS|read\("data\/STATUS_LABELS|CONTENT_MASTER|readdir\(/,
+  );
+  assert.match(source, /Framework · atomic risks/);
+  assert.match(source, /Lifecycle · transmission mapping/);
+  assert.deepEqual(pack.study, conference.study);
+  assert.deepEqual(pack.lifecycle, conference.lifecycle);
+  assert.deepEqual(pack.amplification, conference.amplification);
+  assert.deepEqual(pack.modules, conference.modules);
+  assert.deepEqual(pack.future, conference.future);
+});
+test("original home archive and source SVGs remain unchanged; old public diagram copies are retired", () => {
   const zip = resolve(root, "Homepage_Research_Codex_Ready_Package_V0.2.zip");
   const files = execFileSync("unzip", ["-Z1", zip], { encoding: "utf8" })
     .trim()
     .split("\n")
-    .filter((f) => !f.endsWith("/"));
+    .filter((p) => !p.endsWith("/"));
   assert.equal(files.length, 29);
-  for (const file of files)
+  for (const file of files) {
+    const rel = file.replace(/^home_research_codex_package_v0\.2\//, "");
     assert.deepEqual(
       readFileSync(
         resolve(
-          source,
-          file.replace(/^home_research_codex_package_v0\.2\//, ""),
+          root,
+          "docs/source-packages/home_research_codex_package_v0.2",
+          rel,
         ),
       ),
       execFileSync("unzip", ["-p", zip, file]),
     );
-});
-test("research statuses, bilingual masters and labels are copied without inferred facts", () => {
-  assert.equal(data.version, "0.2");
-  assert.equal(data.baseline, "2026-10-16");
-  assert.deepEqual(
-    data.research,
-    JSON.parse(original("data/RESEARCH_STATUS.json")),
-  );
-  assert.deepEqual(
-    data.labels,
-    JSON.parse(original("data/STATUS_LABELS.json")),
-  );
-  for (const page of ["home", "research"])
-    for (const [language, suffix] of [
-      ["en", "en"],
-      ["zh", "zh-CN"],
-    ])
-      assert.equal(
-        data.copy[page][language],
-        original(`content/${page.toUpperCase()}_CONTENT_MASTER.${suffix}.md`),
-      );
-  assert.equal(data.research.length, 7);
-  assert.equal(data.sources.length, 9);
-  assert.equal(data.pages.length, 2);
-  assert.equal(data.assets.length, 6);
-});
-test("five frozen SVGs are byte-identical and the old screenshot is not used", () => {
-  const dir = resolve(
-    root,
-    "artifacts/stablecoin-hub/public/home-research/v0.2",
-  );
-  const files = readdirSync(dir);
-  assert.equal(files.length, 5);
-  for (const file of files) {
-    const before = readFileSync(resolve(source, "visuals/final", file));
-    assert.deepEqual(readFileSync(resolve(dir, file)), before);
+  }
+  for (const file of [
+    "HOME-D01-research-hub-map.svg",
+    "HOME-D02-research-maturity.svg",
+    "RES-D01-research-pipeline-status.svg",
+    "RES-D02-quantitative-research-map.svg",
+    "RES-D03-taxonomy-to-measurement.svg",
+  ])
     assert.equal(
-      data.hashes[file],
-      createHash("sha256").update(before).digest("hex"),
+      existsSync(
+        resolve(
+          root,
+          "artifacts/stablecoin-hub/public/home-research/v0.2",
+          file,
+        ),
+      ),
+      false,
     );
-    const id = file.match(/^(HOME-D\d+|RES-D\d+)/)![0];
-    assert.equal(data.svg[id], before.toString());
-    assert.doesNotMatch(
-      before.toString(),
-      /<script|<image|<foreignObject|\son\w+=/i,
-    );
-  }
+});
+test("navigation map body, modal and small text all use the conference-only research description", () => {
+  const html = render(home);
+  assert.match(html, /data-hub-navigation-figure/);
+  assert.doesNotMatch(strip(html), METHOD);
+  assert.match(pack.navigation_svg, /Framework · atomic risks/);
+  assert.match(pack.navigation_svg, /Lifecycle · transmission mapping/);
   assert.doesNotMatch(
-    home + research + ui,
-    /current-homepage|<img|risk-lifecycle\.jpg|risk-amplification-pyramid|placeholder/i,
+    pack.navigation_svg,
+    /<script|<image|<foreignObject|\son\w+=/i,
+  );
+  assert.match(
+    read("artifacts/stablecoin-hub/src/components/home-research-ui.tsx"),
+    /hsl\(var\(--background\)\)/,
   );
 });
-test("homepage follows question-first hierarchy and Research follows the page manifest", () => {
-  const orders = [
-    [
-      home,
-      [
-        "hero",
-        "question-entry",
-        "current-research",
-        "research-status",
-        "evidence-principles",
-        "about-platform",
-      ],
-    ],
-    [
-      research,
-      [
-        "hero",
-        "pipeline",
-        "55-risk-framework",
-        "quantitative-research",
-        "evidence-modules",
-        "outputs",
-        "not-live",
-        "next-stage",
-      ],
-    ],
-  ] as const;
-  for (const [copy, ids] of orders) {
-    let previous = -1;
-    for (const id of ids) {
-      const index = copy.indexOf(`id="${id}"`);
-      assert.ok(index > previous, id);
-      previous = index;
-    }
+test("existing public paper and official programme remain accessible without private file links", () => {
+  assert.equal(
+    pack.paper.url,
+    "/media/research/ai-defit-2026-stablecoin-risk-framework.pdf",
+  );
+  const bytes = readFileSync(
+    resolve(root, "artifacts/stablecoin-hub/public" + pack.paper.url),
+  );
+  assert.equal(bytes.subarray(0, 5).toString(), "%PDF-");
+  assert.equal(
+    createHash("sha256").update(bytes).digest("hex"),
+    pack.paper.sha256,
+  );
+  const h = render(research);
+  assert.match(
+    h,
+    /href="\/media\/research\/ai-defit-2026-stablecoin-risk-framework\.pdf"/,
+  );
+  assert.match(
+    h,
+    /https:\/\/www\.lait\.fe\.uni-lj\.si\/AI-DEFIT\/program\.html/,
+  );
+  assert.doesNotMatch(
+    h,
+    /\/Users\/|file:\/\/|submission-orignal|\.docx|PROJECT_INTERNAL/,
+  );
+  assert.deepEqual(
+    pack.sources.map((s: any) => s.source_id),
+    ["SRC-HR-02", "SRC-HR-03", "SRC-HR-04"],
+  );
+});
+test("research retains all ten conceptual sections and the existing framework deep link", () => {
+  const h = render(research);
+  let position = -1;
+  for (const id of [
+    "study-overview",
+    "research-question",
+    "framework-architecture",
+    "55-risk-framework",
+    "lifecycle-mapping",
+    "amplification-mapping",
+    "transmission-logic",
+    "research-contribution",
+    "conference-paper",
+    "future-research",
+  ]) {
+    const next = h.indexOf(`id="${id}"`);
+    assert.ok(next > position, id);
+    position = next;
   }
-  const destinations = [...adapter.matchAll(/href: "(\/[^\"]*)"/g)]
-    .slice(0, 5)
-    .map((m) => m[1]);
-  assert.deepEqual(destinations, [
+  assert.match(
+    read("artifacts/stablecoin-hub/src/pages/research.tsx"),
+    /requestAnimationFrame/,
+  );
+  for (const r of [
+    "/quantitative",
+    "/quantitative/dimension-a",
+    "/quantitative/dimension-b",
+  ])
+    assert.ok(h.includes(`href="${r}"`));
+});
+test("framework logic and atomic interactions remain; representative examples are source-provided", () => {
+  const text = strip(render(research));
+  assert.match(
+    text,
+    /minimum useful risk unit for identification and measurement/,
+  );
+  assert.match(
+    text,
+    /Atomic does not mean causally or statistically independent/,
+  );
+  assert.match(text, /common financial risks from stablecoin-specific risks/);
+  for (const d of ["L0 ≠ L1", "L1 ≠ L2", "T0 ≠ L1", "T3 ≠ L3"])
+    assert.ok(text.includes(d));
+  const ids = [
+    ...render(research).matchAll(/data-conference-example="([^"]+)"/g),
+  ].map((m) => m[1]);
+  assert.deepEqual(ids, ["C5", "C26", "U18"]);
+  assert.equal(new Set(ids).size, 3);
+});
+test("homepage keeps mission, support, question entries and evidence links outside completed research", () => {
+  const text = strip(render(home));
+  assert.match(text, /Stablecoin Research Hub/);
+  assert.match(
+    text,
+    /Sponsored by the Academy of Internet Finance \(AIF\), Zhejiang University/,
+  );
+  const links = [...render(home).matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+  for (const href of [
     "/about-stablecoins",
     "/regional-developments",
     "/agentic-payments",
     "/market-data",
     "/research",
-  ]);
-  assert.doesNotMatch(home, /team|resource-count|partner.logo|progressbar/i);
-  assert.match(home, /Start with stablecoins/);
-  assert.match(home, /Explore our research/);
-  assert.match(research, /window.location.hash === "#55-risk-framework"/);
-  assert.match(research, /requestAnimationFrame/);
-});
-test("55 is a conceptual taxonomy, while TE/Hawkes are interim and validation is ongoing", () => {
-  const item = (id: string) =>
-    data.research.find((r: { id: string }) => r.id === id);
-  assert.equal(item("risk-framework").status, "COMPLETED_CONCEPTUAL_OUTPUT");
-  assert.equal(
-    item("quantitative-te-hawkes").status,
-    "INTERIM_EMPIRICAL_RESULTS",
-  );
-  assert.equal(item("stress-cases").status, "INTERIM_RESEARCH_RESULTS");
-  assert.equal(item("monitoring-platform").status, "PLANNED");
-  assert.equal(
-    data.labels.VALIDATION_IN_PROGRESS.label_en,
-    "Validation in progress",
-  );
-  assert.match(
-    adapter,
-    /does not imply that 55 variables are entered directly into a single empirical model/,
-  );
-  assert.match(research, /55 ≠ 55 direct model nodes/);
-  assert.match(research, /ResearchState status="VALIDATION_IN_PROGRESS"/);
-  assert.match(
-    research,
-    /Continuous monitoring and early warning remain future objectives, not deployed products/,
-  );
-  assert.match(
-    adapter,
-    /does not currently provide real-time depeg-probability estimates or a production-grade early-warning score/,
-  );
+    "/regulatory",
+    "/academic-resources",
+    "/experts",
+  ])
+    assert.ok(links.includes(href));
+  const current = render(home)
+    .split("data-home-current-study")[1]
+    .split("</section>")[0];
   assert.doesNotMatch(
-    home + research + adapter,
-    /55.{0,10}(?:live model nodes|direct model inputs)|calibrated probability:\s*[\d.]|depeg probability:\s*[\d.]/i,
+    current,
+    /asia-research|agentic-payments|evidence module complete|data-home-future-research/i,
   );
 });
-
-test("final English copy preserves Chinese literals and page layout attributes", () => {
-  const baselines = [
-    [
-      "src/pages/home-overview.tsx",
-      "a548a840586ad44b2e248c3ddd68ae1da48bb7a1548b914579ba401121de3d23",
-      "580659e11c19c32284c6b3e09bc4c174d836427f8e94f4c6fa25d762b625cf0d",
-    ],
-    [
-      "src/pages/research.tsx",
-      "2e1e5861e101d3487b4056338fb002cf61c4c852f501ed6e175c946564f71489",
-      "bb4e464a9daeab6e02d16791fa61f4b308783acd1a4e1aafbb107127cda6dd77",
-    ],
-    [
-      "src/data/home-research.ts",
-      "3d6c9caac28a728b47c1ecb823abc1cdef254f9fc10ac8e96044767b152d2efd",
-      "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    ],
-    [
-      "src/components/home-research-ui.tsx",
-      "5adeb73760354f3e55758e3099d0874d7a2b055350e67273b04eabb4097bbff3",
-      "7dc717fae4308653c6d055bc20521bcb1302574d0b3ae046e66ea69ed08a2212",
-    ],
-  ];
-  const hash = (value: unknown) =>
-    createHash("sha256").update(JSON.stringify(value)).digest("hex");
-  for (const [file, chineseHash, layoutHash] of baselines) {
-    const text = read(`artifacts/stablecoin-hub/${file}`);
-    const ast = ts.createSourceFile(
+test("three approved conference routes and mappings remain byte-identical during the cross-page correction", () => {
+  const before = JSON.parse(
+    read("outputs/home-research-boundary-qa-2026-10-17/scope-before.json"),
+  );
+  for (const [file, hash] of Object.entries(before.quantitative_routes))
+    assert.equal(
+      createHash("sha256")
+        .update(readFileSync(resolve(root, file)))
+        .digest("hex"),
+      hash,
       file,
-      text,
-      ts.ScriptTarget.Latest,
-      true,
-      ts.ScriptKind.TSX,
     );
-    const chinese: string[] = [];
-    function visit(node: ts.Node) {
-      if (
-        (ts.isStringLiteral(node) ||
-          ts.isNoSubstitutionTemplateLiteral(node) ||
-          ts.isJsxText(node)) &&
-        /\p{Script=Han}/u.test(node.text)
-      )
-        chinese.push(node.text);
-      ts.forEachChild(node, visit);
-    }
-    visit(ast);
-    assert.equal(hash(chinese), chineseHash, `${file}: Chinese unchanged`);
-    assert.equal(
-      hash(
-        [
-          ...text.matchAll(
-            /\b(?:className|id|data-[\w-]+)=(?:"[^"]*"|\{[^\n]*\})/g,
-          ),
-        ].map((m) => m[0]),
-      ),
-      layoutHash,
-      `${file}: layout unchanged`,
-    );
-  }
-});
-
-test("approved English corrections are public-facing and overrides cannot change research statuses", () => {
-  assert.match(home, /mechanisms, live products, regulation/);
-  assert.match(
-    research,
-    /From a conceptual risk framework to empirical risk-transmission analysis/,
-  );
-  assert.match(
-    research,
-    /identifying the structural risks stablecoins may face/,
-  );
-  assert.match(research, /What is not yet live/);
-  assert.match(research, /a deployed TE\/Hawkes risk engine/);
-  assert.match(adapter, /Core design established; refinement ongoing/);
-  assert.match(adapter, /Audited research data pipeline established/);
-  assert.match(
-    adapter,
-    /Interim results have been produced for directed, time-varying transmission among measured risk signals\./,
-  );
-  assert.match(
-    adapter,
-    /Interim model fits and cross-excitation patterns have been obtained, while out-of-sample performance and interpretation still require further validation\./,
-  );
-  assert.match(
-    adapter,
-    /Interim stress-scenario and historical case-study results have been produced; reproducibility and integrated validation remain in progress\./,
-  );
-  assert.match(adapter, /Regulatory coverage mapping/);
-  assert.match(adapter, /Integrated research and market data/);
-  assert.equal(
-    RESEARCH_RECORD_ENGLISH["risk-framework"].title_en,
-    "Full-lifecycle stablecoin risk framework",
-  );
-  for (const copy of Object.values(RESEARCH_RECORD_ENGLISH)) {
-    assert.ok(
-      Object.keys(copy).every((key) =>
-        ["title_en", "summary_en", "important_boundary_en"].includes(key),
-      ),
-    );
-    assert.doesNotMatch(
-      JSON.stringify(copy),
-      /result packages|stage results exist|validated findings/i,
-    );
-  }
-  assert.doesNotMatch(
-    home + research + adapter,
-    /result packages|stage results exist|real products|regulatory-coverage|integrated research\/market data|deployed live TE\/Hawkes/i,
-  );
-  assert.match(ui, /RESEARCH_RECORD_ENGLISH\[id\]/);
-  assert.match(ui, /applyFigureEnglishCopy\(raw\)/);
-});
-
-test("figure English corrections are reversible text-only substitutions", () => {
-  const unchangedMarkup = (svg: string) => svg.replace(/>([^<]*)</g, "><");
-  let changed = 0;
-  for (const svg of Object.values(data.svg) as string[]) {
-    const copy = applyFigureEnglishCopy(svg);
-    assert.equal(unchangedMarkup(copy), unchangedMarkup(svg));
-    assert.equal(
-      FIGURE_ENGLISH_REPLACEMENTS.reduce(
-        (text, [before, after]) => text.replaceAll(after, before),
-        copy,
-      ),
-      svg,
-    );
-    assert.doesNotMatch(copy, /result packages|Integrated research \+/i);
-    if (copy !== svg) changed++;
-  }
-  assert.equal(changed, 1);
-});
-test("approved evidence modules are linked and remain independent of empirical risk scores", () => {
-  for (const id of ["asia-research", "agentic-payments"]) {
-    const item = data.research.find((r: { id: string }) => r.id === id);
-    assert.equal(item.status, "COMPLETED_EVIDENCE_MODULE");
-    assert.equal(item.public, true);
-  }
-  assert.match(adapter, /"asia-research": "\/regional-developments"/);
-  assert.match(adapter, /"agentic-payments": "\/agentic-payments"/);
-  assert.match(research, /rather than being forced into one risk score/);
-  assert.match(ui, /item.public &&/);
-  for (const item of data.research.filter(
-    (r: { public: boolean }) => !r.public,
-  ))
-    assert.ok(!new RegExp(`"${item.id}": "\/`).test(adapter));
-});
-test("public citations are restricted to manifest URLs and private records have no downloads", () => {
-  const external = data.sources.filter((s: { url: string }) =>
-    /^https:\/\//.test(s.url),
-  );
-  assert.deepEqual(
-    external.map((s: { source_id: string }) => s.source_id),
-    ["SRC-HR-02", "SRC-HR-03", "SRC-HR-04"],
-  );
-  const refs = [...(home + research + ui).matchAll(/SRC-HR-\d+/g)].map(
-    (m) => m[0],
-  );
-  const ids = new Set(external.map((s: { source_id: string }) => s.source_id));
-  for (const id of refs) assert.ok(ids.has(id));
-  assert.match(ui, /source_id === id && \/\^https/);
-  assert.doesNotMatch(
-    home + research + ui + adapter,
-    /\/Users\/|file:\/\/|\.docx|\.pdf|download=|href=.*PROJECT_INTERNAL/,
-  );
-  assert.match(ui, /TooltipTrigger asChild/);
-  assert.match(ui, /PopoverTrigger asChild/);
-});
-test("institutional wording, bilingual support and theme-aware frozen figures are preserved", () => {
-  assert.match(
-    adapter,
-    /Sponsored by the Academy of Internet Finance \(AIF\), Zhejiang University\./,
-  );
-  assert.match(home, /BRAND.name.en, BRAND.name.zh/);
-  assert.match(ui, /hsl\(var\(--background\)\)/);
-  assert.match(ui, /hsl\(var\(--foreground\)\)/);
-  assert.match(ui, /closeLabel=/);
-  assert.match(ui, /mobileSummary/);
-  assert.match(home, /HOME-D01/);
-  assert.match(home, /HOME-D02/);
-  for (const id of ["RES-D01", "RES-D02", "RES-D03"])
-    assert.ok(research.includes(id));
-  assert.doesNotMatch(
-    home + research + ui,
-    /useQuery|fetch\(|researchRisks|lifecycleRiskCodes|setTheme/,
-  );
 });

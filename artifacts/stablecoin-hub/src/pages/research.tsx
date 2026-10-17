@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 import { useLanguage } from "@/lib/language-context";
 import {
-  PIPELINE,
-  QUANTITATIVE,
-  SCREENING,
-  NEXT_STAGE,
+  HOME_RESEARCH,
+  FRAMEWORK_STEPS,
+  CONTRIBUTIONS,
+  LIFECYCLE,
+  AMPLIFICATION,
+  MODULES,
+  DISTINCTIONS,
+  ATOMIC_BOUNDARY,
   TAXONOMY_BOUNDARY,
-  RESEARCH_BOUNDARY,
 } from "@/data/home-research";
 import {
   HubText,
@@ -16,25 +19,25 @@ import {
   HubCite,
   ResearchState,
   ResearchRecord,
-  ResearchFigure,
   ResearchSourceNote,
   PublicSourceLink,
+  ConferencePaperLink,
+  FutureResearch,
 } from "@/components/home-research-ui";
-
 export default function Research() {
   const { t } = useLanguage();
   useEffect(() => {
-    // The shared layout resets its own scroll container after route changes.
-    // Apply this page's explicit deep link afterwards, without changing global navigation.
     const frame = requestAnimationFrame(() => {
-      if (window.location.hash === "#55-risk-framework") {
-        document
-          .getElementById("55-risk-framework")
-          ?.scrollIntoView({ block: "start" });
-      }
+      const id = window.location.hash.slice(1);
+      if (id) document.getElementById(id)?.scrollIntoView({ block: "start" });
     });
     return () => cancelAnimationFrame(frame);
   }, []);
+  const examples = [
+    MODULES[0].risks[0],
+    MODULES[2].risks[1],
+    MODULES[6].risks[0],
+  ];
   return (
     <div
       data-home-research="research"
@@ -43,247 +46,294 @@ export default function Research() {
       <header id="hero" className="pb-9 pt-3 sm:pb-12">
         <p className="mb-4 text-xs font-semibold tracking-wider text-primary">
           {t(
-            "Our Research · Stablecoin risk and market structure",
-            "Our Research · 稳定币风险与市场结构",
+            "Our Research · AI-DEFIT 2026 conference study",
+            "我们的研究 · AI-DEFIT 2026 会议研究",
           )}
         </p>
         <h1 className="max-w-5xl font-serif text-3xl font-bold leading-tight tracking-tight text-primary sm:text-4xl xl:text-5xl">
           {t(
-            "From a conceptual risk framework to empirical risk-transmission analysis",
-            "从概念风险框架，到可量化的风险传导研究",
+            "A full-lifecycle framework for stablecoin risk",
+            "稳定币全生命周期风险框架",
           )}
         </h1>
         <p className="mt-5 max-w-5xl text-base leading-8 text-muted-foreground sm:text-lg">
           {t(
-            "Our research begins by identifying the structural risks stablecoins may face, then translates those risk concepts into measurable indicators, event definitions and network relationships. The conceptual framework and public evidence modules are complete. Transfer Entropy, multivariate Hawkes, stress-scenario analysis and historical-event validation have produced interim empirical results. Continuous monitoring and early warning remain future objectives, not deployed products.",
-            "我们的研究先回答“稳定币有哪些结构性风险”，再逐步把可测量风险转化为数据、事件与网络关系。当前已经形成公开的概念框架和多个专题证据模块，并进入 Transfer Entropy、Hawkes、压力情景和历史事件验证的实证阶段；持续监测与早期预警仍是后续目标，而不是已经上线的产品。",
+            "Our current study identifies atomic risks and maps their lifecycle locations and amplification/transmission roles. The accepted AI-DEFIT 2026 conference paper contributes a conceptual framework; later measurement and monitoring are future research directions.",
+            "当前研究识别 atomic risks，并映射它们的生命周期位置与放大 / 传导角色。AI-DEFIT 2026 已接收会议论文的贡献是概念框架；后续测量与监测属于未来研究方向。",
           )}
         </p>
       </header>
-
       <HubSection
-        id="pipeline"
+        id="study-overview"
         number="01"
-        title={[
-          "Research pipeline and status",
-          "研究不是一张“已完成系统”流程图",
-        ]}
-        intro={[
-          "Arrows express research dependency, not completion of every stage.",
-          "箭头表达研究依赖关系，不代表每个阶段均已完成。",
-        ]}
+        title={["Study overview", "研究概览"]}
       >
-        <ol className="grid gap-x-8 gap-y-7 md:grid-cols-2 xl:grid-cols-3">
-          {PIPELINE.map((step, i) => (
+        <div data-home-current-study>
+          <ResearchState status="CURRENT_STUDY" />
+          <p className="mt-4 max-w-4xl text-base leading-8">
+            {t(HOME_RESEARCH.study.title, HOME_RESEARCH.study.title)}
+          </p>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground">
+            {t(
+              "Xueli Li · Zhejiang University · Conference presentation, October 2026",
+              "Xueli Li · 浙江大学 · 会议报告，2026年10月",
+            )}
+          </p>
+          <p className="mt-3 max-w-4xl text-sm leading-7">
+            {t(
+              "The conference paper and its framework are the current research output presented here.",
+              "这里的当前研究成果限于该会议论文及其框架。",
+            )}
+          </p>
+        </div>
+      </HubSection>
+      <HubSection
+        id="research-question"
+        number="02"
+        title={["Research question & motivation", "研究问题与动机"]}
+      >
+        <p className="max-w-4xl text-base leading-8">
+          {t(
+            "Where do stablecoin risks enter and become relevant, and how can they interact, amplify and spread beyond one stablecoin system?",
+            "稳定币风险主要在哪里进入并变得相关？它们如何相互作用、放大，并越过单一稳定币的系统边界？",
+          )}
+        </p>
+        <p className="mt-4 max-w-4xl text-sm leading-7 text-muted-foreground">
+          {t(
+            "Stablecoins connect financial, institutional, technical and protocol relationships. Distinguishing common financial risks from stablecoin-specific risks helps clarify the source, location and role of a risk.",
+            "稳定币连接金融、机构、技术与协议关系。区分一般金融风险与稳定币特有风险，有助于明确风险来源、位置及角色。",
+          )}
+        </p>
+      </HubSection>
+      <HubSection
+        id="framework-architecture"
+        number="03"
+        title={["Framework architecture", "框架结构"]}
+      >
+        <ol
+          data-conceptual-architecture
+          className="grid gap-x-8 gap-y-5 md:grid-cols-2 xl:grid-cols-4"
+        >
+          {FRAMEWORK_STEPS.map((step, i) => (
             <li
-              key={step.title[0]}
-              data-pipeline-stage={i + 1}
-              className={`border-l-2 pl-4 ${i === 5 ? "border-dashed border-border" : "border-primary/35"}`}
+              key={step[0]}
+              className="min-w-0 border-l-2 border-primary/35 pl-4"
             >
-              <div className="flex items-baseline gap-3">
-                <span className="font-mono text-xs text-primary">0{i + 1}</span>
-                <h3 className="text-lg font-semibold">
-                  <HubText text={step.title} />
-                </h3>
-              </div>
-              <p className="mt-2 text-xs font-medium text-primary">
-                <HubText text={step.stage} />
-              </p>
-              {step.status && (
-                <div className="mt-2">
-                  <ResearchState status={step.status} />
-                </div>
-              )}
-              <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                <HubText text={step.detail} />
-              </p>
+              <span className="font-mono text-xs text-primary">0{i + 1}</span>
+              <h3 className="mt-2 text-base font-semibold">
+                <HubText text={step} />
+              </h3>
             </li>
           ))}
         </ol>
-        <ResearchFigure
-          id="RES-D01"
-          title={["Research Pipeline & Status", "研究流程与状态"]}
-          mobileSummary={[
-            "Conceptual framework: complete → measurement: core design established, refinement ongoing → audited research data pipeline: established → TE/Hawkes: interim results → validation: in progress → monitoring: planned.",
-            "概念框架：完成 → 测量设计：已形成、持续修订 → 研究数据链：已建立 → TE / Hawkes：中期结果 → 验证：进行中 → 监测：计划。",
-          ]}
-        />
-      </HubSection>
-
-      <HubSection
-        id="55-risk-framework"
-        number="02"
-        title={[
-          "Completed conceptual research: 55 atomic risks",
-          "已完成的概念研究：55 项原子风险",
-        ]}
-      >
-        <ResearchRecord id="risk-framework" link={false} compact />
-        <p className="mt-5 max-w-4xl text-base leading-8">
+        <p className="mt-5 max-w-4xl text-sm leading-7 text-muted-foreground">
           {t(
-            "The research accepted and presented at AI-DEFIT 2026 maps 55 conceptually distinct atomic risks across lifecycle position and amplification/transmission role.",
-            "已接收并在 AI-DEFIT 2026 展示的研究建立了一个全生命周期风险框架，将稳定币风险拆解为 55 项概念上相对独立的原子风险，并从生命周期位置、风险放大 / 传导作用两个维度进行交叉分析。",
-          )}
-          <HubCite ids={["SRC-HR-04"]} />
-        </p>
-        <HubBoundary text={TAXONOMY_BOUNDARY} />
-        <h3 className="mt-6 text-base font-semibold">
-          {t(
-            "From conceptual risks to empirical nodes",
-            "从理论风险到实证节点",
-          )}
-        </h3>
-        <p className="mt-3 max-w-4xl text-sm leading-7 text-muted-foreground">
-          {t(
-            "A conceptual taxonomy does not require placing all 55 variables into a statistical model. Empirical nodes are screened for:",
-            "55 是概念分类结果，不是要求把 55 个变量全部同时放进一个统计模型。量化节点需要根据以下条件筛选：",
-          )}
-        </p>
-        <ul className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-          {SCREENING.map((s) => (
-            <li key={s[0]} className="border-l border-primary/35 pl-3">
-              <HubText text={s} />
-            </li>
-          ))}
-        </ul>
-        <ResearchFigure
-          id="RES-D03"
-          title={["From Taxonomy to Measurement", "从风险分类到测量"]}
-          mobileSummary={[
-            "55 atomic risks form a completed conceptual taxonomy. Measurement screening produces an empirical representation; no fixed current node count is published. 55 ≠ 55 direct model nodes.",
-            "55 项原子风险属于已完成的概念分类。经过测量条件筛选后，形成适合实证分析的节点表示；不公开未冻结的当前节点数量。55 ≠ 55 个直接模型节点。",
-          ]}
-        />
-      </HubSection>
-
-      <HubSection
-        id="quantitative-research"
-        number="03"
-        title={["Current quantitative research", "当前量化研究"]}
-      >
-        <div className="space-y-7">
-          {QUANTITATIVE.map((q) => (
-            <article
-              key={q.title[0]}
-              data-quantitative-method={q.title[0]}
-              className="grid gap-4 border-b border-border pb-7 md:grid-cols-[0.7fr_1.3fr]"
-            >
-              <div>
-                <h3 className="text-xl font-semibold">
-                  <HubText text={q.title} />
-                </h3>
-                <div className="mt-3">
-                  <ResearchState status={q.status} />
-                </div>
-              </div>
-              <div>
-                <p className="text-base font-medium leading-7">
-                  <HubText text={q.question} />
-                </p>
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                  <HubText text={q.result} />
-                </p>
-                <p className="mt-3 text-sm leading-7">
-                  <HubText text={q.boundary} />
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
-        <ResearchFigure
-          id="RES-D02"
-          title={[
-            "Quantitative Risk-Transmission Research",
-            "量化风险传导研究",
-          ]}
-          mobileSummary={[
-            "Continuous risk states → measured nodes → rolling windows → Transfer Entropy. Extreme events → event construction → multivariate Hawkes. Both require case, stress, robustness, out-of-sample and reproducibility validation before future monitoring.",
-            "连续风险状态 → 测量节点 → 滚动窗口 → Transfer Entropy；极端事件 → 事件构建 → 多元 Hawkes。两条路径都需要案例、压力、稳健性、样本外及可复现性验证，之后才进入未来监测。",
-          ]}
-        />
-        <ResearchState status="VALIDATION_IN_PROGRESS" />
-      </HubSection>
-
-      <HubSection
-        id="evidence-modules"
-        number="04"
-        title={["Research evidence modules", "研究证据模块"]}
-        intro={[
-          "These sit alongside quantitative risk research. They supply evidence on institutions, products and infrastructure rather than being forced into one risk score.",
-          "这些模块与风险量化研究并列：它们提供制度、产品和基础设施层的事实证据，而不是被强行塞进同一个风险分数。",
-        ]}
-      >
-        <div className="grid gap-8 md:grid-cols-2">
-          <ResearchRecord id="asia-research" />
-          <ResearchRecord id="agentic-payments" />
-        </div>
-      </HubSection>
-
-      <HubSection
-        id="outputs"
-        number="05"
-        title={["Research outputs", "研究产出"]}
-      >
-        <ResearchRecord id="conference-paper" link={false} />
-        <div className="mt-4">
-          <PublicSourceLink
-            id="SRC-HR-04"
-            text={["AI-DEFIT 2026 programme", "AI-DEFIT 2026 会议议程"]}
-          />
-        </div>
-        <div className="mt-7 grid gap-8 lg:grid-cols-3">
-          <ResearchRecord id="quantitative-te-hawkes" link={false} />
-          <ResearchRecord id="stress-cases" link={false} />
-          <ResearchRecord id="monitoring-platform" link={false} />
-        </div>
-      </HubSection>
-
-      <HubSection
-        id="not-live"
-        number="06"
-        title={["What is not yet live", "明确没有上线的东西"]}
-      >
-        <ResearchState status="PLANNED" />
-        <HubBoundary text={RESEARCH_BOUNDARY} />
-        <p className="max-w-4xl text-sm leading-7 text-muted-foreground">
-          {t(
-            "The website does not provide real-time stablecoin risk probabilities, calibrated live risk scores or a deployed TE/Hawkes risk engine. Quantitative outputs remain research-stage; model calibration and production early warning must not be represented as completed. No payment-gateway data partnership is claimed.",
-            "当前没有上线的实时稳定币风险概率、已校准实时风险评分或实时 TE / Hawkes 风险引擎。量化输出仍属研究阶段，不能将模型校准和生产级预警表述为已完成；本站也不声称已与支付网关合作获取指标。",
-          )}
-        </p>
-      </HubSection>
-
-      <HubSection
-        id="next-stage"
-        number="07"
-        title={["Next stage", "下一阶段"]}
-        intro={[
-          "The priority is not more indicators, but a stronger basis for measurement, modelling and validation.",
-          "下一阶段研究重点不是“再增加更多指标”，而是提高测量、模型与验证基础。",
-        ]}
-      >
-        <div className="mb-5">
-          <ResearchState status="VALIDATION_IN_PROGRESS" />
-        </div>
-        <ul className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-          {NEXT_STAGE.map((item) => (
-            <li key={item[0]} className="border-l border-primary/35 pl-3">
-              <HubText text={item} />
-            </li>
-          ))}
-        </ul>
-        <p className="mt-6 max-w-4xl text-sm leading-7 text-muted-foreground">
-          {t(
-            "Only after these links are stable can monitoring and warnings have a sufficient research foundation.",
-            "只有这些环节稳定后，监测和预警才有足够研究基础。",
+            "These are conceptual decomposition and mapping steps. The seven risk modules organise the presentation of the submitted framework; they are not a new formal taxonomy.",
+            "这些是概念风险拆解与映射步骤。七个风险模块用于组织已提交框架的展示，不是一套新的正式分类。",
           )}
         </p>
         <div className="mt-4">
           <HubLink
-            href="/market-data"
-            text={["Inspect market evidence", "查看市场证据"]}
+            href="/quantitative"
+            text={["Explore the risk framework", "查看风险框架"]}
           />
         </div>
+      </HubSection>
+      <HubSection
+        id="55-risk-framework"
+        number="04"
+        title={["Atomic risk framework", "Atomic Risk 框架"]}
+      >
+        <ResearchRecord id="risk-framework" link={false} compact />
+        <p className="mt-5 max-w-4xl text-base leading-8">
+          {t(
+            "An atomic risk is the minimum useful risk unit for identification and measurement in this framework.",
+            "Atomic risk 是本框架中用于识别和测量的最小有用风险单元。",
+          )}
+        </p>
+        <HubBoundary text={ATOMIC_BOUNDARY} />
+        <HubBoundary text={TAXONOMY_BOUNDARY} />
+        <h3 className="mt-6 text-base font-semibold">
+          {t(
+            "Representative risks from the conference study",
+            "会议研究中的代表性风险",
+          )}
+        </h3>
+        <ul className="mt-3 grid gap-4 text-sm leading-7 md:grid-cols-3">
+          {examples.map((r) => (
+            <li
+              key={r.id}
+              data-conference-example={r.id}
+              className="min-w-0 border-l border-primary/35 pl-3"
+            >
+              <span className="mr-2 font-mono text-xs text-primary">
+                {r.id}
+              </span>
+              <HubText text={r.name} />
+            </li>
+          ))}
+        </ul>
+      </HubSection>
+      <HubSection
+        id="lifecycle-mapping"
+        number="05"
+        title={["Lifecycle mapping — T0–T3", "生命周期映射 — T0–T3"]}
+      >
+        <p className="mb-5 max-w-4xl text-sm leading-7 text-muted-foreground">
+          {t(
+            "The T dimension identifies the primary operational location of a risk. It does not rank severity.",
+            "T 维度标记风险的主要运行位置，不表示严重程度排名。",
+          )}
+        </p>
+        <ol className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {LIFECYCLE.map((s) => (
+            <li
+              key={s.level}
+              data-research-lifecycle={s.level}
+              className="min-w-0 border-t-2 border-primary/35 pt-4"
+            >
+              <span className="font-mono text-lg text-primary">{s.level}</span>
+              <h3 className="mt-2 text-base font-semibold leading-7">
+                <HubText text={s.title} />
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                <HubText text={s.description} />
+              </p>
+            </li>
+          ))}
+        </ol>
+        <HubBoundary
+          text={[
+            "Protocol embedding is the T1/T2 boundary. A DEX trade can remain T1; lending, collateral and LP positions belong to T2.",
+            "T1/T2 的边界是协议嵌入。DEX 交易仍可属于 T1；借贷、抵押与 LP 头寸属于 T2。",
+          ]}
+        />
+        <HubLink
+          href="/quantitative/dimension-a"
+          text={["Read Lifecycle Mapping (T0–T3)", "查看生命周期映射（T0–T3）"]}
+        />
+      </HubSection>
+      <HubSection
+        id="amplification-mapping"
+        number="06"
+        title={[
+          "Amplification & transmission mapping — L0–L3",
+          "放大与传导映射 — L0–L3",
+        ]}
+      >
+        <p className="mb-5 max-w-4xl text-sm leading-7 text-muted-foreground">
+          {t(
+            "The L dimension distinguishes an initial trigger, pre-existing vulnerability, activated feedback and cross-system outcomes.",
+            "L 维度区分初始触发、预先存在的脆弱性、被激活的反馈与跨系统结果。",
+          )}
+        </p>
+        <ol className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {AMPLIFICATION.map((s) => (
+            <li
+              key={s.level}
+              data-research-amplification={s.level}
+              className="min-w-0 border-t-2 border-primary/35 pt-4"
+            >
+              <span className="font-mono text-lg text-primary">{s.level}</span>
+              <h3 className="mt-2 text-base font-semibold leading-7">
+                <HubText text={s.title} />
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                <HubText text={s.description} />
+              </p>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-5">
+          <HubLink
+            href="/quantitative/dimension-b"
+            text={[
+              "Read Amplification & Transmission Mapping (L0–L3)",
+              "查看放大与传导映射（L0–L3）",
+            ]}
+          />
+        </div>
+      </HubSection>
+      <HubSection
+        id="transmission-logic"
+        number="07"
+        title={["Risk transmission logic", "风险传导逻辑"]}
+      >
+        <p className="max-w-4xl text-base leading-8">
+          {t(
+            "Risks can interact and amplify one another. Cross-system transmission begins when effects move beyond the focal stablecoin into other stablecoins, DeFi protocols, broader crypto markets or traditional financial markets.",
+            "风险可以相互作用与放大。当影响越过目标稳定币，传向其他稳定币、DeFi 协议、更广泛的加密市场或传统金融市场时，便进入跨系统传导。",
+          )}
+        </p>
+        <p className="mt-4 max-w-4xl text-sm leading-7 text-muted-foreground">
+          {t(
+            "This is a conceptual interpretation of risk roles. Structural vulnerability can pre-date a trigger; lifecycle position and causal role are distinct properties.",
+            "这是对风险角色的概念解释。结构脆弱性可以先于触发事件存在；生命周期位置与因果角色是不同属性。",
+          )}
+        </p>
+        <dl className="mt-6 grid gap-x-8 sm:grid-cols-2">
+          {DISTINCTIONS.map((d) => (
+            <div key={d.id} className="min-w-0 border-t border-border py-4">
+              <dt className="font-mono font-semibold text-primary">{d.id}</dt>
+              <dd className="mt-2 text-sm leading-7">
+                <HubText text={d.left} />
+                {t(" versus ", " 与 ")}
+                <HubText text={d.right} />
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </HubSection>
+      <HubSection
+        id="research-contribution"
+        number="08"
+        title={["Research contribution", "研究贡献"]}
+      >
+        <ul className="grid gap-5 sm:grid-cols-2">
+          {CONTRIBUTIONS.map((c) => (
+            <li
+              key={c[0]}
+              className="min-w-0 border-l-2 border-primary/35 pl-4 text-sm leading-7"
+            >
+              <HubText text={c} />
+            </li>
+          ))}
+        </ul>
+      </HubSection>
+      <HubSection
+        id="conference-paper"
+        number="09"
+        title={["Conference paper", "会议论文"]}
+      >
+        <ResearchRecord id="conference-paper" link={false} />
+        <div className="mt-5 flex flex-wrap gap-x-7 gap-y-2">
+          <ConferencePaperLink />
+          <PublicSourceLink
+            id="SRC-HR-04"
+            text={[
+              "AI-DEFIT 2026 official programme",
+              "AI-DEFIT 2026 官方议程",
+            ]}
+          />
+        </div>
+        <p className="mt-4 text-xs leading-6 text-muted-foreground">
+          {t(
+            "The paper link opens the existing public study material.",
+            "论文链接打开现有公开研究材料。",
+          )}
+          <HubCite ids={["SRC-HR-04"]} />
+        </p>
+      </HubSection>
+      <HubSection
+        id="future-research"
+        number="10"
+        title={["Future research", "未来研究"]}
+        intro={[
+          "Potential extensions beyond the current conference study.",
+          "超出当前会议研究的潜在后续延展。",
+        ]}
+      >
+        <FutureResearch />
       </HubSection>
       <ResearchSourceNote />
     </div>

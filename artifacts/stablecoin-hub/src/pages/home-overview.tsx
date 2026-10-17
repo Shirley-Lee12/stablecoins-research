@@ -11,10 +11,9 @@ import { useLanguage } from "@/lib/language-context";
 import { BRAND } from "@/lib/brand";
 import {
   QUESTIONS,
-  MATURITY,
   PUBLIC_SUPPORT_LINE,
   EVIDENCE_KINDS,
-  RESEARCH_BOUNDARY,
+  EVIDENCE_LINKS,
   TAXONOMY_BOUNDARY,
 } from "@/data/home-research";
 import {
@@ -23,9 +22,9 @@ import {
   HubBoundary,
   HubLink,
   HubCite,
-  ResearchState,
+  FutureResearch,
   ResearchRecord,
-  ResearchFigure,
+  NavigationFigure,
   ResearchSourceNote,
 } from "@/components/home-research-ui";
 
@@ -109,26 +108,22 @@ export default function HomeOverview() {
             );
           })}
         </div>
-        <ResearchFigure
-          id="HOME-D01"
-          title={["Research Hub Map", "研究平台导航图"]}
-          mobileSummary={[
-            "Five connected questions lead to mechanisms, regional evidence, agentic payments, market data and research. Use the links above to choose a starting point.",
-            "五个相互联系的问题分别通向稳定机制、区域证据、智能体支付、市场数据和研究。可通过上方入口选择起点。",
-          ]}
-        />
+        <NavigationFigure />
       </HubSection>
 
       <HubSection
         id="current-research"
         number="02"
-        title={[
-          "Research and evidence available now",
-          "当前可查看的研究与证据",
-        ]}
+        title={["Completed research · Current study", "已完成研究 · 当前研究"]}
       >
-        <div className="grid gap-8 md:grid-cols-3">
-          {["risk-framework", "asia-research", "agentic-payments"].map((id) => (
+        <p className="mb-6 max-w-4xl text-sm leading-7 text-muted-foreground">
+          {t(
+            "One current study: the framework and its accepted conference paper.",
+            "同一项当前研究：风险框架及其已接收的会议论文。",
+          )}
+        </p>
+        <div data-home-current-study className="grid gap-8 md:grid-cols-2">
+          {["risk-framework", "conference-paper"].map((id) => (
             <ResearchRecord key={id} id={id} compact />
           ))}
         </div>
@@ -138,49 +133,19 @@ export default function HomeOverview() {
       <HubSection
         id="research-status"
         number="03"
-        title={["Where is the research now?", "研究正在推进到哪里？"]}
+        title={["Future research", "未来研究"]}
         intro={[
-          "Completed outputs, interim empirical results, validation and future plans remain separate.",
-          "区分已完成成果、中期实证结果、进行中的验证与未来计划，不把“计划”写成“成果”。",
+          "Potential extensions of the conference framework.",
+          "会议框架的潜在后续延展。",
         ]}
       >
-        <div className="grid gap-x-7 gap-y-8 sm:grid-cols-2 xl:grid-cols-4">
-          {MATURITY.map((group, i) => (
-            <article
-              key={group.title[0]}
-              className={`border-t-2 pt-4 ${i === 3 ? "border-dashed border-border" : "border-primary/40"}`}
-            >
-              <h3 className="text-base font-semibold">
-                <HubText text={group.title} />
-              </h3>
-              {group.status && (
-                <div className="mt-3">
-                  <ResearchState status={group.status} />
-                </div>
-              )}
-              <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
-                {group.items.map((item) => (
-                  <li key={item[0]}>
-                    <HubText text={item} />
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
+        <FutureResearch compact />
+        <div className="mt-5">
+          <HubLink
+            href="/research#future-research"
+            text={["Read the research directions", "查看未来研究方向"]}
+          />
         </div>
-        <ResearchFigure
-          id="HOME-D02"
-          title={["Research Maturity", "研究成熟度"]}
-          mobileSummary={[
-            "Completed conceptual outputs and evidence modules are public. TE/Hawkes have interim results; validation is in progress; continuous monitoring and warning signals are planned.",
-            "概念成果与证据专题已公开；TE / Hawkes 已有中期结果；验证仍在进行；持续监测与预警信号属于未来计划。",
-          ]}
-        />
-        <HubBoundary text={RESEARCH_BOUNDARY} />
-        <HubLink
-          href="/research"
-          text={["Inspect the research status", "查看研究阶段与边界"]}
-        />
       </HubSection>
 
       <HubSection
@@ -208,11 +173,10 @@ export default function HomeOverview() {
             "重要动态事实保留来源和核验日期。UNKNOWN 不用推测补齐。",
           )}
         </p>
-        <div className="mt-3">
-          <HubLink
-            href="/market-data"
-            text={["View data and methods", "查看数据与方法"]}
-          />
+        <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+          {EVIDENCE_LINKS.map((item) => (
+            <HubLink key={item.href} href={item.href} text={item.title} />
+          ))}
         </div>
       </HubSection>
 
