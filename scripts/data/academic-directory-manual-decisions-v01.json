@@ -1,0 +1,267 @@
+{
+  "version": "0.1",
+  "decisionDate": "2026-10-17",
+  "authority": {
+    "filename": "Academic_Directory_Manual_Reconciliation_Decisions_V0.1.md",
+    "sha256": "3edc55d56dad54d56180217617e2671a226a86181bdbf7dfd8e1107318572cb3"
+  },
+  "scope": "Existing public identities only; no resource/author inserts, deletes, moderation, ownership or editorial-summary changes.",
+  "schemaBoundary": "No version/alias/revision fields exist. Earlier versions and DOI alias are preserved here only; no schema redesign.",
+  "resources": [
+    {
+      "seedId": "RES-001",
+      "existingId": 83,
+      "expectedBefore": {
+        "id": 83,
+        "title": "What Keeps Stablecoins Stable?",
+        "authors": ["Richard Lyons", "Ganesh Viswanath-Natraj"],
+        "source_type": "journal_article",
+        "published_date": "2020",
+        "doi": "10.3386/w27136",
+        "url": "https://doi.org/10.3386/w27136"
+      },
+      "canonical": {
+        "title": "What keeps stablecoins stable?",
+        "authors": ["Richard K. Lyons", "Ganesh Viswanath-Natraj"],
+        "source_type": "journal_article",
+        "published_date": "2023",
+        "doi": "10.1016/j.jimonfin.2022.102777",
+        "url": "https://www.sciencedirect.com/science/article/pii/S0261560622001802"
+      },
+      "publicationDate": "2023",
+      "earlierVersions": [
+        {
+          "label": "NBER Working Paper 27136",
+          "doi": "10.3386/w27136"
+        }
+      ],
+      "doiAliases": []
+    },
+    {
+      "seedId": "RES-003",
+      "existingId": 70,
+      "expectedBefore": {
+        "id": 70,
+        "title": "Digital Money Creation and Algorithmic Stablecoin Run",
+        "authors": ["Kanis Saengchote", "Krislert Samphantharak"],
+        "source_type": "working_paper",
+        "published_date": "2024",
+        "doi": "10.2139/ssrn.4710515",
+        "url": "https://doi.org/10.2139/ssrn.4710515"
+      },
+      "canonical": {
+        "title": "Digital money creation and algorithmic stablecoin run",
+        "authors": ["Kanis Saengchote", "Krislert Samphantharak"],
+        "source_type": "journal_article",
+        "published_date": "2024",
+        "doi": "10.1016/j.frl.2024.105435",
+        "url": "https://www.sciencedirect.com/science/article/pii/S1544612324004653"
+      },
+      "publicationDate": "2024-06",
+      "earlierVersions": [],
+      "doiAliases": []
+    },
+    {
+      "seedId": "RES-005",
+      "existingId": 114,
+      "expectedBefore": {
+        "id": 114,
+        "title": "Stablecoin Runs and the Centralization of Arbitrage",
+        "authors": ["Yiming Ma", "Yao Zeng", "Anthony Lee Zhang"],
+        "source_type": "working_paper",
+        "published_date": "2025",
+        "doi": "10.2139/ssrn.5278385",
+        "url": "https://doi.org/10.2139/ssrn.5278385"
+      },
+      "canonical": {
+        "title": "Stablecoin Runs and the Centralization of Arbitrage",
+        "authors": ["Yiming Ma", "Yao Zeng", "Anthony Lee Zhang"],
+        "source_type": "journal_article",
+        "published_date": "2026",
+        "doi": "10.1093/rfs/hhag072",
+        "url": "https://academic.oup.com/rfs/advance-article-abstract/doi/10.1093/rfs/hhag072/8782924"
+      },
+      "publicationDate": "2026-09-03",
+      "earlierVersions": [
+        {
+          "label": "NBER Working Paper 33882",
+          "doi": "10.3386/w33882"
+        }
+      ],
+      "doiAliases": []
+    },
+    {
+      "seedId": "RES-007",
+      "existingId": 445,
+      "expectedBefore": {
+        "id": 445,
+        "title": "Runs, Transparency and Regulation: on the Optimal Design of Stablecoin Frameworks",
+        "authors": ["Olli Castrén", "Riccardo Russo"],
+        "source_type": "journal_article",
+        "published_date": "2025",
+        "doi": "10.1016/j.econlet.2025.112720",
+        "url": "https://www.eba.europa.eu/sites/default/files/2024-08/52b7f7c9-1bf5-4dd8-948f-f31d9c02d1db/Stablecoins_240424.pdf"
+      },
+      "canonical": {
+        "title": "Runs, transparency and regulation: On the optimal design of stablecoin frameworks",
+        "authors": ["Olli Castrén", "Riccardo Russo"],
+        "source_type": "journal_article",
+        "published_date": "2026",
+        "doi": "10.1016/j.econlet.2025.112720",
+        "url": "https://www.sciencedirect.com/science/article/pii/S0165176525005579"
+      },
+      "publicationDate": "2026-01",
+      "earlierVersions": [
+        {
+          "label": "EBA Staff Paper Series No. 18 (2024)",
+          "url": "https://www.eba.europa.eu/sites/default/files/2024-08/52b7f7c9-1bf5-4dd8-948f-f31d9c02d1db/Stablecoins_240424.pdf"
+        }
+      ],
+      "doiAliases": []
+    },
+    {
+      "seedId": "RES-009",
+      "existingId": 67,
+      "expectedBefore": {
+        "id": 67,
+        "title": "Stablecoins and Safe Asset Prices",
+        "authors": ["Iñaki Aldasoro", "Rashad Ahmed"],
+        "source_type": "working_paper",
+        "published_date": "2025",
+        "doi": "10.2139/ssrn.5242448",
+        "url": "https://doi.org/10.2139/ssrn.5242448"
+      },
+      "canonical": {
+        "title": "Stablecoins and safe asset prices",
+        "authors": ["Rashad Ahmed", "Iñaki Aldasoro"],
+        "source_type": "working_paper",
+        "published_date": "2025",
+        "doi": "10.2139/ssrn.5242448",
+        "url": "https://www.bis.org/publications/working-paper-1270-stablecoins-and-safe-asset-prices"
+      },
+      "publicationDate": "2025-05-28",
+      "earlierVersions": [],
+      "doiAliases": []
+    },
+    {
+      "seedId": "RES-012",
+      "existingId": 68,
+      "expectedBefore": {
+        "id": 68,
+        "title": "From Par to Pressure: Liquidity, Redemptions, and Fire Sales with a Systemic Stablecoin",
+        "authors": ["Marco Gross", "Richard Senner"],
+        "source_type": "working_paper",
+        "published_date": "2026",
+        "doi": "10.5089/9798229036795.001.a001",
+        "url": "https://doi.org/10.5089/9798229036795.001.a001"
+      },
+      "canonical": {
+        "title": "From Par to Pressure: Liquidity, Redemptions, and Fire Sales with a Systemic Stablecoin",
+        "authors": ["Marco Gross", "Richard Senner"],
+        "source_type": "working_paper",
+        "published_date": "2026",
+        "doi": "10.5089/9798229036795.001",
+        "url": "https://www.elibrary.imf.org/view/journals/001/2026/005/article-A001-en.xml"
+      },
+      "publicationDate": "2026-01-16",
+      "earlierVersions": [],
+      "doiAliases": ["10.5089/9798229036795.001.A001"]
+    },
+    {
+      "seedId": "RES-020",
+      "existingId": 57,
+      "expectedBefore": {
+        "id": 57,
+        "title": "Stablecoins: Risks, Potential and Regulation",
+        "authors": ["Douglas W. Arner", "Raphael Auer", "Jon Frost"],
+        "source_type": "working_paper",
+        "published_date": "2021",
+        "doi": "10.2139/ssrn.3979495",
+        "url": "https://doi.org/10.2139/ssrn.3979495"
+      },
+      "canonical": {
+        "title": "Stablecoins: risks, potential and regulation",
+        "authors": ["Douglas Arner", "Raphael Auer", "Jon Frost"],
+        "source_type": "working_paper",
+        "published_date": "2020",
+        "doi": "10.2139/ssrn.3979495",
+        "url": "https://www.bis.org/publications/working-paper-905-stablecoins-risks-potential-and-regulation"
+      },
+      "publicationDate": "2020-11-24",
+      "earlierVersions": [],
+      "doiAliases": []
+    }
+  ],
+  "researchers": [
+    {
+      "seedId": "RSC-001",
+      "existingId": 100,
+      "name": "Ganesh Viswanath-Natraj",
+      "institution": "Warwick Business School",
+      "role": "Associate Professor",
+      "profileUrl": "https://warwick.ac.uk/fac/soc/wbs/subjects/finance/faculty/",
+      "verificationType": "OFFICIAL_INSTITUTION_PROFILE",
+      "representativePublicResourceIds": [83]
+    },
+    {
+      "seedId": "RSC-002",
+      "existingId": 200,
+      "name": "Yiming Ma",
+      "institution": "Columbia Business School",
+      "role": "Regina Pitaro Associate Professor of Business, Finance Division",
+      "profileUrl": "https://business.columbia.edu/faculty/people/yiming-ma",
+      "verificationType": "OFFICIAL_PROFILE",
+      "representativePublicResourceIds": [114]
+    },
+    {
+      "seedId": "RSC-003",
+      "existingId": 201,
+      "name": "Yao Zeng",
+      "institution": "The Wharton School, University of Pennsylvania",
+      "role": "Assistant Professor of Finance",
+      "profileUrl": "https://fnce.wharton.upenn.edu/profile/yaozeng/",
+      "verificationType": "OFFICIAL_PROFILE",
+      "representativePublicResourceIds": [114]
+    },
+    {
+      "seedId": "RSC-004",
+      "existingId": 202,
+      "name": "Anthony Lee Zhang",
+      "institution": "Chicago Booth School of Business",
+      "role": "Associate Professor of Finance",
+      "profileUrl": "https://www.chicagobooth.edu/faculty/directory/z/anthony-lee-zhang",
+      "verificationType": "OFFICIAL_PROFILE",
+      "representativePublicResourceIds": [114]
+    },
+    {
+      "seedId": "RSC-005",
+      "existingId": 35,
+      "name": "Gary B. Gorton",
+      "institution": "Yale School of Management",
+      "role": "Frederick Frank Class of 1954 Professor Emeritus of Management & Finance",
+      "profileUrl": "https://som.yale.edu/faculty-research/faculty-directory/gary-b-gorton",
+      "verificationType": "OFFICIAL_PROFILE",
+      "representativePublicResourceIds": [24]
+    },
+    {
+      "seedId": "RSC-006",
+      "existingId": 213,
+      "name": "Jeffery Y. Zhang",
+      "institution": "University of Michigan Law School",
+      "role": "Assistant Professor of Law",
+      "profileUrl": "https://michigan.law.umich.edu/faculty-and-scholarship/our-faculty/jeffery-zhang",
+      "verificationType": "OFFICIAL_PROFILE",
+      "representativePublicResourceIds": [24]
+    },
+    {
+      "seedId": "RSC-009",
+      "existingId": 97,
+      "name": "Marco Gross",
+      "institution": "International Monetary Fund",
+      "role": "Institutional researcher",
+      "profileUrl": "https://www.elibrary.imf.org/view/journals/001/2026/005/article-A001-en.xml",
+      "verificationType": "CURRENT_PUBLICATION_AFFILIATION",
+      "representativePublicResourceIds": [68]
+    }
+  ]
+}

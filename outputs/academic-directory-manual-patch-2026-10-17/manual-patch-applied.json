@@ -1,0 +1,114 @@
+{
+  "mode": "APPLY_BOUNDED_MANUAL_PATCH",
+  "authority": {
+    "filename": "Academic_Directory_Manual_Reconciliation_Decisions_V0.1.md",
+    "sha256": "3edc55d56dad54d56180217617e2671a226a86181bdbf7dfd8e1107318572cb3"
+  },
+  "resource_decisions": [
+    {
+      "seedId": "RES-001",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_EDITORIAL_DECISION_V0_1",
+      "existingId": 83
+    },
+    {
+      "seedId": "RES-003",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_EDITORIAL_DECISION_V0_1",
+      "existingId": 70
+    },
+    {
+      "seedId": "RES-005",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_EDITORIAL_DECISION_V0_1",
+      "existingId": 114
+    },
+    {
+      "seedId": "RES-007",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_EDITORIAL_DECISION_V0_1",
+      "existingId": 445
+    },
+    {
+      "seedId": "RES-009",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_EDITORIAL_DECISION_V0_1",
+      "existingId": 67
+    },
+    {
+      "seedId": "RES-012",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_EDITORIAL_DECISION_V0_1",
+      "existingId": 68
+    },
+    {
+      "seedId": "RES-020",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_EDITORIAL_DECISION_V0_1",
+      "existingId": 57
+    }
+  ],
+  "researcher_decisions": [
+    {
+      "seedId": "RSC-001",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_IDENTITY_DECISION_V0_1",
+      "existingId": 100
+    },
+    {
+      "seedId": "RSC-002",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_IDENTITY_DECISION_V0_1",
+      "existingId": 200
+    },
+    {
+      "seedId": "RSC-003",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_IDENTITY_DECISION_V0_1",
+      "existingId": 201
+    },
+    {
+      "seedId": "RSC-004",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_IDENTITY_DECISION_V0_1",
+      "existingId": 202
+    },
+    {
+      "seedId": "RSC-005",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_IDENTITY_DECISION_V0_1",
+      "existingId": 35
+    },
+    {
+      "seedId": "RSC-006",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_IDENTITY_DECISION_V0_1",
+      "existingId": 213
+    },
+    {
+      "seedId": "RSC-009",
+      "state": "MATCH_EXISTING",
+      "key": "HUMAN_IDENTITY_DECISION_V0_1",
+      "existingId": 97
+    }
+  ],
+  "writes": {
+    "resource_updates": 7,
+    "new_resources": 0,
+    "new_authors": 0,
+    "metadata_inserted": 7,
+    "profiles_inserted": 7,
+    "relationship_changes": 0
+  },
+  "protected_state_unchanged": true,
+  "nonpublic_unchanged": true,
+  "duplicates_before": {
+    "doi_groups": 2,
+    "canonical_url_groups": 3
+  },
+  "duplicates_after": {
+    "doi_groups": 2,
+    "canonical_url_groups": 3
+  },
+  "new_hard_conflicts": []
+}

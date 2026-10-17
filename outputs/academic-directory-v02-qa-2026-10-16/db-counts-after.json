@@ -1,0 +1,18 @@
+{
+  "status": "QUERY_SUCCESS",
+  "read_only": true,
+  "resources": {
+    "total": 434,
+    "approved_public": 395,
+    "pending_private": 24,
+    "rejected": 12,
+    "withdrawn": 3
+  },
+  "researchers": {
+    "authors_total": 1109,
+    "linked_to_public_resource_authors": 843,
+    "verified_public_profiles": 3,
+    "public_resource_metadata_records": 12
+  },
+  "non_public_state_counts_unchanged": true
+}

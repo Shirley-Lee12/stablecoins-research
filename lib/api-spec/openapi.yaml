@@ -24,6 +24,48 @@ tags:
   - name: subscriptions
     description: Admin-managed literature discovery subscriptions
 paths:
+  /public-directory/resources:
+    get:
+      operationId: getPublicResearchLibrary
+      tags: [resources]
+      summary: Approved public research resources, independent of caller authentication
+      description: Public allowlist only. Count and records use the same approved query. No private submissions, account IDs, moderation notes or abstracts. Query failure returns 503 without a numeric total.
+      responses:
+        "200":
+          description: Successful public query; an empty records array is a real zero-match result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [version, kind, records, total]
+                properties:
+                  version: {type: string, enum: ["0.2"]}
+                  kind: {type: string, enum: [resources]}
+                  total: {type: integer, minimum: 0}
+                  records: {type: array, items: {type: object, additionalProperties: true}}
+        "503":
+          description: Public directory temporarily unavailable; no factual zero
+  /public-directory/researchers:
+    get:
+      operationId: getPublicResearcherDirectory
+      tags: [resources]
+      summary: Verified public researcher profiles with approved public works
+      description: Default verification-date order. Publication-time affiliation stays distinct. No citation or article-count ranking. Institutions derive from returned verified profiles and public works.
+      responses:
+        "200":
+          description: Successful public profile query
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [version, kind, records, total]
+                properties:
+                  version: {type: string, enum: ["0.2"]}
+                  kind: {type: string, enum: [researchers]}
+                  total: {type: integer, minimum: 0}
+                  records: {type: array, items: {type: object, additionalProperties: true}}
+        "503":
+          description: Public directory temporarily unavailable; no factual zero
   /stablecoin-market:
     get:
       operationId: getStablecoinMarket

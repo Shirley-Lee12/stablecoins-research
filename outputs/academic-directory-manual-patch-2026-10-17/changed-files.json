@@ -1,0 +1,78 @@
+{
+  "scope": "2026-10-17 manual reconciliation patch only",
+  "implementation_files": [
+    {
+      "path": "scripts/academic-directory-manual-preflight.mjs",
+      "change": "新增：只读公开目标与匿名保护指纹检查",
+      "sha256": "25f0fc2d4774d7387862764942cbe715f2818bf2d1ab75fc08213ead86638da2"
+    },
+    {
+      "path": "scripts/academic-directory-manual-patch.mjs",
+      "change": "新增：限定14项人工裁决的事务补丁，不创建资源/作者",
+      "sha256": "51be78a3453173f77fd9b1b0f716dd765de6885be656530a6362f415600c18f9"
+    },
+    {
+      "path": "scripts/lib/directory-manual-reconciliation.mjs",
+      "change": "新增：精确人工映射与 hard identity/publication guard",
+      "sha256": "b7f9a6e2da3f2ddac4fac8b151bc6e4febc3a118e4e11d327525075741cabe47"
+    },
+    {
+      "path": "scripts/data/academic-directory-manual-decisions-v01.json",
+      "change": "新增：独立人工裁决ledger，不修改原始package/seed",
+      "sha256": "aaa3766cab4d27052c5103eec9db1bb99effaf91ff44b915408816eac4ba4c64"
+    },
+    {
+      "path": "scripts/tests/academic-directory-manual.test.ts",
+      "change": "新增：10项补丁安全、幂等与真实审计测试",
+      "sha256": "040c24adc665324c901f7f00abe71cefa7c0f328c299cd16584f2e0627e109e8"
+    },
+    {
+      "path": "scripts/academic-directory-db.mjs",
+      "change": "修改：显式只读 --manual-decisions 模式；与完整apply互斥",
+      "sha256": "d8d5410cf39d04d976939b65349e01f404e973c8224aa4c905780b1b47bd691f"
+    },
+    {
+      "path": "docs/planning/40-AcademicResourcesResearchersV0.2施工与验收.md",
+      "change": "追加：2026-10-17 MANUAL RECONCILIATION PATCH；历史记录保留",
+      "sha256": "c8bfcf2bbfc430b87772aa779b8f20e1ef2af7e3a546b92e4ecd7dc540dcffd8"
+    }
+  ],
+  "evidence_files": [
+    "outputs/academic-directory-manual-patch-2026-10-17/acceptance.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/browser-content-checks.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/browser-errors.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/build.log",
+    "outputs/academic-directory-manual-patch-2026-10-17/diff-check.log",
+    "outputs/academic-directory-manual-patch-2026-10-17/dry-run.log",
+    "outputs/academic-directory-manual-patch-2026-10-17/ganesh-mobile-320.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/ganesh-mobile-light-zh-full.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/imf-mobile-320-zh.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/imf-mobile-light-zh-full.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/imf-mobile-source-dark-en.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/imf-mobile-source-light-zh.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/library-rfs-desktop-dark.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/library-rfs-desktop-light-full.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/library-rfs-desktop-light.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/manual-patch-applied.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/manual-patch-preflight.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/marco-desktop-dark.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/marco-mobile-dark-full.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/package-integrity.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/preflight-after.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/preflight-before.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/public-researchers.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/public-resources.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/reconciliation-post-dry-run.json",
+    "outputs/academic-directory-manual-patch-2026-10-17/regression.log",
+    "outputs/academic-directory-manual-patch-2026-10-17/researchers-desktop-light.png",
+    "outputs/academic-directory-manual-patch-2026-10-17/typecheck.log"
+  ],
+  "unchanged": [
+    "V0.2 original ZIP and 22 extracted files",
+    "frozen generated seed JSON",
+    "all other page implementations",
+    "existing nonpublic resource rows and all protected editorial/ownership fields",
+    "existing author identities and resource-author links"
+  ],
+  "preexisting_unrelated_worktree_changes": "Preserved; not staged or committed. Prior topic scope exclusions remain in the 2026-10-16 record."
+}

@@ -15,7 +15,10 @@ import accountRouter from "./account";
 import connectorRouter from "./connector";
 import issuerDisclosuresRouter from "./issuerDisclosures";
 
+import publicDirectoryRouter from "./publicDirectory";
+
 const router: IRouter = Router();
+router.use(publicDirectoryRouter);
 
 router.use(healthRouter);
 router.use(authRouter);

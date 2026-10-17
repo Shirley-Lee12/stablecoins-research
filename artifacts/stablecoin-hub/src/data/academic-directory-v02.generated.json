@@ -1,0 +1,1143 @@
+{
+  "version": "0.2",
+  "verified": "2026-10-16",
+  "seedOrigin": "ACADEMIC_RESOURCES_EXPERTS_V0_2_2026_10_16",
+  "resources": [
+    {
+      "resource_id": "RES-001",
+      "title": "What keeps stablecoins stable?",
+      "authors": "Richard K. Lyons; Ganesh Viswanath-Natraj",
+      "year": "2023",
+      "evidence_type": "Journal article",
+      "venue_or_series": "Journal of International Money and Finance",
+      "themes": "Peg stability; arbitrage; primary market; Tether; DAI",
+      "method_or_evidence": "Empirical market microstructure",
+      "language": "English",
+      "access": "Yes",
+      "doi": "10.1016/j.jimonfin.2022.102777",
+      "canonical_url": "https://www.sciencedirect.com/science/article/pii/S0261560622001802",
+      "why_relevant": "Peer-reviewed evidence on how arbitrage access and market design affect stablecoin peg efficiency."
+    },
+    {
+      "resource_id": "RES-002",
+      "title": "Taming Wildcat Stablecoins",
+      "authors": "Gary B. Gorton; Jeffery Y. Zhang",
+      "year": "2023",
+      "evidence_type": "Law review article",
+      "venue_or_series": "University of Chicago Law Review",
+      "themes": "Private money; runs; regulation; safe assets",
+      "method_or_evidence": "Law and economics",
+      "language": "English",
+      "access": "Yes",
+      "doi": "",
+      "canonical_url": "https://lawreview.uchicago.edu/index.php/print-archive/taming-wildcat-stablecoins",
+      "why_relevant": "Frames stablecoins through historical private-money and banking-run economics."
+    },
+    {
+      "resource_id": "RES-003",
+      "title": "Digital money creation and algorithmic stablecoin run",
+      "authors": "Kanis Saengchote; Krislert Samphantharak",
+      "year": "2024",
+      "evidence_type": "Journal article",
+      "venue_or_series": "Finance Research Letters",
+      "themes": "Algorithmic stablecoins; runs; Iron Finance; Terra-Luna",
+      "method_or_evidence": "On-chain empirical case study",
+      "language": "English",
+      "access": "Publisher access",
+      "doi": "10.1016/j.frl.2024.105435",
+      "canonical_url": "https://www.sciencedirect.com/science/article/pii/S1544612324004653",
+      "why_relevant": "Transaction-level evidence on reflexive algorithmic stablecoin failure dynamics."
+    },
+    {
+      "resource_id": "RES-004",
+      "title": "10 years of stablecoins: Their impact, what we know, and future research directions",
+      "authors": "Lambis Dionysopoulos; Andrew Urquhart",
+      "year": "2024",
+      "evidence_type": "Journal article",
+      "venue_or_series": "Economics Letters",
+      "themes": "Literature review; market development; research agenda",
+      "method_or_evidence": "Review",
+      "language": "English",
+      "access": "Yes",
+      "doi": "10.1016/j.econlet.2024.111939",
+      "canonical_url": "https://www.sciencedirect.com/science/article/pii/S0165176524004233",
+      "why_relevant": "Concise review of the first decade of stablecoin research and open questions."
+    },
+    {
+      "resource_id": "RES-005",
+      "title": "Stablecoin Runs and the Centralization of Arbitrage",
+      "authors": "Yiming Ma; Yao Zeng; Anthony Lee Zhang",
+      "year": "2026",
+      "evidence_type": "Journal article",
+      "venue_or_series": "The Review of Financial Studies",
+      "themes": "Runs; arbitrage concentration; reserves; Tether; USDC",
+      "method_or_evidence": "Theory + empirical/calibration",
+      "language": "English",
+      "access": "Abstract / subscription",
+      "doi": "10.1093/rfs/hhag072",
+      "canonical_url": "https://academic.oup.com/rfs/advance-article-abstract/doi/10.1093/rfs/hhag072/8782924",
+      "why_relevant": "Shows a trade-off between arbitrage efficiency, price stability and run risk."
+    },
+    {
+      "resource_id": "RES-006",
+      "title": "Digital Currency as Money: The Case of Stablecoins",
+      "authors": "Lance Ang",
+      "year": "2026",
+      "evidence_type": "Journal article",
+      "venue_or_series": "Asian Journal of Comparative Law",
+      "themes": "Money; legal status; single-currency stablecoins; payments",
+      "method_or_evidence": "Legal analysis",
+      "language": "English",
+      "access": "Publisher access",
+      "doi": "",
+      "canonical_url": "https://www.cambridge.org/core/journals/asian-journal-of-comparative-law/article/digital-currency-as-money-the-case-of-stablecoins/9C7436FF6FDCD05DB0376451D8807534",
+      "why_relevant": "Examines reserve-backed single-currency stablecoins through the legal concept of money."
+    },
+    {
+      "resource_id": "RES-007",
+      "title": "Runs, transparency and regulation: On the optimal design of stablecoin frameworks",
+      "authors": "Olli Castren; Riccardo Russo",
+      "year": "2026",
+      "evidence_type": "Journal article",
+      "venue_or_series": "Economics Letters",
+      "themes": "Runs; transparency; overcollateralisation; regulation",
+      "method_or_evidence": "Theory",
+      "language": "English",
+      "access": "Publisher access",
+      "doi": "10.1016/j.econlet.2025.112720",
+      "canonical_url": "https://www.sciencedirect.com/science/article/pii/S0165176525005579",
+      "why_relevant": "Studies how transparency and collateral design interact with stablecoin run risk and regulation."
+    },
+    {
+      "resource_id": "RES-008",
+      "title": "Public information and stablecoin runs",
+      "authors": "Rashad Ahmed; Iñaki Aldasoro; Chanelle Duley",
+      "year": "2024 / revised 2025",
+      "evidence_type": "Working paper",
+      "venue_or_series": "BIS Working Papers No. 1164",
+      "themes": "Reserve transparency; bank runs; collateral quality; public information",
+      "method_or_evidence": "Theory + case evidence",
+      "language": "English",
+      "access": "Yes",
+      "doi": "",
+      "canonical_url": "https://www.bis.org/publications/working-paper-1164-public-information-and-stablecoin-runs",
+      "why_relevant": "Explains when reserve transparency can reduce or increase stablecoin run risk."
+    },
+    {
+      "resource_id": "RES-009",
+      "title": "Stablecoins and safe asset prices",
+      "authors": "Rashad Ahmed; Iñaki Aldasoro",
+      "year": "2025 / revised 2026",
+      "evidence_type": "Working paper",
+      "venue_or_series": "BIS Working Papers No. 1270",
+      "themes": "Treasury bills; reserve flows; monetary policy; safe assets",
+      "method_or_evidence": "Empirical causal identification",
+      "language": "English",
+      "access": "Yes",
+      "doi": "",
+      "canonical_url": "https://www.bis.org/publications/working-paper-1270-stablecoins-and-safe-asset-prices",
+      "why_relevant": "Links dollar-backed stablecoin flows to short-term US Treasury yields."
+    },
+    {
+      "resource_id": "RES-010",
+      "title": "Are stablecoins and bank deposits substitutes?",
+      "authors": "Rashad Ahmed; Iñaki Aldasoro",
+      "year": "2026",
+      "evidence_type": "Working paper",
+      "venue_or_series": "BIS Working Papers No. 1382",
+      "themes": "Bank deposits; substitution; stablecoin growth; rates",
+      "method_or_evidence": "Empirical macro-finance",
+      "language": "English",
+      "access": "Yes",
+      "doi": "",
+      "canonical_url": "https://www.bis.org/publications/working-paper-1382-are-stablecoins-and-bank-deposits-substitutes",
+      "why_relevant": "Tests whether deposit pricing affects stablecoin growth and substitution."
+    },
+    {
+      "resource_id": "RES-011",
+      "title": "Stablecoins and monetary policy transmission",
+      "authors": "Carlo Altavilla; Miguel Boucinha; Lorenzo Burlon; Ramón Adalid; Roberta Fortes; Franziska Maruhn",
+      "year": "2026",
+      "evidence_type": "Working paper",
+      "venue_or_series": "ECB Working Paper Series No. 3199",
+      "themes": "Bank deposits; monetary policy transmission; stablecoin adoption",
+      "method_or_evidence": "Empirical banking / monetary economics",
+      "language": "English",
+      "access": "Yes",
+      "doi": "",
+      "canonical_url": "https://www.ecb.europa.eu/pub/pdf/scpwps/ecb.wp3199~ad552b59ec.en.pdf",
+      "why_relevant": "Studies deposit substitution and the effects of stablecoin adoption on bank intermediation and policy transmission."
+    },
+    {
+      "resource_id": "RES-012",
+      "title": "From Par to Pressure: Liquidity, Redemptions, and Fire Sales with a Systemic Stablecoin",
+      "authors": "Marco Gross; Richard Senner",
+      "year": "2026",
+      "evidence_type": "Working paper",
+      "venue_or_series": "IMF Working Paper 2026/005",
+      "themes": "Systemic stablecoins; redemptions; fire sales; liquidity; capital buffers",
+      "method_or_evidence": "Financial-stability model",
+      "language": "English",
+      "access": "Yes",
+      "doi": "10.5089/9798229036795.001",
+      "canonical_url": "https://www.elibrary.imf.org/view/journals/001/2026/005/article-A001-en.xml",
+      "why_relevant": "Models feedback from redemptions to asset sales, solvency and financial-market stress."
+    },
+    {
+      "resource_id": "RES-013",
+      "title": "Making Stablecoins Stable",
+      "authors": "Bo Li; Tommaso Mancini-Griffoli; Marcello Miccoli; Brandon Joel Tan; Longmei Zhang",
+      "year": "2026",
+      "evidence_type": "Working paper",
+      "venue_or_series": "IMF Working Paper 2026/074",
+      "themes": "Reserve backing; run risk; issuer incentives; payment innovation",
+      "method_or_evidence": "Theory / policy design",
+      "language": "English",
+      "access": "Yes",
+      "doi": "10.5089/9798229044349.001",
+      "canonical_url": "https://www.imf.org/en/publications/wp/issues/2026/04/10/making-stablecoins-stable-575348",
+      "why_relevant": "Analyses trade-offs between safer reserve requirements, run risk and issuer incentives."
+    },
+    {
+      "resource_id": "RES-014",
+      "title": "Runs and Flights to Safety: Are Stablecoins the New Money Market Funds?",
+      "authors": "Kenechukwu Anadu; Pablo Azar; Marco Cipriani; Thomas M. Eisenbach; Catherine Huang; Mattia Landoni; Gabriele La Spada; Marco Macchiavelli; Antoine Malfroy-Camine; J. Christina Wang",
+      "year": "2023 / revised 2024",
+      "evidence_type": "Staff report",
+      "venue_or_series": "Federal Reserve Bank of New York Staff Reports No. 1073",
+      "themes": "Runs; flight to safety; money market funds; redemption",
+      "method_or_evidence": "Empirical financial stability",
+      "language": "English",
+      "access": "Yes",
+      "doi": "10.59576/sr.1073",
+      "canonical_url": "https://www.newyorkfed.org/research/staff_reports/sr1073.html",
+      "why_relevant": "Documents stablecoin flight-to-safety behaviour and run dynamics using an MMF comparison."
+    },
+    {
+      "resource_id": "RES-015",
+      "title": "Primary and Secondary Markets for Stablecoins",
+      "authors": "Cy Watsky; Jeffrey Allen; Hamzah Daud; Jochen Demuth; Daniel Little; Megan Rodden; Amber Seira",
+      "year": "2024",
+      "evidence_type": "Research note",
+      "venue_or_series": "Federal Reserve FEDS Notes",
+      "themes": "Primary market; secondary market; issuance; SVB; USDC; DAI",
+      "method_or_evidence": "Market-structure case study",
+      "language": "English",
+      "access": "Yes",
+      "doi": "10.17016/2380-7172.3447",
+      "canonical_url": "https://www.federalreserve.gov/econres/notes/feds-notes/primary-and-secondary-markets-for-stablecoins-20240223.html",
+      "why_relevant": "Separates issuance/redemption dynamics from secondary-market pricing during the March 2023 stress episode."
+    },
+    {
+      "resource_id": "RES-016",
+      "title": "Stablecoins: Growth Potential and Impact on Banking",
+      "authors": "Gordon Y. Liao; John Caramichael",
+      "year": "2022",
+      "evidence_type": "Working paper",
+      "venue_or_series": "Federal Reserve International Finance Discussion Papers 1334",
+      "themes": "Banking; deposits; reserves; payments; disintermediation",
+      "method_or_evidence": "Scenario / banking analysis",
+      "language": "English",
+      "access": "Yes",
+      "doi": "10.17016/IFDP.2022.1334",
+      "canonical_url": "https://www.federalreserve.gov/econres/ifdp/stablecoins-growth-potential-and-impact-on-banking.htm",
+      "why_relevant": "Examines how reserve design and stablecoin adoption could affect banking and credit provision."
+    },
+    {
+      "resource_id": "RES-017",
+      "title": "Understanding Stablecoins",
+      "authors": "Tobias Adrian; Parma Bains; Marianne Bechara; Eugenio M Cerutti; Stephanie Forte; Federico Grinberg; Alessandro Gullo; Martina Hengge; Kathleen Kao; Tommaso Mancini-Griffoli; Soledad Martinez Peria; Marcello Miccoli; Marco Reuter; Nobuyasu Sugimoto",
+      "year": "2025",
+      "evidence_type": "Institutional research report",
+      "venue_or_series": "IMF Departmental Paper",
+      "themes": "Market overview; use cases; risks; regulation; tokenisation",
+      "method_or_evidence": "Comprehensive policy review",
+      "language": "English",
+      "access": "Yes",
+      "doi": "10.5089/9798229024075.087",
+      "canonical_url": "https://www.imf.org/en/publications/departmental-papers/issues/2025/12/02/understanding-stablecoins-570602",
+      "why_relevant": "Broad evidence-based overview spanning markets, use cases, risks and regulation."
+    },
+    {
+      "resource_id": "RES-018",
+      "title": "In search for stability in crypto-assets: are stablecoins the solution?",
+      "authors": "Dirk Bullmann; Jonas Klemm; Andrea Pinna",
+      "year": "2019",
+      "evidence_type": "Occasional paper",
+      "venue_or_series": "ECB Occasional Paper Series No. 230",
+      "themes": "Taxonomy; stabilisation mechanisms; issuer accountability; collateral",
+      "method_or_evidence": "Conceptual taxonomy",
+      "language": "English",
+      "access": "Yes",
+      "doi": "",
+      "canonical_url": "https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op230~d57946be3b.en.pdf",
+      "why_relevant": "Foundational taxonomy of stablecoin designs and stabilisation mechanisms."
+    },
+    {
+      "resource_id": "RES-019",
+      "title": "Some Simple Economics of Stablecoins",
+      "authors": "Christian Catalini; Alonso de Gortari; Nihar Shah",
+      "year": "2022",
+      "evidence_type": "Review article",
+      "venue_or_series": "Annual Review of Financial Economics",
+      "themes": "Stablecoin economics; reserve design; legal claims; payments; CBDC",
+      "method_or_evidence": "Review / conceptual economics",
+      "language": "English",
+      "access": "Publisher access",
+      "doi": "10.1146/annurev-financial-111621-101151",
+      "canonical_url": "https://www.annualreviews.org/content/journals/10.1146/annurev-financial-111621-101151",
+      "why_relevant": "Reviews core design and economic trade-offs linking stablecoins, payments, regulation and public money."
+    },
+    {
+      "resource_id": "RES-020",
+      "title": "Stablecoins: risks, potential and regulation",
+      "authors": "Douglas Arner; Raphael Auer; Jon Frost",
+      "year": "2020",
+      "evidence_type": "Working paper",
+      "venue_or_series": "BIS Working Papers No. 905",
+      "themes": "Regulation; payments; global stablecoins; embedded supervision",
+      "method_or_evidence": "Policy / conceptual analysis",
+      "language": "English",
+      "access": "Yes",
+      "doi": "",
+      "canonical_url": "https://www.bis.org/publications/working-paper-905-stablecoins-risks-potential-and-regulation",
+      "why_relevant": "Early regulatory analysis of stablecoin uses, risks and supervisory responses."
+    }
+  ],
+  "researchers": [
+    {
+      "researcher_id": "RSC-001",
+      "name": "Ganesh Viswanath-Natraj",
+      "researcher_type": "Academic researcher",
+      "current_role": "Assistant Professor of Finance",
+      "institution": "Warwick Business School",
+      "stablecoin_research_focus": "Peg stability; arbitrage; stablecoin market structure",
+      "representative_resource_ids": "RES-001",
+      "profile_or_verification_url": "https://warwick.ac.uk/fac/soc/wbs/subjects/finance/faculty/",
+      "verification_type": "OFFICIAL_INSTITUTION_PROFILE",
+      "status": "VERIFIED"
+    },
+    {
+      "researcher_id": "RSC-002",
+      "name": "Yiming Ma",
+      "researcher_type": "Academic researcher",
+      "current_role": "Regina Pitaro Associate Professor of Business",
+      "institution": "Columbia Business School",
+      "stablecoin_research_focus": "Financial intermediation; financial stability; stablecoin runs",
+      "representative_resource_ids": "RES-005",
+      "profile_or_verification_url": "https://business.columbia.edu/faculty/people/yiming-ma",
+      "verification_type": "OFFICIAL_PROFILE",
+      "status": "VERIFIED"
+    },
+    {
+      "researcher_id": "RSC-003",
+      "name": "Yao Zeng",
+      "researcher_type": "Academic researcher",
+      "current_role": "Assistant Professor of Finance",
+      "institution": "The Wharton School, University of Pennsylvania",
+      "stablecoin_research_focus": "Financial intermediation; markets; stablecoin runs",
+      "representative_resource_ids": "RES-005",
+      "profile_or_verification_url": "https://fnce.wharton.upenn.edu/profile/yaozeng/",
+      "verification_type": "OFFICIAL_PROFILE",
+      "status": "VERIFIED"
+    },
+    {
+      "researcher_id": "RSC-004",
+      "name": "Anthony Lee Zhang",
+      "researcher_type": "Academic researcher",
+      "current_role": "Associate Professor of Finance",
+      "institution": "Chicago Booth School of Business",
+      "stablecoin_research_focus": "Web3/DeFi; market structure; stablecoin runs",
+      "representative_resource_ids": "RES-005",
+      "profile_or_verification_url": "https://www.chicagobooth.edu/faculty/directory/z/anthony-lee-zhang",
+      "verification_type": "OFFICIAL_PROFILE",
+      "status": "VERIFIED"
+    },
+    {
+      "researcher_id": "RSC-005",
+      "name": "Gary B. Gorton",
+      "researcher_type": "Academic researcher",
+      "current_role": "Frederick Frank Class of 1954 Professor Emeritus of Management & Finance",
+      "institution": "Yale School of Management",
+      "stablecoin_research_focus": "Banking; private money; financial crises; stablecoin regulation",
+      "representative_resource_ids": "RES-002",
+      "profile_or_verification_url": "https://som.yale.edu/faculty-research/faculty-directory/gary-b-gorton",
+      "verification_type": "OFFICIAL_PROFILE",
+      "status": "VERIFIED"
+    },
+    {
+      "researcher_id": "RSC-006",
+      "name": "Jeffery Y. Zhang",
+      "researcher_type": "Legal / academic researcher",
+      "current_role": "Assistant Professor of Law",
+      "institution": "University of Michigan Law School",
+      "stablecoin_research_focus": "Financial regulation; digital assets; law and economics",
+      "representative_resource_ids": "RES-002",
+      "profile_or_verification_url": "https://michigan.law.umich.edu/faculty-and-scholarship/our-faculty/jeffery-zhang",
+      "verification_type": "OFFICIAL_PROFILE",
+      "status": "VERIFIED"
+    },
+    {
+      "researcher_id": "RSC-007",
+      "name": "Iñaki Aldasoro",
+      "researcher_type": "Central-bank researcher",
+      "current_role": "Principal Economist, Monetary and Economic Department, Financial Stability Policy",
+      "institution": "Bank for International Settlements",
+      "stablecoin_research_focus": "Financial stability; reserve transparency; safe assets; deposit substitution",
+      "representative_resource_ids": "RES-008;RES-009;RES-010",
+      "profile_or_verification_url": "https://www.bis.org/author/inaki-aldasoro",
+      "verification_type": "OFFICIAL_PROFILE",
+      "status": "VERIFIED"
+    },
+    {
+      "researcher_id": "RSC-008",
+      "name": "Carlo Altavilla",
+      "researcher_type": "Central-bank researcher",
+      "current_role": "Author / economist",
+      "institution": "European Central Bank",
+      "stablecoin_research_focus": "Monetary policy transmission; bank intermediation; stablecoin adoption",
+      "representative_resource_ids": "RES-011",
+      "profile_or_verification_url": "https://www.ecb.europa.eu/pub/research/authors/profiles/carlo-altavilla.en.html",
+      "verification_type": "OFFICIAL_AUTHOR_PROFILE",
+      "status": "VERIFIED"
+    },
+    {
+      "researcher_id": "RSC-009",
+      "name": "Marco Gross",
+      "researcher_type": "Policy researcher",
+      "current_role": "IMF author / economist",
+      "institution": "International Monetary Fund",
+      "stablecoin_research_focus": "Systemic liquidity; fire sales; stablecoin prudential design",
+      "representative_resource_ids": "RES-012",
+      "profile_or_verification_url": "https://www.elibrary.imf.org/view/journals/001/2026/005/article-A001-en.xml",
+      "verification_type": "CURRENT_PUBLICATION_AFFILIATION",
+      "status": "VERIFIED"
+    },
+    {
+      "researcher_id": "RSC-010",
+      "name": "Lance Ang",
+      "researcher_type": "Legal / academic researcher",
+      "current_role": "School of Law",
+      "institution": "Singapore University of Social Sciences",
+      "stablecoin_research_focus": "Stablecoins as money; payments; legal classification",
+      "representative_resource_ids": "RES-006",
+      "profile_or_verification_url": "https://www.cambridge.org/core/journals/asian-journal-of-comparative-law/article/digital-currency-as-money-the-case-of-stablecoins/9C7436FF6FDCD05DB0376451D8807534",
+      "verification_type": "CURRENT_PUBLICATION_AFFILIATION",
+      "status": "VERIFIED"
+    }
+  ],
+  "institutions": [
+    {
+      "institution_id": "INST-001",
+      "institution": "Warwick Business School",
+      "institution_type": "University",
+      "location_scope": "United Kingdom",
+      "relevance": "Academic finance research",
+      "researcher_ids": "RSC-001"
+    },
+    {
+      "institution_id": "INST-002",
+      "institution": "Columbia Business School",
+      "institution_type": "University",
+      "location_scope": "United States",
+      "relevance": "Finance / financial intermediation research",
+      "researcher_ids": "RSC-002"
+    },
+    {
+      "institution_id": "INST-003",
+      "institution": "The Wharton School, University of Pennsylvania",
+      "institution_type": "University",
+      "location_scope": "United States",
+      "relevance": "Finance / financial intermediation research",
+      "researcher_ids": "RSC-003"
+    },
+    {
+      "institution_id": "INST-004",
+      "institution": "Chicago Booth School of Business",
+      "institution_type": "University",
+      "location_scope": "United States",
+      "relevance": "Finance / DeFi research",
+      "researcher_ids": "RSC-004"
+    },
+    {
+      "institution_id": "INST-005",
+      "institution": "Yale School of Management",
+      "institution_type": "University",
+      "location_scope": "United States",
+      "relevance": "Banking / private money research",
+      "researcher_ids": "RSC-005"
+    },
+    {
+      "institution_id": "INST-006",
+      "institution": "University of Michigan Law School",
+      "institution_type": "University",
+      "location_scope": "United States",
+      "relevance": "Financial regulation / digital-assets law",
+      "researcher_ids": "RSC-006"
+    },
+    {
+      "institution_id": "INST-007",
+      "institution": "Bank for International Settlements",
+      "institution_type": "International institution",
+      "location_scope": "International",
+      "relevance": "Financial stability / monetary economics / payments",
+      "researcher_ids": "RSC-007"
+    },
+    {
+      "institution_id": "INST-008",
+      "institution": "European Central Bank",
+      "institution_type": "Central bank",
+      "location_scope": "European Union",
+      "relevance": "Monetary policy / banking / financial stability",
+      "researcher_ids": "RSC-008"
+    },
+    {
+      "institution_id": "INST-009",
+      "institution": "International Monetary Fund",
+      "institution_type": "International institution",
+      "location_scope": "International",
+      "relevance": "Financial stability / payments / policy design",
+      "researcher_ids": "RSC-009"
+    },
+    {
+      "institution_id": "INST-010",
+      "institution": "Singapore University of Social Sciences",
+      "institution_type": "University",
+      "location_scope": "Singapore",
+      "relevance": "Law / digital money",
+      "researcher_ids": "RSC-010"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "SRC-RES-001",
+      "scope": "RESOURCE",
+      "title": "What keeps stablecoins stable?",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0261560622001802",
+      "date_or_period": "2023",
+      "source_type": "Journal article",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-002",
+      "scope": "RESOURCE",
+      "title": "Taming Wildcat Stablecoins",
+      "url": "https://lawreview.uchicago.edu/index.php/print-archive/taming-wildcat-stablecoins",
+      "date_or_period": "2023",
+      "source_type": "Law review article",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-003",
+      "scope": "RESOURCE",
+      "title": "Digital money creation and algorithmic stablecoin run",
+      "url": "https://www.sciencedirect.com/science/article/pii/S1544612324004653",
+      "date_or_period": "2024",
+      "source_type": "Journal article",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-004",
+      "scope": "RESOURCE",
+      "title": "10 years of stablecoins: Their impact, what we know, and future research directions",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0165176524004233",
+      "date_or_period": "2024",
+      "source_type": "Journal article",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-005",
+      "scope": "RESOURCE",
+      "title": "Stablecoin Runs and the Centralization of Arbitrage",
+      "url": "https://academic.oup.com/rfs/advance-article-abstract/doi/10.1093/rfs/hhag072/8782924",
+      "date_or_period": "2026",
+      "source_type": "Journal article",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-006",
+      "scope": "RESOURCE",
+      "title": "Digital Currency as Money: The Case of Stablecoins",
+      "url": "https://www.cambridge.org/core/journals/asian-journal-of-comparative-law/article/digital-currency-as-money-the-case-of-stablecoins/9C7436FF6FDCD05DB0376451D8807534",
+      "date_or_period": "2026",
+      "source_type": "Journal article",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-007",
+      "scope": "RESOURCE",
+      "title": "Runs, transparency and regulation: On the optimal design of stablecoin frameworks",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0165176525005579",
+      "date_or_period": "2026",
+      "source_type": "Journal article",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-008",
+      "scope": "RESOURCE",
+      "title": "Public information and stablecoin runs",
+      "url": "https://www.bis.org/publications/working-paper-1164-public-information-and-stablecoin-runs",
+      "date_or_period": "2024 / revised 2025",
+      "source_type": "Working paper",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-009",
+      "scope": "RESOURCE",
+      "title": "Stablecoins and safe asset prices",
+      "url": "https://www.bis.org/publications/working-paper-1270-stablecoins-and-safe-asset-prices",
+      "date_or_period": "2025 / revised 2026",
+      "source_type": "Working paper",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-010",
+      "scope": "RESOURCE",
+      "title": "Are stablecoins and bank deposits substitutes?",
+      "url": "https://www.bis.org/publications/working-paper-1382-are-stablecoins-and-bank-deposits-substitutes",
+      "date_or_period": "2026",
+      "source_type": "Working paper",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-011",
+      "scope": "RESOURCE",
+      "title": "Stablecoins and monetary policy transmission",
+      "url": "https://www.ecb.europa.eu/pub/pdf/scpwps/ecb.wp3199~ad552b59ec.en.pdf",
+      "date_or_period": "2026",
+      "source_type": "Working paper",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-012",
+      "scope": "RESOURCE",
+      "title": "From Par to Pressure: Liquidity, Redemptions, and Fire Sales with a Systemic Stablecoin",
+      "url": "https://www.elibrary.imf.org/view/journals/001/2026/005/article-A001-en.xml",
+      "date_or_period": "2026",
+      "source_type": "Working paper",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-013",
+      "scope": "RESOURCE",
+      "title": "Making Stablecoins Stable",
+      "url": "https://www.imf.org/en/publications/wp/issues/2026/04/10/making-stablecoins-stable-575348",
+      "date_or_period": "2026",
+      "source_type": "Working paper",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-014",
+      "scope": "RESOURCE",
+      "title": "Runs and Flights to Safety: Are Stablecoins the New Money Market Funds?",
+      "url": "https://www.newyorkfed.org/research/staff_reports/sr1073.html",
+      "date_or_period": "2023 / revised 2024",
+      "source_type": "Staff report",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-015",
+      "scope": "RESOURCE",
+      "title": "Primary and Secondary Markets for Stablecoins",
+      "url": "https://www.federalreserve.gov/econres/notes/feds-notes/primary-and-secondary-markets-for-stablecoins-20240223.html",
+      "date_or_period": "2024",
+      "source_type": "Research note",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-016",
+      "scope": "RESOURCE",
+      "title": "Stablecoins: Growth Potential and Impact on Banking",
+      "url": "https://www.federalreserve.gov/econres/ifdp/stablecoins-growth-potential-and-impact-on-banking.htm",
+      "date_or_period": "2022",
+      "source_type": "Working paper",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-017",
+      "scope": "RESOURCE",
+      "title": "Understanding Stablecoins",
+      "url": "https://www.imf.org/en/publications/departmental-papers/issues/2025/12/02/understanding-stablecoins-570602",
+      "date_or_period": "2025",
+      "source_type": "Institutional research report",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-018",
+      "scope": "RESOURCE",
+      "title": "In search for stability in crypto-assets: are stablecoins the solution?",
+      "url": "https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op230~d57946be3b.en.pdf",
+      "date_or_period": "2019",
+      "source_type": "Occasional paper",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-019",
+      "scope": "RESOURCE",
+      "title": "Some Simple Economics of Stablecoins",
+      "url": "https://www.annualreviews.org/content/journals/10.1146/annurev-financial-111621-101151",
+      "date_or_period": "2022",
+      "source_type": "Review article",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RES-020",
+      "scope": "RESOURCE",
+      "title": "Stablecoins: risks, potential and regulation",
+      "url": "https://www.bis.org/publications/working-paper-905-stablecoins-risks-potential-and-regulation",
+      "date_or_period": "2020",
+      "source_type": "Working paper",
+      "publisher_or_institution": "Publication / official research source",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RSC-001",
+      "scope": "RESEARCHER_PROFILE",
+      "title": "Ganesh Viswanath-Natraj — profile/affiliation verification",
+      "url": "https://warwick.ac.uk/fac/soc/wbs/subjects/finance/faculty/",
+      "date_or_period": "current / verified 2026-10-16",
+      "source_type": "OFFICIAL_INSTITUTION_PROFILE",
+      "publisher_or_institution": "Warwick Business School",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RSC-002",
+      "scope": "RESEARCHER_PROFILE",
+      "title": "Yiming Ma — profile/affiliation verification",
+      "url": "https://business.columbia.edu/faculty/people/yiming-ma",
+      "date_or_period": "current / verified 2026-10-16",
+      "source_type": "OFFICIAL_PROFILE",
+      "publisher_or_institution": "Columbia Business School",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RSC-003",
+      "scope": "RESEARCHER_PROFILE",
+      "title": "Yao Zeng — profile/affiliation verification",
+      "url": "https://fnce.wharton.upenn.edu/profile/yaozeng/",
+      "date_or_period": "current / verified 2026-10-16",
+      "source_type": "OFFICIAL_PROFILE",
+      "publisher_or_institution": "The Wharton School, University of Pennsylvania",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RSC-004",
+      "scope": "RESEARCHER_PROFILE",
+      "title": "Anthony Lee Zhang — profile/affiliation verification",
+      "url": "https://www.chicagobooth.edu/faculty/directory/z/anthony-lee-zhang",
+      "date_or_period": "current / verified 2026-10-16",
+      "source_type": "OFFICIAL_PROFILE",
+      "publisher_or_institution": "Chicago Booth School of Business",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RSC-005",
+      "scope": "RESEARCHER_PROFILE",
+      "title": "Gary B. Gorton — profile/affiliation verification",
+      "url": "https://som.yale.edu/faculty-research/faculty-directory/gary-b-gorton",
+      "date_or_period": "current / verified 2026-10-16",
+      "source_type": "OFFICIAL_PROFILE",
+      "publisher_or_institution": "Yale School of Management",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RSC-006",
+      "scope": "RESEARCHER_PROFILE",
+      "title": "Jeffery Y. Zhang — profile/affiliation verification",
+      "url": "https://michigan.law.umich.edu/faculty-and-scholarship/our-faculty/jeffery-zhang",
+      "date_or_period": "current / verified 2026-10-16",
+      "source_type": "OFFICIAL_PROFILE",
+      "publisher_or_institution": "University of Michigan Law School",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RSC-007",
+      "scope": "RESEARCHER_PROFILE",
+      "title": "Iñaki Aldasoro — profile/affiliation verification",
+      "url": "https://www.bis.org/author/inaki-aldasoro",
+      "date_or_period": "current / verified 2026-10-16",
+      "source_type": "OFFICIAL_PROFILE",
+      "publisher_or_institution": "Bank for International Settlements",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RSC-008",
+      "scope": "RESEARCHER_PROFILE",
+      "title": "Carlo Altavilla — profile/affiliation verification",
+      "url": "https://www.ecb.europa.eu/pub/research/authors/profiles/carlo-altavilla.en.html",
+      "date_or_period": "current / verified 2026-10-16",
+      "source_type": "OFFICIAL_AUTHOR_PROFILE",
+      "publisher_or_institution": "European Central Bank",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RSC-009",
+      "scope": "RESEARCHER_PROFILE",
+      "title": "Marco Gross — profile/affiliation verification",
+      "url": "https://www.elibrary.imf.org/view/journals/001/2026/005/article-A001-en.xml",
+      "date_or_period": "current / verified 2026-10-16",
+      "source_type": "CURRENT_PUBLICATION_AFFILIATION",
+      "publisher_or_institution": "International Monetary Fund",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    },
+    {
+      "source_id": "SRC-RSC-010",
+      "scope": "RESEARCHER_PROFILE",
+      "title": "Lance Ang — profile/affiliation verification",
+      "url": "https://www.cambridge.org/core/journals/asian-journal-of-comparative-law/article/digital-currency-as-money-the-case-of-stablecoins/9C7436FF6FDCD05DB0376451D8807534",
+      "date_or_period": "current / verified 2026-10-16",
+      "source_type": "CURRENT_PUBLICATION_AFFILIATION",
+      "publisher_or_institution": "Singapore University of Social Sciences",
+      "status": "VERIFIED",
+      "last_verified": "2026-10-16"
+    }
+  ],
+  "pages": [
+    {
+      "route": "/academic-resources",
+      "title_zh": "稳定币研究资源库",
+      "title_en": "Stablecoin Research Library",
+      "action": "REBUILD",
+      "status": "READY_FOR_CODEX",
+      "audience": "general;research;student",
+      "primary_question": "如何按研究问题找到可信的稳定币证据？",
+      "module_order": "hero>research-themes>search-filters>results>evidence-guide>empty-state",
+      "visual_assets": "RES-LIB-01;RES-LIB-02;RES-LIB-03"
+    },
+    {
+      "route": "/experts",
+      "title_zh": "研究者与机构",
+      "title_en": "Researchers & Institutions",
+      "action": "REBUILD",
+      "status": "READY_FOR_CODEX",
+      "audience": "research;student;institutional",
+      "primary_question": "哪些研究者和机构已有可核验的稳定币直接研究？",
+      "module_order": "hero>inclusion-method>search-filters>researcher-results>institution-aggregation>empty-state",
+      "visual_assets": "EXP-DIR-01;EXP-DIR-02;EXP-DIR-03"
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "RES-LIB-01",
+      "asset_type": "theme_browser",
+      "route": "/academic-resources",
+      "title": "Research-theme browser",
+      "purpose": "Question-first entry into resources",
+      "status": "READY_FOR_IMPLEMENTATION"
+    },
+    {
+      "asset_id": "RES-LIB-02",
+      "asset_type": "resource_results",
+      "route": "/academic-resources",
+      "title": "Resource search/results",
+      "purpose": "DB-backed approved public records",
+      "status": "READY_FOR_IMPLEMENTATION"
+    },
+    {
+      "asset_id": "RES-LIB-03",
+      "asset_type": "evidence_legend",
+      "route": "/academic-resources",
+      "title": "Evidence-type guide",
+      "purpose": "Distinguish peer-reviewed / working / policy / law / data",
+      "status": "READY_FOR_IMPLEMENTATION"
+    },
+    {
+      "asset_id": "EXP-DIR-01",
+      "asset_type": "researcher_results",
+      "route": "/experts",
+      "title": "Researcher directory",
+      "purpose": "Verified public researcher profiles linked to resources",
+      "status": "READY_FOR_IMPLEMENTATION"
+    },
+    {
+      "asset_id": "EXP-DIR-02",
+      "asset_type": "institution_aggregation",
+      "route": "/experts",
+      "title": "Institution aggregation",
+      "purpose": "Institutions represented by public resources/researchers",
+      "status": "READY_FOR_IMPLEMENTATION"
+    },
+    {
+      "asset_id": "EXP-DIR-03",
+      "asset_type": "inclusion_method",
+      "route": "/experts",
+      "title": "Directory inclusion methodology",
+      "purpose": "Explain why a profile appears",
+      "status": "READY_FOR_IMPLEMENTATION"
+    }
+  ],
+  "taxonomy": {
+    "research_themes": [
+      {
+        "id": "stability_arbitrage",
+        "zh": "稳定机制与套利",
+        "en": "Stability & arbitrage"
+      },
+      {
+        "id": "runs_liquidity",
+        "zh": "挤兑与流动性",
+        "en": "Runs & liquidity"
+      },
+      {
+        "id": "reserves_transparency",
+        "zh": "储备与透明度",
+        "en": "Reserves & transparency"
+      },
+      {
+        "id": "market_structure",
+        "zh": "一级/二级市场与市场结构",
+        "en": "Primary/secondary markets & market structure"
+      },
+      {
+        "id": "banking_monetary",
+        "zh": "银行体系与货币政策",
+        "en": "Banking & monetary policy"
+      },
+      {
+        "id": "systemic_macro",
+        "zh": "系统性风险与宏观金融外溢",
+        "en": "Systemic & macro-financial spillovers"
+      },
+      {
+        "id": "regulation_law",
+        "zh": "监管与法律",
+        "en": "Regulation & law"
+      },
+      {
+        "id": "payments_adoption",
+        "zh": "支付与采用",
+        "en": "Payments & adoption"
+      },
+      {
+        "id": "taxonomy_design",
+        "zh": "分类、机制与制度设计",
+        "en": "Taxonomy & mechanism design"
+      },
+      {
+        "id": "data_measurement",
+        "zh": "数据、测量与方法",
+        "en": "Data, measurement & methodology"
+      }
+    ],
+    "evidence_types": [
+      {
+        "id": "peer_reviewed",
+        "zh": "同行评审论文",
+        "en": "Peer-reviewed journal article"
+      },
+      {
+        "id": "law_review",
+        "zh": "法律评论 / 法学论文",
+        "en": "Law review / legal scholarship"
+      },
+      {
+        "id": "working_paper",
+        "zh": "工作论文",
+        "en": "Working paper"
+      },
+      {
+        "id": "institutional_research",
+        "zh": "央行 / 国际机构研究",
+        "en": "Central-bank / institutional research"
+      },
+      {
+        "id": "review_survey",
+        "zh": "综述",
+        "en": "Review / survey"
+      },
+      {
+        "id": "primary_regulation",
+        "zh": "法律与监管原文",
+        "en": "Primary law / regulation"
+      },
+      {
+        "id": "dataset_method",
+        "zh": "数据与方法",
+        "en": "Dataset / methodology"
+      },
+      {
+        "id": "industry_research",
+        "zh": "行业研究",
+        "en": "Industry research"
+      }
+    ],
+    "default_visible_types": [
+      "peer_reviewed",
+      "law_review",
+      "working_paper",
+      "institutional_research",
+      "review_survey",
+      "primary_regulation",
+      "dataset_method"
+    ],
+    "news_commentary_rule": "News/commentary may exist in the database but should not be a default-highlighted research type. It must be clearly labelled and not mixed with peer-reviewed evidence."
+  },
+  "search": {
+    "academic_resources": {
+      "search_fields": [
+        "title",
+        "author",
+        "venue_or_series",
+        "theme",
+        "keyword"
+      ],
+      "filters": [
+        "research_theme",
+        "evidence_type",
+        "year",
+        "language",
+        "access",
+        "author",
+        "institution"
+      ],
+      "default_sort": "year_desc",
+      "secondary_sorts": [
+        "year_asc",
+        "title_az"
+      ],
+      "count_scope": "approved public records matching the same query",
+      "result_card_fields": [
+        "title",
+        "authors",
+        "year",
+        "evidence_type",
+        "venue_or_series",
+        "themes",
+        "access",
+        "doi_or_source"
+      ],
+      "do_not_default_highlight": [
+        "news_commentary"
+      ]
+    },
+    "experts": {
+      "search_fields": [
+        "researcher_name",
+        "institution",
+        "stablecoin_research_focus"
+      ],
+      "filters": [
+        "researcher_type",
+        "institution",
+        "research_theme"
+      ],
+      "default_sort": "recently_verified",
+      "secondary_sorts": [
+        "name_az"
+      ],
+      "result_card_fields": [
+        "name",
+        "role",
+        "institution",
+        "research_focus",
+        "representative_resources",
+        "verification_date"
+      ],
+      "article_count_label": "Resources in this library",
+      "forbidden_sort_labels": [
+        "expert_score",
+        "citation_rank",
+        "top_expert"
+      ]
+    }
+  },
+  "empty": {
+    "resource_query_success_zero": {
+      "zh": "没有符合当前筛选条件的公开资源。",
+      "en": "No approved public resources match the current filters."
+    },
+    "resource_directory_unavailable": {
+      "zh": "研究资源目录暂时无法读取。",
+      "en": "The public research directory is temporarily unavailable."
+    },
+    "resource_no_approved_records": {
+      "zh": "当前尚无已审核公开资源。",
+      "en": "No approved public resources are currently available."
+    },
+    "researcher_query_success_zero": {
+      "zh": "没有符合当前筛选条件的公开研究者档案。",
+      "en": "No public researcher profiles match the current filters."
+    },
+    "researcher_directory_unavailable": {
+      "zh": "研究者目录暂时无法读取。",
+      "en": "The public researcher directory is temporarily unavailable."
+    },
+    "rule": "A failed database request must never be presented as a factual zero count."
+  },
+  "copy": {
+    "en": "# Academic Resources + Researchers & Institutions｜Content Master en V0.1\n\n## `/academic-resources`\n\n### Find the evidence behind stablecoin research questions\n\nThe Stablecoin Research Library brings together peer-reviewed papers, working papers, central-bank and institutional research, legal scholarship, primary regulatory sources, and data/methodology resources.\n\nIt is curated, not exhaustive.\n\nPrimary discovery should begin with research themes:\n- Stability & arbitrage\n- Runs & liquidity\n- Reserves & transparency\n- Primary/secondary markets & market structure\n- Banking & monetary policy\n- Systemic & macro-financial spillovers\n- Regulation & law\n- Payments & adoption\n- Taxonomy & mechanism design\n- Data, measurement & methodology\n\nSearch:\ntitle / author / institution or venue / theme / keyword.\n\nFilters:\ntheme / evidence type / year / language / access / author / institution.\n\nDefault sort:\nyear — newest first.\n\nEach resource card shows:\ntitle · authors · year · evidence type · venue/institution · themes · access · DOI/official source.\n\nDo not reproduce long abstracts. Link to the original publication.\n\nEvidence labels must remain visible: peer-reviewed research, working paper, institutional research, primary regulation, dataset/methodology and industry research are not interchangeable.\n\n### Empty states\n\nSuccessful query with no match:\n`No approved public resources match the current filters.`\n\nNo approved records:\n`No approved public resources are currently available.`\n\nDirectory/database failure:\n`The public research directory is temporarily unavailable.`\n\nA failed database query must not be rendered as a factual zero.\n\n---\n\n## `/experts`\n\n### Trace stablecoin research through researchers and institutions\n\nPublic display title:\n`Researchers & Institutions`\n\nThis is a directory of people whose directly relevant stablecoin research is represented in the public library. It is not a ranking of the world's “top stablecoin experts”.\n\nA public profile requires:\n- unambiguous identity;\n- at least one verified directly stablecoin-focused output;\n- authoritative publication/source record;\n- verified current or publication-time affiliation;\n- representative work linked to the research library.\n\nResearcher cards:\nname · role · institution · research focus · representative stablecoin research · last verified · official profile/source.\n\nIf only publication-time affiliation is verified, label it as such.\n\nResearcher types may include:\nAcademic researcher / Legal-academic researcher / Central-bank researcher / Policy researcher / Institutional researcher.\n\nThese describe research context, not hierarchy.\n\nDefault sort:\nrecently verified.\n\nSecondary sort:\nname A–Z.\n\nIf a count is displayed, use:\n`Resources in this library`\n\nnot:\n`Total publications`.\n\nInstitutions are derived from verified public researcher/resource records. They are not ranked and must not be described as partners or leading institutions without separate evidence.\n\n### Empty states\n\nNo matching public profile:\n`No public researcher profiles match the current filters.`\n\nDirectory failure:\n`The public researcher directory is temporarily unavailable.`\n\nDo not turn a database failure into `0 experts`.\n",
+    "zh": "# Academic Resources + Researchers & Institutions｜Content Master zh-CN V0.1\n\n---\n\n# `/academic-resources`｜稳定币研究资源库\n\n## HERO\n\n**H1** 从研究问题出发，找到稳定币证据\n\n**Lead**  \n这里汇集同行评审论文、工作论文、央行与国际机构研究、法律研究、监管原文以及数据/方法资料。资源按主题和证据类型整理，不把新闻评论与学术研究放在同一证据层级。\n\n**Boundary**  \n这是经过筛选的研究目录，不是“全球所有稳定币论文”的完整数据库。\n\n---\n\n## 01｜按研究问题浏览\n\n### 稳定机制与套利\n稳定币为什么能维持锚定？一级市场、二级市场和套利权限如何影响价格稳定？\n\n代表资源：\n- *What keeps stablecoins stable?*\n- *Stablecoin Runs and the Centralization of Arbitrage*\n- *Primary and Secondary Markets for Stablecoins*\n\n### 挤兑、流动性与储备\n储备质量、赎回、信息披露和流动性如何共同形成 run risk？\n\n代表资源：\n- *Public information and stablecoin runs*\n- *Runs and Flights to Safety*\n- *Runs, transparency and regulation*\n\n### 银行体系与货币政策\n稳定币是否替代银行存款？储备资产流动如何影响 Treasury 市场和货币政策传导？\n\n代表资源：\n- *Are stablecoins and bank deposits substitutes?*\n- *Stablecoins and safe asset prices*\n- *Stablecoins and monetary policy transmission*\n\n### 系统性风险与传统金融外溢\n大型稳定币的赎回和资产出售如何传导至债券市场与金融稳定？\n\n代表资源：\n- *From Par to Pressure*\n- *Making Stablecoins Stable*\n\n### 监管、法律与私人货币\n稳定币在法律上是什么？应如何理解私人货币、发行人和监管边界？\n\n代表资源：\n- *Taming Wildcat Stablecoins*\n- *Digital Currency as Money: The Case of Stablecoins*\n- *Some Simple Economics of Stablecoins*\n- *Stablecoins: risks, potential and regulation*\n\n### 分类、机制与研究综述\n如何区分 reserve-backed、crypto-collateralised、synthetic、algorithmic 机制？过去十年的研究发现了什么？\n\n代表资源：\n- *In search for stability in crypto-assets*\n- *10 years of stablecoins*\n- *Understanding Stablecoins*\n\n---\n\n## 02｜筛选与搜索\n\n搜索范围：\n- 标题\n- 作者\n- 机构 / venue\n- 主题\n- 关键词\n\n筛选：\n- 研究主题\n- 证据类型\n- 年份\n- 语言\n- 获取方式\n- 作者\n- 机构\n\n默认排序：\n**年份：新到旧**\n\n辅助排序：\n- 年份：旧到新\n- 标题 A–Z\n\n不提供：\n- “最权威论文”\n- “引用最多专家”\n- “最重要机构”\n等主观排名。\n\n---\n\n## 03｜证据类型\n\n### 同行评审论文\n已在学术期刊正式发表。\n\n### 法学研究\n法律评论或同行评审法律研究。\n\n### 工作论文\n尚可能修订的研究成果，包括 NBER、BIS、ECB、IMF 等 working papers。\n\n### 央行 / 国际机构研究\n政策机构的研究论文、staff report、departmental paper 等。\n\n### 综述\n用于快速建立文献地图。\n\n### 法律与监管原文\n只保留一手法律/监管文件；不把新闻稿当法条。\n\n### 数据与方法\n可复现研究的数据源、方法说明或数据门户。\n\n### 行业研究\n可以作为市场证据，但必须单独标注，不与同行评审结果混为同一证据层级。\n\n---\n\n## 04｜资源卡片\n\n每条资源至少显示：\n- Title\n- Authors\n- Year\n- Evidence type\n- Venue / institution\n- Research themes\n- Access\n- DOI / official source\n\n可选展开：\n- 方法 / evidence\n- 为什么与稳定币研究相关\n- 关联研究者\n\n不要复制长摘要；以原始出版页作为全文和引用入口。\n\n---\n\n## 05｜数据状态\n\n### 查询成功但没有匹配\n`没有符合当前筛选条件的公开资源。`\n\n### 当前没有已审核资源\n`当前尚无已审核公开资源。`\n\n### 数据库 / API 读取失败\n`研究资源目录暂时无法读取。`\n\n**禁止：**\n把数据库失败显示成 `共 0 条结果`。\n\n---\n\n# `/experts`｜研究者与机构\n\n## HERO\n\n**H1** 沿着研究成果找到稳定币研究者\n\n**Lead**  \n这里展示的是在本研究资源库中已有可核验稳定币研究成果的研究者及其当前/最近核验机构。它不是“全球稳定币专家排行榜”，也不按知名度、引用量或机构声望排序。\n\n---\n\n## 01｜研究者如何进入目录\n\n公开档案需要满足：\n1. 身份可以明确核验；\n2. 至少有一项直接稳定币研究成果；\n3. 研究成果已有权威出版/研究机构来源；\n4. 当前 affiliation 或 publication-time affiliation 有明确来源；\n5. 代表成果已经关联至资源库。\n\n每张研究者卡片显示：\n- 姓名\n- 当前角色 / 已核验角色\n- 机构\n- Research focus\n- Representative stablecoin research\n- 最后核验日期\n- 官方个人/机构页面\n\n若只能核验论文发表时 affiliation：\n明确写成 `Publication-time affiliation`，不能伪装成 current affiliation。\n\n---\n\n## 02｜研究者类型\n\n可以按研究背景筛选：\n- Academic researcher\n- Legal / academic researcher\n- Central-bank researcher\n- Policy researcher\n- Institutional researcher\n\n这些只是研究环境分类，不代表资历高低。\n\n---\n\n## 03｜机构\n\n机构区不是机构排名。\n\n它只回答：\n**“当前公开目录中的稳定币研究来自哪些机构？”**\n\n机构卡片可以显示：\n- institution\n- institution type\n- location\n- researchers represented in this library\n- stablecoin topics represented\n\n禁止使用：\n- Top institution\n- Leading institution\n- Partner institution\n- Strategic partner\n\n除非另有独立证据和合作关系。\n\n---\n\n## 04｜排序\n\n默认：\n**最近核验**\n\n可选：\n**姓名 A–Z**\n\n如显示数量，使用：\n`本资源库收录成果`\n\n不要使用：\n`总论文数`\n或\n`专家排名`\n\n因为本资源库是精选目录，并不完整覆盖研究者所有成果。\n\n---\n\n## 05｜空状态\n\n### 查询成功但没有匹配\n`没有符合当前筛选条件的公开研究者档案。`\n\n### 目录读取失败\n`研究者目录暂时无法读取。`\n\n数据库读取失败不能显示成：\n`共 0 位专家学者`。\n"
+  },
+  "hashes": {
+    "00_README.md": "3c2c0243726237cf2804a0cdec53d0234eca11c200f872275bcdfe08cccf5618",
+    "01_CURRENT_PAGE_AUDIT.md": "32448e62e1bef6a537fcefcbe478ac932a9c864d4a47cf0a68c4c92695411b5e",
+    "CODEX_HANDOFF.md": "2a782fed0eecd0298e92d54a2abfda92f3ea417a751e19b0b1fb5a74a4d33a17",
+    "PACKAGE_INVENTORY.json": "e0fe1b42387580c483213291abf2ac72d41222942dd00512c8afb03f93d28316",
+    "PACKAGE_STATUS.md": "70886df605133b6b346bfef10f3b3d7e691655d17fdec0b92e25e3b5490661ec",
+    "components/DB_RECONCILIATION_IMPORT_SPEC.md": "eadeac33a494beb9e854426c52a527ad19b5bcdc15e35a046263001663c0e807",
+    "components/DIRECTORY_UI_SPEC.md": "04683453472c6f8fe47c0b92a4a0020ce5b21cc1a18a73c910b61193fbb5c48a",
+    "content/CONTENT_MASTER.en.md": "377eb90ec26f63ed5299dd4a484638b499b117390f95a4ab940657025962b900",
+    "content/CONTENT_MASTER.zh-CN.md": "300b29cef67ef8a6187fab8a0835d2e821c56cb7efe519bc4bc28596452c4ae3",
+    "data/DB_RECONCILIATION_PROTOCOL.md": "d67e038e1a62e2eaa7872330fcddd7842cc6d865dff88c3b9c1ee3a2340b1fbf",
+    "data/EMPTY_STATE_SPEC.json": "f981d91df0bcc9e2945b22180a3333cacdd3a6adf982ece26878d222a9184152",
+    "data/PUBLIC_INSTITUTION_SEED_CANDIDATES.csv": "85f9bca7855e696eafab85aebdef01af5b8521f31732cfec357342db2f168f43",
+    "data/PUBLIC_RESEARCHER_SEED_CANDIDATES.csv": "f675c9a4f6ce0cf35fcc5e355ec31c4e962d7d393b602a5db08f05f3852bb315",
+    "data/PUBLIC_RESOURCE_SEED_CANDIDATES.csv": "9cdd986691f5a5779ba3ce98284ea6bcaeb2905e6f86c0df312929526183aa2a",
+    "data/RESEARCHER_INCLUSION_POLICY.md": "2b561726536e11dbfb973bf4d45427cb88025a9131598c7235b4535a2885c15d",
+    "data/RESOURCE_TAXONOMY.json": "fe8bd9225f709b065b98d80e8e389754d80df7cf9c81bf0c39a9ec8eda179bd2",
+    "data/SEARCH_FILTER_SPEC.json": "852e14eda75edf90d6f8f4ec051f7abeeb3bea322535a3bf755e6278758e7d46",
+    "manifests/ASSET_MANIFEST.csv": "7be8c1f09e5b1cc1aa65fa02e96f19b0b25282f163e1b15aab7cfd70ded0726a",
+    "manifests/PAGE_MANIFEST.csv": "b376cac963685454a117c9fa3f27ee388941ca7252fb5f2357265145f1045340",
+    "manifests/SOURCE_MANIFEST.csv": "7d1095bf3ff9a63de1180ecc31648348e3044dc728c5db523f4f189d16d1f976",
+    "qa/FINAL_CONTENT_DATA_QA.md": "fb78c060a188968e9dde2311bcbcde6ce6e8c22b38c69ff32afdfd5a617ed56b",
+    "reference/CURRENT_PUBLIC_EXPORT_REFERENCE.md": "48e5393924c705e04e3f98758f8cd11b0af42625da7a9d214f519408843ea472"
+  }
+}

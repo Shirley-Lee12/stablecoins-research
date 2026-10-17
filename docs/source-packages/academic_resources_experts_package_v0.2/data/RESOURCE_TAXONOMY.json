@@ -1,0 +1,106 @@
+{
+  "research_themes": [
+    {
+      "id": "stability_arbitrage",
+      "zh": "稳定机制与套利",
+      "en": "Stability & arbitrage"
+    },
+    {
+      "id": "runs_liquidity",
+      "zh": "挤兑与流动性",
+      "en": "Runs & liquidity"
+    },
+    {
+      "id": "reserves_transparency",
+      "zh": "储备与透明度",
+      "en": "Reserves & transparency"
+    },
+    {
+      "id": "market_structure",
+      "zh": "一级/二级市场与市场结构",
+      "en": "Primary/secondary markets & market structure"
+    },
+    {
+      "id": "banking_monetary",
+      "zh": "银行体系与货币政策",
+      "en": "Banking & monetary policy"
+    },
+    {
+      "id": "systemic_macro",
+      "zh": "系统性风险与宏观金融外溢",
+      "en": "Systemic & macro-financial spillovers"
+    },
+    {
+      "id": "regulation_law",
+      "zh": "监管与法律",
+      "en": "Regulation & law"
+    },
+    {
+      "id": "payments_adoption",
+      "zh": "支付与采用",
+      "en": "Payments & adoption"
+    },
+    {
+      "id": "taxonomy_design",
+      "zh": "分类、机制与制度设计",
+      "en": "Taxonomy & mechanism design"
+    },
+    {
+      "id": "data_measurement",
+      "zh": "数据、测量与方法",
+      "en": "Data, measurement & methodology"
+    }
+  ],
+  "evidence_types": [
+    {
+      "id": "peer_reviewed",
+      "zh": "同行评审论文",
+      "en": "Peer-reviewed journal article"
+    },
+    {
+      "id": "law_review",
+      "zh": "法律评论 / 法学论文",
+      "en": "Law review / legal scholarship"
+    },
+    {
+      "id": "working_paper",
+      "zh": "工作论文",
+      "en": "Working paper"
+    },
+    {
+      "id": "institutional_research",
+      "zh": "央行 / 国际机构研究",
+      "en": "Central-bank / institutional research"
+    },
+    {
+      "id": "review_survey",
+      "zh": "综述",
+      "en": "Review / survey"
+    },
+    {
+      "id": "primary_regulation",
+      "zh": "法律与监管原文",
+      "en": "Primary law / regulation"
+    },
+    {
+      "id": "dataset_method",
+      "zh": "数据与方法",
+      "en": "Dataset / methodology"
+    },
+    {
+      "id": "industry_research",
+      "zh": "行业研究",
+      "en": "Industry research"
+    }
+  ],
+  "default_visible_types": [
+    "peer_reviewed",
+    "law_review",
+    "working_paper",
+    "institutional_research",
+    "review_survey",
+    "primary_regulation",
+    "dataset_method"
+  ],
+  "news_commentary_rule": "News/commentary may exist in the database but should not be a default-highlighted research type. It must be clearly labelled and not mixed with peer-reviewed evidence."
+}

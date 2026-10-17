@@ -1,0 +1,69 @@
+{
+  "academic_resources": {
+    "search_fields": [
+      "title",
+      "author",
+      "venue_or_series",
+      "theme",
+      "keyword"
+    ],
+    "filters": [
+      "research_theme",
+      "evidence_type",
+      "year",
+      "language",
+      "access",
+      "author",
+      "institution"
+    ],
+    "default_sort": "year_desc",
+    "secondary_sorts": [
+      "year_asc",
+      "title_az"
+    ],
+    "count_scope": "approved public records matching the same query",
+    "result_card_fields": [
+      "title",
+      "authors",
+      "year",
+      "evidence_type",
+      "venue_or_series",
+      "themes",
+      "access",
+      "doi_or_source"
+    ],
+    "do_not_default_highlight": [
+      "news_commentary"
+    ]
+  },
+  "experts": {
+    "search_fields": [
+      "researcher_name",
+      "institution",
+      "stablecoin_research_focus"
+    ],
+    "filters": [
+      "researcher_type",
+      "institution",
+      "research_theme"
+    ],
+    "default_sort": "recently_verified",
+    "secondary_sorts": [
+      "name_az"
+    ],
+    "result_card_fields": [
+      "name",
+      "role",
+      "institution",
+      "research_focus",
+      "representative_resources",
+      "verification_date"
+    ],
+    "article_count_label": "Resources in this library",
+    "forbidden_sort_labels": [
+      "expert_score",
+      "citation_rank",
+      "top_expert"
+    ]
+  }
+}

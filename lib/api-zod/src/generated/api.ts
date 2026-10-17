@@ -9,6 +9,38 @@ import * as zod from 'zod';
 
 
 /**
+ * Public allowlist only. Count and records use the same approved query. No private submissions, account IDs, moderation notes or abstracts. Query failure returns 503 without a numeric total.
+ * @summary Approved public research resources, independent of caller authentication
+ */
+export const getPublicResearchLibraryResponseTotalMin = 0;
+
+
+
+export const GetPublicResearchLibraryResponse = zod.object({
+  "version": zod.enum(['0.2']),
+  "kind": zod.enum(['resources']),
+  "total": zod.number().min(getPublicResearchLibraryResponseTotalMin),
+  "records": zod.array(zod.record(zod.string(), zod.unknown()))
+})
+
+
+/**
+ * Default verification-date order. Publication-time affiliation stays distinct. No citation or article-count ranking. Institutions derive from returned verified profiles and public works.
+ * @summary Verified public researcher profiles with approved public works
+ */
+export const getPublicResearcherDirectoryResponseTotalMin = 0;
+
+
+
+export const GetPublicResearcherDirectoryResponse = zod.object({
+  "version": zod.enum(['0.2']),
+  "kind": zod.enum(['researchers']),
+  "total": zod.number().min(getPublicResearcherDirectoryResponseTotalMin),
+  "records": zod.array(zod.record(zod.string(), zod.unknown()))
+})
+
+
+/**
  * @summary Tracked USD circulating value and dated history
  */
 export const GetStablecoinMarketResponse = zod.object({

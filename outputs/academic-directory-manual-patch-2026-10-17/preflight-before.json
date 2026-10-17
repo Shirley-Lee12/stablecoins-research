@@ -1,0 +1,400 @@
+{
+  "mode": "READ_ONLY",
+  "resources": [
+    {
+      "id": 57,
+      "title": "Stablecoins: Risks, Potential and Regulation",
+      "authors": [
+        "Douglas W. Arner",
+        "Raphael Auer",
+        "Jon Frost"
+      ],
+      "source_type": "working_paper",
+      "published_date": "2021",
+      "doi": "10.2139/ssrn.3979495",
+      "url": "https://doi.org/10.2139/ssrn.3979495"
+    },
+    {
+      "id": 67,
+      "title": "Stablecoins and Safe Asset Prices",
+      "authors": [
+        "Iñaki Aldasoro",
+        "Rashad Ahmed"
+      ],
+      "source_type": "working_paper",
+      "published_date": "2025",
+      "doi": "10.2139/ssrn.5242448",
+      "url": "https://doi.org/10.2139/ssrn.5242448"
+    },
+    {
+      "id": 68,
+      "title": "From Par to Pressure: Liquidity, Redemptions, and Fire Sales with a Systemic Stablecoin",
+      "authors": [
+        "Marco Gross",
+        "Richard Senner"
+      ],
+      "source_type": "working_paper",
+      "published_date": "2026",
+      "doi": "10.5089/9798229036795.001.a001",
+      "url": "https://doi.org/10.5089/9798229036795.001.a001"
+    },
+    {
+      "id": 70,
+      "title": "Digital Money Creation and Algorithmic Stablecoin Run",
+      "authors": [
+        "Kanis Saengchote",
+        "Krislert Samphantharak"
+      ],
+      "source_type": "working_paper",
+      "published_date": "2024",
+      "doi": "10.2139/ssrn.4710515",
+      "url": "https://doi.org/10.2139/ssrn.4710515"
+    },
+    {
+      "id": 83,
+      "title": "What Keeps Stablecoins Stable?",
+      "authors": [
+        "Richard Lyons",
+        "Ganesh Viswanath-Natraj"
+      ],
+      "source_type": "journal_article",
+      "published_date": "2020",
+      "doi": "10.3386/w27136",
+      "url": "https://doi.org/10.3386/w27136"
+    },
+    {
+      "id": 114,
+      "title": "Stablecoin Runs and the Centralization of Arbitrage",
+      "authors": [
+        "Yiming Ma",
+        "Yao Zeng",
+        "Anthony Lee Zhang"
+      ],
+      "source_type": "working_paper",
+      "published_date": "2025",
+      "doi": "10.2139/ssrn.5278385",
+      "url": "https://doi.org/10.2139/ssrn.5278385"
+    },
+    {
+      "id": 445,
+      "title": "Runs, Transparency and Regulation: on the Optimal Design of Stablecoin Frameworks",
+      "authors": [
+        "Olli Castrén",
+        "Riccardo Russo"
+      ],
+      "source_type": "journal_article",
+      "published_date": "2025",
+      "doi": "10.1016/j.econlet.2025.112720",
+      "url": "https://www.eba.europa.eu/sites/default/files/2024-08/52b7f7c9-1bf5-4dd8-948f-f31d9c02d1db/Stablecoins_240424.pdf"
+    }
+  ],
+  "authors": [
+    {
+      "id": 35,
+      "name": "Gary B. Gorton",
+      "institution": null,
+      "orcid": null,
+      "profile_url": null,
+      "verification_type": null
+    },
+    {
+      "id": 97,
+      "name": "Marco Gross",
+      "institution": null,
+      "orcid": null,
+      "profile_url": null,
+      "verification_type": null
+    },
+    {
+      "id": 100,
+      "name": "Ganesh Viswanath-Natraj",
+      "institution": null,
+      "orcid": null,
+      "profile_url": null,
+      "verification_type": null
+    },
+    {
+      "id": 200,
+      "name": "Yiming Ma",
+      "institution": null,
+      "orcid": null,
+      "profile_url": null,
+      "verification_type": null
+    },
+    {
+      "id": 201,
+      "name": "Yao Zeng",
+      "institution": null,
+      "orcid": null,
+      "profile_url": null,
+      "verification_type": null
+    },
+    {
+      "id": 202,
+      "name": "Anthony Lee Zhang",
+      "institution": null,
+      "orcid": null,
+      "profile_url": null,
+      "verification_type": null
+    },
+    {
+      "id": 213,
+      "name": "Jeffery Y. Zhang",
+      "institution": null,
+      "orcid": null,
+      "profile_url": null,
+      "verification_type": null
+    }
+  ],
+  "publicRelationships": [
+    {
+      "author_id": 35,
+      "name": "Gary B. Gorton",
+      "resource_id": 24,
+      "title": "Taming Wildcat Stablecoins",
+      "authors": [
+        "Gary B. Gorton",
+        "Jeffery Y. Zhang"
+      ],
+      "doi": "10.2139/ssrn.3888752"
+    },
+    {
+      "author_id": 35,
+      "name": "Gary B. Gorton",
+      "resource_id": 72,
+      "title": "Leverage and Stablecoin Pegs",
+      "authors": [
+        "Gary B. Gorton",
+        "Elizabeth C. Klee",
+        "Chase P. Ross",
+        "Sharon Y. Ross",
+        "Alexandros P. Vardoulakis"
+      ],
+      "doi": "10.1017/s0022109025000134"
+    },
+    {
+      "author_id": 97,
+      "name": "Marco Gross",
+      "resource_id": 68,
+      "title": "From Par to Pressure: Liquidity, Redemptions, and Fire Sales with a Systemic Stablecoin",
+      "authors": [
+        "Marco Gross",
+        "Richard Senner"
+      ],
+      "doi": "10.5089/9798229036795.001.a001"
+    },
+    {
+      "author_id": 100,
+      "name": "Ganesh Viswanath-Natraj",
+      "resource_id": 69,
+      "title": "Decentralized Stablecoins and Collateral Risk",
+      "authors": [
+        "Roman Kozhan",
+        "Ganesh Viswanath-Natraj"
+      ],
+      "doi": null
+    },
+    {
+      "author_id": 100,
+      "name": "Ganesh Viswanath-Natraj",
+      "resource_id": 83,
+      "title": "What Keeps Stablecoins Stable?",
+      "authors": [
+        "Richard Lyons",
+        "Ganesh Viswanath-Natraj"
+      ],
+      "doi": "10.3386/w27136"
+    },
+    {
+      "author_id": 100,
+      "name": "Ganesh Viswanath-Natraj",
+      "resource_id": 177,
+      "title": "Stablecoin Devaluation Risk",
+      "authors": [
+        "Barry Eichengreen",
+        "My Nguyen",
+        "Ganesh Viswanath-Natraj"
+      ],
+      "doi": "10.2139/ssrn.4460515"
+    },
+    {
+      "author_id": 100,
+      "name": "Ganesh Viswanath-Natraj",
+      "resource_id": 246,
+      "title": "Cryptocurrencies in Emerging Markets: a Stablecoin Solution?",
+      "authors": [
+        "David Murakami",
+        "Ganesh Viswanath-Natraj"
+      ],
+      "doi": "10.1016/j.jimonfin.2025.103344"
+    },
+    {
+      "author_id": 200,
+      "name": "Yiming Ma",
+      "resource_id": 114,
+      "title": "Stablecoin Runs and the Centralization of Arbitrage",
+      "authors": [
+        "Yiming Ma",
+        "Yao Zeng",
+        "Anthony Lee Zhang"
+      ],
+      "doi": "10.2139/ssrn.5278385"
+    },
+    {
+      "author_id": 201,
+      "name": "Yao Zeng",
+      "resource_id": 114,
+      "title": "Stablecoin Runs and the Centralization of Arbitrage",
+      "authors": [
+        "Yiming Ma",
+        "Yao Zeng",
+        "Anthony Lee Zhang"
+      ],
+      "doi": "10.2139/ssrn.5278385"
+    },
+    {
+      "author_id": 202,
+      "name": "Anthony Lee Zhang",
+      "resource_id": 114,
+      "title": "Stablecoin Runs and the Centralization of Arbitrage",
+      "authors": [
+        "Yiming Ma",
+        "Yao Zeng",
+        "Anthony Lee Zhang"
+      ],
+      "doi": "10.2139/ssrn.5278385"
+    },
+    {
+      "author_id": 213,
+      "name": "Jeffery Y. Zhang",
+      "resource_id": 24,
+      "title": "Taming Wildcat Stablecoins",
+      "authors": [
+        "Gary B. Gorton",
+        "Jeffery Y. Zhang"
+      ],
+      "doi": "10.2139/ssrn.3888752"
+    }
+  ],
+  "publicRepresentative": [
+    {
+      "id": 24,
+      "title": "Taming Wildcat Stablecoins",
+      "authors": [
+        "Gary B. Gorton",
+        "Jeffery Y. Zhang"
+      ],
+      "doi": "10.2139/ssrn.3888752",
+      "url": "https://doi.org/10.2139/ssrn.3888752"
+    }
+  ],
+  "targetLinks": [
+    {
+      "resource_id": 57,
+      "author_id": 70,
+      "name": "Douglas W. Arner"
+    },
+    {
+      "resource_id": 57,
+      "author_id": 71,
+      "name": "Raphael Auer"
+    },
+    {
+      "resource_id": 57,
+      "author_id": 72,
+      "name": "Jon Frost"
+    },
+    {
+      "resource_id": 67,
+      "author_id": 95,
+      "name": "Iñaki Aldasoro"
+    },
+    {
+      "resource_id": 67,
+      "author_id": 96,
+      "name": "Rashad Ahmed"
+    },
+    {
+      "resource_id": 68,
+      "author_id": 97,
+      "name": "Marco Gross"
+    },
+    {
+      "resource_id": 68,
+      "author_id": 98,
+      "name": "Richard Senner"
+    },
+    {
+      "resource_id": 70,
+      "author_id": 101,
+      "name": "Kanis Saengchote"
+    },
+    {
+      "resource_id": 70,
+      "author_id": 102,
+      "name": "Krislert Samphantharak"
+    },
+    {
+      "resource_id": 83,
+      "author_id": 100,
+      "name": "Ganesh Viswanath-Natraj"
+    },
+    {
+      "resource_id": 83,
+      "author_id": 134,
+      "name": "Richard Lyons"
+    },
+    {
+      "resource_id": 114,
+      "author_id": 200,
+      "name": "Yiming Ma"
+    },
+    {
+      "resource_id": 114,
+      "author_id": 201,
+      "name": "Yao Zeng"
+    },
+    {
+      "resource_id": 114,
+      "author_id": 202,
+      "name": "Anthony Lee Zhang"
+    },
+    {
+      "resource_id": 445,
+      "author_id": 1081,
+      "name": "Olli Castrén"
+    },
+    {
+      "resource_id": 445,
+      "author_id": 1082,
+      "name": "Riccardo Russo"
+    }
+  ],
+  "optionalSchema": [
+    {
+      "table_name": "issuer_disclosures",
+      "column_name": "maturity_profile"
+    },
+    {
+      "table_name": "public_researcher_profiles",
+      "column_name": "orcid"
+    },
+    {
+      "table_name": "public_researcher_profiles",
+      "column_name": "profile_url"
+    }
+  ],
+  "counts": {
+    "resources_total": 434,
+    "approved_public": 395,
+    "authors_total": 1109,
+    "verified_profiles": 3,
+    "duplicate_candidates": 3
+  },
+  "protectedState": {
+    "nonpublic_fingerprint": "c41f3414ee2dafd5c8cfd07c5e58d275",
+    "protected_resource_fields_fingerprint": "1bf61c94dad7eaeb13c245cdccf895da",
+    "untargeted_resources_fingerprint": "af0e15883e2d4a3aa8e416f3ddc35334",
+    "authors_fingerprint": "78a497c0a66f1613d089af1cb1aa5454"
+  }
+}

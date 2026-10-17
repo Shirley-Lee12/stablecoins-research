@@ -1,0 +1,3 @@
+﻿route,title_zh,title_en,action,status,audience,primary_question,module_order,visual_assets
+/academic-resources,稳定币研究资源库,Stablecoin Research Library,REBUILD,READY_FOR_CODEX,general;research;student,如何按研究问题找到可信的稳定币证据？,hero>research-themes>search-filters>results>evidence-guide>empty-state,RES-LIB-01;RES-LIB-02;RES-LIB-03
+/experts,研究者与机构,Researchers & Institutions,REBUILD,READY_FOR_CODEX,research;student;institutional,哪些研究者和机构已有可核验的稳定币直接研究？,hero>inclusion-method>search-filters>researcher-results>institution-aggregation>empty-state,EXP-DIR-01;EXP-DIR-02;EXP-DIR-03

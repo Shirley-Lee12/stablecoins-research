@@ -1,0 +1,228 @@
+{
+  "mode": "APPLY",
+  "resources": {
+    "MATCH_EXISTING": 7,
+    "NEW_PUBLIC_SEED": 5,
+    "CONFLICT_REVIEW": 7,
+    "PRIVATE_OR_PENDING_MATCH": 1
+  },
+  "researchers": {
+    "MATCH_EXISTING": 2,
+    "NEW_PUBLIC_SEED": 1,
+    "CONFLICT_REVIEW": 7,
+    "PRIVATE_OR_PENDING_MATCH": 0
+  },
+  "public_resource_decisions": [
+    {
+      "seedId": "RES-001",
+      "state": "CONFLICT_REVIEW",
+      "key": "TITLE_CONFLICT",
+      "reason": "title_requires_review",
+      "existingIds": [
+        83
+      ]
+    },
+    {
+      "seedId": "RES-003",
+      "state": "CONFLICT_REVIEW",
+      "key": "TITLE_YEAR_AUTHOR",
+      "reason": "different_doi",
+      "existingIds": [
+        70
+      ]
+    },
+    {
+      "seedId": "RES-004",
+      "state": "MATCH_EXISTING",
+      "key": "DOI",
+      "existingId": 58
+    },
+    {
+      "seedId": "RES-005",
+      "state": "CONFLICT_REVIEW",
+      "key": "TITLE_CONFLICT",
+      "reason": "title_requires_review",
+      "existingIds": [
+        114
+      ]
+    },
+    {
+      "seedId": "RES-006",
+      "state": "NEW_PUBLIC_SEED"
+    },
+    {
+      "seedId": "RES-007",
+      "state": "CONFLICT_REVIEW",
+      "key": "DOI",
+      "reason": "author_metadata_conflict",
+      "existingIds": [
+        445
+      ]
+    },
+    {
+      "seedId": "RES-008",
+      "state": "MATCH_EXISTING",
+      "key": "TITLE_YEAR_AUTHOR",
+      "existingId": 159
+    },
+    {
+      "seedId": "RES-009",
+      "state": "CONFLICT_REVIEW",
+      "key": "TITLE_CONFLICT",
+      "reason": "title_requires_review",
+      "existingIds": [
+        67
+      ]
+    },
+    {
+      "seedId": "RES-010",
+      "state": "NEW_PUBLIC_SEED"
+    },
+    {
+      "seedId": "RES-011",
+      "state": "MATCH_EXISTING",
+      "key": "TITLE_YEAR_AUTHOR",
+      "existingId": 144
+    },
+    {
+      "seedId": "RES-012",
+      "state": "CONFLICT_REVIEW",
+      "key": "TITLE_YEAR_AUTHOR",
+      "reason": "different_doi",
+      "existingIds": [
+        68
+      ]
+    },
+    {
+      "seedId": "RES-013",
+      "state": "NEW_PUBLIC_SEED"
+    },
+    {
+      "seedId": "RES-014",
+      "state": "MATCH_EXISTING",
+      "key": "DOI",
+      "existingId": 143
+    },
+    {
+      "seedId": "RES-015",
+      "state": "NEW_PUBLIC_SEED"
+    },
+    {
+      "seedId": "RES-016",
+      "state": "MATCH_EXISTING",
+      "key": "DOI",
+      "existingId": 184
+    },
+    {
+      "seedId": "RES-017",
+      "state": "MATCH_EXISTING",
+      "key": "DOI",
+      "existingId": 94
+    },
+    {
+      "seedId": "RES-018",
+      "state": "MATCH_EXISTING",
+      "key": "TITLE_YEAR_AUTHOR",
+      "existingId": 204
+    },
+    {
+      "seedId": "RES-019",
+      "state": "NEW_PUBLIC_SEED"
+    },
+    {
+      "seedId": "RES-020",
+      "state": "CONFLICT_REVIEW",
+      "key": "TITLE_CONFLICT",
+      "reason": "title_requires_review",
+      "existingIds": [
+        57
+      ]
+    }
+  ],
+  "researcher_decisions": [
+    {
+      "seedId": "RSC-001",
+      "state": "CONFLICT_REVIEW",
+      "reason": "name_without_verified_identity",
+      "existingIds": [
+        100
+      ]
+    },
+    {
+      "seedId": "RSC-002",
+      "state": "CONFLICT_REVIEW",
+      "reason": "name_without_verified_identity",
+      "existingIds": [
+        200
+      ]
+    },
+    {
+      "seedId": "RSC-003",
+      "state": "CONFLICT_REVIEW",
+      "reason": "name_without_verified_identity",
+      "existingIds": [
+        201
+      ]
+    },
+    {
+      "seedId": "RSC-004",
+      "state": "CONFLICT_REVIEW",
+      "reason": "name_without_verified_identity",
+      "existingIds": [
+        202
+      ]
+    },
+    {
+      "seedId": "RSC-005",
+      "state": "CONFLICT_REVIEW",
+      "reason": "name_without_verified_identity",
+      "existingIds": [
+        35
+      ]
+    },
+    {
+      "seedId": "RSC-006",
+      "state": "CONFLICT_REVIEW",
+      "reason": "name_without_verified_identity",
+      "existingIds": [
+        213
+      ]
+    },
+    {
+      "seedId": "RSC-007",
+      "state": "MATCH_EXISTING",
+      "key": "PUBLICATION_RELATIONSHIP",
+      "existingId": 95
+    },
+    {
+      "seedId": "RSC-008",
+      "state": "MATCH_EXISTING",
+      "key": "PUBLICATION_RELATIONSHIP",
+      "existingId": 577
+    },
+    {
+      "seedId": "RSC-009",
+      "state": "CONFLICT_REVIEW",
+      "reason": "name_without_verified_identity",
+      "existingIds": [
+        97
+      ]
+    },
+    {
+      "seedId": "RSC-010",
+      "state": "NEW_PUBLIC_SEED"
+    }
+  ],
+  "applied": {
+    "new_resources": 5,
+    "missing_fields_enriched": 0,
+    "verified_profiles": 3,
+    "new_public_relationships": 2
+  },
+  "after": {
+    "resources_total": 434,
+    "resources_public": 395,
+    "verified_public_profiles": 3
+  },
+  "preservation_checks": "PASS: existing status/title/authors/year untouched; no summaries/ownership selected for mutation"
+}

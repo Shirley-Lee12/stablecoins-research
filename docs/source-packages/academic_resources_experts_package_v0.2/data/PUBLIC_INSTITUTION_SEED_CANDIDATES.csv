@@ -1,0 +1,11 @@
+﻿institution_id,institution,institution_type,location_scope,relevance,researcher_ids
+INST-001,Warwick Business School,University,United Kingdom,Academic finance research,RSC-001
+INST-002,Columbia Business School,University,United States,Finance / financial intermediation research,RSC-002
+INST-003,"The Wharton School, University of Pennsylvania",University,United States,Finance / financial intermediation research,RSC-003
+INST-004,Chicago Booth School of Business,University,United States,Finance / DeFi research,RSC-004
+INST-005,Yale School of Management,University,United States,Banking / private money research,RSC-005
+INST-006,University of Michigan Law School,University,United States,Financial regulation / digital-assets law,RSC-006
+INST-007,Bank for International Settlements,International institution,International,Financial stability / monetary economics / payments,RSC-007
+INST-008,European Central Bank,Central bank,European Union,Monetary policy / banking / financial stability,RSC-008
+INST-009,International Monetary Fund,International institution,International,Financial stability / payments / policy design,RSC-009
+INST-010,Singapore University of Social Sciences,University,Singapore,Law / digital money,RSC-010

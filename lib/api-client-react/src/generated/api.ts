@@ -31,6 +31,8 @@ import type {
   ExtractionInput,
   ExtractionResult,
   GetObservedStablecoinPrices200,
+  GetPublicResearchLibrary200,
+  GetPublicResearcherDirectory200,
   GetRegulatoryTimelineParams,
   GetStablecoinIssuanceStatus200,
   GetStablecoinLiquidity200,
@@ -74,6 +76,162 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+export const getGetPublicResearchLibraryUrl = () => {
+
+
+
+
+  return `/api/public-directory/resources`
+}
+
+/**
+ * Public allowlist only. Count and records use the same approved query. No private submissions, account IDs, moderation notes or abstracts. Query failure returns 503 without a numeric total.
+ * @summary Approved public research resources, independent of caller authentication
+ */
+export const getPublicResearchLibrary = async ( options?: RequestInit): Promise<GetPublicResearchLibrary200> => {
+
+  return customFetch<GetPublicResearchLibrary200>(getGetPublicResearchLibraryUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicResearchLibraryQueryKey = () => {
+    return [
+    `/api/public-directory/resources`
+    ] as const;
+    }
+
+
+export const getGetPublicResearchLibraryQueryOptions = <TData = Awaited<ReturnType<typeof getPublicResearchLibrary>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicResearchLibrary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicResearchLibraryQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicResearchLibrary>>> = ({ signal }) => getPublicResearchLibrary({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicResearchLibrary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicResearchLibraryQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicResearchLibrary>>>
+export type GetPublicResearchLibraryQueryError = ErrorType<void>
+
+
+/**
+ * @summary Approved public research resources, independent of caller authentication
+ */
+
+export function useGetPublicResearchLibrary<TData = Awaited<ReturnType<typeof getPublicResearchLibrary>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicResearchLibrary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicResearchLibraryQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetPublicResearcherDirectoryUrl = () => {
+
+
+
+
+  return `/api/public-directory/researchers`
+}
+
+/**
+ * Default verification-date order. Publication-time affiliation stays distinct. No citation or article-count ranking. Institutions derive from returned verified profiles and public works.
+ * @summary Verified public researcher profiles with approved public works
+ */
+export const getPublicResearcherDirectory = async ( options?: RequestInit): Promise<GetPublicResearcherDirectory200> => {
+
+  return customFetch<GetPublicResearcherDirectory200>(getGetPublicResearcherDirectoryUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicResearcherDirectoryQueryKey = () => {
+    return [
+    `/api/public-directory/researchers`
+    ] as const;
+    }
+
+
+export const getGetPublicResearcherDirectoryQueryOptions = <TData = Awaited<ReturnType<typeof getPublicResearcherDirectory>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicResearcherDirectory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicResearcherDirectoryQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicResearcherDirectory>>> = ({ signal }) => getPublicResearcherDirectory({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicResearcherDirectory>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicResearcherDirectoryQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicResearcherDirectory>>>
+export type GetPublicResearcherDirectoryQueryError = ErrorType<void>
+
+
+/**
+ * @summary Verified public researcher profiles with approved public works
+ */
+
+export function useGetPublicResearcherDirectory<TData = Awaited<ReturnType<typeof getPublicResearcherDirectory>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicResearcherDirectory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicResearcherDirectoryQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 
 
 

@@ -1,0 +1,7 @@
+﻿asset_id,asset_type,route,title,purpose,status
+RES-LIB-01,theme_browser,/academic-resources,Research-theme browser,Question-first entry into resources,READY_FOR_IMPLEMENTATION
+RES-LIB-02,resource_results,/academic-resources,Resource search/results,DB-backed approved public records,READY_FOR_IMPLEMENTATION
+RES-LIB-03,evidence_legend,/academic-resources,Evidence-type guide,Distinguish peer-reviewed / working / policy / law / data,READY_FOR_IMPLEMENTATION
+EXP-DIR-01,researcher_results,/experts,Researcher directory,Verified public researcher profiles linked to resources,READY_FOR_IMPLEMENTATION
+EXP-DIR-02,institution_aggregation,/experts,Institution aggregation,Institutions represented by public resources/researchers,READY_FOR_IMPLEMENTATION
+EXP-DIR-03,inclusion_method,/experts,Directory inclusion methodology,Explain why a profile appears,READY_FOR_IMPLEMENTATION

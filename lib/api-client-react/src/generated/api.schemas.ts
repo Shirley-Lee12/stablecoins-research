@@ -498,6 +498,54 @@ export interface PlatformStats {
   top_tags?: Tag[];
 }
 
+export type GetPublicResearchLibrary200Version = typeof GetPublicResearchLibrary200Version[keyof typeof GetPublicResearchLibrary200Version];
+
+
+export const GetPublicResearchLibrary200Version = {
+  '02': '0.2',
+} as const;
+
+export type GetPublicResearchLibrary200Kind = typeof GetPublicResearchLibrary200Kind[keyof typeof GetPublicResearchLibrary200Kind];
+
+
+export const GetPublicResearchLibrary200Kind = {
+  resources: 'resources',
+} as const;
+
+export type GetPublicResearchLibrary200RecordsItem = { [key: string]: unknown };
+
+export type GetPublicResearchLibrary200 = {
+  version: GetPublicResearchLibrary200Version;
+  kind: GetPublicResearchLibrary200Kind;
+  /** @minimum 0 */
+  total: number;
+  records: GetPublicResearchLibrary200RecordsItem[];
+};
+
+export type GetPublicResearcherDirectory200Version = typeof GetPublicResearcherDirectory200Version[keyof typeof GetPublicResearcherDirectory200Version];
+
+
+export const GetPublicResearcherDirectory200Version = {
+  '02': '0.2',
+} as const;
+
+export type GetPublicResearcherDirectory200Kind = typeof GetPublicResearcherDirectory200Kind[keyof typeof GetPublicResearcherDirectory200Kind];
+
+
+export const GetPublicResearcherDirectory200Kind = {
+  researchers: 'researchers',
+} as const;
+
+export type GetPublicResearcherDirectory200RecordsItem = { [key: string]: unknown };
+
+export type GetPublicResearcherDirectory200 = {
+  version: GetPublicResearcherDirectory200Version;
+  kind: GetPublicResearcherDirectory200Kind;
+  /** @minimum 0 */
+  total: number;
+  records: GetPublicResearcherDirectory200RecordsItem[];
+};
+
 export type GetStablecoinMarket200Version = typeof GetStablecoinMarket200Version[keyof typeof GetStablecoinMarket200Version];
 
 

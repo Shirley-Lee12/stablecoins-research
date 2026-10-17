@@ -1,0 +1,23 @@
+{
+  "resource_query_success_zero": {
+    "zh": "没有符合当前筛选条件的公开资源。",
+    "en": "No approved public resources match the current filters."
+  },
+  "resource_directory_unavailable": {
+    "zh": "研究资源目录暂时无法读取。",
+    "en": "The public research directory is temporarily unavailable."
+  },
+  "resource_no_approved_records": {
+    "zh": "当前尚无已审核公开资源。",
+    "en": "No approved public resources are currently available."
+  },
+  "researcher_query_success_zero": {
+    "zh": "没有符合当前筛选条件的公开研究者档案。",
+    "en": "No public researcher profiles match the current filters."
+  },
+  "researcher_directory_unavailable": {
+    "zh": "研究者目录暂时无法读取。",
+    "en": "The public researcher directory is temporarily unavailable."
+  },
+  "rule": "A failed database request must never be presented as a factual zero count."
+}

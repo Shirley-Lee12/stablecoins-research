@@ -1,0 +1,6 @@
+{
+  "status": "QUERY_SUCCESS",
+  "read_only": true,
+  "resources": {"total": 429, "approved_public": 390, "pending_private": 24, "rejected": 12, "withdrawn": 3, "with_doi": 346, "with_url": 425, "without_doi_or_url": 4, "archived": "NOT_SUPPORTED"},
+  "researchers": {"authors_total": 1108, "linked_to_public_resource_authors": 842, "duplicate_name_groups": 5, "resource_duplicate_relationships": 3, "duplicate_doi_groups": 2, "separate_public_verified_profile_count": "NOT_SUPPORTED_BY_PREEXISTING_SCHEMA"}
+}

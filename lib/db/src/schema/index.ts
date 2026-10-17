@@ -13,3 +13,4 @@ export * from "./userExperience";
 export * from "./connector";
 export * from "./issuerDisclosures";
 export * from "./marketDataSnapshots";
+export * from "./publicDirectory";
