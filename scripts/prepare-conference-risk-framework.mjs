@@ -43,6 +43,9 @@ const data = {
   study: JSON.parse(await read("data/CONFERENCE_STUDY_STATUS.json")),
   nav: JSON.parse(await read("data/RISK_FRAMEWORK_NAV.json")).routes,
 };
+const corrections = JSON.parse(await readFile(resolve(root, "docs/content-corrections/phase-b-2026-10-18.json"), "utf8"));
+data.study = { ...data.study, ...corrections.conference };
+data.correction_revision = corrections.revision;
 for (const [key, file] of [
   ["modules", "RISK_MODULES"],
   ["lifecycle", "LIFECYCLE_MAPPING"],

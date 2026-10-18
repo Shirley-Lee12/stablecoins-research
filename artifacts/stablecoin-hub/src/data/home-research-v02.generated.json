@@ -5,7 +5,7 @@
     "title": "Establishing a Multi-Dimensional Risk Framework over the Full Lifecycle of Stablecoins",
     "author": "Xueli Li",
     "institution": "Zhejiang University",
-    "presentation_date": "October 2026",
+    "presentation_date": null,
     "current_study": {
       "atomic_risks": 55,
       "dimensions": [
@@ -38,7 +38,21 @@
       "Regulatory coverage evaluation",
       "Blind-spot identification",
       "Regulatory optimisation recommendations"
-    ]
+    ],
+    "conference_year": 2026,
+    "conference_start": "2026-09-29",
+    "conference_end": "2026-10-02",
+    "programme_date": "2026-09-30",
+    "programme_session": "Online Session 1",
+    "programme_status": "PRELIMINARY",
+    "programme_label_en": "Listed in the preliminary programme:",
+    "programme_label_zh": "初步节目表所列场次：",
+    "programme_display_en": "30 September 2026 · Online Session 1",
+    "programme_display_zh": "2026年9月30日 · 线上第1场",
+    "programme_url": "https://www.lait.fe.uni-lj.si/AI-DEFIT/program.html",
+    "actual_presentation_date": null,
+    "individual_acceptance_date": null,
+    "publication_date": null
   },
   "conference": "AI-DEFIT 2026",
   "acceptance": "ACCEPTED_CONFERENCE_PAPER",
@@ -222,6 +236,9 @@
   ],
   "navigation_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">\n<title>Stablecoin Research Hub Map</title><rect width=\"100%\" height=\"100%\" fill=\"#F7F9FC\"/>\n<style>\n.t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#1F2937}\n.m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:#667085}\n.s{font-size:20px} .b{font-size:24px} .l{font-size:26px;font-weight:600} .ttl{font-size:44px;font-weight:700}\n</style>\n<defs><marker id=\"a\" markerWidth=\"12\" markerHeight=\"12\" refX=\"10\" refY=\"6\" orient=\"auto\"><path d=\"M0,0 L12,6 L0,12 z\" fill=\"#C8D2E1\"/></marker></defs><text x=\"90\" y=\"90\" class=\"t ttl\" text-anchor=\"start\" fill=\"#1F2937\">Stablecoin Research Hub</text><text x=\"90\" y=\"130\" class=\"m s\" text-anchor=\"start\">Start with a question, then move into mechanisms, evidence, data or research.</text><rect x=\"575\" y=\"335\" width=\"450\" height=\"180\" rx=\"90\" fill=\"#F3F7FC\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"800\" y=\"405\" class=\"t l\" text-anchor=\"middle\" fill=\"#315B9A\">Stablecoin</text><text x=\"800\" y=\"445\" class=\"t l\" text-anchor=\"middle\" fill=\"#315B9A\">Research Hub</text><rect x=\"80\" y=\"190\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#315B9A\" stroke-width=\"2\"/><text x=\"108\" y=\"238\" class=\"t l\" text-anchor=\"start\" fill=\"#315B9A\">How stablecoins work</text><text x=\"108\" y=\"280\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"108\" dy=\"0\">Reserve · collateral · redemption</tspan><tspan x=\"108\" dy=\"27\">arbitrage · liquidation</tspan></text><text x=\"506\" y=\"335\" class=\"t s\" text-anchor=\"end\" fill=\"#315B9A\" font-weight=\"600\">/about-stablecoins</text><rect x=\"1070\" y=\"190\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#6B65A8\" stroke-width=\"2\"/><text x=\"1098\" y=\"238\" class=\"t l\" text-anchor=\"start\" fill=\"#6B65A8\">Where they are actually live</text><text x=\"1098\" y=\"280\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"1098\" dy=\"0\">Regulation · licence · token status</tspan><tspan x=\"1098\" dy=\"27\">user access</tspan></text><text x=\"1496\" y=\"335\" class=\"t s\" text-anchor=\"end\" fill=\"#6B65A8\" font-weight=\"600\">/regional-developments</text><rect x=\"80\" y=\"570\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#3A7D78\" stroke-width=\"2\"/><text x=\"108\" y=\"618\" class=\"t l\" text-anchor=\"start\" fill=\"#3A7D78\">How AI agents can pay</text><text x=\"108\" y=\"660\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"108\" dy=\"0\">Identity · authorization · execution</tspan><tspan x=\"108\" dy=\"27\">payment rails</tspan></text><text x=\"506\" y=\"715\" class=\"t s\" text-anchor=\"end\" fill=\"#3A7D78\" font-weight=\"600\">/agentic-payments</text><rect x=\"1070\" y=\"570\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#517A63\" stroke-width=\"2\"/><text x=\"1098\" y=\"618\" class=\"t l\" text-anchor=\"start\" fill=\"#517A63\">What markets and chains show</text><text x=\"1098\" y=\"660\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"1098\" dy=\"0\">Supply · price · on-chain activity</tspan><tspan x=\"1098\" dy=\"27\">reserves · macro · adoption</tspan></text><text x=\"1496\" y=\"715\" class=\"t s\" text-anchor=\"end\" fill=\"#517A63\" font-weight=\"600\">/market-data</text><rect x=\"565\" y=\"665\" width=\"450\" height=\"165\" rx=\"18\" fill=\"#FFFFFF\" stroke=\"#C97B63\" stroke-width=\"2\"/><text x=\"593\" y=\"713\" class=\"t l\" text-anchor=\"start\" fill=\"#C97B63\">How risks form and propagate</text><text x=\"593\" y=\"755\" class=\"t s\" text-anchor=\"start\" fill=\"#667085\"><tspan x=\"593\" dy=\"0\">Framework · atomic risks</tspan><tspan x=\"593\" dy=\"27\">Lifecycle · transmission mapping</tspan></text><text x=\"991\" y=\"810\" class=\"t s\" text-anchor=\"end\" fill=\"#C97B63\" font-weight=\"600\">/research</text><line x1=\"575\" y1=\"370\" x2=\"530\" y2=\"300\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"1025\" y1=\"370\" x2=\"1070\" y2=\"300\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"575\" y1=\"485\" x2=\"530\" y2=\"625\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"1025\" y1=\"485\" x2=\"1070\" y2=\"625\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/><line x1=\"800\" y1=\"515\" x2=\"800\" y2=\"665\" stroke=\"#C8D2E1\" stroke-width=\"4\" marker-end=\"url(#a)\"/></svg>",
   "paper": {
+    "version": "SUBMITTED_ANONYMISED_MANUSCRIPT",
+    "label_en": "Submitted anonymised manuscript",
+    "label_zh": "匿名送审稿",
     "url": "/media/research/ai-defit-2026-stablecoin-risk-framework.pdf",
     "bytes": 11838783,
     "sha256": "25eaf2418c2cb6c1a3fb20302203608973650f736893bd4b66811fe8bc54344d"

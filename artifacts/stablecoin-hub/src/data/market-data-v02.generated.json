@@ -97,27 +97,27 @@
       "source_id": "SRC-MD-08",
       "topic": "On-chain adjusted volume",
       "organization": "Artemis",
-      "title": "Artemis-filtered Stablecoin Transfer Volume API",
-      "date_or_snapshot": "current",
-      "url": "https://app.artemisanalytics.com/docs/api-reference/stablecoins/fetch-artemis-filtered-stablecoin-transfer-volume",
-      "source_type": "DATA_PROVIDER_API",
-      "use_for": "Adjusted transfer volume removes deduped/intra-exchange/MEV per Artemis methodology; API key required",
-      "site_mode": "DYNAMIC_REQUIRES_LICENSE_KEY",
-      "status": "VERIFIED",
-      "last_verified": "2026-10-16"
+      "title": "Historical Artemis-filtered transfer methodology · retired",
+      "date_or_snapshot": "2026-07 · methodology retirement",
+      "url": "https://www.artemis.ai/docs/data-reference/stablecoin-methodology",
+      "source_type": "PROVIDER_METHODOLOGY",
+      "use_for": "Historical adjusted methodology; no longer maintained and endpoint retired. Gross transfer volume is not a continuous replacement.",
+      "site_mode": "HISTORICAL_RETIRED_METHODOLOGY",
+      "status": "RETIRED",
+      "last_verified": "2026-10-18"
     },
     {
       "source_id": "SRC-MD-09",
       "topic": "On-chain P2P",
       "organization": "Artemis",
-      "title": "P2P Stablecoin Transfer Volume API",
-      "date_or_snapshot": "current",
-      "url": "https://app.artemisanalytics.com/docs/api-reference/stablecoins/fetch-p2p-stablecoin-transfer-volume",
-      "source_type": "DATA_PROVIDER_API",
-      "use_for": "Wallet-to-wallet P2P transfer volume; API key required",
-      "site_mode": "DYNAMIC_REQUIRES_LICENSE_KEY",
-      "status": "VERIFIED",
-      "last_verified": "2026-10-16"
+      "title": "Historical P2P transfer methodology · retired",
+      "date_or_snapshot": "2026-07 · methodology retirement",
+      "url": "https://www.artemis.ai/docs/data-reference/stablecoin-methodology",
+      "source_type": "PROVIDER_METHODOLOGY",
+      "use_for": "Historical EOA-to-EOA P2P flavor; no longer maintained and endpoint retired. Gross transfers and merchant payments are different scopes.",
+      "site_mode": "HISTORICAL_RETIRED_METHODOLOGY",
+      "status": "RETIRED",
+      "last_verified": "2026-10-18"
     },
     {
       "source_id": "SRC-MD-10",
@@ -466,13 +466,13 @@
       "dataset_id": "DS-ARTEMIS-ACTIVITY",
       "dataset": "Artemis activity",
       "page_group": "On-chain",
-      "metrics": "raw/adjusted transfer volume; addresses; P2P",
-      "mode": "API or dated snapshot",
-      "expected_site_refresh": "Manual unless licensed API configured",
-      "allowed_states": "REPORT_SNAPSHOT or API freshness",
-      "access_scope": "API key / redistribution rights to verify",
-      "public_use": "Manual/source-only until confirmed",
-      "critical_boundary": "Adjusted methodology must be named"
+      "metrics": "Historical adjusted/P2P transfer methodology; other activity requires separate validation",
+      "mode": "HISTORICAL_RETIRED_METHODOLOGY",
+      "expected_site_refresh": "No live adjusted/P2P endpoint",
+      "allowed_states": "UNAVAILABLE",
+      "access_scope": "Adjusted/P2P endpoints retired; no longer maintained",
+      "public_use": "Historical methodology only",
+      "critical_boundary": "Gross volume is not a continuous replacement for historical adjusted or P2P volume"
     },
     {
       "dataset_id": "DS-ETH-ISSUANCE",
@@ -959,12 +959,12 @@
       "boundary": "PRO Standard+ endpoint; address classification needed"
     },
     {
-      "source": "Artemis raw/adjusted/P2P APIs",
-      "public_mode": "API_IF_LICENSED",
-      "status": "LICENSE_REQUIRED",
-      "approved_use": "Use only when API key/licensing/redistribution is confirmed",
-      "expected_refresh": "source-defined",
-      "boundary": "Adjusted and P2P metrics retain Artemis methodology labels"
+      "source": "Artemis historical adjusted/P2P methodology",
+      "public_mode": "HISTORICAL_RETIRED_METHODOLOGY",
+      "status": "RETIRED",
+      "approved_use": "Historical methodology reference only; adjusted/P2P flavors no longer maintained and endpoints retired",
+      "expected_refresh": "No live endpoint",
+      "boundary": "Gross volume is not a continuous replacement for historical adjusted or P2P volume"
     },
     {
       "source": "Artemis payment report 2025",
@@ -1468,6 +1468,7 @@
     "en": "# Market Data + Dashboard｜Content Master en V0.1\n\n## `/dashboard`\n### Stablecoin signals worth checking today\nShow no more than 4–6 well-defined signals:\n- tracked stablecoin circulating value;\n- top-two supply concentration;\n- 30-day net supply change;\n- 3-month Treasury yield as macro context;\n- selected-market liquidity health, only when the collector is healthy;\n- the latest dated adoption-evidence card.\n\nNever turn missing data into zero.\nDo not use research counts or resource counts as market KPIs.\n\n## `/market-data`\n### Define the metric before showing the chart\nOrganise the section around five questions:\nMarket / On-chain / Issuers & reserves / Macro / Adoption.\n\nEach panel has its own source, timestamp, coverage and freshness state.\nDo not create a false impression that all sources update in real time.\n\n## `/market-data/market`\n### Supply, price stability and trading liquidity are different concepts\n\nUse `Tracked circulating value (USD)` for the main DefiLlama-derived size measure unless field-level implementation proves a different definition.\n\nCEX:\nselected venue/pair only; show pair, timestamp, spread, separate bid/ask 2% depth, and simulated slippage for an explicit order size.\n\nDEX:\nselected pool liquidity and volume only.\n\n`DEX pool liquidity ≠ CEX order-book depth ≠ route-level executable slippage.`\n\nObserved price deviation is not a depeg probability.\n\n## `/market-data/on-chain`\n### High transfer activity does not automatically mean high payment adoption\n\nSeparate:\n- supply by chain;\n- raw transfer volume;\n- adjusted transfer volume;\n- P2P transfer volume;\n- active addresses;\n- selected Ethereum issuance research.\n\nAddress ≠ user.\n\nPublic holder-concentration metrics remain on hold until address classification and exclusion rules are validated.\n\n## `/market-data/issuers-reserves`\n### Compare disclosure scopes before comparing reserve numbers\n\nCore fields:\nreport period / publication date / circulation or liabilities covered / reserve composition / assurance type / assurance provider / direct redemption eligibility / limitations.\n\n`Attestation ≠ financial-statement audit.`\n\nTether:\nlatest verified reserve attestation at this baseline is Q2 2026 (period end 30 June 2026, published 31 July 2026). Tether separately announced an unqualified KPMG audit opinion on its 2025 financial statements on 13 August 2026.\n\nCircle:\ncontinuous transparency/reserve page plus monthly reserve attestations; company financial reporting is a separate disclosure layer.\n\nPaxos PYUSD:\nmonthly reserve reports/attestations; KPMG listed from February 2025 onward.\n\nFDUSD:\nmonthly reserve disclosure/attestation; direct issuer purchase/redemption eligibility differs from secondary-market access.\n\nCompany profit may be shown only as a separately labelled company-level metric.\n\n## `/market-data/macro`\n### Macro data describe the environment; they do not establish stablecoin causality\n\nCharts:\n1. SOFR + DGS3MO (optionally EFFR)\n2. DGS3MO / DGS2 / DGS10 Treasury curve\n3. DTWEXBGS broad dollar\n4. VIXCLS market-stress context\n5. RRPONTSYD money-market liquidity\n6. optional normalized Asia FX panel using DEXCHUS / DEXHKUS / DEXSIUS\n\nAlways preserve units and quote direction.\n\n## `/market-data/adoption`\n### Adoption evidence must identify who is using stablecoins, for what, and in what sample\n\nArtemis 2025 report is a dated sample:\n- 22 surveyed firms + 11 estimated firms;\n- Jan 2023–Aug 2025;\n- $136B attributable payments in the study period;\n- $122B annualised run rate as of Aug 2025.\n\nThese are not a live 2026 total-market measure.\n\nKeep separate:\n- attributable payment research;\n- on-chain activity;\n- issuer-reported network/distribution metrics.\n\nDo not add these evidence classes together.\n",
     "zh": "# Market Data + Dashboard｜Content Master zh-CN V0.1\n\n> 所有数字必须来自结构化数据对象；正文不硬编码会快速变化的市场数字。\n\n---\n\n# 1. `/dashboard`｜稳定币数据仪表盘\n\n## HERO\n**H1** 今天值得看的稳定币信号\n\n**Lead**  \n这里不追求“指标越多越好”。只展示定义清楚、来源可核验、时间状态明确的少数市场信号，再把用户引向完整数据页。\n\n## Core signals\n最多 6 个：\n1. **追踪稳定币流通价值** — DefiLlama 动态数据\n2. **Top-2 供应集中度** — 与总量同一快照计算\n3. **30 日流通价值净变化** — 同口径历史序列\n4. **3 个月美债收益率** — FRED，作为储备收益环境背景，不是发行方实际回报\n5. **选定交易场所流动性状态** — 有健康快照才展示，不构造“全市场流动性”\n6. **最新采用证据** — 报告快照卡，必须显示研究期间和样本范围\n\n## Data health\n每张卡显示：\n- observation / report date\n- source\n- freshness\n- methodology tooltip\n\n如果当前抓取失败：\n显示 `上次成功快照：YYYY-MM-DD HH:mm`\n而不是 `0`。\n\n## Links\n市场 / 链上 / 发行方储备 / 宏观 / 采用\n\n**禁止**\n- 55 风险、机制数量、辖区数量、资源数量作为 Dashboard KPI\n- 实时风险概率\n- 实时脱锚概率\n\n---\n\n# 2. `/market-data`｜市场数据概览\n\n## HERO\n**H1** 先定义指标，再看图表\n\n**Lead**  \n稳定币的“规模、流动性、链上活动、储备、宏观环境和采用”来自不同数据体系。它们不能被压成一个统一的“市场活跃度”。\n\n## Five questions\n\n### 01 市场\n**问题：** 市场有多大？供应是否集中？选定交易场所是否流动？价格是否偏离目标？\n\n数据：\n- tracked circulating value\n- supply concentration\n- price deviation / event history\n- selected CEX spread / depth / simulated slippage\n- selected DEX pool volume / liquidity\n\n### 02 链上\n**问题：** 稳定币在哪些链上存在？链上转移活动如何？\n\n数据：\n- supply by chain\n- raw transfer volume\n- adjusted transfer volume\n- P2P transfer volume\n- active addresses\n- selected Ethereum issuance / holder research\n\n### 03 发行方与储备\n**问题：** 什么资产支持赎回？披露与核验有多及时？\n\n数据：\n- circulation/liabilities covered\n- reserve composition\n- assurance type\n- report period / publication date\n- redemption eligibility\n\n### 04 宏观\n**问题：** 美元利率、国债收益率、美元强弱与市场压力处于什么环境？\n\n数据：\n- SOFR / EFFR\n- DGS3MO / DGS2 / DGS10\n- broad USD\n- RRP\n- VIX\n- selected Asia FX\n\n### 05 采用\n**问题：** 哪些活动可以真正归因到支付、结算或具体使用渠道？\n\n区分：\n- attributable payment research\n- on-chain activity\n- issuer-reported network/distribution metrics\n\n## Methodology warning\n不同来源的覆盖、更新频率、样本和许可不同。每个图表独立显示来源与时间，不做“统一实时”假象。\n\n---\n\n# 3. `/market-data/market`｜市场规模、价格与流动性\n\n## HERO\n**H1** 供应规模、价格稳定与交易流动性是三件不同的事\n\n## A. Supply\n### 追踪稳定币流通价值\n使用 DefiLlama stablecoins 数据。\n\n公共标签优先用：\n**Tracked circulating value (USD)**\n\n除非字段级验证完成，不把所有数据简单写成“market cap”。\n\n图表：\n- aggregate history\n- top stablecoins\n- 30d net change\n- top-2 / top-5 concentration\n\n## B. Price stability\n展示：\n- current price vs verified target\n- deviation in bps\n- event history only after methodology QA\n\n**边界**\n价格偏离是观测，不是未来脱锚概率。\n\n## C. CEX liquidity — selected venues only\n每个交易对展示：\n- exchange\n- pair\n- timestamp\n- bid / ask\n- spread bps\n- bid depth within 2%\n- ask depth within 2%\n- simulated slippage for explicit order size\n\n不要把一个 Binance pair 称为“全市场流动性”。\n\n## D. DEX liquidity — selected pools only\n展示：\n- chain / DEX / pool\n- pool liquidity USD\n- 24h volume\n- pool price\n\n**明确：**\nDEX pool liquidity ≠ CEX 2% depth ≠ route-level executable slippage.\n\n## E. Failure state\n如果 Binance / DEX / CoinGecko 没有有效快照：\n显示 unavailable / delayed / last-successful，不显示空白大图，也不显示 0。\n\n---\n\n# 4. `/market-data/on-chain`｜链上活动\n\n## HERO\n**H1** 链上转移很多，不等于支付很多\n\n## A. Supply by chain\nDefiLlama 自动更新。\n需要说明 native / bridged 处理和追踪范围。\n\n## B. Activity hierarchy\n依次解释：\n\n### Raw transfer volume\n链上代币转移总量，可能包含交易所内部流转、协议交互、机器人、MEV 和重复经济活动。\n\n### Adjusted transfer volume\n如果使用 Artemis adjusted metric，必须保留其过滤定义。\n\n### P2P transfer volume\nwallet-to-wallet 活动，比 raw transfer 更接近个人间转移，但仍不等于商户支付。\n\n### Attributable payments\n需要付款方/收款方/商户/发票/支付服务商等额外证据，放在 Adoption 页面。\n\n## C. Active addresses\n地址 ≠ 用户。\n一个用户可控制多个地址；托管地址可代表多个用户。\n\n## D. Ethereum issuance\n仅对经过验证的 USDT/USDC 等合约展示。\nMint/burn 事件含义、Treasury 转移与流通发行必须逐币验证。\n\n## E. Holder concentration\n默认 HOLD。\n只有完成 exchange/bridge/treasury 地址分类和排除规则后，才公开集中度指标。\n\n---\n\n# 5. `/market-data/issuers-reserves`｜发行方、储备与赎回\n\n## HERO\n**H1** 比较储备之前，先比较披露口径\n\n**Lead**\n“100% backed”不是一个足够完整的横向比较。还要看资产构成、期限、托管、核验类型、报告时滞和谁能直接赎回。\n\n## Comparison table\n主列：\n- Token / issuer\n- Report period\n- Publication date\n- Circulation / liabilities covered\n- Reserve composition\n- Assurance type\n- Assurance provider\n- Disclosure frequency\n- Direct redemption eligibility\n- Notes / limitations\n\n## Assurance ladder\n### Issuer self-report\n发行方自己的数字。\n\n### Attestation / examination\n独立会计机构针对特定声明和时点执行鉴证程序。\n\n### Financial-statement audit\n对公司完整财务报表执行审计。\n\n**Attestation ≠ financial-statement audit.**\n\n## Current baseline examples\n### Tether / USDT\n截至本基线，最新核验的储备鉴证为 Q2 2026、报告期末 2026-06-30、2026-07-31 发布。Tether 另于 2026-08-13 宣布 KPMG 对 2025 全年财务报表出具无保留审计意见。\n\n不要把年度公司审计与季度储备鉴证混成一个字段。\n\n### Circle / USDC\nCircle transparency 页面持续披露 circulation、reserve composition 与 issuance/redemption，并发布月度储备鉴证。公司季度财报是另一层披露。\n\n### Paxos / PYUSD\n保留每月 reserve reports / attestations；2025-02 起页面列示 KPMG。\n\n### FDUSD\n使用月度储备披露与鉴证；直接 purchase/redeem 面向符合资格的发行方客户，普通二级市场持有人关系不同。\n\n## Issuer economics\n公司级收入/利润可以作为背景，但必须单列：\n`Company-level financial result`\n不得标成某稳定币“产品利润”。\n\n---\n\n# 6. `/market-data/macro`｜宏观环境\n\n## HERO\n**H1** 宏观数据提供环境，不提供稳定币因果结论\n\n## Chart 1｜美元短端利率环境\nSOFR、DGS3MO；必要时 EFFR。\n同为百分比，但含义不同。\n\n解释：\n短端利率与短期储备资产的潜在收益环境相关；不是发行方实际投资组合回报。\n\n## Chart 2｜Treasury curve\nDGS3MO / DGS2 / DGS10。\n\n解释：\n观察期限结构与利率风险环境；不暗示发行方实际持有对应期限。\n\n## Chart 3｜Broad USD\nDTWEXBGS。\n\n解释：\n美元外部价值背景。不要由同步变化直接推出 stablecoin demand 因果关系。\n\n## Chart 4｜Market stress\nVIXCLS。\n\n解释：\n跨市场风险情绪背景，不是“稳定币风险指数”。\n\n## Chart 5｜Money-market liquidity\nRRPONTSYD。\n单位 USD bn，必须单独纵轴。\n\n## Optional｜Asia FX\nDEXCHUS / DEXHKUS / DEXSIUS。\n若同图比较，建议转换为各自基期=100 的归一化指数；tooltip 仍显示原始“本币/1美元”报价。\n\n香港本地利率、阿联酋货币市场指标仍属于后续扩展，不为了对称性硬填。\n\n---\n\n# 7. `/market-data/adoption`｜支付与实际使用\n\n## HERO\n**H1** 采用证据必须回答“谁在用、用于什么、样本有多大”\n\n## Evidence class A｜Attributable payment research\nArtemis 2025 report：\n- 22 家受访公司 + 11 家补充估算\n- 研究期：2023-01 至 2025-08\n- 可归因稳定币支付累计：$136B\n- 2025-08 年化运行规模：$122B\n\n这些数字是**报告样本**，不是 2026 年实时全市场总额。\n\n按报告分类展示：\nB2B / P2P / Card / B2C / Prefunding。\n\n## Evidence class B｜On-chain activity\ntransfer volume / transactions / active addresses。\n\n这些衡量网络活动，不能自动转成支付采用。\n\n## Evidence class C｜Issuer-reported activity\n例如发行方报告的：\n- wallets\n- on-chain volume\n- network participants\n- payment-network activity\n\n必须保留发行方自己的指标定义和报告日期。\n不得与 Artemis sampled payments 相加。\n\n## Cross-link\n“稳定币能做什么” → `/about-stablecoins/applications`\n“实际用了多少” → 本页\n\n## Explicit warning\n不要用：\n- 链上 transfer volume\n- 钱包数量\n- partner/member count\n- token circulation\n\n单独证明“merchant adoption”或“大规模支付采用”。\n"
   },
+  "correction_revision": "2026-10-18",
   "hashes": {
     "00_README.md": "03d4c81c80f5e1cf2c0544dc7941ce5a7cc21d8ae6759ded484e088f21390be0",
     "01_CURRENT_PAGE_AUDIT.md": "fe908d9561decab8adbc6779ec6de8b58d4cbc8e48c5fb76566dcde075a5419c",

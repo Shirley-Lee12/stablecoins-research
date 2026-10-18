@@ -64,15 +64,15 @@ export function StudySource() {
   return (
     <details className="mt-5 text-sm leading-7 text-muted-foreground">
       <summary className="min-h-11 cursor-pointer font-medium text-primary">
-        {t(
-          "Conference presentation · October 2026 · Study source",
-          "会议报告 · 2026年10月 · 研究来源",
-        )}
+        {t(CONFERENCE.study.programme_label_en, CONFERENCE.study.programme_label_zh)}{" "}
+        {t(CONFERENCE.study.programme_display_en, CONFERENCE.study.programme_display_zh)}
       </summary>
       <p className="mt-2 max-w-4xl">
         {t(CONFERENCE.study.title, CONFERENCE.study.title)}
       </p>
       <p>{t("Xueli Li · Zhejiang University", "Xueli Li · 浙江大学")}</p>
+      <p>{t("Conference dates: 29 September–2 October 2026", "会议日期：2026年9月29日至10月2日")}</p>
+      <p>{t("Conference paper accepted. The preliminary programme does not confirm completion of the presentation or publication.", "会议论文已接收。初步节目表不能证明报告已经完成或论文已经出版。")}</p>
     </details>
   );
 }

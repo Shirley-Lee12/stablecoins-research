@@ -206,6 +206,7 @@ export function ResearchRecord({
   link?: boolean;
   compact?: boolean;
 }) {
+  const { t } = useLanguage();
   const item = RESEARCH_RECORDS.find((r) => r.id === id);
   if (!item) return null;
   return (
@@ -221,6 +222,12 @@ export function ResearchRecord({
         <HubText text={item.summary} />
         {id === "conference-paper" && <HubCite ids={["SRC-HR-04"]} />}
       </p>
+      {id === "conference-paper" && (
+        <p data-conference-programme className="mt-3 text-sm leading-7">
+          {t(HOME_RESEARCH.study.programme_label_en, HOME_RESEARCH.study.programme_label_zh)}{" "}
+          {t(HOME_RESEARCH.study.programme_display_en, HOME_RESEARCH.study.programme_display_zh)}
+        </p>
+      )}
       {!compact && (
         <p className="mt-3 text-sm leading-7">
           <HubText text={item.boundary} />
@@ -287,7 +294,7 @@ export function ConferencePaperLink() {
       rel="noopener noreferrer"
       className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary underline underline-offset-4"
     >
-      {t("Read the conference paper (PDF)", "阅读会议论文（PDF）")}
+      {t(HOME_RESEARCH.paper.label_en, HOME_RESEARCH.paper.label_zh)} (PDF)
       <ExternalLink size={14} />
     </a>
   );

@@ -24,3 +24,16 @@ export async function loadPublicDirectory(
       : rows.filter((r) => r.works?.length && r.profileUrl && r.verifiedOn);
   return { version: "0.2", kind, records, total: records.length };
 }
+
+/** Reuse the directory projection; a name is never an identity join key here. */
+export async function loadVerifiedResearcher(
+  query: (sql: string, values: number[]) => Promise<{ rows: any[] }>,
+  authorId: number,
+) {
+  if (!Number.isSafeInteger(authorId) || authorId <= 0) return null;
+  const { rows } = await query(
+    `SELECT * FROM (${PUBLIC_RESEARCHERS_SQL}) AS verified WHERE id = $1`,
+    [authorId],
+  );
+  return rows.find((r) => r.id === authorId && r.profileUrl && r.verifiedOn && r.works?.length) ?? null;
+}

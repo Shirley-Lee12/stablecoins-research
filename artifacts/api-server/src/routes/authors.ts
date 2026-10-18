@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { db, authorsTable, institutionsTable, resourceAuthorsTable, resourcesTable } from "@workspace/db";
+import { db, pool, authorsTable, institutionsTable, resourceAuthorsTable, resourcesTable } from "@workspace/db";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./auth";
 import { attachFacetedTags } from "../lib/tagging";
+
+import { loadVerifiedResearcher } from "../lib/publicDirectory";
 
 const router = Router();
 
@@ -91,7 +93,8 @@ router.get("/authors/:name", async (req, res) => {
       .where(sql`${resourceAuthorsTable.authorId} = ${author.id} AND ${resourcesTable.status} = 'approved'`)
       .orderBy(sql`${resourcesTable.publishedDate} DESC NULLS LAST`, sql`${resourcesTable.createdAt} DESC`);
 
-    res.json({ ...author, resources: await attachFacetedTags(resources) });
+    const verifiedProfile = await loadVerifiedResearcher((text, values) => pool.query(text, values), author.id);
+    res.json({ ...author, verifiedProfile, resources: await attachFacetedTags(resources) });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch author" });

@@ -57,6 +57,19 @@ data.copy = {
   en: await read("content/CONTENT_MASTER.en.md"),
   zh: await read("content/CONTENT_MASTER.zh-CN.md"),
 };
+// Frozen source packages remain provenance; this approved correction is the current source of truth.
+const corrections = JSON.parse(await readFile(resolve(root, "docs/content-corrections/phase-b-2026-10-18.json"), "utf8"));
+for (const patch of corrections.market_sources) {
+  const source = data.sources.find((s) => s.source_id === patch.source_id);
+  if (!source) throw Error("Unknown corrected source " + patch.source_id);
+  Object.assign(source, patch);
+}
+const activity = data.datasets.find((d) => d.dataset_id === "DS-ARTEMIS-ACTIVITY");
+if (activity) Object.assign(activity, { metrics: "Historical adjusted/P2P transfer methodology; other activity requires separate validation", mode: "HISTORICAL_RETIRED_METHODOLOGY", expected_site_refresh: "No live adjusted/P2P endpoint", allowed_states: "UNAVAILABLE", access_scope: "Adjusted/P2P endpoints retired; no longer maintained", public_use: "Historical methodology only", critical_boundary: "Gross volume is not a continuous replacement for historical adjusted or P2P volume" });
+const mode = data.modes.find((m) => m.source === "Artemis raw/adjusted/P2P APIs");
+if (!mode) throw Error("Artemis mode missing");
+Object.assign(mode, { source: "Artemis historical adjusted/P2P methodology", public_mode: "HISTORICAL_RETIRED_METHODOLOGY", status: "RETIRED", approved_use: "Historical methodology reference only; adjusted/P2P flavors no longer maintained and endpoints retired", expected_refresh: "No live endpoint", boundary: "Gross volume is not a continuous replacement for historical adjusted or P2P volume" });
+data.correction_revision = corrections.revision;
 data.hashes = {};
 async function walk(dir = "") {
   for (const entry of await readdir(resolve(source, dir), {

@@ -4,7 +4,7 @@
     "title": "Establishing a Multi-Dimensional Risk Framework over the Full Lifecycle of Stablecoins",
     "author": "Xueli Li",
     "institution": "Zhejiang University",
-    "presentation_date": "October 2026",
+    "presentation_date": null,
     "current_study": {
       "atomic_risks": 55,
       "dimensions": [
@@ -37,7 +37,21 @@
       "Regulatory coverage evaluation",
       "Blind-spot identification",
       "Regulatory optimisation recommendations"
-    ]
+    ],
+    "conference_year": 2026,
+    "conference_start": "2026-09-29",
+    "conference_end": "2026-10-02",
+    "programme_date": "2026-09-30",
+    "programme_session": "Online Session 1",
+    "programme_status": "PRELIMINARY",
+    "programme_label_en": "Listed in the preliminary programme:",
+    "programme_label_zh": "初步节目表所列场次：",
+    "programme_display_en": "30 September 2026 · Online Session 1",
+    "programme_display_zh": "2026年9月30日 · 线上第1场",
+    "programme_url": "https://www.lait.fe.uni-lj.si/AI-DEFIT/program.html",
+    "actual_presentation_date": null,
+    "individual_acceptance_date": null,
+    "publication_date": null
   },
   "nav": [
     {
@@ -56,6 +70,7 @@
       "en": "Amplification & Transmission"
     }
   ],
+  "correction_revision": "2026-10-18",
   "modules": [
     {
       "module": "M1",

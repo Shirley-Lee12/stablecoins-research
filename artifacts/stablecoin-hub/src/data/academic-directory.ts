@@ -69,6 +69,7 @@ export const evidence = (r: DirectoryResource) =>
   }[r.sourceType] ||
   "unclassified";
 export const EXTRA_EVIDENCE = [
+  { id: "conference_contribution", en: "Conference contribution", zh: "会议贡献" },
   {
     id: "journal_article",
     en: "Journal article · review status not recorded",

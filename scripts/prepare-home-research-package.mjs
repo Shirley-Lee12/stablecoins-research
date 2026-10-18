@@ -40,7 +40,8 @@ function csv(text) {
     .filter((r) => r.some(Boolean))
     .map((r) => Object.fromEntries(keys.map((k, i) => [k, r[i] || ""])));
 }
-const study = JSON.parse(await read("data/CONFERENCE_STUDY_STATUS.json"));
+const corrections = JSON.parse(await readFile(resolve(root, "docs/content-corrections/phase-b-2026-10-18.json"), "utf8"));
+const study = { ...JSON.parse(await read("data/CONFERENCE_STUDY_STATUS.json")), ...corrections.conference };
 const previousSources = csv(
   await readFile(
     resolve(
@@ -82,6 +83,7 @@ const data = {
       .replace("Hawkes · validation", "Lifecycle · transmission mapping"),
   ),
   paper: {
+    ...corrections.manuscript,
     url: paper,
     bytes: bytes.length,
     sha256: createHash("sha256").update(bytes).digest("hex"),

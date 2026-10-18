@@ -1,0 +1,274 @@
+{
+  "version": "2026-10-18",
+  "status": "READY_PENDING_DATA_APPLY",
+  "applyAuthorized": false,
+  "resourceIds": [
+    107,
+    127,
+    159,
+    162,
+    180,
+    284,
+    429
+  ],
+  "affectedResources": 7,
+  "metadataResourceIds": [
+    127,
+    429
+  ],
+  "preserveApproved": true,
+  "preserveUnknown": [
+    "verified_on for all new metadata",
+    "language for 107",
+    "all fields outside explicit patches"
+  ],
+  "patches": [
+    {
+      "id": 107,
+      "before": {
+        "id": 107,
+        "title": "Recurrent Marked Temporal Point Processes: Embedding Event History to Vector",
+        "authors": [
+          "Nan Du",
+          "Hanjun Dai",
+          "Rakshit Trivedi",
+          "Utkarsh Upadhyay",
+          "Manuel Gomez-Rodriguez",
+          "Le Song"
+        ],
+        "source_type": "journal_article",
+        "published_date": "2016",
+        "url": "https://doi.org/10.1145/2939672.2939875",
+        "doi": "10.1145/2939672.2939875",
+        "status": "approved",
+        "metadata": null
+      },
+      "resourcePatch": {
+        "source_type": "conference_paper"
+      },
+      "metadataPatch": {},
+      "evidence": [
+        "https://api.crossref.org/works/10.1145/2939672.2939875"
+      ],
+      "notes": [
+        "Language remains unknown. Scope decision unchanged."
+      ]
+    },
+    {
+      "id": 127,
+      "before": {
+        "id": 127,
+        "title": "稳定币的稳妥和可持续发展",
+        "authors": [
+          "余伟文"
+        ],
+        "source_type": "news",
+        "published_date": "2025-06-23",
+        "url": "https://www.hkma.gov.hk/gb/key-information/press-releases/2025/20250623-4/",
+        "doi": null,
+        "status": "approved",
+        "metadata": null
+      },
+      "resourcePatch": {
+        "url": "https://www.hkma.gov.hk/gb_chi/news-and-media/insight/2025/06/20250623/"
+      },
+      "metadataPatch": {
+        "venue": "HKMA Insight / 汇思"
+      },
+      "evidence": [
+        "https://www.hkma.gov.hk/gb_chi/news-and-media/insight/2025/06/20250623/"
+      ],
+      "notes": []
+    },
+    {
+      "id": 159,
+      "before": {
+        "id": 159,
+        "title": "Public Information and Stablecoin Runs",
+        "authors": [
+          "Rashad Ahmed",
+          "Iñaki Aldasoro",
+          "Chanelle Duley"
+        ],
+        "source_type": "working_paper",
+        "published_date": "2024",
+        "url": "https://doi.org/10.29094/1164",
+        "doi": "10.29094/1164",
+        "status": "approved",
+        "metadata": {
+          "venue": "BIS Working Papers No. 1164",
+          "access": "Yes",
+          "method": "Theory + case evidence",
+          "seed_id": "RES-008",
+          "language": "English",
+          "resource_id": 159,
+          "seed_origin": "ACADEMIC_RESOURCES_EXPERTS_V0_2_2026_10_16",
+          "theme_terms": [
+            "Reserve transparency",
+            "bank runs",
+            "collateral quality",
+            "public information"
+          ],
+          "verified_on": "2026-10-16",
+          "evidence_type": "working_paper",
+          "relevance_note": "Explains when reserve transparency can reduce or increase stablecoin run risk."
+        }
+      },
+      "resourcePatch": {
+        "url": "https://www.bis.org/publications/working-paper-1164-public-information-and-stablecoin-runs",
+        "doi": null
+      },
+      "metadataPatch": {},
+      "evidence": [
+        "https://www.bis.org/publications/working-paper-1164-public-information-and-stablecoin-runs"
+      ],
+      "notes": [
+        "Invalid prior DOI 10.29094/1164 retained in before snapshot; no replacement DOI inferred."
+      ]
+    },
+    {
+      "id": 162,
+      "before": {
+        "id": 162,
+        "title": "Explanatory Notes on Licensing of Stablecoin Issuers",
+        "authors": [
+          "Hong Kong Monetary Authority"
+        ],
+        "source_type": "gov_document",
+        "published_date": "2025",
+        "url": "https://www.hkma.gov.hk/eng/key-functions/international-financial-centre/fintech/regulatory-regime-for-stablecoin-issuers/",
+        "doi": null,
+        "status": "approved",
+        "metadata": null
+      },
+      "resourcePatch": {
+        "url": "https://www.hkma.gov.hk/media/eng/doc/key-functions/ifc/stablecoin-issuers/Explanatory_Notes_on_Licensing_of_Stablecoin_Issuers_eng.pdf"
+      },
+      "metadataPatch": {},
+      "evidence": [
+        "https://www.hkma.gov.hk/media/eng/doc/key-functions/ifc/stablecoin-issuers/Explanatory_Notes_on_Licensing_of_Stablecoin_Issuers_eng.pdf"
+      ],
+      "notes": []
+    },
+    {
+      "id": 180,
+      "before": {
+        "id": 180,
+        "title": "Stablecoin Sector Analysis",
+        "authors": [
+          "Tanay Ved",
+          "Coin Metrics Team"
+        ],
+        "source_type": "report",
+        "published_date": "2025",
+        "url": "https://coinmetrics.substack.com/p/stablecoin-sector-analysis",
+        "doi": null,
+        "status": "approved",
+        "metadata": null
+      },
+      "resourcePatch": {
+        "url": "https://www.talos.com/insights/stablecoin-sector-analysis"
+      },
+      "metadataPatch": {},
+      "evidence": [
+        "https://coinmetrics.io/special-insights/stablecoin-sector-analysis/",
+        "https://www.talos.com/insights/stablecoin-sector-analysis"
+      ],
+      "notes": [
+        "Authors, title and Coin Metrics attribution unchanged."
+      ]
+    },
+    {
+      "id": 284,
+      "before": {
+        "id": 284,
+        "title": "Decentralized Governance of Stablecoins with Closed Form Valuation",
+        "authors": [
+          "Lucy Huo",
+          "Ariah Klages-Mundt",
+          "Andreea Minca",
+          "Frederik Christian Münter",
+          "Mads Rude Wind"
+        ],
+        "source_type": "conference_paper",
+        "published_date": "2021",
+        "url": "https://doi.org/10.1007/978-3-031-18679-0_4",
+        "doi": "10.1007/978-3-031-18679-0_4",
+        "status": "approved",
+        "metadata": null
+      },
+      "resourcePatch": {
+        "published_date": "2023",
+        "source_type": "book_chapter"
+      },
+      "metadataPatch": {},
+      "evidence": [
+        "https://link.springer.com/chapter/10.1007/978-3-031-18679-0_4"
+      ],
+      "notes": [
+        "VERSION_RELATION_PENDING: no existing explicit version-family model. Retain id=284 and id=285; corrected year orders the formal version first."
+      ]
+    },
+    {
+      "id": 429,
+      "before": {
+        "id": 429,
+        "title": "Agile PM Approaches to enhance Stablecoin Reserve Transparency",
+        "authors": [
+          "Ching Kar Chung",
+          "Angela Marqui",
+          "Ambi; id_orcid 0000-0002-2803-2528 Ambituuni"
+        ],
+        "source_type": "conference_paper",
+        "published_date": "2026",
+        "url": "https://openalex.org/W7203567542",
+        "doi": null,
+        "status": "approved",
+        "metadata": null
+      },
+      "resourcePatch": {
+        "authors": [
+          "Ching Kar Chung",
+          "Angela Marqui",
+          "Ambi Ambituuni"
+        ]
+      },
+      "metadataPatch": {
+        "venue": "BAM 2026 Conference",
+        "language": "English",
+        "evidence_type": "conference_contribution",
+        "method": "Conference contribution · Unpublished / 会议贡献 · 未出版"
+      },
+      "evidence": [
+        "https://research.birmingham.ac.uk/en/publications/agile-pm-approaches-to-enhance-stablecoin-reserve-transparency/"
+      ],
+      "notes": [
+        "Unpublished is publication status, separate from moderation approved. No dedicated publication-status column exists; retain explicit status in method/evidence and visible controlled evidence label.",
+        "Only bibliographic spelling and resource 429 associations synchronize. No global identity rename, ORCID assertion, affiliation or relationship creation."
+      ]
+    }
+  ],
+  "scopeCasesRetained": [
+    66,
+    107,
+    342,
+    337,
+    331,
+    340,
+    108,
+    92
+  ],
+  "versionRelation": "VERSION_RELATION_PENDING",
+  "guardedAuthorSync": {
+    "resourceId": 429,
+    "priorAuthorId": 1056,
+    "newName": "Ambi Ambituuni",
+    "newCanonicalAuthorId": null,
+    "policy": "Existing exact-name entity only if unique, otherwise create bibliographic entity; abort on ambiguous names. Call existing syncResourceAuthors in same transaction. Never globally merge or rename entities.",
+    "authorLinksBefore": [
+      1054,
+      1055,
+      1056
+    ]
+  }
+}

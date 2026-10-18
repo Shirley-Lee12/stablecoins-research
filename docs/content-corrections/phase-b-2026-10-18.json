@@ -1,0 +1,50 @@
+{
+  "revision": "2026-10-18",
+  "authority": "Phase B targeted correction instruction; official evidence recorded in Phase B decision package",
+  "conference": {
+    "presentation_date": null,
+    "conference_year": 2026,
+    "conference_start": "2026-09-29",
+    "conference_end": "2026-10-02",
+    "programme_date": "2026-09-30",
+    "programme_session": "Online Session 1",
+    "programme_status": "PRELIMINARY",
+    "programme_label_en": "Listed in the preliminary programme:",
+    "programme_label_zh": "初步节目表所列场次：",
+    "programme_display_en": "30 September 2026 · Online Session 1",
+    "programme_display_zh": "2026年9月30日 · 线上第1场",
+    "programme_url": "https://www.lait.fe.uni-lj.si/AI-DEFIT/program.html",
+    "actual_presentation_date": null,
+    "individual_acceptance_date": null,
+    "publication_date": null
+  },
+  "manuscript": {
+    "version": "SUBMITTED_ANONYMISED_MANUSCRIPT",
+    "label_en": "Submitted anonymised manuscript",
+    "label_zh": "匿名送审稿"
+  },
+  "market_sources": [
+    {
+      "source_id": "SRC-MD-08",
+      "title": "Historical Artemis-filtered transfer methodology · retired",
+      "date_or_snapshot": "2026-07 · methodology retirement",
+      "url": "https://www.artemis.ai/docs/data-reference/stablecoin-methodology",
+      "source_type": "PROVIDER_METHODOLOGY",
+      "use_for": "Historical adjusted methodology; no longer maintained and endpoint retired. Gross transfer volume is not a continuous replacement.",
+      "site_mode": "HISTORICAL_RETIRED_METHODOLOGY",
+      "status": "RETIRED",
+      "last_verified": "2026-10-18"
+    },
+    {
+      "source_id": "SRC-MD-09",
+      "title": "Historical P2P transfer methodology · retired",
+      "date_or_snapshot": "2026-07 · methodology retirement",
+      "url": "https://www.artemis.ai/docs/data-reference/stablecoin-methodology",
+      "source_type": "PROVIDER_METHODOLOGY",
+      "use_for": "Historical EOA-to-EOA P2P flavor; no longer maintained and endpoint retired. Gross transfers and merchant payments are different scopes.",
+      "site_mode": "HISTORICAL_RETIRED_METHODOLOGY",
+      "status": "RETIRED",
+      "last_verified": "2026-10-18"
+    }
+  ]
+}

@@ -75,9 +75,13 @@ export default function Research() {
           </p>
           <p className="mt-3 text-sm leading-7 text-muted-foreground">
             {t(
-              "Xueli Li · Zhejiang University · Conference presentation, October 2026",
-              "Xueli Li · 浙江大学 · 会议报告，2026年10月",
+              "Xueli Li · Zhejiang University",
+              "Xueli Li · 浙江大学",
             )}
+          </p>
+          <p data-conference-programme className="mt-3 text-sm leading-7">
+            {t(HOME_RESEARCH.study.programme_label_en, HOME_RESEARCH.study.programme_label_zh)}{" "}
+            {t(HOME_RESEARCH.study.programme_display_en, HOME_RESEARCH.study.programme_display_zh)}
           </p>
           <p className="mt-3 max-w-4xl text-sm leading-7">
             {t(
@@ -318,8 +322,8 @@ export default function Research() {
         </div>
         <p className="mt-4 text-xs leading-6 text-muted-foreground">
           {t(
-            "The paper link opens the existing public study material.",
-            "论文链接打开现有公开研究材料。",
+            "Downloadable manuscript version: submitted anonymised manuscript. Conference acceptance does not make this file a published version of record.",
+            "可下载稿件版本：匿名送审稿。会议录用不代表此文件是已正式出版版本。",
           )}
           <HubCite ids={["SRC-HR-04"]} />
         </p>

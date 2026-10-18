@@ -633,8 +633,8 @@ export function MarketOnChainV02() {
                 "CHAIN_ADJ_TRANSFER",
                 ["Artemis-adjusted transfer volume", "Artemis 调整后转移额"],
                 [
-                  "Artemis deduplicates activity and excludes intra-exchange transfers and MEV. This remains a transfer metric.",
-                  "Artemis 去重并剔除交易所内部转移和 MEV；这仍是转移指标。",
+                  "Historical / retired methodology. Artemis-adjusted volume deduplicated activity and excluded intra-exchange transfers and MEV. This flavor is no longer maintained and its endpoint is retired. Gross volume is not a continuous replacement.",
+                  "历史 / 已退役口径。Artemis 调整后转移额曾去重并剔除交易所内部转移和 MEV；该口径已不再维护，接口已退役。Gross 转移额不是原指标的连续替代。",
                 ],
                 "SRC-MD-08",
               ],
@@ -642,8 +642,8 @@ export function MarketOnChainV02() {
                 "CHAIN_P2P_TRANSFER",
                 ["P2P transfer volume", "P2P 转移额"],
                 [
-                  "Wallet-to-wallet / EOA activity is not identical to merchant or attributable payment activity.",
-                  "钱包 / EOA 间活动不等于商户支付或可归因支付。",
+                  "Historical / retired methodology. The P2P flavor is no longer maintained and its endpoint is retired. Wallet-to-wallet / EOA activity is not merchant or attributable payment activity.",
+                  "历史 / 已退役口径。P2P 口径已不再维护，接口已退役。钱包 / EOA 间活动不等于商户支付或可归因支付。",
                 ],
                 "SRC-MD-09",
               ],

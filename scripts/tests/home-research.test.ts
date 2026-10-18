@@ -408,11 +408,13 @@ test("homepage keeps mission, support, question entries and evidence links outsi
     /asia-research|agentic-payments|evidence module complete|data-home-future-research/i,
   );
 });
-test("three approved conference routes and mappings remain byte-identical during the cross-page correction", () => {
+test("conference routes and conceptual mappings stay unchanged while approved programme metadata is corrected", () => {
   const before = JSON.parse(
     read("outputs/home-research-boundary-qa-2026-10-17/scope-before.json"),
   );
-  for (const [file, hash] of Object.entries(before.quantitative_routes))
+  for (const [file, hash] of Object.entries(before.quantitative_routes)) {
+    // Phase B explicitly authorizes programme metadata and its shared renderer.
+    if (file.endsWith("components/risk-framework-ui.tsx") || file.endsWith("data/conference-risk-framework-v02.generated.json")) continue;
     assert.equal(
       createHash("sha256")
         .update(readFileSync(resolve(root, file)))
@@ -420,4 +422,17 @@ test("three approved conference routes and mappings remain byte-identical during
       hash,
       file,
     );
+  }
+  const original = JSON.parse(execFileSync("git", ["show", "cb879f55e29c8f3b206a19d862bf19fdc62d00d2:artifacts/stablecoin-hub/src/data/conference-risk-framework-v02.generated.json"], {cwd: root, encoding:"utf8"}));
+  for(const key of ["nav","modules","lifecycle","amplification","future","hashes"]) assert.deepEqual(conference[key],original[key]);
+  assert.equal(conference.study.presentation_date,null);
+  assert.equal(conference.study.programme_date,"2026-09-30");
+});
+
+for (const lang of ["en", "zh"]) test(`research ${lang} displays the approved preliminary programme and anonymised download without stale presentation claims`, () => {
+  const html=render(research,lang);
+  assert.match(html,lang==="en"?/Listed in the preliminary programme:/:/初步节目表所列场次：/);
+  assert.match(html,lang==="en"?/30 September 2026 · Online Session 1/:/2026年9月30日 · 线上第1场/);
+  assert.match(html,lang==="en"?/Submitted anonymised manuscript/:/匿名送审稿/);
+  assert.doesNotMatch(html,/Conference presentation, October 2026|会议报告，2026年10月|Published September 2026/);
 });
