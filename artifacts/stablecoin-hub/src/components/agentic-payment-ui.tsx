@@ -248,7 +248,7 @@ export function PaymentVisual({ id, label }: { id: string; label: string }) {
         )
         .replace(
           'width="1600" height="900"',
-          'width="100%" height="auto" role="img"',
+          'width="100%" height="900" style="height:auto" role="img"',
         ),
     [svg, instance],
   );
