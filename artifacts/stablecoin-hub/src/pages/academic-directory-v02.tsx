@@ -137,10 +137,10 @@ export function LibraryPage() {
   return (
     <div
       data-directory-v02="resources"
-      className="mx-auto w-full min-w-0 max-w-6xl pb-8"
+      className="mx-auto w-full min-w-0 max-w-screen-xl pb-8"
     >
-      <header className="pb-8">
-        <h1 className="font-serif text-3xl font-bold leading-tight text-primary sm:text-4xl">
+      <header className="border-b border-border pb-5 mb-6">
+        <h1 className="font-serif text-3xl font-bold leading-tight text-primary">
           {t("Stablecoin Research Library", "稳定币研究资源库")}
         </h1>
         <p className="mt-4 text-lg leading-8">
@@ -346,10 +346,10 @@ export function ResearchersPage() {
   return (
     <div
       data-directory-v02="researchers"
-      className="mx-auto w-full min-w-0 max-w-6xl pb-8"
+      className="mx-auto w-full min-w-0 max-w-7xl pb-8"
     >
-      <header className="pb-7">
-        <h1 className="font-serif text-3xl font-bold leading-tight text-primary sm:text-4xl">
+      <header className="border-b border-border pb-5 mb-6">
+        <h1 className="font-serif text-3xl font-bold leading-tight text-primary">
           {t("Researchers & Institutions", "研究者与机构")}
         </h1>
         <p className="mt-4 text-lg leading-8">

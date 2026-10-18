@@ -1,0 +1,110 @@
+[
+  {
+    "width": 1440,
+    "language": "zh",
+    "theme": "light",
+    "aboutDestinations": 6,
+    "agenticDestinations": 4,
+    "keyboardToggle": true,
+    "detailHighlight": true,
+    "switches": true,
+    "errors": [],
+    "uncaught": [],
+    "pass": true
+  },
+  {
+    "width": 1440,
+    "language": "zh",
+    "theme": "dark",
+    "aboutDestinations": 6,
+    "agenticDestinations": 4,
+    "keyboardToggle": true,
+    "detailHighlight": true,
+    "switches": true,
+    "errors": [],
+    "uncaught": [],
+    "pass": true
+  },
+  {
+    "width": 1440,
+    "language": "en",
+    "theme": "light",
+    "aboutDestinations": 6,
+    "agenticDestinations": 4,
+    "keyboardToggle": true,
+    "detailHighlight": true,
+    "switches": true,
+    "errors": [],
+    "uncaught": [],
+    "pass": true
+  },
+  {
+    "width": 1440,
+    "language": "en",
+    "theme": "dark",
+    "aboutDestinations": 6,
+    "agenticDestinations": 4,
+    "keyboardToggle": true,
+    "detailHighlight": true,
+    "switches": true,
+    "errors": [],
+    "uncaught": [],
+    "pass": true
+  },
+  {
+    "width": 390,
+    "language": "zh",
+    "theme": "light",
+    "aboutDestinations": 6,
+    "agenticDestinations": 4,
+    "keyboardToggle": true,
+    "detailHighlight": true,
+    "switches": true,
+    "errors": [],
+    "uncaught": [],
+    "pass": true
+  },
+  {
+    "width": 390,
+    "language": "zh",
+    "theme": "dark",
+    "aboutDestinations": 6,
+    "agenticDestinations": 4,
+    "keyboardToggle": true,
+    "detailHighlight": true,
+    "switches": true,
+    "errors": [],
+    "uncaught": [],
+    "pass": true
+  },
+  {
+    "width": 390,
+    "language": "en",
+    "theme": "light",
+    "aboutDestinations": 6,
+    "agenticDestinations": 4,
+    "keyboardToggle": true,
+    "detailHighlight": true,
+    "switches": true,
+    "errors": [],
+    "uncaught": [],
+    "pass": true
+  },
+  {
+    "width": 390,
+    "language": "en",
+    "theme": "dark",
+    "aboutDestinations": 6,
+    "agenticDestinations": 4,
+    "keyboardToggle": true,
+    "detailHighlight": true,
+    "switches": true,
+    "errors": [],
+    "uncaught": [],
+    "pass": true
+  },
+  {
+    "feature": "globalSearch",
+    "pass": true
+  }
+]

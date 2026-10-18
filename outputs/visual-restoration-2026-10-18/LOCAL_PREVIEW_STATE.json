@@ -1,0 +1,7 @@
+{
+  "baseline": "http://127.0.0.1:5292",
+  "restored": "http://127.0.0.1:5293",
+  "api": "http://127.0.0.1:5291",
+  "data": "Previously saved public snapshots, no database connection or credentials loaded",
+  "productionDml": 0
+}

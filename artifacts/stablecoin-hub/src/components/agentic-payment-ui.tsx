@@ -369,7 +369,7 @@ export function PaymentPage({
     };
   }, [path]);
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[1480px] p-4 sm:p-6 lg:p-10">
+    <div className="mx-auto w-full min-w-0 max-w-5xl pb-12">
       <SectionTopNav
         eyebrow={t("Agentic Payments", "智能体支付")}
         ariaLabel={t("Agentic payments sections", "智能体支付栏目")}
@@ -498,7 +498,7 @@ export function PaymentHero({
       <p className="mb-4 text-xs font-semibold tracking-[.14em] text-primary">
         {t("AGENTIC PAYMENTS", "智能体支付")}
       </p>
-      <h1 className="max-w-5xl font-serif text-3xl font-semibold leading-tight text-primary sm:text-4xl lg:text-[2.75rem]">
+      <h1 className="max-w-5xl font-serif text-3xl font-semibold leading-tight text-primary sm:text-4xl">
         {title}
       </h1>
       {lead && (

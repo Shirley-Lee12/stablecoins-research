@@ -41,16 +41,17 @@ export default function Research() {
   return (
     <div
       data-home-research="research"
-      className="mx-auto w-full min-w-0 max-w-[1280px] px-1 pb-8 sm:px-4"
+      className="mx-auto w-full min-w-0 max-w-[1480px] pb-8"
     >
-      <header id="hero" className="pb-9 pt-3 sm:pb-12">
+      <header id="hero" className="grid min-h-[470px] items-center gap-12 border-b border-border pb-16 pt-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <div>
         <p className="mb-4 text-xs font-semibold tracking-wider text-primary">
           {t(
             "Our Research · AI-DEFIT 2026 conference study",
             "我们的研究 · AI-DEFIT 2026 会议研究",
           )}
         </p>
-        <h1 className="max-w-5xl font-serif text-3xl font-bold leading-tight tracking-tight text-primary sm:text-4xl xl:text-5xl">
+        <h1 className="max-w-5xl font-serif text-3xl font-bold leading-tight tracking-tight text-primary sm:text-4xl">
           {t(
             "A full-lifecycle framework for stablecoin risk",
             "稳定币全生命周期风险框架",
@@ -62,6 +63,19 @@ export default function Research() {
             "当前研究识别 atomic risks，并映射它们的生命周期位置与放大 / 传导角色。AI-DEFIT 2026 已接收会议论文的贡献是概念框架；后续测量与监测属于未来研究方向。",
           )}
         </p>
+        </div>
+        <div className="relative overflow-hidden bg-[linear-gradient(135deg,rgba(49,87,200,0.10),rgba(7,139,127,0.07)_52%,rgba(212,92,77,0.09))] p-7 sm:p-10">
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">{t("Research foundation", "研究基础")}</span>
+          <div className="mt-14 grid grid-cols-2 gap-7 sm:grid-cols-4">
+            {[
+              {n:"55", label:t("Submitted-framework risks", "已提交框架风险数")},
+              {n:"4", label:t("Lifecycle stages", "生命周期阶段")},
+              {n:"4", label:t("Amplification tiers", "风险放大层级")},
+              {n:"2026", label:t("AI-DEFIT conference study", "AI-DEFIT 会议研究")},
+            ].map(metric => <div key={metric.label} className="min-w-0 border-t border-foreground/25 pt-3"><strong className="block text-3xl font-semibold tabular-nums text-primary sm:text-4xl">{metric.n}</strong><span className="mt-1 block text-sm leading-5 text-foreground/70">{metric.label}</span></div>)}
+          </div>
+          <p className="mt-14 text-sm font-semibold text-primary">{t("Conceptual framework · Future extensions remain future research", "概念框架 · 后续延展仍属于未来研究")}</p>
+        </div>
       </header>
       <HubSection
         id="study-overview"

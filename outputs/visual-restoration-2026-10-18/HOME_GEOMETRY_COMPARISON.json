@@ -1,0 +1,194 @@
+[
+  {
+    "variant": "baseline",
+    "width": 1440,
+    "sections": {
+      "hub-introduction": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "\"Iowan Old Style\", Baskerville, \"Noto Serif SC\", Georgia, serif",
+        "headingSize": "36px",
+        "headingColor": "rgb(40, 63, 138)"
+      },
+      "hub-mission": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-work": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-agenda": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-team": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-modules": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      }
+    }
+  },
+  {
+    "variant": "baseline",
+    "width": 390,
+    "sections": {
+      "hub-introduction": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "\"Iowan Old Style\", Baskerville, \"Noto Serif SC\", Georgia, serif",
+        "headingSize": "30px",
+        "headingColor": "rgb(40, 63, 138)"
+      },
+      "hub-mission": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-work": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-agenda": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-team": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-modules": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      }
+    }
+  },
+  {
+    "variant": "restored",
+    "width": 1440,
+    "sections": {
+      "hub-introduction": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "\"Iowan Old Style\", Baskerville, \"Noto Serif SC\", Georgia, serif",
+        "headingSize": "36px",
+        "headingColor": "rgb(40, 63, 138)"
+      },
+      "hub-mission": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-work": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-agenda": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-team": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-modules": {
+        "left": 336,
+        "width": 1024,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      }
+    }
+  },
+  {
+    "variant": "restored",
+    "width": 390,
+    "sections": {
+      "hub-introduction": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "\"Iowan Old Style\", Baskerville, \"Noto Serif SC\", Georgia, serif",
+        "headingSize": "30px",
+        "headingColor": "rgb(40, 63, 138)"
+      },
+      "hub-mission": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-work": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-agenda": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-team": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      },
+      "hub-modules": {
+        "left": 16,
+        "width": 358,
+        "headingFont": "Inter, \"Noto Sans SC\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "headingSize": "12px",
+        "headingColor": "rgb(64, 72, 89)"
+      }
+    }
+  }
+]

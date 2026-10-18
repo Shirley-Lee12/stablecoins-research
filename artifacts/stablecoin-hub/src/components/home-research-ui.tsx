@@ -1,6 +1,6 @@
 import { useId, type ReactNode } from "react";
 import { Link } from "wouter";
-import { ArrowUpRight, ExternalLink, Maximize2 } from "lucide-react";
+import { ArrowUpRight, ExternalLink, Maximize2, Lightbulb } from "lucide-react";
 import {
   HOME_RESEARCH,
   RECORD_LINKS,
@@ -66,7 +66,7 @@ export function HubSection({
       <div className="mb-6 flex items-start gap-4">
         <span className="mt-1 font-mono text-xs text-primary">{number}</span>
         <div className="min-w-0">
-          <h2 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+          <h2 className="font-serif text-3xl font-semibold leading-tight text-primary sm:text-4xl">
             <HubText text={title} />
           </h2>
           {intro && (
@@ -201,10 +201,12 @@ export function ResearchRecord({
   id,
   link = true,
   compact = false,
+  editorial = false,
 }: {
   id: string;
   link?: boolean;
   compact?: boolean;
+  editorial?: boolean;
 }) {
   const { t } = useLanguage();
   const item = RESEARCH_RECORDS.find((r) => r.id === id);
@@ -212,7 +214,7 @@ export function ResearchRecord({
   return (
     <article
       data-research-record={id}
-      className="min-w-0 border-l-2 border-primary/35 pl-4"
+      className={editorial ? "min-w-0" : "min-w-0 border-l-2 border-primary/35 pl-4"}
     >
       <ResearchState status={item.status} />
       <h3 className="mt-3 text-lg font-semibold leading-7">
@@ -244,27 +246,28 @@ export function ResearchRecord({
     </article>
   );
 }
-export function FutureResearch({ compact = false }: { compact?: boolean }) {
+export function FutureResearch({ compact = false, editorial = false }: { compact?: boolean; editorial?: boolean }) {
   const { t } = useLanguage();
   return (
     <div
       data-home-future-research
-      className="min-w-0 border-l-2 border-dashed border-border pl-4"
+      className={editorial ? "min-w-0" : "min-w-0 border-l-2 border-dashed border-border pl-4"}
     >
       <ResearchState status="FUTURE_RESEARCH" />
       <p className="mt-4 text-sm leading-7">
         <HubText text={RESEARCH_BOUNDARY} />
       </p>
       <ul
-        className={`mt-5 gap-x-8 gap-y-4 ${compact ? "grid sm:grid-cols-2" : "grid md:grid-cols-2"}`}
+        className={editorial ? "mt-5 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2" : `mt-5 gap-x-8 gap-y-4 ${compact ? "grid sm:grid-cols-2" : "grid md:grid-cols-2"}`}
       >
         {FUTURE.map((f) => (
           <li
             key={f.id}
             data-future-direction={f.id}
-            className="min-w-0 text-sm leading-7"
+            className={editorial ? "min-w-0 border-t-2 border-primary/25 pt-5 text-sm leading-7" : "min-w-0 text-sm leading-7"}
           >
-            <span className="font-semibold">
+            <span className={editorial ? "flex items-center gap-2.5 text-base font-semibold" : "font-semibold"}>
+              {editorial && <span className="flex h-8 w-8 shrink-0 items-center justify-center bg-primary/8"><Lightbulb className="h-4 w-4 text-primary" aria-hidden="true" /></span>}
               <HubText text={f.title} />
             </span>
             {!compact && (
@@ -336,8 +339,8 @@ export function NavigationFigure() {
       />
       <p className="border-l-2 border-primary/35 pl-4 text-sm leading-7 text-muted-foreground lg:hidden">
         {t(
-          "The five questions above connect mechanisms, regional evidence, payments, market data and research.",
-          "上方五个问题分别通向机制、区域证据、支付、市场数据与研究。",
+          "The navigation map connects mechanisms, regional evidence, payments, market data and research.",
+          "导航图连接机制、区域证据、支付、市场数据与研究。",
         )}
       </p>
       <figcaption className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">

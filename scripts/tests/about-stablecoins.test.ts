@@ -139,7 +139,7 @@ test("all ten pages preserve manifest module order and existing canonical routes
   assert.match(app, /path="\/about-stablecoins\/types\/:mechanism"/);
   assert.match(page, /ABOUT.nav.type_nav.some/);
 });
-test("sidebar has one About entry with no children; regulatory remains independent", () => {
+test("restored sidebar exposes six About children; regulatory keeps its independent page", () => {
   const tree = layout.slice(
     layout.indexOf("const NAV_ITEMS"),
     layout.indexOf("// ── Breadcrumb"),
@@ -148,11 +148,10 @@ test("sidebar has one About entry with no children; regulatory remains independe
     tree.indexOf('href: "/about-stablecoins"'),
     tree.indexOf('href: "/regional-developments"'),
   );
-  assert.equal((tree.match(/href: "\/about-stablecoins"/g) || []).length, 1);
-  assert.doesNotMatch(
-    about,
-    /children:|activeAliases:|\/regulatory|history|types/,
-  );
+  assert.equal((tree.match(/href: "\/about-stablecoins"/g) || []).length, 2);
+  assert.match(about, /children:/);
+  for (const route of ["/about-stablecoins", "/about-stablecoins/history", "/about-stablecoins/types", "/about-stablecoins/applications", "/about-stablecoins/regulatory-evolution", "/regulatory"])
+    assert.ok(about.includes(`href: "${route}"`), route);
   assert.equal((tree.match(/href: "\/regulatory"/g) || []).length, 1);
   assert.doesNotMatch(
     read(prefix + "src/pages/regulatory.tsx"),

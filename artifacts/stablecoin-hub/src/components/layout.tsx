@@ -144,6 +144,14 @@ const NAV_ITEMS: NavItem[] = [
     labelEn: "About Stablecoins",
     labelZh: "关于稳定币",
     icon: BookOpen,
+    children: [
+      { href: "/about-stablecoins", labelEn: "Learn Stablecoins", labelZh: "了解稳定币" },
+      { href: "/about-stablecoins/history", labelEn: "History", labelZh: "历程" },
+      { href: "/about-stablecoins/types", labelEn: "Stablecoin Types", labelZh: "稳定币类别", matchPrefix: "/about-stablecoins/types/" },
+      { href: "/about-stablecoins/applications", labelEn: "Applications", labelZh: "应用" },
+      { href: "/about-stablecoins/regulatory-evolution", labelEn: "Regulatory Evolution", labelZh: "监管演变" },
+      { href: "/regulatory", labelEn: "Regulatory Status", labelZh: "监管现状" },
+    ],
   },
   {
     href: "/regional-developments",
@@ -159,18 +167,18 @@ const NAV_ITEMS: NavItem[] = [
     labelEn: "Agentic Payments",
     labelZh: "智能体支付",
     icon: Workflow,
+    children: [
+      { href: "/agentic-payments", labelEn: "Overview", labelZh: "概览" },
+      { href: "/agentic-payments/protocols", labelEn: "Protocols & Mechanisms", labelZh: "协议与机制", matchPrefix: "/agentic-payments/protocols/" },
+      { href: "/agentic-payments/scenarios", labelEn: "Applications & Risks", labelZh: "应用与风险" },
+      { href: "/agentic-payments/ecosystem", labelEn: "Ecosystem & Developments", labelZh: "生态与进展" },
+    ],
   },
   {
     href: "/research",
     labelEn: "Our Research",
     labelZh: "我们的研究",
     icon: Microscope,
-  },
-  {
-    href: "/regulatory",
-    labelEn: "Regulatory Status",
-    labelZh: "监管现状",
-    icon: Shield,
   },
   {
     href: "/academic-resources",
@@ -204,6 +212,12 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
 ];
+
+function navChildMatches(child: NavChild, location: string): boolean {
+  return location === child.href
+    || Boolean(child.aliases?.includes(location))
+    || Boolean(child.matchPrefix && location.startsWith(child.matchPrefix));
+}
 
 // ── Breadcrumb builder ────────────────────────────────────────────────────────
 function useBreadcrumbs(location: string, language: string) {
@@ -272,13 +286,13 @@ function SidebarNavItem({
   const isParentActive =
     (item.href === "/" && location === "/") ||
     (item.href !== "/" && location.startsWith(item.href)) ||
-    item.children?.some((child) => location.startsWith(child.href) || child.aliases?.includes(location));
+    item.children?.some((child) => navChildMatches(child, location));
   const hasChildren = !!item.children?.length;
   const isOpen = openMap[item.href] ?? false;
 
   if (!hasChildren) {
     return (
-      <Link href={item.href} onClick={onNavigate}>
+      <Link href={item.href} onClick={onNavigate} aria-current={isParentActive ? "page" : undefined}>
         <div
           title={collapsed ? (zh ? item.labelZh : item.labelEn) : undefined}
           className={cn(
@@ -300,17 +314,23 @@ function SidebarNavItem({
 
   return (
     <Collapsible
+      data-nav-group={item.href}
       open={isOpen}
       onOpenChange={(v) => setOpenMap((prev) => ({ ...prev, [item.href]: v }))}
     >
       <CollapsibleTrigger asChild>
-        <div
-          onClick={() => {
-            if (collapsed && window.innerWidth >= 1024) onRequestExpand();
+        <button
+          type="button"
+          onClick={(event) => {
+            if (collapsed && window.innerWidth >= 1024) {
+              event.preventDefault();
+              onRequestExpand();
+              setOpenMap((prev) => ({ ...prev, [item.href]: true }));
+            }
           }}
           title={collapsed ? (zh ? item.labelZh : item.labelEn) : undefined}
           className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium cursor-pointer select-none",
+            "w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium cursor-pointer select-none",
             collapsed && "lg:justify-center lg:gap-0 lg:px-2",
             isParentActive
               ? "bg-sidebar-accent text-sidebar-accent-foreground"
@@ -328,17 +348,14 @@ function SidebarNavItem({
               collapsed && "lg:hidden",
             )}
           />
-        </div>
+        </button>
       </CollapsibleTrigger>
       <CollapsibleContent className={cn(collapsed && "lg:hidden")}>
         <div className="ml-7 mt-0.5 mb-0.5 flex flex-col gap-0.5 border-l border-sidebar-border/60 pl-3">
           {item.children!.map((child) => {
-            const childActive = location === child.href
-              || Boolean(child.aliases?.includes(location))
-              || Boolean(child.matchPrefix && location.startsWith(child.matchPrefix))
-              || (child.href === "/about-stablecoins/types" && location.startsWith(`${child.href}/`));
+            const childActive = navChildMatches(child, location);
             return (
-              <Link key={child.href} href={child.href} onClick={onNavigate}>
+              <Link key={child.href} href={child.href} onClick={onNavigate} data-nav-child={child.href} aria-current={childActive ? "page" : undefined}>
                 <div
                   className={cn(
                     "px-2 py-2 rounded-md text-xs font-medium cursor-pointer transition-all",
@@ -462,7 +479,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     NAV_ITEMS.forEach((item) => {
       if (item.children) {
         init[item.href] = item.children.some((c) =>
-          location.startsWith(c.href),
+          navChildMatches(c, location),
         );
       }
     });
@@ -474,7 +491,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     NAV_ITEMS.forEach((item) => {
       if (item.children) {
         const shouldOpen = item.children.some((c) =>
-          location.startsWith(c.href),
+          navChildMatches(c, location),
         );
         if (shouldOpen) setOpenMap((prev) => ({ ...prev, [item.href]: true }));
       }

@@ -1,0 +1,1718 @@
+[
+  {
+    "route": "/agentic-payments",
+    "core": true,
+    "requestedLanguage": "en",
+    "requestedTheme": "light",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "en",
+    "theme": "light",
+    "title": "Agentic Payments | Stablecoin Research Hub",
+    "description": "Explore agent authorisation, payment execution and payment rails.",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Stack .«r8»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r8»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r8»-modal-small { font-size:22px; } .«r8»-modal-body { font-size:26px; } .«r8»-modal-label { font-size:24px; font-weight:600; } .«r8»-modal-title { font-size:44px; font-weight:700; } .«r8»-modal-sub { font-size:24px; } .«r8»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r8»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r8»-modal-arrow); } .«r8»-modal-dash { stroke-dasharray:10 8; } Agentic Payment StackFrom user intent to payment, settlement and evidence1 User IntentWhat does the user actually want?“Buy a Friday flight under ¥500”2 AI AgentWho is acting?ChatGPT · Gemini · Muse · Grok Bot · JD AI Shopping3 Trust & AuthorizationWhat is the agent allowed to do?AP2 · ACT · AMP · APOP · KYA4 Payment ExecutionHow is payment initiated?x402 · MPP · A402 · Agent Pay · JD AI Pay5 Rail & SettlementWhere does value move?Card · Bank · Wallet · Stablecoin · BlockchainReceipt · Audit · Dispute",
+          "children": 39,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-light-0-0.png",
+        "layoutPass": true
+      },
+      {
+        "index": 1,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Autonomy Levels .«rk»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} How Much Control Does the Agent Have?More autonomy requires stronger identity, limits, monitoring and audit.1Human-confirmed每次都问我• Find and compare• Show final amount• User approves• PayExamplesInstant CheckoutMuseGrok Bot2Pre-authorized满足条件就可以买• Amount cap• Merchant / category• Time / frequency• Execute within limitsExamplesAP2 mandateAMP task authAPOP intent3Machine-native机器自动付款• Request resource• Receive payment request• Pay under policy• Get resourceExamplesx402MPPA402 / Machine PayHuman controlAutomation",
+          "children": 65,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 238.765625,
+          "bottom": 605.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-light-0-1.png",
+        "layoutPass": true
+      },
+      {
+        "index": 2,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Three Fund-Control Models .«r12»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} Three Fund-Control ModelsAn agent can execute a payment without receiving unrestricted access to the underlying account.AMandate ModelTask authority,not full account control.UserStructured mandateAgentVerifierPaymentExample: AP2 / APOPBScoped CredentialOne-time or restrictedpayment credential.User approvalPSP / walletScoped tokenAgentMerchantExample: ACP / Muse + LinkCPlatform Account + ApprovalAgent proposes; user approves;platform account pays.Platform accountAgent proposalAllow / DenyPaymentMerchantExample: Grok Bot + X Money",
+          "children": 74,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-light-0-2.png",
+        "layoutPass": true
+      },
+      {
+        "index": 3,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Three Payment Rails .«r1a»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r1a»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r1a»-modal-small { font-size:22px; } .«r1a»-modal-body { font-size:26px; } .«r1a»-modal-label { font-size:24px; font-weight:600; } .«r1a»-modal-title { font-size:44px; font-weight:700; } .«r1a»-modal-sub { font-size:24px; } .«r1a»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r1a»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r1a»-modal-arrow); } .«r1a»-modal-dash { stroke-dasharray:10 8; } The Agent Can Pay Through Different RailsStablecoin is one payment rail — not the whole agentic-payment stack.Card / BankVisa · Mastercard · UnionPay · ACH · UPIStrengths• Merchant acceptance• Refund / dispute maturity• Consumer protectionTrade-offs• Micropayment economics• Machine-native interactionWallet / APMAlipay · Alipay+ · GCash · DANA · TNGStrengths• Mobile-first• Regional coverage• Existing wallet identityTrade-offs• Cross-wallet interoperability• Platform dependenceStablecoin / Blockchainx402 paths · MPP stablecoin rail · A2AStrengths• 24/7• Micropayments• Programmability• Cross-borderTrade-offs• Key / wallet risk• Irreversibility• Regulatory varianceAgentic commerce can route across all three.",
+          "children": 42,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-light-0-3.png",
+        "layoutPass": true
+      },
+      {
+        "index": 4,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r1i»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r1i»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r1i»-modal-small { font-size:22px; } .«r1i»-modal-body { font-size:26px; } .«r1i»-modal-label { font-size:24px; font-weight:600; } .«r1i»-modal-title { font-size:44px; font-weight:700; } .«r1i»-modal-sub { font-size:24px; } .«r1i»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r1i»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r1i»-modal-arrow); } .«r1i»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-light-0-4.png",
+        "layoutPass": true
+      },
+      {
+        "index": 5,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Risk Chain .«r1q»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} Agentic Payment Risk ChainEach layer introduces a different failure mode — and a different control.IntentRiskAmbiguityHidden constraintsControlStructured intentAgentRiskHallucinationPrompt injectionControlKYASecure runtimeAuthorizationRiskOver-delegationReplay / stale consentControlMandateLimits / revokeCredentialRiskCard/token/key theftControlScoped tokenSecure vaultMerchantRiskFraudNon-deliveryControlIdentityReputationPaymentRiskDuplicate chargeWrong amountControlIdempotencyMonitoringSettlementRiskDepeg / chain riskIrreversibilityControlRail policyEscrowDisputeRiskWeak evidenceUnclear liabilityControlReceiptAudit trailMore autonomy → stronger identity, limits, monitoring and evidence",
+          "children": 103,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-light-0-5.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-en-light-0.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments/protocols",
+    "core": true,
+    "requestedLanguage": "en",
+    "requestedTheme": "light",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "en",
+    "theme": "light",
+    "title": "Protocols & Mechanisms | Stablecoin Research Hub",
+    "description": "Compare the roles of agentic payment protocols and mechanisms.",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r8»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r8»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r8»-modal-small { font-size:22px; } .«r8»-modal-body { font-size:26px; } .«r8»-modal-label { font-size:24px; font-weight:600; } .«r8»-modal-title { font-size:44px; font-weight:700; } .«r8»-modal-sub { font-size:24px; } .«r8»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r8»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r8»-modal-arrow); } .«r8»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-light-1-0.png",
+        "layoutPass": true
+      },
+      {
+        "index": 1,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Stack .«rc»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«rc»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«rc»-modal-small { font-size:22px; } .«rc»-modal-body { font-size:26px; } .«rc»-modal-label { font-size:24px; font-weight:600; } .«rc»-modal-title { font-size:44px; font-weight:700; } .«rc»-modal-sub { font-size:24px; } .«rc»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«rc»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«rc»-modal-arrow); } .«rc»-modal-dash { stroke-dasharray:10 8; } Agentic Payment StackFrom user intent to payment, settlement and evidence1 User IntentWhat does the user actually want?“Buy a Friday flight under ¥500”2 AI AgentWho is acting?ChatGPT · Gemini · Muse · Grok Bot · JD AI Shopping3 Trust & AuthorizationWhat is the agent allowed to do?AP2 · ACT · AMP · APOP · KYA4 Payment ExecutionHow is payment initiated?x402 · MPP · A402 · Agent Pay · JD AI Pay5 Rail & SettlementWhere does value move?Card · Bank · Wallet · Stablecoin · BlockchainReceipt · Audit · Dispute",
+          "children": 39,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-light-1-1.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-en-light-1.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments/ecosystem",
+    "core": true,
+    "requestedLanguage": "en",
+    "requestedTheme": "light",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "en",
+    "theme": "light",
+    "title": "Ecosystem & Developments | Stablecoin Research Hub",
+    "description": "Explore the roles of protocols, agents, products and payment providers.",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r4»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r4»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r4»-modal-small { font-size:22px; } .«r4»-modal-body { font-size:26px; } .«r4»-modal-label { font-size:24px; font-weight:600; } .«r4»-modal-title { font-size:44px; font-weight:700; } .«r4»-modal-sub { font-size:24px; } .«r4»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r4»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r4»-modal-arrow); } .«r4»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-light-2-0.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-en-light-2.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments",
+    "core": true,
+    "requestedLanguage": "en",
+    "requestedTheme": "dark",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "en",
+    "theme": "dark",
+    "title": "Agentic Payments | Stablecoin Research Hub",
+    "description": "Explore agent authorisation, payment execution and payment rails.",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Stack .«r8»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r8»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r8»-modal-small { font-size:22px; } .«r8»-modal-body { font-size:26px; } .«r8»-modal-label { font-size:24px; font-weight:600; } .«r8»-modal-title { font-size:44px; font-weight:700; } .«r8»-modal-sub { font-size:24px; } .«r8»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r8»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r8»-modal-arrow); } .«r8»-modal-dash { stroke-dasharray:10 8; } Agentic Payment StackFrom user intent to payment, settlement and evidence1 User IntentWhat does the user actually want?“Buy a Friday flight under ¥500”2 AI AgentWho is acting?ChatGPT · Gemini · Muse · Grok Bot · JD AI Shopping3 Trust & AuthorizationWhat is the agent allowed to do?AP2 · ACT · AMP · APOP · KYA4 Payment ExecutionHow is payment initiated?x402 · MPP · A402 · Agent Pay · JD AI Pay5 Rail & SettlementWhere does value move?Card · Bank · Wallet · Stablecoin · BlockchainReceipt · Audit · Dispute",
+          "children": 39,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-dark-0-0.png",
+        "layoutPass": true
+      },
+      {
+        "index": 1,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Autonomy Levels .«rk»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} How Much Control Does the Agent Have?More autonomy requires stronger identity, limits, monitoring and audit.1Human-confirmed每次都问我• Find and compare• Show final amount• User approves• PayExamplesInstant CheckoutMuseGrok Bot2Pre-authorized满足条件就可以买• Amount cap• Merchant / category• Time / frequency• Execute within limitsExamplesAP2 mandateAMP task authAPOP intent3Machine-native机器自动付款• Request resource• Receive payment request• Pay under policy• Get resourceExamplesx402MPPA402 / Machine PayHuman controlAutomation",
+          "children": 65,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 238.765625,
+          "bottom": 605.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-dark-0-1.png",
+        "layoutPass": true
+      },
+      {
+        "index": 2,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Three Fund-Control Models .«r12»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} Three Fund-Control ModelsAn agent can execute a payment without receiving unrestricted access to the underlying account.AMandate ModelTask authority,not full account control.UserStructured mandateAgentVerifierPaymentExample: AP2 / APOPBScoped CredentialOne-time or restrictedpayment credential.User approvalPSP / walletScoped tokenAgentMerchantExample: ACP / Muse + LinkCPlatform Account + ApprovalAgent proposes; user approves;platform account pays.Platform accountAgent proposalAllow / DenyPaymentMerchantExample: Grok Bot + X Money",
+          "children": 74,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-dark-0-2.png",
+        "layoutPass": true
+      },
+      {
+        "index": 3,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Three Payment Rails .«r1a»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r1a»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r1a»-modal-small { font-size:22px; } .«r1a»-modal-body { font-size:26px; } .«r1a»-modal-label { font-size:24px; font-weight:600; } .«r1a»-modal-title { font-size:44px; font-weight:700; } .«r1a»-modal-sub { font-size:24px; } .«r1a»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r1a»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r1a»-modal-arrow); } .«r1a»-modal-dash { stroke-dasharray:10 8; } The Agent Can Pay Through Different RailsStablecoin is one payment rail — not the whole agentic-payment stack.Card / BankVisa · Mastercard · UnionPay · ACH · UPIStrengths• Merchant acceptance• Refund / dispute maturity• Consumer protectionTrade-offs• Micropayment economics• Machine-native interactionWallet / APMAlipay · Alipay+ · GCash · DANA · TNGStrengths• Mobile-first• Regional coverage• Existing wallet identityTrade-offs• Cross-wallet interoperability• Platform dependenceStablecoin / Blockchainx402 paths · MPP stablecoin rail · A2AStrengths• 24/7• Micropayments• Programmability• Cross-borderTrade-offs• Key / wallet risk• Irreversibility• Regulatory varianceAgentic commerce can route across all three.",
+          "children": 42,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-dark-0-3.png",
+        "layoutPass": true
+      },
+      {
+        "index": 4,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r1i»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r1i»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r1i»-modal-small { font-size:22px; } .«r1i»-modal-body { font-size:26px; } .«r1i»-modal-label { font-size:24px; font-weight:600; } .«r1i»-modal-title { font-size:44px; font-weight:700; } .«r1i»-modal-sub { font-size:24px; } .«r1i»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r1i»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r1i»-modal-arrow); } .«r1i»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-dark-0-4.png",
+        "layoutPass": true
+      },
+      {
+        "index": 5,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Risk Chain .«r1q»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} Agentic Payment Risk ChainEach layer introduces a different failure mode — and a different control.IntentRiskAmbiguityHidden constraintsControlStructured intentAgentRiskHallucinationPrompt injectionControlKYASecure runtimeAuthorizationRiskOver-delegationReplay / stale consentControlMandateLimits / revokeCredentialRiskCard/token/key theftControlScoped tokenSecure vaultMerchantRiskFraudNon-deliveryControlIdentityReputationPaymentRiskDuplicate chargeWrong amountControlIdempotencyMonitoringSettlementRiskDepeg / chain riskIrreversibilityControlRail policyEscrowDisputeRiskWeak evidenceUnclear liabilityControlReceiptAudit trailMore autonomy → stronger identity, limits, monitoring and evidence",
+          "children": 103,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-dark-0-5.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-en-dark-0.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments/protocols",
+    "core": true,
+    "requestedLanguage": "en",
+    "requestedTheme": "dark",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "en",
+    "theme": "dark",
+    "title": "Protocols & Mechanisms | Stablecoin Research Hub",
+    "description": "Compare the roles of agentic payment protocols and mechanisms.",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r8»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r8»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r8»-modal-small { font-size:22px; } .«r8»-modal-body { font-size:26px; } .«r8»-modal-label { font-size:24px; font-weight:600; } .«r8»-modal-title { font-size:44px; font-weight:700; } .«r8»-modal-sub { font-size:24px; } .«r8»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r8»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r8»-modal-arrow); } .«r8»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-dark-1-0.png",
+        "layoutPass": true
+      },
+      {
+        "index": 1,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Stack .«rc»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«rc»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«rc»-modal-small { font-size:22px; } .«rc»-modal-body { font-size:26px; } .«rc»-modal-label { font-size:24px; font-weight:600; } .«rc»-modal-title { font-size:44px; font-weight:700; } .«rc»-modal-sub { font-size:24px; } .«rc»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«rc»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«rc»-modal-arrow); } .«rc»-modal-dash { stroke-dasharray:10 8; } Agentic Payment StackFrom user intent to payment, settlement and evidence1 User IntentWhat does the user actually want?“Buy a Friday flight under ¥500”2 AI AgentWho is acting?ChatGPT · Gemini · Muse · Grok Bot · JD AI Shopping3 Trust & AuthorizationWhat is the agent allowed to do?AP2 · ACT · AMP · APOP · KYA4 Payment ExecutionHow is payment initiated?x402 · MPP · A402 · Agent Pay · JD AI Pay5 Rail & SettlementWhere does value move?Card · Bank · Wallet · Stablecoin · BlockchainReceipt · Audit · Dispute",
+          "children": 39,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-dark-1-1.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-en-dark-1.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments/ecosystem",
+    "core": true,
+    "requestedLanguage": "en",
+    "requestedTheme": "dark",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "en",
+    "theme": "dark",
+    "title": "Ecosystem & Developments | Stablecoin Research Hub",
+    "description": "Explore the roles of protocols, agents, products and payment providers.",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r4»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r4»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r4»-modal-small { font-size:22px; } .«r4»-modal-body { font-size:26px; } .«r4»-modal-label { font-size:24px; font-weight:600; } .«r4»-modal-title { font-size:44px; font-weight:700; } .«r4»-modal-sub { font-size:24px; } .«r4»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r4»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r4»-modal-arrow); } .«r4»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 247.765625,
+          "bottom": 596.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-en-dark-2-0.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-en-dark-2.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments",
+    "core": true,
+    "requestedLanguage": "zh",
+    "requestedTheme": "light",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "zh-CN",
+    "theme": "light",
+    "title": "智能体支付 | Stablecoin Research Hub",
+    "description": "了解智能体授权、支付执行与支付通道。",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Stack .«r8»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r8»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r8»-modal-small { font-size:22px; } .«r8»-modal-body { font-size:26px; } .«r8»-modal-label { font-size:24px; font-weight:600; } .«r8»-modal-title { font-size:44px; font-weight:700; } .«r8»-modal-sub { font-size:24px; } .«r8»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r8»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r8»-modal-arrow); } .«r8»-modal-dash { stroke-dasharray:10 8; } Agentic Payment StackFrom user intent to payment, settlement and evidence1 User IntentWhat does the user actually want?“Buy a Friday flight under ¥500”2 AI AgentWho is acting?ChatGPT · Gemini · Muse · Grok Bot · JD AI Shopping3 Trust & AuthorizationWhat is the agent allowed to do?AP2 · ACT · AMP · APOP · KYA4 Payment ExecutionHow is payment initiated?x402 · MPP · A402 · Agent Pay · JD AI Pay5 Rail & SettlementWhere does value move?Card · Bank · Wallet · Stablecoin · BlockchainReceipt · Audit · Dispute",
+          "children": 39,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-light-0-0.png",
+        "layoutPass": true
+      },
+      {
+        "index": 1,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Autonomy Levels .«rk»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} How Much Control Does the Agent Have?More autonomy requires stronger identity, limits, monitoring and audit.1Human-confirmed每次都问我• Find and compare• Show final amount• User approves• PayExamplesInstant CheckoutMuseGrok Bot2Pre-authorized满足条件就可以买• Amount cap• Merchant / category• Time / frequency• Execute within limitsExamplesAP2 mandateAMP task authAPOP intent3Machine-native机器自动付款• Request resource• Receive payment request• Pay under policy• Get resourceExamplesx402MPPA402 / Machine PayHuman controlAutomation",
+          "children": 65,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-light-0-1.png",
+        "layoutPass": true
+      },
+      {
+        "index": 2,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Three Fund-Control Models .«r12»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} Three Fund-Control ModelsAn agent can execute a payment without receiving unrestricted access to the underlying account.AMandate ModelTask authority,not full account control.UserStructured mandateAgentVerifierPaymentExample: AP2 / APOPBScoped CredentialOne-time or restrictedpayment credential.User approvalPSP / walletScoped tokenAgentMerchantExample: ACP / Muse + LinkCPlatform Account + ApprovalAgent proposes; user approves;platform account pays.Platform accountAgent proposalAllow / DenyPaymentMerchantExample: Grok Bot + X Money",
+          "children": 74,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-light-0-2.png",
+        "layoutPass": true
+      },
+      {
+        "index": 3,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Three Payment Rails .«r1a»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r1a»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r1a»-modal-small { font-size:22px; } .«r1a»-modal-body { font-size:26px; } .«r1a»-modal-label { font-size:24px; font-weight:600; } .«r1a»-modal-title { font-size:44px; font-weight:700; } .«r1a»-modal-sub { font-size:24px; } .«r1a»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r1a»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r1a»-modal-arrow); } .«r1a»-modal-dash { stroke-dasharray:10 8; } The Agent Can Pay Through Different RailsStablecoin is one payment rail — not the whole agentic-payment stack.Card / BankVisa · Mastercard · UnionPay · ACH · UPIStrengths• Merchant acceptance• Refund / dispute maturity• Consumer protectionTrade-offs• Micropayment economics• Machine-native interactionWallet / APMAlipay · Alipay+ · GCash · DANA · TNGStrengths• Mobile-first• Regional coverage• Existing wallet identityTrade-offs• Cross-wallet interoperability• Platform dependenceStablecoin / Blockchainx402 paths · MPP stablecoin rail · A2AStrengths• 24/7• Micropayments• Programmability• Cross-borderTrade-offs• Key / wallet risk• Irreversibility• Regulatory varianceAgentic commerce can route across all three.",
+          "children": 42,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-light-0-3.png",
+        "layoutPass": true
+      },
+      {
+        "index": 4,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r1i»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r1i»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r1i»-modal-small { font-size:22px; } .«r1i»-modal-body { font-size:26px; } .«r1i»-modal-label { font-size:24px; font-weight:600; } .«r1i»-modal-title { font-size:44px; font-weight:700; } .«r1i»-modal-sub { font-size:24px; } .«r1i»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r1i»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r1i»-modal-arrow); } .«r1i»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-light-0-4.png",
+        "layoutPass": true
+      },
+      {
+        "index": 5,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Risk Chain .«r1q»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} Agentic Payment Risk ChainEach layer introduces a different failure mode — and a different control.IntentRiskAmbiguityHidden constraintsControlStructured intentAgentRiskHallucinationPrompt injectionControlKYASecure runtimeAuthorizationRiskOver-delegationReplay / stale consentControlMandateLimits / revokeCredentialRiskCard/token/key theftControlScoped tokenSecure vaultMerchantRiskFraudNon-deliveryControlIdentityReputationPaymentRiskDuplicate chargeWrong amountControlIdempotencyMonitoringSettlementRiskDepeg / chain riskIrreversibilityControlRail policyEscrowDisputeRiskWeak evidenceUnclear liabilityControlReceiptAudit trailMore autonomy → stronger identity, limits, monitoring and evidence",
+          "children": 103,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-light-0-5.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-zh-light-0.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments/protocols",
+    "core": true,
+    "requestedLanguage": "zh",
+    "requestedTheme": "light",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "zh-CN",
+    "theme": "light",
+    "title": "协议与机制 | Stablecoin Research Hub",
+    "description": "比较智能体支付协议与机制的角色。",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r8»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r8»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r8»-modal-small { font-size:22px; } .«r8»-modal-body { font-size:26px; } .«r8»-modal-label { font-size:24px; font-weight:600; } .«r8»-modal-title { font-size:44px; font-weight:700; } .«r8»-modal-sub { font-size:24px; } .«r8»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r8»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r8»-modal-arrow); } .«r8»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-light-1-0.png",
+        "layoutPass": true
+      },
+      {
+        "index": 1,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Stack .«rc»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«rc»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«rc»-modal-small { font-size:22px; } .«rc»-modal-body { font-size:26px; } .«rc»-modal-label { font-size:24px; font-weight:600; } .«rc»-modal-title { font-size:44px; font-weight:700; } .«rc»-modal-sub { font-size:24px; } .«rc»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«rc»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«rc»-modal-arrow); } .«rc»-modal-dash { stroke-dasharray:10 8; } Agentic Payment StackFrom user intent to payment, settlement and evidence1 User IntentWhat does the user actually want?“Buy a Friday flight under ¥500”2 AI AgentWho is acting?ChatGPT · Gemini · Muse · Grok Bot · JD AI Shopping3 Trust & AuthorizationWhat is the agent allowed to do?AP2 · ACT · AMP · APOP · KYA4 Payment ExecutionHow is payment initiated?x402 · MPP · A402 · Agent Pay · JD AI Pay5 Rail & SettlementWhere does value move?Card · Bank · Wallet · Stablecoin · BlockchainReceipt · Audit · Dispute",
+          "children": 39,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-light-1-1.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-zh-light-1.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments/ecosystem",
+    "core": true,
+    "requestedLanguage": "zh",
+    "requestedTheme": "light",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "zh-CN",
+    "theme": "light",
+    "title": "生态与进展 | Stablecoin Research Hub",
+    "description": "了解协议、智能体、产品与支付服务方的角色。",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r4»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r4»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r4»-modal-small { font-size:22px; } .«r4»-modal-body { font-size:26px; } .«r4»-modal-label { font-size:24px; font-weight:600; } .«r4»-modal-title { font-size:44px; font-weight:700; } .«r4»-modal-sub { font-size:24px; } .«r4»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r4»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r4»-modal-arrow); } .«r4»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(249, 248, 246)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-light-2-0.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-zh-light-2.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments",
+    "core": true,
+    "requestedLanguage": "zh",
+    "requestedTheme": "dark",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "zh-CN",
+    "theme": "dark",
+    "title": "智能体支付 | Stablecoin Research Hub",
+    "description": "了解智能体授权、支付执行与支付通道。",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Stack .«r8»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r8»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r8»-modal-small { font-size:22px; } .«r8»-modal-body { font-size:26px; } .«r8»-modal-label { font-size:24px; font-weight:600; } .«r8»-modal-title { font-size:44px; font-weight:700; } .«r8»-modal-sub { font-size:24px; } .«r8»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r8»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r8»-modal-arrow); } .«r8»-modal-dash { stroke-dasharray:10 8; } Agentic Payment StackFrom user intent to payment, settlement and evidence1 User IntentWhat does the user actually want?“Buy a Friday flight under ¥500”2 AI AgentWho is acting?ChatGPT · Gemini · Muse · Grok Bot · JD AI Shopping3 Trust & AuthorizationWhat is the agent allowed to do?AP2 · ACT · AMP · APOP · KYA4 Payment ExecutionHow is payment initiated?x402 · MPP · A402 · Agent Pay · JD AI Pay5 Rail & SettlementWhere does value move?Card · Bank · Wallet · Stablecoin · BlockchainReceipt · Audit · Dispute",
+          "children": 39,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-dark-0-0.png",
+        "layoutPass": true
+      },
+      {
+        "index": 1,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Autonomy Levels .«rk»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} How Much Control Does the Agent Have?More autonomy requires stronger identity, limits, monitoring and audit.1Human-confirmed每次都问我• Find and compare• Show final amount• User approves• PayExamplesInstant CheckoutMuseGrok Bot2Pre-authorized满足条件就可以买• Amount cap• Merchant / category• Time / frequency• Execute within limitsExamplesAP2 mandateAMP task authAPOP intent3Machine-native机器自动付款• Request resource• Receive payment request• Pay under policy• Get resourceExamplesx402MPPA402 / Machine PayHuman controlAutomation",
+          "children": 65,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-dark-0-1.png",
+        "layoutPass": true
+      },
+      {
+        "index": 2,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Three Fund-Control Models .«r12»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} Three Fund-Control ModelsAn agent can execute a payment without receiving unrestricted access to the underlying account.AMandate ModelTask authority,not full account control.UserStructured mandateAgentVerifierPaymentExample: AP2 / APOPBScoped CredentialOne-time or restrictedpayment credential.User approvalPSP / walletScoped tokenAgentMerchantExample: ACP / Muse + LinkCPlatform Account + ApprovalAgent proposes; user approves;platform account pays.Platform accountAgent proposalAllow / DenyPaymentMerchantExample: Grok Bot + X Money",
+          "children": 74,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-dark-0-2.png",
+        "layoutPass": true
+      },
+      {
+        "index": 3,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Three Payment Rails .«r1a»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r1a»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r1a»-modal-small { font-size:22px; } .«r1a»-modal-body { font-size:26px; } .«r1a»-modal-label { font-size:24px; font-weight:600; } .«r1a»-modal-title { font-size:44px; font-weight:700; } .«r1a»-modal-sub { font-size:24px; } .«r1a»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r1a»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r1a»-modal-arrow); } .«r1a»-modal-dash { stroke-dasharray:10 8; } The Agent Can Pay Through Different RailsStablecoin is one payment rail — not the whole agentic-payment stack.Card / BankVisa · Mastercard · UnionPay · ACH · UPIStrengths• Merchant acceptance• Refund / dispute maturity• Consumer protectionTrade-offs• Micropayment economics• Machine-native interactionWallet / APMAlipay · Alipay+ · GCash · DANA · TNGStrengths• Mobile-first• Regional coverage• Existing wallet identityTrade-offs• Cross-wallet interoperability• Platform dependenceStablecoin / Blockchainx402 paths · MPP stablecoin rail · A2AStrengths• 24/7• Micropayments• Programmability• Cross-borderTrade-offs• Key / wallet risk• Irreversibility• Regulatory varianceAgentic commerce can route across all three.",
+          "children": 42,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-dark-0-3.png",
+        "layoutPass": true
+      },
+      {
+        "index": 4,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r1i»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r1i»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r1i»-modal-small { font-size:22px; } .«r1i»-modal-body { font-size:26px; } .«r1i»-modal-label { font-size:24px; font-weight:600; } .«r1i»-modal-title { font-size:44px; font-weight:700; } .«r1i»-modal-sub { font-size:24px; } .«r1i»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r1i»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r1i»-modal-arrow); } .«r1i»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-dark-0-4.png",
+        "layoutPass": true
+      },
+      {
+        "index": 5,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Risk Chain .«r1q»-modal-t{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--foreground))} .m{font-family:Inter,\"Noto Sans SC\",\"PingFang SC\",Arial,sans-serif;fill:hsl(var(--muted-foreground))} .s{font-size:20px} .b{font-size:24px} .l{font-size:24px;font-weight:600} .ttl{font-size:44px;font-weight:700} Agentic Payment Risk ChainEach layer introduces a different failure mode — and a different control.IntentRiskAmbiguityHidden constraintsControlStructured intentAgentRiskHallucinationPrompt injectionControlKYASecure runtimeAuthorizationRiskOver-delegationReplay / stale consentControlMandateLimits / revokeCredentialRiskCard/token/key theftControlScoped tokenSecure vaultMerchantRiskFraudNon-deliveryControlIdentityReputationPaymentRiskDuplicate chargeWrong amountControlIdempotencyMonitoringSettlementRiskDepeg / chain riskIrreversibilityControlRail policyEscrowDisputeRiskWeak evidenceUnclear liabilityControlReceiptAudit trailMore autonomy → stronger identity, limits, monitoring and evidence",
+          "children": 103,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-dark-0-5.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-zh-dark-0.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments/protocols",
+    "core": true,
+    "requestedLanguage": "zh",
+    "requestedTheme": "dark",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "zh-CN",
+    "theme": "dark",
+    "title": "协议与机制 | Stablecoin Research Hub",
+    "description": "比较智能体支付协议与机制的角色。",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r8»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r8»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r8»-modal-small { font-size:22px; } .«r8»-modal-body { font-size:26px; } .«r8»-modal-label { font-size:24px; font-weight:600; } .«r8»-modal-title { font-size:44px; font-weight:700; } .«r8»-modal-sub { font-size:24px; } .«r8»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r8»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r8»-modal-arrow); } .«r8»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-dark-1-0.png",
+        "layoutPass": true
+      },
+      {
+        "index": 1,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Agentic Payment Stack .«rc»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«rc»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«rc»-modal-small { font-size:22px; } .«rc»-modal-body { font-size:26px; } .«rc»-modal-label { font-size:24px; font-weight:600; } .«rc»-modal-title { font-size:44px; font-weight:700; } .«rc»-modal-sub { font-size:24px; } .«rc»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«rc»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«rc»-modal-arrow); } .«rc»-modal-dash { stroke-dasharray:10 8; } Agentic Payment StackFrom user intent to payment, settlement and evidence1 User IntentWhat does the user actually want?“Buy a Friday flight under ¥500”2 AI AgentWho is acting?ChatGPT · Gemini · Muse · Grok Bot · JD AI Shopping3 Trust & AuthorizationWhat is the agent allowed to do?AP2 · ACT · AMP · APOP · KYA4 Payment ExecutionHow is payment initiated?x402 · MPP · A402 · Agent Pay · JD AI Pay5 Rail & SettlementWhere does value move?Card · Bank · Wallet · Stablecoin · BlockchainReceipt · Audit · Dispute",
+          "children": 39,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-dark-1-1.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-zh-dark-1.png",
+    "pass": true
+  },
+  {
+    "route": "/agentic-payments/ecosystem",
+    "core": true,
+    "requestedLanguage": "zh",
+    "requestedTheme": "dark",
+    "viewportConfiguration": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "innerWidth": 390,
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "devicePixelRatio": 1,
+    "bodyScrollWidth": 390,
+    "documentScrollWidth": 390,
+    "mainClientWidth": 390,
+    "mainScrollWidth": 390,
+    "language": "zh-CN",
+    "theme": "dark",
+    "title": "生态与进展 | Stablecoin Research Hub",
+    "description": "了解协议、智能体、产品与支付服务方的角色。",
+    "unnamedButtons": 0,
+    "content": true,
+    "geometryPass": true,
+    "initialConsoleErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "httpErrors": [],
+    "modals": [
+      {
+        "index": 0,
+        "svg": {
+          "widthAttribute": "100%",
+          "heightAttribute": "900",
+          "inlineStyle": "height:auto",
+          "viewBox": "0 0 1600 900",
+          "viewBoxRatio": 1.7777777777777777,
+          "width": 324.390625,
+          "height": 182.46875,
+          "ratio": 1.7777872923445797,
+          "left": 32.8046875,
+          "right": 357.1953125,
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 1600,
+            "height": 900
+          },
+          "text": "Protocol vs Product vs Infrastructure .«r4»-modal-t { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--foreground)); } .«r4»-modal-muted { font-family: Inter, \"Noto Sans SC\", \"PingFang SC\", Arial, sans-serif; fill:hsl(var(--muted-foreground)); } .«r4»-modal-small { font-size:22px; } .«r4»-modal-body { font-size:26px; } .«r4»-modal-label { font-size:24px; font-weight:600; } .«r4»-modal-title { font-size:44px; font-weight:700; } .«r4»-modal-sub { font-size:24px; } .«r4»-modal-box { fill:hsl(var(--background)); stroke:hsl(var(--border)); stroke-width:2; rx:18; ry:18; } .«r4»-modal-arrow { stroke:hsl(var(--border)); stroke-width:4; fill:none; marker-end:url(#«r4»-modal-arrow); } .«r4»-modal-dash { stroke-dasharray:10 8; } Protocol ≠ Product ≠ InfrastructureDifferent artifacts solve different parts of the stack.Protocol / StandardUCPACPAP2ACTAMPAPOPx402MPPProduct / SolutionInstant CheckoutAgent PayMachine PayJD AI PayMuseX MoneyAntomInfrastructure / RailStripeVisaMastercardUnionPayBank accountWalletStablecoinTokenised depositDefines how parties coordinateDelivers a user/merchant experienceMoves or settles valueA402: product-embedded 402/A2M method/spec",
+          "children": 67,
+          "computedWidth": "324.391px",
+          "computedHeight": "182.469px",
+          "fill": "rgb(17, 19, 24)"
+        },
+        "dialog": {
+          "left": 7.8046875,
+          "right": 382.1953125,
+          "top": 257.765625,
+          "bottom": 586.234375,
+          "clientWidth": 372,
+          "scrollWidth": 372
+        },
+        "screenshot": "screenshots/after-modal-zh-dark-2-0.png",
+        "layoutPass": true
+      }
+    ],
+    "switchesPass": true,
+    "screenshot": "screenshots/after-zh-dark-2.png",
+    "pass": true
+  }
+]

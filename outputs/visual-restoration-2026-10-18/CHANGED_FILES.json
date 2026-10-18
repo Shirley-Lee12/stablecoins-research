@@ -1,0 +1,15 @@
+{
+  "trackedChanges": [
+    "artifacts/stablecoin-hub/src/components/about-stablecoins-ui.tsx",
+    "artifacts/stablecoin-hub/src/components/agentic-payment-ui.tsx",
+    "artifacts/stablecoin-hub/src/components/global-search.tsx",
+    "artifacts/stablecoin-hub/src/components/home-research-ui.tsx",
+    "artifacts/stablecoin-hub/src/components/layout.tsx",
+    "artifacts/stablecoin-hub/src/pages/academic-directory-v02.tsx",
+    "artifacts/stablecoin-hub/src/pages/home-overview.tsx",
+    "artifacts/stablecoin-hub/src/pages/research.tsx",
+    "scripts/tests/about-stablecoins.test.ts",
+    "scripts/tests/home-research.test.ts"
+  ],
+  "newTest": "scripts/tests/visual-restoration.test.ts"
+}

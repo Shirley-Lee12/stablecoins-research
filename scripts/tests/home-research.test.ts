@@ -101,9 +101,11 @@ for (const [part, names] of Object.entries({
     ]),
   );
 const ui = load(resolve(hub, "components/home-research-ui.tsx"), common);
+const edgeNav = load(resolve(hub, "components/content-edge-nav.tsx"), common);
 const home = load(resolve(hub, "pages/home-overview.tsx"), {
   ...common,
   "@/lib/brand": brand,
+  "@/components/content-edge-nav": edgeNav,
   "@/components/home-research-ui": ui,
 }).default;
 const research = load(resolve(hub, "pages/research.tsx"), {

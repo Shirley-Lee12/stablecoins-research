@@ -1,0 +1,39 @@
+{
+  "fullTests": {
+    "tests": 218,
+    "pass": 218,
+    "fail": 0,
+    "skip": 0
+  },
+  "baselineTestCount": 213,
+  "newTests": 5,
+  "updatedRequirementAssertion": "About menu: no-children requirement replaced by six-destination assertions under explicit owner instruction; no tests removed.",
+  "typecheck": "PASS",
+  "build": "PASS",
+  "diffCheck": "PASS",
+  "restoredPriorityScreenshots": {
+    "pass": 32,
+    "total": 32
+  },
+  "navigationAndSearch": {
+    "pass": 9,
+    "total": 9
+  },
+  "protocolRoutes": {
+    "pass": 64,
+    "total": 64
+  },
+  "agentic390Svg": {
+    "pass": 12,
+    "total": 12
+  },
+  "svgDesktopAndTablet": {
+    "pass": 24,
+    "total": 24
+  },
+  "localApiContracts": {
+    "pass": 7,
+    "total": 7
+  },
+  "productionDml": 0
+}

@@ -153,7 +153,7 @@ export function AboutFrame({
   return (
     <div
       data-about-v02
-      className="mx-auto w-full min-w-0 max-w-6xl px-1 pb-6 sm:px-3"
+      className="mx-auto w-full min-w-0 max-w-7xl pb-6"
     >
       <AboutSectionNav />
       {types && <TypeNav />}

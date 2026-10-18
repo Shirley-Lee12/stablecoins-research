@@ -1,0 +1,201 @@
+{
+  "cases": 32,
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "passed": false,
+  "rows": [
+    {
+      "page": "home",
+      "width": "1440",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "home",
+      "width": "1440",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "home",
+      "width": "390",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "home",
+      "width": "390",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "about",
+      "width": "1440",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "about",
+      "width": "1440",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "about",
+      "width": "390",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "about",
+      "width": "390",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "agentic",
+      "width": "1440",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "agentic",
+      "width": "1440",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "agentic",
+      "width": "390",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "agentic",
+      "width": "390",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "research",
+      "width": "1440",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "research",
+      "width": "1440",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "research",
+      "width": "390",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "research",
+      "width": "390",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "risk",
+      "width": "1440",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "risk",
+      "width": "1440",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "risk",
+      "width": "390",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "risk",
+      "width": "390",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "market",
+      "width": "1440",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "market",
+      "width": "1440",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "market",
+      "width": "390",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "market",
+      "width": "390",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "resources",
+      "width": "1440",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "resources",
+      "width": "1440",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "resources",
+      "width": "390",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "resources",
+      "width": "390",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "researchers",
+      "width": "1440",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "researchers",
+      "width": "1440",
+      "mode": "en-dark",
+      "pass": true
+    },
+    {
+      "page": "researchers",
+      "width": "390",
+      "mode": "zh-light",
+      "pass": true
+    },
+    {
+      "page": "researchers",
+      "width": "390",
+      "mode": "en-dark",
+      "pass": true
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "scope": "Local fixture contracts only. Actual old/new route/schema compatibility additionally tested in isolated PGlite full suite. No production reads/writes.",
+  "checks": [
+    {
+      "path": "/api/resources",
+      "status": 200,
+      "total": 395,
+      "pass": true
+    },
+    {
+      "path": "/api/public-directory/resources",
+      "status": 200,
+      "kind": "resources",
+      "version": "0.2",
+      "total": 395,
+      "pass": true
+    },
+    {
+      "path": "/api/public-directory/researchers",
+      "status": 200,
+      "kind": "researchers",
+      "version": "0.2",
+      "total": 10,
+      "pass": true
+    },
+    {
+      "path": "/api/stablecoin-market",
+      "status": 200,
+      "version": "0.2",
+      "total": {
+        "source_scope": "DefiLlama tracked universe, not every stablecoin worldwide. Provider native/bridged classifications are retained; chain values are not summed again.",
+        "last_successful_fetch": "2026-10-18T03:36:03.034Z",
+        "is_estimate": false,
+        "is_adjusted": false,
+        "source_id": "SRC-MD-01",
+        "source": "DefiLlama",
+        "source_url": "https://api-docs.defillama.com/",
+        "unit": "USD",
+        "methodology_note": "Sum of provider totalCirculatingUSD fields; no token-unit or assumed-$1 substitute. History and change retain provider observation dates.",
+        "coverage_note": "DefiLlama tracked universe, not every stablecoin worldwide. Provider native/bridged classifications are retained; chain values are not summed again.",
+        "metric_id": "MKT_TOTAL_TRACKED_USD",
+        "label": "Tracked circulating value (USD)",
+        "value": 306370670913.87,
+        "observation_time": "2026-10-18T00:00:00.000Z",
+        "report_period_end": null,
+        "publication_time": null,
+        "freshness_state": "FRESH",
+        "freshness_tolerance_ms": 172800000
+      },
+      "pass": true
+    },
+    {
+      "path": "/api/stablecoin-macro",
+      "status": 200,
+      "version": "0.2",
+      "total": null,
+      "pass": true
+    },
+    {
+      "path": "/api/stablecoin-liquidity",
+      "status": 200,
+      "version": "0.2",
+      "total": null,
+      "pass": true
+    },
+    {
+      "path": "/api/resources",
+      "method": "POST",
+      "status": 405,
+      "pass": true
+    }
+  ]
+}

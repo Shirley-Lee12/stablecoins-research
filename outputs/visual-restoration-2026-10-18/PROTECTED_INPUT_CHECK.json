@@ -1,0 +1,41 @@
+{
+  "baseline": "c8a7b6024c0b966781ed3aa4918e22586cacfdd8",
+  "checks": [
+    {
+      "path": "artifacts/api-server",
+      "changed": [],
+      "pass": true
+    },
+    {
+      "path": "lib",
+      "changed": [],
+      "pass": true
+    },
+    {
+      "path": "docs/source-packages",
+      "changed": [],
+      "pass": true
+    },
+    {
+      "path": "artifacts/stablecoin-hub/src/data",
+      "changed": [],
+      "pass": true
+    },
+    {
+      "path": "artifacts/stablecoin-hub/public",
+      "changed": [],
+      "pass": true
+    },
+    {
+      "path": "artifacts/stablecoin-hub/src/index.css",
+      "changed": [],
+      "pass": true
+    },
+    {
+      "path": "DEPLOYMENT.md",
+      "changed": [],
+      "pass": true
+    }
+  ],
+  "allPassed": true
+}
