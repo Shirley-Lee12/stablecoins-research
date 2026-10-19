@@ -1,0 +1,66 @@
+{
+  "ALL_TEST_FILES_LOADED": "YES",
+  "REAL_DEFECTS_FIXED": 5,
+  "STALE_ASSERTIONS_UPDATED": 18,
+  "STALE_COUNT_BASIS": "explicit contract groups; not number of assert() calls",
+  "REMAINING_FAILURES": 21,
+  "FULL_TESTS": "211/232",
+  "FULL_TESTS_STATUS": "FAIL",
+  "NEW_REGRESSIONS": 0,
+  "READY_FOR_RELEASE": "NO",
+  "TYPECHECK": "PASS",
+  "BUILD": "PASS",
+  "AGENTIC_TARGETED": {
+    "tests": 51,
+    "pass": 51,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "PRODUCTION_UI_UNIT": {
+    "tests": 26,
+    "pass": 26,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "baselineOriginal": {
+    "tests": 162,
+    "pass": 141,
+    "fail": 21,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "currentOriginal": {
+    "tests": 168,
+    "pass": 150,
+    "fail": 18,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "baselineNormalized": {
+    "tests": 220,
+    "pass": 191,
+    "fail": 29,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "currentFinal": {
+    "tests": 232,
+    "pass": 211,
+    "fail": 21,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "baselineFiles": 14,
+  "currentFiles": 16,
+  "skipped": 0,
+  "MAIN_UPDATED": "NO",
+  "PUSHED": "NO",
+  "RENDER_DEPLOYED": "NO",
+  "PRODUCTION_DML": 0,
+  "AGENTIC_DESIGN_CHANGED": "NO",
+  "UI_BROWSER": "8/8 PASS",
+  "MOUNTED_SEARCH_BROWSER": "8/8 PASS",
+  "VISUAL_PIXEL_COMPARISON": "5/5 identical"
+}

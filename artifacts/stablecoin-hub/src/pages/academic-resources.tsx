@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { useLanguage } from "@/lib/language-context";
 import { useAuth } from "@/lib/auth-context";
 import { SOURCE_TYPES, sourceTypeLabel, type SourceType } from "@/lib/source-types";
@@ -2793,7 +2793,10 @@ export default function AcademicResources() {
   const { user, token } = useAuth();
   const zh = language === "zh";
 
-  const [searchQuery,   setSearchQuery]   = useState("");
+  const search = useSearch();
+  const requestedQuery = new URLSearchParams(search).get("q") ?? "";
+  const [searchQuery, setSearchQuery] = useState(requestedQuery);
+  useEffect(() => { setSearchQuery(requestedQuery); }, [requestedQuery]);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "title">("newest");
   const [publicationLanguage, setPublicationLanguage] = useState<PublicationLanguageFilter>("all");
   const [yearFrom, setYearFrom] = useState("");

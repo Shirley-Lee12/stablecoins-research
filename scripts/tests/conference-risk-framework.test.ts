@@ -358,13 +358,13 @@ test("conceptual decomposition and causal-role diagrams contain no quantified ed
     /\d+\s*%|coefficient|predictive accuracy|live refresh/i,
   );
 });
-test("navigation exposes one framework parent and lightweight exact-route links", () => {
+test("retained framework has exact-route links; approved Friday sidebar preserves its quantitative parent", () => {
   const h = render("LifecycleMapping");
   assert.equal((h.match(/aria-current="page"/g) || []).length, 1);
   for (const n of pack.nav) assert.ok(h.includes(`href="${n.route}"`));
   const layout = read("artifacts/stablecoin-hub/src/components/layout.tsx");
   const item = layout.split('href: "/quantitative",')[1].split("\n  },")[0];
-  assert.match(item, /Risk Framework/);
+  assert.match(item, /labelEn: "Quantitative Indicators"/);
   assert.doesNotMatch(item, /children:/);
   assert.doesNotMatch(
     h,

@@ -46,8 +46,8 @@ test('unpublished contribution, formal chapter and invalid DOI have coherent pat
  const p=(id:number)=>plan.patches.find((p:any)=>p.id===id);
  assert.deepEqual(p(429).resourcePatch.authors,['Ching Kar Chung','Angela Marqui','Ambi Ambituuni']);assert.equal(p(429).metadataPatch.evidence_type,'conference_contribution');assert.match(p(429).metadataPatch.method,/Unpublished/);assert.deepEqual(p(284).resourcePatch,{published_date:'2023',source_type:'book_chapter'});assert.equal(plan.versionRelation,'VERSION_RELATION_PENDING');assert.ok(!plan.resourceIds.includes(285));assert.equal(p(159).resourcePatch.doi,null);assert.equal(p(159).before.doi,'10.29094/1164');assert.equal(p(127).metadataPatch.venue,'HKMA Insight / 汇思');assert.equal(p(180).resourcePatch.authors,undefined);
 });
-test('dry-run preserves public counts and all non-target records',()=>{
- const d=json('outputs/phase-b-corrections-2026-10-18/ACADEMIC_DATA_DRY_RUN.json');assert.equal(d.status,'PASS');assert.equal(d.productionWrites,0);assert.equal(d.nonTargetChanges,0);assert.equal(d.statusChanges,0);assert.equal(d.approvedAfter,395);assert.equal(d.nonNewsAfter,378);
+test('historical dry-run audit preserves recorded public counts and all non-target records',()=>{
+ const d=json('scripts/tests/fixtures/phase-b-academic-dry-run.historical.json');assert.equal(d.status,'PASS');assert.equal(d.productionWrites,0);assert.equal(d.nonTargetChanges,0);assert.equal(d.statusChanges,0);assert.equal(d.approvedAfter,395);assert.equal(d.nonNewsAfter,378);
 });
 test('author page retains publication links and guards legacy metadata display',()=>{
  const p=read('artifacts/stablecoin-hub/src/pages/author.tsx');assert.match(p,/ResearcherCard researcher=\{author.verifiedProfile\}/);assert.match(p,/Bibliographic author record/);assert.match(p,/Verified researcher profile/);assert.match(p,/academic-resources\?id=\$\{resource.id\}/);assert.match(p,/setLocation\("\/experts"\)/);assert.match(p,/!author.verifiedProfile && author.bio/);

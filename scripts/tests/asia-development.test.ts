@@ -210,7 +210,7 @@ test("ten events retain dates and classifications; consultation is not enactment
   assert.match(page, /does not establish a final implementation date/);
 });
 
-test("five canonical pages and four compatibility redirects are wired", () => {
+test("five canonical pages and four approved Friday compatibility routes share the same components", () => {
   const app = read("artifacts/stablecoin-hub/src/App.tsx");
   const layout = read("artifacts/stablecoin-hub/src/components/layout.tsx");
   const routes = [
@@ -224,17 +224,12 @@ test("five canonical pages and four compatibility redirects are wired", () => {
     assert.ok(app.includes(`path="${route}"`));
     assert.ok(adapter.includes(`href: "${route}"`));
   }
-  for (const suffix of ["mainland-china", "hong-kong", "singapore", "uae"])
-    assert.ok(
-      app.includes(
-        `<Route path="/regional-developments/${suffix}"><Redirect replace to="/${suffix}" /></Route>`,
-      ),
-    );
-  assert.match(layout, /child\.aliases\?\.includes\(location\)/);
-  assert.equal(
-    (page.match(/export function \w+Development\w*Page/g) ?? []).length,
-    5,
-  );
+  for(const [suffix,component] of [["mainland-china","MainlandChinaDevelopmentPage"],["hong-kong","HongKongDevelopmentPage"],["singapore","SingaporeDevelopmentPage"],["uae","UaeDevelopmentPage"]]){
+    assert.ok(app.includes(`<Route path="/regional-developments/${suffix}" component={${component}} />`));
+    assert.ok(app.includes(`<Route path="/${suffix}" component={${component}} />`));
+  }
+  assert.match(layout,/matchPrefix: "\/regional-developments\/"/);
+  for(const name of ["AsiaDevelopmentOverviewPage","MainlandChinaDevelopmentPage","HongKongDevelopmentPage","SingaporeDevelopmentPage","UaeDevelopmentPage"])assert.ok(page.includes(`export function ${name}(`),name);
 });
 
 test("required modules are ordered, mobile equivalents and bilingual accessible sources exist", () => {
@@ -278,9 +273,10 @@ test("final English copy uses the authorised wording without changing Chinese st
     read("docs/source-packages/asia-development-final-english-copy-qa.json"),
   );
   for (const baseline of qa.chinese_copy_baseline) {
+    const archived=execFileSync("git",["show","c8a7b6024c0b966781ed3aa4918e22586cacfdd8:"+baseline.path],{cwd:root,encoding:"utf8"});
     const tree = ts.createSourceFile(
       baseline.path,
-      read(baseline.path),
+      archived,
       ts.ScriptTarget.Latest,
       true,
     );
@@ -304,6 +300,9 @@ test("final English copy uses the authorised wording without changing Chinese st
       baseline.sha256,
       baseline.path,
     );
+    // Friday restoration was explicitly approved later; keep its Chinese UI unchanged too.
+    const approved=execFileSync("git",["show","632a7e383e5dfd78ef49cead12d829fe807e1526:"+baseline.path],{cwd:root,encoding:"utf8"});
+    assert.equal(read(baseline.path),approved,baseline.path+" approved Friday source");
   }
   for (const text of [
     "Mainland China follows a CBDC-led digital-money path rather than a private-stablecoin licensing model.",

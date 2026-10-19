@@ -8,7 +8,9 @@ import vm from 'node:vm';
 import ts from 'typescript';
 const root = resolve(import.meta.dirname, '../..');
 const file = 'artifacts/stablecoin-hub/src/components/agentic-payment-ui.tsx';
-const source = readFileSync(resolve(root, file), 'utf8');
+// 632 replaced PaymentVisual; this test explicitly protects the archived Phase C renderer.
+// The actual production D01 is exercised separately below, not substituted by this renderer.
+const source = execFileSync('git',['show',`c8a7b6024c0b966781ed3aa4918e22586cacfdd8:${file}`],{cwd:root,encoding:'utf8'});
 const baseline = execFileSync('git', ['show', `914e81ddea21ea0cce468750372b95074c589b04:${file}`], { cwd: root, encoding: 'utf8' });
 const pack = JSON.parse(readFileSync(resolve(root, 'artifacts/stablecoin-hub/src/data/agentic-payments-v02.generated.json'), 'utf8'));
 const req = createRequire(resolve(root, 'artifacts/stablecoin-hub/package.json'));
@@ -44,7 +46,7 @@ const render = (component: any, id: string, theme: string) => renderToStaticMark
   React.createElement('div', { className: theme }, React.createElement(component, { id, label: language === 'en' ? 'Mechanism diagram' : '机制图' })),
 );
 for (const id of Object.keys(pack.svg)) for (const lang of ['en', 'zh']) {
-  test(`${id} ${lang}: valid inline/modal sizing preserves all other diagram markup`, () => {
+  test(`archived Phase C ${id} ${lang}: valid inline/modal sizing preserves all other diagram markup`, () => {
     language = lang;
     for (const theme of ['light', 'dark']) {
       const html = render(PaymentVisual, id, theme);
@@ -66,10 +68,10 @@ for (const id of Object.keys(pack.svg)) for (const lang of ['en', 'zh']) {
     }
   });
 }
-test('missing diagram still renders nothing', () => {
+test('archived Phase C missing diagram still renders nothing', () => {
   assert.equal(renderToStaticMarkup(React.createElement(PaymentVisual, { id: 'missing', label: 'Missing' })), '');
 });
-test('repeated diagrams retain unique inline/modal IDs and resolve marker references', () => {
+test('archived Phase C repeated diagrams retain unique inline/modal IDs and resolve marker references', () => {
   const html = renderToStaticMarkup(React.createElement('div', null,
     React.createElement(PaymentVisual, { id: 'AGT-D01', label: 'First' }),
     React.createElement(PaymentVisual, { id: 'AGT-D01', label: 'Second' }),

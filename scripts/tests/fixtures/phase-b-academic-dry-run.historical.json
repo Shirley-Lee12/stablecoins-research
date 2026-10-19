@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "mode": "OFFLINE_SIMULATION_OF_READ_ONLY_SNAPSHOT",
+  "productionWrites": 0,
+  "affectedResources": 7,
+  "metadataRowsToInsert": 2,
+  "fieldChanges": 14,
+  "approvedBefore": 395,
+  "approvedAfter": 395,
+  "nonNewsBefore": 378,
+  "nonNewsAfter": 378,
+  "nonTargetChanges": 0,
+  "statusChanges": 0,
+  "verifiedOnInferred": 0,
+  "authorSync": "PREPARED_ONLY; exact names; resource 429 only",
+  "versionRelation": "VERSION_RELATION_PENDING",
+  "PERSISTENT_DATA_APPLY_PENDING": true
+}

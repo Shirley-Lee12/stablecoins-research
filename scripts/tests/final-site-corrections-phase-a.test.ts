@@ -1,3 +1,4 @@
+import { renderModule } from "./helpers/render-module";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -80,15 +81,10 @@ test("the actual global-search form submits into library navigation", () => {
     useEffect: () => {},
   };
   const Search = () => null;
-  const { GlobalSearch } = load("components/global-search.tsx", {
-    react: fakeReact,
-    "react/jsx-runtime": req("react/jsx-runtime"),
-    wouter: { useLocation: () => ["/", (p: string) => (destination = p)] },
-    "lucide-react": { Search },
-    "@/data/academic-directory": model,
-    "@/lib/language-context": { useLanguage: () => ({ t: (en: string) => en }) },
-  });
-  const form = GlobalSearch();
+  const text=readFileSync(resolve(hub,"components/layout.tsx"),"utf8"),tree=ts.createSourceFile("layout.tsx",text,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+  let declaration="";function visit(n:ts.Node){if(ts.isFunctionDeclaration(n)&&n.name?.text==="GlobalSearch")declaration=n.getText(tree);ts.forEachChild(n,visit);}visit(tree);assert.ok(declaration);
+  const exports:any={};vm.runInNewContext(ts.transpileModule(declaration+";exports.GlobalSearch=GlobalSearch;",{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require:(id:string)=>{assert.equal(id,"react/jsx-runtime");return req(id)},useLocation:()=>["/",(p:string)=>destination=p],useLanguage:()=>({t:(en:string)=>en}),useState:(value:any)=>[typeof value==='boolean'?value:'  Stablecoin & Liquidity  ',()=>{}],useRef:()=>({current:null}),useEffect:()=>{},Search,cn:(...items:any[])=>items.filter(Boolean).join(' '),encodeURIComponent});
+  const form=exports.GlobalSearch({language:"en"});
   assert.equal(form.type, "form");
   assert.equal(form.props.role, "search");
   form.props.onSubmit({ preventDefault: () => (prevented = true) });
@@ -179,7 +175,7 @@ test("controlled directory vocabulary is bilingual without changing unknown fact
 });
 test("404 is bilingual, theme-compatible and offers working canonical return links", () => {
   for (const language of ["en", "zh"]) {
-    const mod = load("pages/not-found.tsx", {
+    const mod = renderModule(root,resolve(hub,"pages/not-found.tsx"), {
       "react/jsx-runtime": req("react/jsx-runtime"),
       wouter: {
         Link: ({ children, ...props }: any) =>
@@ -295,7 +291,7 @@ test("author breadcrumb targets the verified directory and adoption has a biling
   const code = readFileSync(resolve(hub, "components/layout.tsx"), "utf8");
   const branch = code.slice(
     code.indexOf('if (location.startsWith("/authors/"))'),
-    code.indexOf('if (["/mainland-china"'),
+    code.indexOf('  const segments = location.split'),
   );
   assert.match(branch, /href: "\/experts"/);
   assert.doesNotMatch(branch, /href: "\/authors"/);

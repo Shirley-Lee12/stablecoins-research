@@ -112,7 +112,7 @@ test("structured navigation, timelines, matrices and bilingual masters are mecha
     );
   assert.doesNotMatch(generator, /fetch\(|https:\/\/|stablecoin-mechanisms/);
 });
-test("all ten pages preserve manifest module order and existing canonical routes", () => {
+test("frozen ten-page plan preserves module order and approved Friday routes use their real default components", () => {
   assert.deepEqual(Object.keys(presentation.ABOUT_PAGES), keys);
   for (const [i, manifest] of data.pages.entries()) {
     const p = presentation.ABOUT_PAGES[keys[i]];
@@ -122,24 +122,17 @@ test("all ten pages preserve manifest module order and existing canonical routes
     );
     assert.ok(p.title[0] && p.title[1]);
   }
-  for (const [file, name] of [
-    ["about", "AboutOverviewPage"],
-    ["about-history", "AboutHistoryPage"],
-    ["about-types", "AboutTypesPage"],
-    ["about-applications", "AboutApplicationsPage"],
-    ["about-regulatory-evolution", "AboutRegulatoryEvolutionPage"],
-    ["stablecoin-mechanism", "AboutMechanismPage"],
-  ])
-    assert.match(
-      read(prefix + `src/pages/${file}.tsx`),
-      new RegExp(`export \\{ ${name} as default \\}`),
-    );
+  for (const file of ["about","about-history","about-types","about-applications","about-regulatory-evolution","stablecoin-mechanism"]){
+    const actual=read(prefix+`src/pages/${file}.tsx`);
+    assert.match(actual,/export default function/);
+    assert.ok(app.includes(`@/pages/${file}`));
+  }
   for (const route of data.nav.section_top_nav.map((n: any) => n.route))
     assert.ok(app.includes(`path="${route}"`));
   assert.match(app, /path="\/about-stablecoins\/types\/:mechanism"/);
   assert.match(page, /ABOUT.nav.type_nav.some/);
 });
-test("sidebar has one About entry with no children; regulatory remains independent", () => {
+test("approved Friday sidebar keeps one About entry; regulatory stays reachable in top navigation", () => {
   const tree = layout.slice(
     layout.indexOf("const NAV_ITEMS"),
     layout.indexOf("// ── Breadcrumb"),
@@ -151,16 +144,15 @@ test("sidebar has one About entry with no children; regulatory remains independe
   assert.equal((tree.match(/href: "\/about-stablecoins"/g) || []).length, 1);
   assert.doesNotMatch(
     about,
-    /children:|activeAliases:|\/regulatory|history|types/,
+    /children:|history|types/,
   );
-  assert.equal((tree.match(/href: "\/regulatory"/g) || []).length, 1);
-  assert.doesNotMatch(
-    read(prefix + "src/pages/regulatory.tsx"),
-    /AboutSectionNav/,
-  );
+  assert.equal((tree.match(/href: "\/regulatory"/g) || []).length, 0);
+  assert.match(about,/activeAliases: \["\/regulatory"\]/);
+  assert.match(nav,/href: "\/regulatory"/);
+  assert.match(read(prefix + "src/pages/regulatory.tsx"),/AboutSectionNav/);
   assert.equal(data.nav.sidebar.length, 1);
 });
-test("SectionTopNav has five frozen entries; TypeNav is page-local and scrollable", () => {
+test("frozen five-entry plan and approved six-entry Friday top nav are distinct; retained TypeNav stays scrollable", () => {
   assert.deepEqual(
     data.nav.section_top_nav.map((n: any) => n.label_en),
     ["Overview", "History", "Types", "Applications", "Regulatory Evolution"],
@@ -169,8 +161,9 @@ test("SectionTopNav has five frozen entries; TypeNav is page-local and scrollabl
     !data.nav.section_top_nav.some((n: any) => n.route === "/regulatory"),
   );
   assert.match(nav, /SectionTopNav/);
-  assert.match(nav, /ABOUT.nav.section_top_nav.map/);
-  assert.match(nav, /matchPrefix: item.route === "\/about-stablecoins\/types"/);
+  const items=[...nav.matchAll(/href: "([^"]+)"/g)].map(m=>m[1]);
+  assert.deepEqual(items,[...data.nav.section_top_nav.map((n:any)=>n.route),"/regulatory"]);
+  assert.match(nav,/href: "\/about-stablecoins\/types"[^\n]*matchPrefix: true/);
   assert.match(ui, /types && <TypeNav/);
   assert.match(ui, /data-about-type-nav/);
   assert.match(ui, /overflow-x-auto/);

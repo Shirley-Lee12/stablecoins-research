@@ -84,6 +84,7 @@ const ROUTE_LABELS: Record<string, { en: string; zh: string }> = {
   "/market-data/on-chain": { en: "On-chain", zh: "链上数据" },
   "/market-data/issuers-reserves": { en: "Issuers & Reserves", zh: "发行方与储备" },
   "/market-data/macro": { en: "Macro", zh: "宏观数据" },
+  "/market-data/adoption": { en: "Adoption", zh: "采用" },
   "/regional-developments": { en: "Stablecoin Developments", zh: "稳定币发展" },
   "/regional-developments/mainland-china": { en: "Mainland China", zh: "中国内地" },
   "/regional-developments/hong-kong": { en: "Hong Kong", zh: "中国香港" },
@@ -199,6 +200,11 @@ function useBreadcrumbs(location: string, language: string) {
   const crumbs: { href?: string; label: string }[] = [
     { href: "/", label: language === "zh" ? "首页" : "Home" },
   ];
+  if (location.startsWith("/authors/")) {
+    let name = location.slice("/authors/".length);
+    try { name = decodeURIComponent(name); } catch { /* preserve malformed input as text */ }
+    return [...crumbs, { href: "/experts", label:language === "zh" ? "专家与机构" : "Experts & Institutions"}, {label:name}];
+  }
   const segments = location.split("/").filter(Boolean);
   let currentPath = "";
   segments.forEach((seg, i) => {
@@ -221,6 +227,9 @@ function useBreadcrumbs(location: string, language: string) {
 
 // ── Global Search ─────────────────────────────────────────────────────────────
 function GlobalSearch({ language }: { language: string }) {
+  const { t } = useLanguage();
+  const [, navigate] = useLocation();
+  const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
 
@@ -237,7 +246,9 @@ function GlobalSearch({ language }: { language: string }) {
   }, []);
 
   return (
-    <div
+    <form
+      role="search"
+      onSubmit={(event) => { event.preventDefault(); const value=query.trim(); navigate(value ? `/academic-resources?q=${encodeURIComponent(value)}` : "/academic-resources"); }}
       className={cn(
         "hidden 2xl:flex items-center gap-2 w-full max-w-[280px] h-8 px-3 rounded-md border transition-all text-sm text-muted-foreground bg-muted/40",
         focused
@@ -248,6 +259,9 @@ function GlobalSearch({ language }: { language: string }) {
       <Search className="h-3.5 w-3.5 shrink-0" />
       <input
         ref={inputRef}
+        aria-label={t("Search content", "搜索内容")}
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder={language === "zh" ? "搜索内容…" : "Search…"}
@@ -256,7 +270,7 @@ function GlobalSearch({ language }: { language: string }) {
       <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded border border-border/50 bg-muted px-1.5 font-mono text-[10px] text-muted-foreground/60 shrink-0">
         ⌘K
       </kbd>
-    </div>
+    </form>
   );
 }
 
@@ -506,6 +520,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex h-dvh overflow-hidden bg-background font-sans text-foreground">
       {/* ── Sidebar ── */}
       <aside
+        id="site-navigation"
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground flex flex-col transition-[transform,width] duration-300 ease-in-out border-r border-sidebar-border lg:static lg:translate-x-0",
           !isSidebarOpen && "-translate-x-full",
@@ -545,6 +560,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               variant="ghost"
               size="icon"
               className="lg:hidden text-sidebar-primary-foreground hover:bg-black/10 ml-2 shrink-0 h-8 w-8"
+              aria-label={t("Close navigation", "关闭导航")}
+              aria-controls="site-navigation"
               onClick={(e) => {
                 e.preventDefault();
                 setIsSidebarOpen(false);
@@ -603,6 +620,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               size="icon"
               className="lg:hidden h-8 w-8 shrink-0"
               aria-label={t("Open navigation", "打开导航")}
+              aria-expanded={isSidebarOpen}
+              aria-controls="site-navigation"
               onClick={() => setIsSidebarOpen(true)}
             >
               <Menu className="h-4 w-4" />
@@ -685,7 +704,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative h-8 w-8 text-muted-foreground hover:text-foreground" title={t("Messages", "消息中心")}>
+                  <Button variant="ghost" size="icon" className="relative h-8 w-8 text-muted-foreground hover:text-foreground" title={t("Messages", "消息中心")} aria-label={t("Messages", "消息中心")}>
                     <Bell className="h-4 w-4" />
                     {notifications.some((item) => !item.read) && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-background" />}
                   </Button>
@@ -709,6 +728,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Button
                     variant="ghost"
                     className="h-8 w-8 rounded-full border border-border hover:border-primary/40 p-0"
+                    aria-label={t("Account menu", "账户菜单")}
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">

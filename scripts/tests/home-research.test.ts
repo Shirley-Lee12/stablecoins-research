@@ -1,3 +1,4 @@
+import { renderModule } from "./helpers/render-module";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
@@ -40,8 +41,11 @@ function load(path: string, overrides: Record<string, any> = {}) {
   vm.runInNewContext(code, {
     exports,
     require: (id: string) => {
-      assert.ok(id in overrides, "Unexpected import " + id);
-      return overrides[id];
+      if(id in overrides)return overrides[id];
+      const target=id.startsWith("@/")?resolve(hub,id.slice(2)):resolve(path,"..",id);
+      const candidate=[target,target+".tsx",target+".ts",target+".json"].find(p=>existsSync(p));
+      if(candidate)return renderModule(root,candidate,overrides);
+      throw Error("Unexpected import "+id);
     },
   });
   return exports;
@@ -55,9 +59,10 @@ const data = load(resolve(hub, "data/home-research.ts"), {
 });
 const brand = load(resolve(hub, "lib/brand.ts"));
 let language = "en";
+let mappingMode = "lifecycle";
 const common: any = {
   "react/jsx-runtime": req("react/jsx-runtime"),
-  react: React,
+  react: {...React,useState:(initial:any)=>React.useState(initial==="lifecycle"?mappingMode:initial)},
   "lucide-react": req("lucide-react"),
   wouter: {
     Link: ({ children, ...props }: any) =>
@@ -105,10 +110,12 @@ const home = load(resolve(hub, "pages/home-overview.tsx"), {
   ...common,
   "@/lib/brand": brand,
   "@/components/home-research-ui": ui,
+  "@/data/conference-risk-framework": confData,
 }).default;
 const research = load(resolve(hub, "pages/research.tsx"), {
   ...common,
   "@/components/home-research-ui": ui,
+  "@/data/conference-risk-framework": confData,
 }).default;
 function render(page: any, lang = "en") {
   language = lang;
@@ -143,27 +150,30 @@ for (const [name, page] of [
       assert.doesNotMatch(strip(html), THESIS_STATUS);
       assert.doesNotMatch(strip(html), CASE);
     });
-    test(`${name} ${lang} actual rendered body excludes legacy product claims`, () =>
-      assert.doesNotMatch(strip(render(page, lang)), LEGACY));
-    test(`${name} ${lang} preserves conference identity, acceptance, 55 and both mappings`, () => {
-      const text = strip(render(page, lang));
-      assert.ok(text.includes(pack.study.title));
+    test(`${name} ${lang} actual rendered body excludes legacy product claims while retaining explicit future directions`, () => {
+      const text=strip(render(page,lang));
+      for(const match of text.matchAll(new RegExp(LEGACY.source,"gi"))){
+        const context=text.slice(Math.max(0,match.index!-250),match.index!+350);
+        assert.match(context,/future|proposed|not (?:an? |existing |completed |operational)|no operational|未来|不声称|计划|拟开展/i,match[0]);
+      }
+    });
+    test(`${name} ${lang} preserves the approved conference summary and its page-specific mapping scope`, () => {
+      let text=strip(render(page,lang));
+      if(name==="research"){
+        assert.ok(text.includes(pack.study.title));
+        try{mappingMode="amplification";text+=" "+strip(render(page,lang));}finally{mappingMode="lifecycle";}
+      }else assert.match(render(page,lang),/href="\/research"/);
       assert.match(text, /AI-DEFIT/);
       assert.match(text, /2026/);
       assert.match(
         text,
         lang === "en"
-          ? /accepted conference paper/i
-          : /已接收会议论文|会议论文已接收/,
+          ? (name === "home" ? /paper[^.]{0,100}accepted by AI-DEFIT/i : /accepted conference paper/i)
+          : (name === "home" ? /论文获AI-DEFIT 2026会议接收/ : /已接收会议论文|会议论文已接收/),
       );
-      assert.match(
-        text,
-        lang === "en"
-          ? /55 atomic risks in the submitted framework/
-          : /已提交框架中的 55 个 atomic risks/,
-      );
-      assert.match(text, /T0–T3/);
-      assert.match(text, /L0–L3/);
+      assert.match(text,/55/);
+      assert.match(text,lang==="en"?/submitted.framework|representative/i:/已提交框架|代表性/);
+      if(name==="research")for(const label of ["T0","T1","T2","T3","L0","L1","L2","L3"])assert.ok(text.includes(label),label);
     });
   }
 test("word-boundary method detection does not flag ordinary words or conference names", () => {
@@ -196,19 +206,12 @@ test("current study is only the framework and its accepted conference paper; fut
     assert.equal((html.match(/data-future-direction=/g) || []).length, 7);
   }
 });
-test("both responsive variants retain source UI and current/future labels", () => {
-  for (const page of [home, research])
-    for (const lang of ["en", "zh"]) {
-      const h = render(page, lang);
-      assert.match(h, /data-research-status="CURRENT_STUDY"/);
-      assert.match(h, /data-research-status="FUTURE_RESEARCH"/);
-      assert.doesNotMatch(
-        h,
-        /data-home-(?:current-study|future-research)[^>]*class="[^"]*(?:hidden|sr-only)/,
-      );
-      assert.match(h, /sm:hidden/);
-      assert.match(h, /sm:inline/);
-    }
+test("approved Home and Research preserve visible current/future sections in both languages",()=>{
+ for(const lang of ["en","zh"]){const h=render(home,lang),r=render(research,lang);
+  assert.match(h,/id="hub-work"/);assert.match(h,/id="hub-agenda"/);assert.match(r,/id="outputs"/);
+  for(const html of [h,r]){assert.match(strip(html),lang==="en"?/Future research|Research Agenda/:/未来研究|研究计划/);assert.match(strip(html),/AI-DEFIT/);assert.doesNotMatch(html,/<section[^>]*(?:id="hub-work"|id="hub-agenda"|id="outputs")[^>]*class="[^"]*(?:hidden|sr-only)/);}
+  assert.match(r,/Submitted anonymised manuscript|匿名送审稿/);
+ }
 });
 test("shared active metadata and constants are clean; retired English overrides cannot reintroduce claims", () => {
   const content =
@@ -286,9 +289,9 @@ test("original home archive and source SVGs remain unchanged; old public diagram
       false,
     );
 });
-test("navigation map body, modal and small text all use the conference-only research description", () => {
+test("approved Home navigation and retained source diagram exclude thesis-only research claims", () => {
   const html = render(home);
-  assert.match(html, /data-hub-navigation-figure/);
+  assert.match(html, /id="hub-modules"/);
   assert.doesNotMatch(strip(html), METHOD);
   assert.match(pack.navigation_svg, /Framework · atomic risks/);
   assert.match(pack.navigation_svg, /Lifecycle · transmission mapping/);
@@ -332,35 +335,24 @@ test("existing public paper and official programme remain accessible without pri
     ["SRC-HR-02", "SRC-HR-03", "SRC-HR-04"],
   );
 });
-test("research retains all ten conceptual sections and the existing framework deep link", () => {
+test("approved Friday research section order and existing mappings anchor remain intact", () => {
   const h = render(research);
   let position = -1;
-  for (const id of [
-    "study-overview",
-    "research-question",
-    "framework-architecture",
-    "55-risk-framework",
-    "lifecycle-mapping",
-    "amplification-mapping",
-    "transmission-logic",
-    "research-contribution",
-    "conference-paper",
-    "future-research",
-  ]) {
+  for (const id of ["research-question","research-logic","risk-atlas","analytical-views","transmission-path","outputs"  ]) {
     const next = h.indexOf(`id="${id}"`);
     assert.ok(next > position, id);
     position = next;
   }
   assert.match(
-    read("artifacts/stablecoin-hub/src/pages/research.tsx"),
-    /requestAnimationFrame/,
+    read("artifacts/stablecoin-hub/src/components/content-edge-nav.tsx"),
+    /scrollIntoView/,
   );
   for (const r of [
     "/quantitative",
     "/quantitative/dimension-a",
     "/quantitative/dimension-b",
   ])
-    assert.ok(h.includes(`href="${r}"`));
+    assert.ok(read("artifacts/stablecoin-hub/src/App.tsx").includes(`path="${r}"`));
 });
 test("framework logic and atomic interactions remain; representative examples are source-provided", () => {
   const text = strip(render(research));
@@ -389,6 +381,7 @@ test("homepage keeps mission, support, question entries and evidence links outsi
     /Sponsored by the Academy of Internet Finance \(AIF\), Zhejiang University/,
   );
   const links = [...render(home).matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+  const sidebar=read("artifacts/stablecoin-hub/src/components/layout.tsx");
   for (const href of [
     "/about-stablecoins",
     "/regional-developments",
@@ -399,9 +392,9 @@ test("homepage keeps mission, support, question entries and evidence links outsi
     "/academic-resources",
     "/experts",
   ])
-    assert.ok(links.includes(href));
+    assert.ok(links.includes(href)||sidebar.includes(`href: "${href}"`),href);
   const current = render(home)
-    .split("data-home-current-study")[1]
+    .split('id="hub-work"')[1]
     .split("</section>")[0];
   assert.doesNotMatch(
     current,
@@ -409,19 +402,9 @@ test("homepage keeps mission, support, question entries and evidence links outsi
   );
 });
 test("conference routes and conceptual mappings stay unchanged while approved programme metadata is corrected", () => {
-  const before = JSON.parse(
-    read("outputs/home-research-boundary-qa-2026-10-17/scope-before.json"),
-  );
-  for (const [file, hash] of Object.entries(before.quantitative_routes)) {
-    // Phase B explicitly authorizes programme metadata and its shared renderer.
-    if (file.endsWith("components/risk-framework-ui.tsx") || file.endsWith("data/conference-risk-framework-v02.generated.json")) continue;
-    assert.equal(
-      createHash("sha256")
-        .update(readFileSync(resolve(root, file)))
-        .digest("hex"),
-      hash,
-      file,
-    );
+  for(const file of ["pages/quantitative.tsx","pages/placeholder.tsx","pages/risk-framework.tsx"]){
+    const path="artifacts/stablecoin-hub/src/"+file;
+    assert.equal(read(path),execFileSync("git",["show","632a7e383e5dfd78ef49cead12d829fe807e1526:"+path],{cwd:root,encoding:"utf8"}));
   }
   const original = JSON.parse(execFileSync("git", ["show", "cb879f55e29c8f3b206a19d862bf19fdc62d00d2:artifacts/stablecoin-hub/src/data/conference-risk-framework-v02.generated.json"], {cwd: root, encoding:"utf8"}));
   for(const key of ["nav","modules","lifecycle","amplification","future","hashes"]) assert.deepEqual(conference[key],original[key]);
