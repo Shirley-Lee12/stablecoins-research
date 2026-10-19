@@ -49,7 +49,7 @@ export function PlaceholderPage({
 
 // ── Pre-built sub-page exports ─────────────────────────────────────────────────
 export function AboutHistory() {
-  return <PlaceholderPage titleEn="History" titleZh="历程" parentHref="/about-stablecoins" parentLabelEn="About Stablecoins" parentLabelZh="关于稳定币" descEn="A timeline of stablecoin development from early experiments to today's trillion-dollar ecosystem." descZh="稳定币发展历程，从早期实验到如今的万亿生态全面回顾。" />;
+  return <PlaceholderPage titleEn="History" titleZh="历程" parentHref="/about-stablecoins" parentLabelEn="About Stablecoins" parentLabelZh="关于稳定币" descEn="A timeline of stablecoin development from early experiments to today's stablecoin ecosystem." descZh="稳定币发展历程，从早期实验到如今的稳定币生态全面回顾。" />;
 }
 export function AboutTypes() {
   return <PlaceholderPage titleEn="Types" titleZh="种类" parentHref="/about-stablecoins" parentLabelEn="About Stablecoins" parentLabelZh="关于稳定币" descEn="Explore different stablecoin architectures: fiat-backed, crypto-collateralized, algorithmic, and more." descZh="探索各类稳定币架构：法币抵押、加密资产抵押、算法稳定币等。" />;
@@ -59,6 +59,12 @@ export function AboutApplications() {
 }
 export function AboutRegulatoryEvolution() {
   return <PlaceholderPage titleEn="Regulatory Evolution" titleZh="监管演变" parentHref="/about-stablecoins" parentLabelEn="About Stablecoins" parentLabelZh="关于稳定币" descEn="Track how global regulation of stablecoins has evolved from MiCA to US legislation." descZh="追踪全球稳定币监管从 MiCA 到美国立法的演变历程。" />;
+}
+export function QuantDimensionA() {
+  return <PlaceholderPage titleEn="Dimension A" titleZh="维度 A" parentHref="/quantitative" parentLabelEn="Quantitative Indicators" parentLabelZh="量化指标" descEn="Quantitative dimension A — detailed metrics and analysis to be published." descZh="量化指标维度 A — 详细指标与分析即将发布。" />;
+}
+export function QuantDimensionB() {
+  return <PlaceholderPage titleEn="Dimension B" titleZh="维度 B" parentHref="/quantitative" parentLabelEn="Quantitative Indicators" parentLabelZh="量化指标" descEn="Quantitative dimension B — detailed metrics and analysis to be published." descZh="量化指标维度 B — 详细指标与分析即将发布。" />;
 }
 export function MarketPriceTracking() {
   return <PlaceholderPage titleEn="Price Tracking" titleZh="价格追踪" parentHref="/market-data" parentLabelEn="Market Data" parentLabelZh="市场数据" descEn="Real-time and historical price data for major stablecoins." descZh="主流稳定币的实时与历史价格数据。" />;

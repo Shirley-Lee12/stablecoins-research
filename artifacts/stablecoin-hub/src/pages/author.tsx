@@ -20,9 +20,6 @@ import {
 import { sourceTypeLabel } from "@/lib/source-types";
 import { normalizeAbstractForDisplay, TagSummaryList, type TagSummary } from "@/pages/academic-resources";
 
-import { ResearcherCard } from "@/components/directory-ui";
-import type { DirectoryResearcher } from "@/data/academic-directory";
-
 interface ApiResource {
   id: number;
   title: string;
@@ -45,7 +42,6 @@ interface AuthorProfile {
   institutionName: string | null;
   institutionCountry: string | null;
   resources: ApiResource[];
-  verifiedProfile: DirectoryResearcher | null;
 }
 
 const editFormSchema = z.object({
@@ -202,7 +198,7 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
         data-testid="button-back-to-experts"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        {t("Back to Researchers & Institutions", "返回研究者与机构")}
+        {t("Back to Experts & Scholars", "返回专家学者")}
       </Button>
 
       {isLoading ? (
@@ -243,10 +239,10 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                   </span>
                 </div>
 
-                <div className="min-w-0 flex-1 space-y-4">
-                  <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h1 className="break-words text-3xl font-serif font-bold text-primary" data-testid="text-author-name">
+                      <h1 className="text-3xl font-serif font-bold text-primary" data-testid="text-author-name">
                         {author.name}
                       </h1>
                     </div>
@@ -254,9 +250,9 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                     <div className="flex flex-wrap justify-end gap-2">
                     <Button variant={followingAuthor ? "default" : "outline"} size="sm" onClick={() => void toggleFollow("author")}>
                       {followingAuthor ? <UserCheck className="mr-2 h-3.5 w-3.5" /> : <UserPlus className="mr-2 h-3.5 w-3.5" />}
-                      {followingAuthor ? t("Following", "已关注") : t("Follow author", "关注作者")}
+                      {followingAuthor ? t("Following", "已关注") : t("Follow expert", "关注专家")}
                     </Button>
-                    {!author.verifiedProfile && author.institutionId && author.institutionName && <Button variant={followingInstitution ? "default" : "outline"} size="sm" onClick={() => void toggleFollow("institution")}>
+                    {author.institutionId && author.institutionName && <Button variant={followingInstitution ? "default" : "outline"} size="sm" onClick={() => void toggleFollow("institution")}>
                       <Building2 className="mr-2 h-3.5 w-3.5" />{followingInstitution ? t("Institution followed", "已关注机构") : t("Follow institution", "关注机构")}
                     </Button>}
                     {user?.role === "admin" && (
@@ -274,7 +270,7 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                         </DialogTrigger>
                         <DialogContent className="max-w-md">
                           <DialogHeader>
-                            <DialogTitle>{t("Edit bibliographic author record", "编辑书目作者条目")}</DialogTitle>
+                            <DialogTitle>{t("Edit Author Profile", "编辑作者档案")}</DialogTitle>
                           </DialogHeader>
                           <Form {...editForm}>
                             <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
@@ -327,28 +323,23 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                     )}
                     </div>
                   </div>
-                  {!author.verifiedProfile && author.institutionName && (
+                  {author.institutionName && (
                     <p className="text-muted-foreground mt-1 flex items-center gap-1.5">
                       <Building2 className="h-4 w-4" />
                       {author.institutionName}
                       {author.institutionCountry ? ` · ${author.institutionCountry}` : ""}
                     </p>
                   )}
-                  <p data-author-record-kind className="text-sm leading-7 text-muted-foreground">
-                    {author.verifiedProfile
-                      ? t("Verified researcher profile", "已核验研究者档案")
-                      : t("Bibliographic author record · no verified researcher profile established. Legacy biographical fields are not verified profile data.", "书目作者条目 · 尚未建立已核验研究者档案。旧版简介字段不属于已核验档案数据。")}
-                  </p>
                   <p className="text-muted-foreground mt-1">
                     {(author.resources ?? []).length}{" "}
                     {t("publication(s) in the resource library", "篇资源收录于资源库")}
                   </p>
 
-                  {!author.verifiedProfile && author.bio && (
+                  {author.bio && (
                     <p className="text-sm text-foreground/80 leading-relaxed max-w-2xl">{author.bio}</p>
                   )}
 
-                  {!author.verifiedProfile && Array.isArray(author.researchInterests) && author.researchInterests.length > 0 && (
+                  {Array.isArray(author.researchInterests) && author.researchInterests.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {author.researchInterests.map((interest) => (
                         <span
@@ -365,7 +356,6 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
             </CardContent>
           </Card>
 
-          {author.verifiedProfile && <ResearcherCard researcher={author.verifiedProfile} />}
           <div>
             <h2 className="text-xl font-serif font-bold text-primary mb-4 flex items-center gap-2">
               <BookOpen className="h-5 w-5" />
@@ -383,7 +373,7 @@ export default function AuthorPage({ params }: { params: { name: string } }) {
                   data-testid={`card-resource-${resource.id}`}
                 >
                   <CardHeader className="pb-2">
-                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                    <div className="flex items-start justify-between gap-4">
                       <div className="space-y-1 flex-1">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
                           <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${TYPE_COLORS[resource.sourceType ?? ""] ?? "bg-muted text-muted-foreground"}`}>

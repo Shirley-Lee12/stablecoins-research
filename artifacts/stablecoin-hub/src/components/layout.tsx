@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useLanguage } from "@/lib/language-context";
-import { GlobalSearch } from "@/components/global-search";
 import { BRAND } from "@/lib/brand";
 import { useTheme } from "@/lib/theme-context";
 import { authenticatedFetch, useAuth } from "@/lib/auth-context";
@@ -71,31 +70,26 @@ const ROUTE_LABELS: Record<string, { en: string; zh: string }> = {
   "/about-stablecoins/applications": { en: "Applications", zh: "应用" },
   "/about-stablecoins/regulatory-evolution": {
     en: "Regulatory Evolution",
-    zh: "监管演进",
+    zh: "监管演变",
   },
   "/research": { en: "Our Research", zh: "我们的研究" },
-  "/academic-resources": { en: "Stablecoin Research Library", zh: "稳定币研究资源库" },
-  "/experts": { en: "Researchers & Institutions", zh: "研究者与机构" },
+  "/academic-resources": { en: "Resources", zh: "资源库" },
+  "/experts": { en: "Experts & Institutions", zh: "专家与机构" },
   "/regulatory": { en: "Regulatory Status", zh: "监管现状" },
-  "/quantitative": { en: "Stablecoin Risk Framework", zh: "稳定币风险框架" },
-  "/quantitative/dimension-a": { en: "Lifecycle Mapping (T0–T3)", zh: "生命周期映射（T0–T3）" },
-  "/quantitative/dimension-b": { en: "Amplification & Transmission Mapping (L0–L3)", zh: "放大与传导映射（L0–L3）" },
+  "/quantitative": { en: "Quantitative Indicators", zh: "量化指标" },
+  "/quantitative/dimension-a": { en: "Dimension A", zh: "维度 A" },
+  "/quantitative/dimension-b": { en: "Dimension B", zh: "维度 B" },
   "/market-data": { en: "Market Data", zh: "市场数据" },
   "/market-data/market": { en: "Market", zh: "市场" },
   "/market-data/on-chain": { en: "On-chain", zh: "链上数据" },
   "/market-data/issuers-reserves": { en: "Issuers & Reserves", zh: "发行方与储备" },
   "/market-data/macro": { en: "Macro", zh: "宏观数据" },
-  "/market-data/adoption": { en: "Adoption", zh: "采用" },
   "/regional-developments": { en: "Stablecoin Developments", zh: "稳定币发展" },
   "/regional-developments/mainland-china": { en: "Mainland China", zh: "中国内地" },
   "/regional-developments/hong-kong": { en: "Hong Kong", zh: "中国香港" },
   "/regional-developments/singapore": { en: "Singapore", zh: "新加坡" },
   "/regional-developments/uae": { en: "United Arab Emirates", zh: "阿联酋" },
-  "/mainland-china": { en: "Mainland China", zh: "中国内地" },
-  "/hong-kong": { en: "Hong Kong", zh: "中国香港" },
-  "/singapore": { en: "Singapore", zh: "新加坡" },
-  "/uae": { en: "United Arab Emirates", zh: "阿联酋" },
-  "/agentic-payments": { en: "Agentic Payments", zh: "智能体支付" },
+  "/agentic-payments": { en: "Agentic Payments", zh: "智能体支付协议" },
   "/agentic-payments/protocols": { en: "Protocols & Mechanisms", zh: "协议与机制" },
   "/agentic-payments/scenarios": { en: "Applications & Risks", zh: "应用与风险" },
   "/agentic-payments/ecosystem": { en: "Ecosystem & Developments", zh: "生态与进展" },
@@ -104,8 +98,7 @@ const ROUTE_LABELS: Record<string, { en: string; zh: string }> = {
   "/agentic-payments/protocols/amp": { en: "AMP", zh: "AMP" },
   "/agentic-payments/protocols/x402": { en: "x402", zh: "x402" },
   "/agentic-payments/protocols/apop": { en: "APOP", zh: "APOP" },
-  "/agentic-payments/protocols/mpp": { en: "MPP", zh: "MPP" },
-  "/agentic-payments/protocols/act": { en: "ACT", zh: "ACT" },
+  "/agentic-payments/protocols/a2p2": { en: "A2P2", zh: "A2P2" },
   "/agentic-payments/protocols/ucp": { en: "UCP", zh: "UCP" },
   "/admin": { en: "Admin Center", zh: "管理中心" },
   "/profile": { en: "My Profile", zh: "个人资料" },
@@ -121,7 +114,6 @@ interface NavChild {
   labelEn: string;
   labelZh: string;
   matchPrefix?: string;
-  aliases?: string[];
 }
 interface NavItem {
   href: string;
@@ -129,6 +121,7 @@ interface NavItem {
   labelZh: string;
   icon: React.ElementType;
   children?: NavChild[];
+  activeAliases?: string[];
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -144,6 +137,7 @@ const NAV_ITEMS: NavItem[] = [
     labelEn: "About Stablecoins",
     labelZh: "关于稳定币",
     icon: BookOpen,
+    activeAliases: ["/regulatory"],
   },
   {
     href: "/regional-developments",
@@ -151,13 +145,13 @@ const NAV_ITEMS: NavItem[] = [
     labelZh: "稳定币发展",
     icon: MapPinned,
     children: [
-      { href: "/regional-developments", labelEn: "Asia", labelZh: "亚洲", matchPrefix: "/regional-developments/", aliases: ["/mainland-china", "/hong-kong", "/singapore", "/uae"] },
+      { href: "/regional-developments", labelEn: "Asia", labelZh: "亚洲", matchPrefix: "/regional-developments/" },
     ],
   },
   {
     href: "/agentic-payments",
     labelEn: "Agentic Payments",
-    labelZh: "智能体支付",
+    labelZh: "智能体支付协议",
     icon: Workflow,
   },
   {
@@ -167,27 +161,21 @@ const NAV_ITEMS: NavItem[] = [
     icon: Microscope,
   },
   {
-    href: "/regulatory",
-    labelEn: "Regulatory Status",
-    labelZh: "监管现状",
-    icon: Shield,
-  },
-  {
     href: "/academic-resources",
-    labelEn: "Research Library",
-    labelZh: "研究资源库",
+    labelEn: "Resources",
+    labelZh: "资源库",
     icon: Database,
   },
   {
     href: "/experts",
-    labelEn: "Researchers & Institutions",
-    labelZh: "研究者与机构",
+    labelEn: "Experts & Institutions",
+    labelZh: "专家与机构",
     icon: UsersRound,
   },
   {
     href: "/quantitative",
-    labelEn: "Risk Framework",
-    labelZh: "风险框架",
+    labelEn: "Quantitative Indicators",
+    labelZh: "量化指标",
     icon: BarChart,
   },
   {
@@ -208,22 +196,6 @@ const NAV_ITEMS: NavItem[] = [
 // ── Breadcrumb builder ────────────────────────────────────────────────────────
 function useBreadcrumbs(location: string, language: string) {
   if (location === "/") return [{ label: language === "zh" ? "首页" : "Home" }];
-  if (location.startsWith("/authors/")) {
-    let name = location.slice("/authors/".length);
-    try { name = decodeURIComponent(name); } catch { /* retain the visible URL segment */ }
-    return [
-      { href: "/", label: language === "zh" ? "首页" : "Home" },
-      { href: "/experts", label: language === "zh" ? "研究者与机构" : "Researchers & Institutions" },
-      { label: name },
-    ];
-  }
-  if (["/mainland-china", "/hong-kong", "/singapore", "/uae"].includes(location)) {
-    return [
-      { href: "/", label: language === "zh" ? "首页" : "Home" },
-      { href: "/regional-developments", label: language === "zh" ? "亚洲稳定币发展" : "Asia Stablecoin Development" },
-      { label: language === "zh" ? ROUTE_LABELS[location].zh : ROUTE_LABELS[location].en },
-    ];
-  }
   const crumbs: { href?: string; label: string }[] = [
     { href: "/", label: language === "zh" ? "首页" : "Home" },
   ];
@@ -233,11 +205,11 @@ function useBreadcrumbs(location: string, language: string) {
     currentPath += "/" + seg;
     const entry = ROUTE_LABELS[currentPath];
     const mechanismLabels: Record<string, { en: string; zh: string }> = {
-      "fiat-backed": { en: "Fiat-reserve-backed", zh: "法币储备型" },
-      "crypto-backed": { en: "Crypto-collateralised", zh: "加密资产抵押型" },
-      synthetic: { en: "Synthetic / hedged", zh: "合成 / 对冲型" },
+      "fiat-backed": { en: "Fiat-backed", zh: "法币储备型" },
+      "crypto-backed": { en: "Crypto-collateralized", zh: "加密资产抵押型" },
+      synthetic: { en: "Synthetic", zh: "合成型" },
       algorithmic: { en: "Algorithmic", zh: "算法型" },
-      other: { en: "Hybrid & boundary", zh: "混合与边界" },
+      other: { en: "Other", zh: "其他" },
     };
     const mechanismEntry = currentPath.startsWith("/about-stablecoins/types/") ? mechanismLabels[seg] : undefined;
     const label = entry ? (language === "zh" ? entry.zh : entry.en) : mechanismEntry ? (language === "zh" ? mechanismEntry.zh : mechanismEntry.en) : seg;
@@ -248,6 +220,46 @@ function useBreadcrumbs(location: string, language: string) {
 }
 
 // ── Global Search ─────────────────────────────────────────────────────────────
+function GlobalSearch({ language }: { language: string }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [focused, setFocused] = useState(false);
+
+  // ⌘K / Ctrl+K shortcut
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  return (
+    <div
+      className={cn(
+        "hidden 2xl:flex items-center gap-2 w-full max-w-[280px] h-8 px-3 rounded-md border transition-all text-sm text-muted-foreground bg-muted/40",
+        focused
+          ? "border-primary/50 ring-2 ring-primary/20 bg-background"
+          : "border-border/60 hover:border-border",
+      )}
+    >
+      <Search className="h-3.5 w-3.5 shrink-0" />
+      <input
+        ref={inputRef}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder={language === "zh" ? "搜索内容…" : "Search…"}
+        className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/70 text-xs"
+      />
+      <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded border border-border/50 bg-muted px-1.5 font-mono text-[10px] text-muted-foreground/60 shrink-0">
+        ⌘K
+      </kbd>
+    </div>
+  );
+}
+
 // ── Sidebar NavItem (with optional Collapsible) ───────────────────────────────
 function SidebarNavItem({
   item,
@@ -272,7 +284,8 @@ function SidebarNavItem({
   const isParentActive =
     (item.href === "/" && location === "/") ||
     (item.href !== "/" && location.startsWith(item.href)) ||
-    item.children?.some((child) => location.startsWith(child.href) || child.aliases?.includes(location));
+    item.activeAliases?.includes(location) ||
+    item.children?.some((child) => location.startsWith(child.href));
   const hasChildren = !!item.children?.length;
   const isOpen = openMap[item.href] ?? false;
 
@@ -334,7 +347,6 @@ function SidebarNavItem({
         <div className="ml-7 mt-0.5 mb-0.5 flex flex-col gap-0.5 border-l border-sidebar-border/60 pl-3">
           {item.children!.map((child) => {
             const childActive = location === child.href
-              || Boolean(child.aliases?.includes(location))
               || Boolean(child.matchPrefix && location.startsWith(child.matchPrefix))
               || (child.href === "/about-stablecoins/types" && location.startsWith(`${child.href}/`));
             return (
@@ -494,7 +506,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex h-dvh overflow-hidden bg-background font-sans text-foreground">
       {/* ── Sidebar ── */}
       <aside
-        id="site-navigation"
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground flex flex-col transition-[transform,width] duration-300 ease-in-out border-r border-sidebar-border lg:static lg:translate-x-0",
           !isSidebarOpen && "-translate-x-full",
@@ -538,9 +549,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 e.preventDefault();
                 setIsSidebarOpen(false);
               }}
-              aria-label={t("Close navigation", "关闭导航")}
-              aria-expanded={isSidebarOpen}
-              aria-controls="site-navigation"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -594,10 +602,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               variant="ghost"
               size="icon"
               className="lg:hidden h-8 w-8 shrink-0"
-              onClick={() => setIsSidebarOpen(true)}
               aria-label={t("Open navigation", "打开导航")}
-              aria-expanded={isSidebarOpen}
-              aria-controls="site-navigation"
+              onClick={() => setIsSidebarOpen(true)}
             >
               <Menu className="h-4 w-4" />
             </Button>
@@ -640,7 +646,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           {/* CENTER — global search */}
           <div className="flex justify-center shrink-0">
-            <GlobalSearch />
+            <GlobalSearch language={language} />
           </div>
 
           {/* RIGHT — controls */}
@@ -661,7 +667,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-foreground"
               onClick={toggleTheme}
-              aria-label={theme === "light" ? t("Dark mode", "深色模式") : t("Light mode", "浅色模式")}
               title={
                 theme === "light"
                   ? t("Dark mode", "深色模式")
@@ -680,7 +685,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative h-8 w-8 text-muted-foreground hover:text-foreground" title={t("Messages", "消息中心")} aria-label={t("Messages", "消息中心")}>
+                  <Button variant="ghost" size="icon" className="relative h-8 w-8 text-muted-foreground hover:text-foreground" title={t("Messages", "消息中心")}>
                     <Bell className="h-4 w-4" />
                     {notifications.some((item) => !item.read) && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-background" />}
                   </Button>
@@ -704,7 +709,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Button
                     variant="ghost"
                     className="h-8 w-8 rounded-full border border-border hover:border-primary/40 p-0"
-                    aria-label={t("Account menu", "账户菜单")}
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">

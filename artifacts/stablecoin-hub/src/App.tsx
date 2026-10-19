@@ -1,11 +1,10 @@
-import { Switch, Route, Redirect, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/lib/language-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { AuthProvider } from "@/lib/auth-context";
-import { PageMetadata } from "@/components/page-metadata";
 import { Layout } from "@/components/layout";
 import NotFound from "@/pages/not-found";
 
@@ -18,7 +17,7 @@ import AboutApplicationsPage from "@/pages/about-applications";
 import StablecoinMechanismPage from "@/pages/stablecoin-mechanism";
 import AboutRegulatoryEvolutionPage from "@/pages/about-regulatory-evolution";
 import Research from "@/pages/research";
-import { AgenticPaymentsOverview, AgenticProtocolsPage, AgenticProtocolDetail, AgenticScenariosPage, AgenticEcosystemPage, AgenticLegacyProtocolRedirect } from "@/pages/agentic-payments";
+import { AgenticPaymentsOverview, AgenticProtocolsPage, AgenticProtocolDetail, AgenticScenariosPage, AgenticEcosystemPage } from "@/pages/agentic-payments";
 import AcademicResources from "@/pages/academic-resources";
 import Experts from "@/pages/experts";
 import AuthorPage from "@/pages/author";
@@ -42,9 +41,9 @@ import ChangePasswordPage from "@/pages/change-password";
 import VerifyEmailPage from "@/pages/verify-email";
 import ConnectorPage from "@/pages/connector";
 import {
-  LifecycleMapping as QuantDimensionA,
-  AmplificationMapping as QuantDimensionB,
-} from "@/pages/risk-framework";
+  QuantDimensionA,
+  QuantDimensionB,
+} from "@/pages/placeholder";
 
 const queryClient = new QueryClient();
 
@@ -67,21 +66,20 @@ function Router() {
         <Route path="/regulatory" component={Regulatory} />
         <Route path="/market-data" component={MarketData} />
         <Route path="/quantitative" component={Quantitative} />
-        <Route path="/regional-developments" component={AsiaDevelopmentOverviewPage} />
         <Route path="/mainland-china" component={MainlandChinaDevelopmentPage} />
         <Route path="/hong-kong" component={HongKongDevelopmentPage} />
         <Route path="/singapore" component={SingaporeDevelopmentPage} />
         <Route path="/uae" component={UaeDevelopmentPage} />
-        <Route path="/regional-developments/mainland-china"><Redirect replace to="/mainland-china" /></Route>
-        <Route path="/regional-developments/hong-kong"><Redirect replace to="/hong-kong" /></Route>
-        <Route path="/regional-developments/singapore"><Redirect replace to="/singapore" /></Route>
-        <Route path="/regional-developments/uae"><Redirect replace to="/uae" /></Route>
+        <Route path="/regional-developments" component={AsiaDevelopmentOverviewPage} />
+        <Route path="/regional-developments/mainland-china" component={MainlandChinaDevelopmentPage} />
+        <Route path="/regional-developments/hong-kong" component={HongKongDevelopmentPage} />
+        <Route path="/regional-developments/singapore" component={SingaporeDevelopmentPage} />
+        <Route path="/regional-developments/uae" component={UaeDevelopmentPage} />
         <Route path="/agentic-payments" component={AgenticPaymentsOverview} />
         <Route path="/agentic-payments/protocols" component={AgenticProtocolsPage} />
         <Route path="/agentic-payments/protocols/:id" component={AgenticProtocolDetail} />
         <Route path="/agentic-payments/scenarios" component={AgenticScenariosPage} />
         <Route path="/agentic-payments/ecosystem" component={AgenticEcosystemPage} />
-        <Route path="/protocols/:id" component={AgenticLegacyProtocolRedirect} />
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/verify-email" component={VerifyEmailPage} />
         <Route path="/admin" component={AdminCenter} />
@@ -125,7 +123,6 @@ function App() {
           <LanguageProvider>
             <TooltipProvider>
               <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-                <PageMetadata />
                 <Router />
               </WouterRouter>
               <Toaster />

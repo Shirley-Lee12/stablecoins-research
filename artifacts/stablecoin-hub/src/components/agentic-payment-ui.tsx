@@ -1,7 +1,6 @@
-import React, { useEffect, useId, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ExternalLink, Info, Maximize2 } from "lucide-react";
-import { useLanguage } from "@/lib/language-context";
+import { ArrowRight, ExternalLink, Info } from "lucide-react";
 import { SectionTopNav } from "@/components/section-top-nav";
 import {
   Tooltip,
@@ -9,100 +8,66 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { useLanguage } from "@/lib/language-context";
+import { cn } from "@/lib/utils";
 import {
   AGENT_PROTOCOLS,
-  PACKAGE,
   PAYMENT_SOURCES,
   REVIEWED_AT,
   getSource,
-  valueTranslations,
-} from "@/data/agentic-payments";
-import { cn } from "@/lib/utils";
+  type PaymentFact,
+  type PaymentText,
+} from "@/data/friday-agentic-payments";
 
 export function usePaymentText() {
-  const { t, language } = useLanguage();
-  return {
-    t,
-    language,
-    value: (text: string) => t(text, valueTranslations[text] ?? text),
-  };
+  const { t } = useLanguage();
+  return { t, local: (value: PaymentText) => t(value.en, value.zh) };
 }
 
 export function PaymentCitation({ ids }: { ids: string[] }) {
-  const { t } = usePaymentText();
+  const { t, local } = usePaymentText();
+  const types = {
+    spec: t("Specification", "官方规范"),
+    code: t("Source / sample", "源码／示例"),
+    announcement: t("Official announcement", "官方公告"),
+    report: t("Research / release coverage", "研究／发布报道"),
+    product: t("Product page", "产品介绍"),
+  };
   return (
     <>
       {[...new Set(ids)].map((id) => {
-        const s = getSource(id);
-        if (!s) return null;
-        const number = PAYMENT_SOURCES.indexOf(s) + 1;
-        const text = (
-          <>
-            <p className="font-semibold leading-5">{t(s.title, s.title)}</p>
-            <p className="mt-1 text-xs leading-5">
-              {t(s.organization, s.organization)} ·{" "}
-              {t("Source publication", "来源发布")} {t(s.date, s.date)}
-            </p>
-            <p className="mt-1 text-xs">
-              {t("Last verified", "最近核查")} {s.last_verified} ·{" "}
-              {t(s.status, s.status)}
-            </p>
-          </>
-        );
+        const source = getSource(id);
+        if (!source) return null;
+        const number = PAYMENT_SOURCES.indexOf(source) + 1;
         return (
-          <sup
-            key={id}
-            className="ml-1 inline-flex align-super text-[11px] text-primary"
-          >
-            <Tooltip delayDuration={180}>
+          <sup key={id} className="ml-0.5 inline-flex align-super">
+            <Tooltip delayDuration={200} disableHoverableContent>
               <TooltipTrigger asChild>
                 <a
-                  className="hidden min-h-6 min-w-6 items-center justify-center rounded-sm hover:bg-primary/10 focus-visible:outline sm:inline-flex"
-                  href={s.url}
+                  href={source.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`${s.title} · ${t("open official source", "打开官方来源")}`}
+                  aria-label={`${local(source.title)} · ${t("opens in a new tab", "新标签页打开")}`}
+                  className="inline-flex min-h-6 min-w-6 items-center justify-center rounded-sm text-[11px] font-semibold leading-none text-primary hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
                   [{number}]
                 </a>
               </TooltipTrigger>
-              <TooltipContent className="max-w-80 bg-popover p-3 text-popover-foreground border">
-                {text}
+              <TooltipContent className="max-w-[min(320px,90vw)] border border-border bg-popover p-3 text-popover-foreground shadow-md">
+                <p className="font-semibold leading-5">{local(source.title)}</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  {source.publisher} · {types[source.type]}
+                  {source.version ? ` · ${source.version}` : ""}
+                  {source.date ? ` · ${source.date}` : ""}
+                </p>
               </TooltipContent>
             </Tooltip>
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  className="inline-flex min-h-8 min-w-8 items-center justify-center sm:hidden"
-                  aria-label={`${t("Source details", "来源详情")} ${number}`}
-                >
-                  [{number}]
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="max-w-[90vw] text-sm">
-                {text}
-                <a
-                  className="mt-3 inline-flex items-center gap-2 text-primary underline"
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t("Open official source", "打开官方来源")}
-                  <ExternalLink size={12} />
-                </a>
-              </PopoverContent>
-            </Popover>
           </sup>
         );
       })}
@@ -110,15 +75,31 @@ export function PaymentCitation({ ids }: { ids: string[] }) {
   );
 }
 
+export function PaymentFactText({
+  fact,
+  className,
+}: {
+  fact: PaymentFact;
+  className?: string;
+}) {
+  const { local } = usePaymentText();
+  return (
+    <p className={cn("text-sm leading-7 text-muted-foreground", className)}>
+      {local(fact.body)}
+      <PaymentCitation ids={fact.sources} />
+    </p>
+  );
+}
+
 export function PaymentSection({
   id,
-  title,
   kicker,
+  title,
   children,
 }: {
   id?: string;
-  title: string;
   kicker?: string;
+  title: string;
   children: React.ReactNode;
 }) {
   return (
@@ -127,11 +108,11 @@ export function PaymentSection({
       className="scroll-mt-6 border-t border-border py-9 sm:py-12"
     >
       {kicker && (
-        <p className="mb-3 text-xs font-semibold tracking-widest text-primary">
+        <p className="mb-3 text-xs font-semibold tracking-[0.1em] text-primary">
           {kicker}
         </p>
       )}
-      <h2 className="mb-5 max-w-4xl font-serif text-2xl font-semibold leading-snug sm:text-3xl">
+      <h2 className="mb-6 max-w-4xl font-serif text-2xl font-semibold leading-snug text-foreground sm:text-3xl">
         {title}
       </h2>
       {children}
@@ -139,202 +120,128 @@ export function PaymentSection({
   );
 }
 
-/** Small renderer for approved copy only; no raw HTML, imports or external Markdown. */
-export function PaymentCopy({
-  en,
-  zh,
-  className,
+export function PaymentFlow({
+  steps,
+  label,
+  conceptual = false,
 }: {
-  en: string;
-  zh: string;
-  className?: string;
+  steps: PaymentFact[];
+  label: string;
+  conceptual?: boolean;
 }) {
-  const { t } = usePaymentText();
-  const inline = (line: string) =>
-    line.split(/(\*\*[^*]+\*\*|`[^`]+`)/).map((part, i) =>
-      part.startsWith("**") ? (
-        <strong key={i} className="font-semibold text-foreground">
-          {part.slice(2, -2)}
-        </strong>
-      ) : part.startsWith("`") ? (
-        <code key={i} className="text-[0.92em]">
-          {part.slice(1, -1)}
-        </code>
-      ) : (
-        part
-      ),
-    );
+  const { t, local } = usePaymentText();
+  const [selected, setSelected] = useState(0);
+  // A different task can have fewer steps than the previous task.
+  const index = Math.min(selected, steps.length - 1);
+  if (!steps.length) return null;
   return (
-    <div
-      className={cn(
-        "space-y-3 text-sm leading-7 text-muted-foreground sm:text-base",
-        className,
-      )}
-    >
-      {t(en, zh)
-        .replace(/^---\s*$/gm, "")
-        .trim()
-        .split(/\n\s*\n/)
-        .filter(Boolean)
-        .map((block, i) => {
-          if (block.startsWith("### "))
-            return (
-              <div key={i}>
-                <h3 className="mb-2 font-semibold text-foreground">
-                  {inline(block.split("\n")[0].slice(4))}
-                </h3>
-                {block
-                  .split("\n")
-                  .slice(1)
-                  .map((s, j) => (
-                    <p key={j}>{inline(s)}</p>
-                  ))}
-              </div>
-            );
-          const lines = block.split("\n");
-          if (lines.every((x) => /^[-\d]/.test(x)))
-            return (
-              <ul key={i} className="list-disc space-y-1 pl-5">
-                {lines.map((s, j) => (
-                  <li key={j}>{inline(s.replace(/^(?:- |\d+\. )/, ""))}</li>
-                ))}
-              </ul>
-            );
-          return <p key={i}>{inline(block)}</p>;
-        })}
+    <div>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        {conceptual && (
+          <span className="text-xs text-muted-foreground">
+            {t(
+              "Illustrative task · no money moves",
+              "任务示意 · 不发生真实付款",
+            )}
+          </span>
+        )}
+      </div>
+      <div
+        aria-label={label}
+        className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:flex xl:items-stretch"
+      >
+        {steps.map((step, i) => (
+          <React.Fragment key={`${step.title.en}-${i}`}>
+            <button
+              type="button"
+              aria-pressed={index === i}
+              onClick={() => setSelected(i)}
+              className={cn(
+                "flex min-w-0 items-center gap-3 rounded-md border px-4 py-4 text-left transition-colors xl:flex-1 xl:flex-col xl:items-start focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary",
+                index === i
+                  ? "border-primary bg-primary/[0.08]"
+                  : "border-border bg-transparent hover:border-primary/60",
+              )}
+            >
+              <span
+                className={cn(
+                  "font-mono text-xs",
+                  index === i ? "text-primary" : "text-muted-foreground",
+                )}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span className="text-sm font-semibold leading-6">
+                {local(step.title)}
+              </span>
+            </button>
+            {i < steps.length - 1 && (
+              <ArrowRight
+                aria-hidden="true"
+                className="hidden h-4 w-4 shrink-0 self-center text-primary/60 xl:block"
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+      <div
+        aria-live="polite"
+        className="mt-4 border-l-2 border-primary bg-primary/[0.04] px-4 py-3"
+      >
+        <p className="text-sm font-semibold">{local(steps[index].title)}</p>
+        <PaymentFactText fact={steps[index]} />
+      </div>
     </div>
   );
 }
 
-const palette: Record<string, string> = {
-  "#F7F9FC": "hsl(var(--background))",
-  "#FFFFFF": "hsl(var(--background))",
-  "#FBFCFE": "hsl(var(--background))",
-  "#1F2937": "hsl(var(--foreground))",
-  "#667085": "hsl(var(--muted-foreground))",
-  "#C8D2E1": "hsl(var(--border))",
-  "#EEF2F7": "hsl(var(--muted))",
-  "#EEF3F9": "hsl(var(--muted))",
-  "#FFF2EA": "hsl(var(--muted))",
-  "#315B9A": "hsl(var(--primary))",
-  "#5F7DB5": "hsl(var(--primary))",
-  "#6B65A8": "hsl(var(--primary))",
-  "#3A7D78": "hsl(var(--secondary))",
-  "#517A63": "hsl(var(--secondary))",
-  "#C97B63": "hsl(var(--muted-foreground))",
-};
-export function PaymentVisual({ id, label }: { id: string; label: string }) {
-  const { t } = usePaymentText();
-  const instance = useId().replace(/:/g, "");
-  const [open, setOpen] = useState(false);
-  const svg = (PACKAGE.svg as Record<string, string>)[id] ?? "";
-  const html = useMemo(
-    () =>
-      svg
-        .replace(/#[0-9a-f]{6}/gi, (c) => palette[c.toUpperCase()] ?? c)
-        .replace(/id="([^"]+)"/g, `id="${instance}-$1"`)
-        .replace(/url\(#([^)]+)\)/g, `url(#${instance}-$1)`)
-        .replace(
-          /class="([^"]+)"/g,
-          (_, names: string) =>
-            `class="${names
-              .split(" ")
-              .map((n) => `${instance}-${n}`)
-              .join(" ")}"`,
-        )
-        .replace(
-          /\.(t|muted|small|body|label|title|sub|box|arrow|dash)\b/g,
-          `.${instance}-$1`,
-        )
-        .replace(
-          'width="1600" height="900"',
-          'width="100%" height="900" style="height:auto" role="img"',
-        ),
-    [svg, instance],
-  );
-  if (!svg) return null;
+export function PaymentQuestions({ questions }: { questions: PaymentFact[] }) {
+  const { local } = usePaymentText();
   return (
-    <figure className="mt-6 overflow-hidden rounded-md border border-border bg-primary/[0.025]">
-      <div
-        className="hidden sm:block"
-        dangerouslySetInnerHTML={{ __html: html }}
-        aria-label={label}
-      />
-      <div className="px-4 py-5 sm:hidden">
-        <p className="text-sm font-semibold">{label}</p>
-        <p className="mt-2 text-xs leading-6 text-muted-foreground">
-          {t(
-            "The explanation is above. Open the original English diagram for the complete mechanism.",
-            "上方文字解释核心机制；可打开英文原图查看完整结构。",
-          )}
-        </p>
-      </div>
-      <figcaption className="flex items-center justify-between gap-3 border-t border-border px-4 py-2 text-xs text-muted-foreground">
-        <span>
-          {t("Original mechanism diagram · EN", "原创机制图 · 英文")} · {id}
-        </span>
-        <button
-          onClick={() => setOpen(true)}
-          className="inline-flex min-h-9 items-center gap-2 text-primary"
-          aria-label={`${t("Open diagram", "打开机制图")} ${label}`}
-        >
-          <Maximize2 size={14} />
-          {t("View diagram", "查看机制图")}
-        </button>
-      </figcaption>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent
-          closeLabel={t("Close", "关闭窗口")}
-          className="max-h-[90dvh] w-[96vw] max-w-6xl overflow-y-auto"
-        >
-          <DialogHeader>
-            <DialogTitle>{label}</DialogTitle>
-            <DialogDescription>
-              {t(
-                "Original explanatory diagram; no real payment is executed.",
-                "原创机制示意，不执行真实付款。",
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <div
-            dangerouslySetInnerHTML={{
-              __html: html.replaceAll(`${instance}-`, `${instance}-modal-`),
-            }}
-          />
-          <a
-            className="text-sm text-primary underline"
-            href={`${import.meta.env.BASE_URL}agentic-payments/v0.2/${PACKAGE.assets.find((a) => a.asset_id === id)?.filename}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t("Open original SVG", "打开原始 SVG")}
-          </a>
-        </DialogContent>
-      </Dialog>
-    </figure>
+    <div className="divide-y divide-border border-y border-border">
+      {questions.map((question) => (
+        <details key={question.title.en} className="group py-4">
+          <summary className="cursor-pointer text-sm font-semibold leading-6 text-foreground marker:text-primary">
+            {local(question.title)}
+          </summary>
+          <PaymentFactText fact={question} className="mt-3 max-w-4xl pl-4" />
+        </details>
+      ))}
+    </div>
   );
 }
 
 export function PaymentProtocolNav() {
+  const [location] = useLocation();
   const { t } = usePaymentText();
-  const [path] = useLocation();
   return (
     <nav
-      aria-label={t("Protocol details", "协议详情导航")}
-      className="mb-8 flex gap-6 overflow-x-auto border-b border-border text-sm"
+      aria-label={t("Choose a protocol", "选择具体协议")}
+      className="mb-8 flex min-w-0 gap-5 overflow-x-auto border-b border-border pb-1"
     >
-      {AGENT_PROTOCOLS.filter((p) => p.id !== "a402").map((p) => (
+      {[
+        {
+          name: t("All protocols", "全部协议"),
+          href: "/agentic-payments/protocols",
+        },
+        ...AGENT_PROTOCOLS.map((p) => ({
+          name: p.name,
+          href: `/agentic-payments/protocols/${p.id}`,
+        })),
+      ].map((item) => (
         <Link
-          key={p.id}
-          href={p.detail_route}
+          key={item.href}
+          href={item.href}
+          aria-current={location === item.href ? "page" : undefined}
           className={cn(
-            "shrink-0 border-b-2 py-3",
-            path === p.detail_route
+            "shrink-0 border-b-2 px-1 py-3 text-sm font-medium transition-colors hover:text-primary",
+            location === item.href
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground",
           )}
         >
-          {t(p.name, p.name)}
+          {item.name}
         </Link>
       ))}
     </nav>
@@ -348,31 +255,14 @@ export function PaymentPage({
   children: React.ReactNode;
   sources?: string[];
 }) {
-  const { t } = usePaymentText();
-  const [path] = useLocation();
-  const [notes, setNotes] = useState(false);
-  useEffect(() => {
-    // Wouter changes paths without waiting for a new target section to mount.
-    const followHash = () =>
-      requestAnimationFrame(() => {
-        const target = window.location.hash.slice(1);
-        if (target)
-          document
-            .getElementById(decodeURIComponent(target))
-            ?.scrollIntoView({ block: "start" });
-      });
-    const frame = followHash();
-    window.addEventListener("hashchange", followHash);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("hashchange", followHash);
-    };
-  }, [path]);
+  const { t, local } = usePaymentText();
+  const [notesOpen, setNotesOpen] = useState(false);
+  const chosenSources = PAYMENT_SOURCES.filter((s) => sources.includes(s.id));
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[1480px] p-4 sm:p-6 lg:p-10">
+    <div className="mx-auto w-full min-w-0 max-w-7xl pb-8">
       <SectionTopNav
-        eyebrow={t("Agentic Payments", "智能体支付")}
-        ariaLabel={t("Agentic payments sections", "智能体支付栏目")}
+        eyebrow={t("Agentic Payments", "智能体支付协议")}
+        ariaLabel={t("Agentic payment sections", "智能体支付专题导航")}
         items={[
           { href: "/agentic-payments", label: t("Overview", "概览") },
           {
@@ -382,131 +272,109 @@ export function PaymentPage({
           },
           {
             href: "/agentic-payments/scenarios",
-            label: t("Scenarios & risks", "应用与风险"),
+            label: t("Applications & risks", "应用与风险"),
           },
           {
             href: "/agentic-payments/ecosystem",
-            label: t("Ecosystem & progress", "生态与进展"),
+            label: t("Ecosystem & developments", "生态与进展"),
           },
         ]}
       />
       {children}
-      <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border py-5 text-xs text-muted-foreground">
+      <footer className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5 text-xs text-muted-foreground">
         <p>
-          {t("Last reviewed", "最近核查")} · {REVIEWED_AT}
+          {t("Sources reviewed", "资料核查")} · {REVIEWED_AT}
         </p>
         <button
-          onClick={() => setNotes(true)}
-          className="inline-flex min-h-10 items-center gap-2 text-primary underline underline-offset-4"
+          type="button"
+          className="inline-flex min-h-9 items-center gap-2 text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary"
+          onClick={() => setNotesOpen(true)}
         >
-          <Info size={14} />
-          {t("Sources & reading notes", "来源与阅读说明")}
+          <Info className="h-3.5 w-3.5" />
+          {t("Sources & reading notes", "资料与阅读说明")}
         </button>
       </footer>
-      <Dialog open={notes} onOpenChange={setNotes}>
+      <Dialog open={notesOpen} onOpenChange={setNotesOpen}>
         <DialogContent
           closeLabel={t("Close", "关闭窗口")}
-          className="max-w-2xl overflow-hidden"
+          className="max-h-[85dvh] max-w-2xl overflow-hidden"
         >
           <DialogHeader>
             <DialogTitle>
-              {t("Sources & reading notes", "来源与阅读说明")}
+              {t("Sources & reading notes", "资料与阅读说明")}
             </DialogTitle>
             <DialogDescription>
               {t(
-                "Read evidence at its stated level.",
-                "按证据实际能说明的范围阅读。",
+                "How to interpret specifications, examples and public claims.",
+                "如何理解规范、参考示例与公开声明。",
               )}
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-[65dvh] space-y-5 overflow-y-auto overscroll-contain text-sm leading-7">
-            <p>
-              {t(
-                "Protocols, products and payment infrastructure are different layers. A stablecoin is one possible payment rail, not the definition of agentic payment.",
-                "协议、产品和支付基础设施属于不同层。稳定币是一条可能的支付轨道，不是智能体支付的定义。",
-              )}
-            </p>
-            <p>
-              {t(
-                "Production-system validation is not general availability. A phase-I rollout or partnership does not establish large-scale adoption.",
-                "生产系统验证不等于全面开放；第一阶段推广或合作公告，也不能证明已有大规模采用。",
-              )}
-            </p>
-            <p>
-              {t(
-                "UNKNOWN means first-party evidence is insufficient. Blockchain or tokenisation alone does not prove stablecoin settlement. Review dates are not release dates.",
-                "UNKNOWN 表示第一方证据不足。使用区块链或代币化技术，本身不能证明采用稳定币结算。核查日期不是发布日期。",
-              )}
-            </p>
-            <p>
-              {t(
-                "Figures explain mechanisms, not live payment services. Product screenshots are not reproduced without a reviewed first-party asset and use conditions.",
-                "图示用于解释机制，不提供真实支付服务。未取得已审核的官方素材与使用条件前，不展示产品截图。",
-              )}
-            </p>
-            <SourceList ids={sources} />
+          <div className="max-h-[calc(85dvh-9rem)] min-h-0 overflow-y-auto overscroll-contain pr-1">
+            <div className="space-y-4 text-sm leading-7 text-muted-foreground">
+              <p>
+                {t(
+                  "Specifications explain a design. Reference code shows an implementation example, not that every product has adopted it.",
+                  "规范说明设计；参考代码展示一种实现，不代表所有产品都已采用。",
+                )}
+              </p>
+              <p>
+                {t(
+                  "Official announcements describe what an organization reported. Partners and covered accounts are not users who actually made agent payments.",
+                  "官方公告记录机构披露的进展。伙伴及覆盖账户，不是实际使用智能体付款的用户数量。",
+                )}
+              </p>
+              <p>
+                {t(
+                  "The flows marked illustrative describe research scenarios, not a live payment service. Refunds and liability depend on the actual service, terms and jurisdiction.",
+                  "标为示意的流程用于解释研究场景，不是真实付款服务。退款与责任取决于实际服务、条款及所在地区。",
+                )}
+              </p>
+              <p>
+                {t(
+                  "Not verified means that the reviewed public sources do not establish a capability; it does not prove that the capability is absent. Review dates are not release dates.",
+                  "未核实表示本轮公开资料不足以确认某项能力，并不证明该能力不存在。核查日期不等于发布日期。",
+                )}
+              </p>
+              <p>
+                {t(
+                  "Research and speeches represent their stated authors or institutions; they are not automatically regulatory rules or approvals.",
+                  "研究和讲话需按作者及机构身份理解，不自动等于监管规则或许可。",
+                )}
+              </p>
+            </div>
+            {chosenSources.length > 0 && (
+              <div className="mt-2 border-t border-border pt-4">
+                <h3 className="mb-3 text-sm font-semibold">
+                  {t("Related primary resources", "相关权威资料")}
+                </h3>
+                <ul className="space-y-3">
+                  {chosenSources.map((source) => (
+                    <li key={source.id} className="text-sm">
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-start gap-2 text-primary hover:underline"
+                      >
+                        <ExternalLink className="mt-1 h-3.5 w-3.5 shrink-0" />
+                        <span>
+                          [{PAYMENT_SOURCES.indexOf(source) + 1}]{" "}
+                          {local(source.title)}
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            {source.publisher}
+                            {source.date ? ` · ${source.date}` : ""}
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
     </div>
-  );
-}
-export function SourceList({ ids }: { ids: string[] }) {
-  const { t } = usePaymentText();
-  return (
-    <ul className="divide-y divide-border">
-      {[...new Set(ids)].map((id) => {
-        const s = getSource(id);
-        if (!s) return null;
-        return (
-          <li key={id} className="py-3">
-            <a
-              href={s.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-start gap-2 text-sm text-primary hover:underline"
-            >
-              <ExternalLink className="mt-1 shrink-0" size={14} />
-              <span>
-                {t(s.title, s.title)}
-                <span className="mt-1 block text-xs text-muted-foreground">
-                  {t(s.organization, s.organization)} ·{" "}
-                  {t("Source publication", "来源发布")} {s.date} ·{" "}
-                  {t("verified", "核查")} {s.last_verified} · {s.status}
-                </span>
-              </span>
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
-export function PaymentHero({
-  title,
-  lead,
-  children,
-}: {
-  title: string;
-  lead?: string;
-  children?: React.ReactNode;
-}) {
-  const { t } = usePaymentText();
-  return (
-    <header className="pb-9 sm:pb-12">
-      <p className="mb-4 text-xs font-semibold tracking-[.14em] text-primary">
-        {t("AGENTIC PAYMENTS", "智能体支付")}
-      </p>
-      <h1 className="max-w-5xl font-serif text-3xl font-semibold leading-tight text-primary sm:text-4xl lg:text-[2.75rem]">
-        {title}
-      </h1>
-      {lead && (
-        <p className="mt-5 max-w-4xl text-base leading-8 text-muted-foreground">
-          {lead}
-        </p>
-      )}
-      {children}
-    </header>
   );
 }
