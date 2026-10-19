@@ -18,7 +18,7 @@ test('Friday sidebar keeps About and Agentic as single entries and preserves ori
 });
 test('Friday layout retains the original task-oriented Agentic overview rather than either rejected design',()=>{
  const page=read('pages/agentic-payments.tsx');for(const text of ['智能体如何付款，用户如何保持控制？','What would you ask an agent to do?','TaskExplorer','PaymentFlow','aria-pressed','PaymentProtocolNav'])assert.ok(page.includes(text),text);
- assert.ok(page.includes('@/data/friday-agentic-payments'));assert.ok(read('App.tsx').includes('/market-data/macro'));
+ assert.ok(page.includes('@/data/agentic-payments-reconciled'));assert.ok(read('data/agentic-payments-reconciled.ts').includes('./friday-agentic-payments')); assert.ok(read('App.tsx').includes('/market-data/macro'));
 });
 test('backend, schema, governance, verified source packages and binary research inputs remain unchanged',()=>{
  const paths=execFileSync('git',['diff','c8a7b6024c0b966781ed3aa4918e22586cacfdd8','--name-only'],{cwd:root,encoding:'utf8'}).trim().split('\n');

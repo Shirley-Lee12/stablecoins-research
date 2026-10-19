@@ -1,0 +1,73 @@
+{
+  "base": "632a7e383e5dfd78ef49cead12d829fe807e1526",
+  "contentSource": "c8a7b6024c0b966781ed3aa4918e22586cacfdd8",
+  "branch": "feat/post-release-content-integration",
+  "CANONICAL_UI_PRESERVED": "YES",
+  "AGENTIC_CONTENT_RECONCILED": "YES",
+  "AGENTIC_TOP_NAV_PASS": "YES",
+  "AGT_D01_INLINE_VISUAL_PASS": "YES",
+  "CONTENT_SOURCES_PRESERVED": "YES",
+  "FULL_TESTS": "FAIL: 151/168 pass, 17 pre-existing failures, 0 skipped",
+  "TARGETED_TESTS": "34/34 PASS (including isolated governance)",
+  "TYPECHECK": "PASS",
+  "BUILD": "PASS",
+  "agenticBrowser": {
+    "total": 120,
+    "passed": 120,
+    "controlsPassed": 8,
+    "consoleErrors": 0,
+    "pageErrors": 0
+  },
+  "allFormalRouteRenderSmoke": {
+    "total": 100,
+    "passed": 100,
+    "scope": "Chinese/light, anonymous cached GET; six console 404 entries on 3 unrelated routes; not a full authenticated or live-data acceptance"
+  },
+  "protectedInputs": {
+    "total": 548,
+    "matched": 548
+  },
+  "shellPixelComparison": [
+    {
+      "label": "sidebar",
+      "width": 1440,
+      "size": [
+        256,
+        1000
+      ],
+      "same": true,
+      "bbox": null
+    },
+    {
+      "label": "shell",
+      "width": 1440,
+      "size": [
+        1440,
+        56
+      ],
+      "same": true,
+      "bbox": null
+    },
+    {
+      "label": "shell",
+      "width": 390,
+      "size": [
+        390,
+        56
+      ],
+      "same": true,
+      "bbox": null
+    }
+  ],
+  "newFailureTitles": [],
+  "MAIN_UPDATED": "NO",
+  "RENDER_DEPLOYED": "NO",
+  "PRODUCTION_DML": 0,
+  "PRODUCTION_DB_MODIFIED": "NO",
+  "VISUAL_REVIEW_PENDING": "YES",
+  "READY_FOR_RELEASE": "NO",
+  "extraControls": {
+    "total": 8,
+    "passed": 8
+  }
+}

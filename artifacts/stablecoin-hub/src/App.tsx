@@ -78,6 +78,7 @@ function Router() {
         <Route path="/agentic-payments" component={AgenticPaymentsOverview} />
         <Route path="/agentic-payments/protocols" component={AgenticProtocolsPage} />
         <Route path="/agentic-payments/protocols/:id" component={AgenticProtocolDetail} />
+        <Route path="/protocols/:id" component={AgenticProtocolDetail} />
         <Route path="/agentic-payments/scenarios" component={AgenticScenariosPage} />
         <Route path="/agentic-payments/ecosystem" component={AgenticEcosystemPage} />
         <Route path="/reset-password" component={ResetPassword} />

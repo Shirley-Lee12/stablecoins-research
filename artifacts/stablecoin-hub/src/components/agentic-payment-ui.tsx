@@ -23,7 +23,7 @@ import {
   getSource,
   type PaymentFact,
   type PaymentText,
-} from "@/data/friday-agentic-payments";
+} from "@/data/agentic-payments-reconciled";
 
 export function usePaymentText() {
   const { t } = useLanguage();
@@ -62,9 +62,19 @@ export function PaymentCitation({ ids }: { ids: string[] }) {
               <TooltipContent className="max-w-[min(320px,90vw)] border border-border bg-popover p-3 text-popover-foreground shadow-md">
                 <p className="font-semibold leading-5">{local(source.title)}</p>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  {source.publisher} · {types[source.type]}
+                  {source.publisher} · {source.sourceType ?? types[source.type]}
+                  {source.status && (
+                    <span className="block">
+                      {t("Source publication", "来源发布日期")}: {source.date} ·{" "}
+                      {source.status}
+                    </span>
+                  )}
+                  {source.useFor && (
+                    <span className="block">{source.useFor}</span>
+                  )}
                   {source.version ? ` · ${source.version}` : ""}
                   {source.date ? ` · ${source.date}` : ""}
+                  {source.status ? ` · ${source.status}` : ""}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -283,7 +293,8 @@ export function PaymentPage({
       {children}
       <footer className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5 text-xs text-muted-foreground">
         <p>
-          {t("Sources reviewed", "资料核查")} · {REVIEWED_AT}
+          {t("Historical sources reviewed", "历史资料核查")} · {REVIEWED_AT} ·{" "}
+          {t("V0.2 evidence snapshot: 2026-10-15", "V0.2 证据快照：2026-10-15")}
         </p>
         <button
           type="button"
@@ -364,6 +375,7 @@ export function PaymentPage({
                           <span className="mt-1 block text-xs text-muted-foreground">
                             {source.publisher}
                             {source.date ? ` · ${source.date}` : ""}
+                            {source.status ? ` · ${source.status}` : ""}
                           </span>
                         </span>
                       </a>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useParams } from "wouter";
+import { Link, Redirect, useParams } from "wouter";
 import {
   ArrowRight,
   BookOpen,
@@ -34,8 +34,17 @@ import {
   type AgentProtocol,
   type PaymentEvent,
   type PaymentLayer,
-} from "@/data/friday-agentic-payments";
+} from "@/data/agentic-payments-reconciled";
 import { cn } from "@/lib/utils";
+
+import { AgenticPaymentStack } from "@/components/agentic-payment-stack";
+import {
+  ProtocolEvidence,
+  OverviewResearch,
+  MachinePaymentNotes,
+  EcosystemEvidence,
+} from "@/components/agentic-evidence-notes";
+import { PAYMENT_SOURCES } from "@/data/agentic-payments-reconciled";
 
 const BASE = "/agentic-payments";
 const protocolSources = (protocol: AgentProtocol) => [
@@ -51,6 +60,7 @@ const allSources = [
     AGENT_PROTOCOLS.flatMap(protocolSources).concat(
       ECOSYSTEM_ENTRIES.map((e) => e.source),
       ["waller", "bis-money"],
+      PAYMENT_SOURCES.map((s) => s.id),
     ),
   ),
 ];
@@ -284,6 +294,7 @@ export function AgenticPaymentsOverview() {
           ))}
         </div>
       </header>
+      <AgenticPaymentStack />
       <PaymentSection
         id="tasks"
         kicker={t("START WITH YOUR TASK", "从你的任务出发")}
@@ -408,6 +419,7 @@ export function AgenticPaymentsOverview() {
           </Link>
         </p>
       </PaymentSection>
+      <OverviewResearch />
       <PaymentSection
         kicker={t("WHAT CHANGED", "发展与变化")}
         title={t(
@@ -682,6 +694,9 @@ export function AgenticProtocolDetail() {
   const { id = "" } = useParams<{ id: string }>();
   const { t, local } = usePaymentText();
   const protocol = getProtocol(id);
+  if (id === "a2p2") return <Redirect to="/agentic-payments/protocols" />;
+  if (id === "a402")
+    return <Redirect to="/agentic-payments/scenarios#api-pay" />;
   if (!protocol)
     return (
       <PaymentPage>
@@ -753,6 +768,7 @@ export function AgenticProtocolDetail() {
           </a>
         ))}
       </nav>
+      <ProtocolEvidence id={id} />
       <PaymentSection
         id="use"
         kicker={t("THE USER EXPERIENCE", "用户使用")}
@@ -782,7 +798,14 @@ export function AgenticProtocolDetail() {
         <PaymentFlow
           key={p.id}
           steps={p.flow}
-          label={t("Select a step to read its role", "点击步骤查看职责")}
+          label={
+            p.id === "act"
+              ? t(
+                  "Conceptual responsibilities · no field-level flow verified",
+                  "概念职责 · 字段级流程未核实",
+                )
+              : t("Select a step to read its role", "点击步骤查看职责")
+          }
         />
       </PaymentSection>
       <PaymentSection
@@ -946,6 +969,7 @@ export function AgenticScenariosPage() {
           )}
         </p>
       </header>
+      <MachinePaymentNotes />
       <PaymentSection
         title={t("One task, several mechanisms", "一个任务，涉及哪些机制？")}
       >
@@ -1036,6 +1060,7 @@ export function AgenticEcosystemPage() {
           )}
         </p>
       </header>
+      <EcosystemEvidence />
       <PaymentSection
         title={t("Organizations and their roles", "机构及其角色")}
       >
@@ -1079,7 +1104,7 @@ export function AgenticEcosystemPage() {
               <div>
                 <p className="text-sm leading-7 text-muted-foreground">
                   {local(e.note)}
-                  <PaymentCitation ids={[e.source]} />
+                  <PaymentCitation ids={e.sources} />
                 </p>
                 {e.protocols.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-4">

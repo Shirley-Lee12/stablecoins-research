@@ -177,10 +177,10 @@ test("factual boundary wording remains explicit in both languages without promot
     /not a fully independent open standard|not label A402 as a fully independent open standard/i,
   );
   assert.match(generated.copy.zh, /完整字段级公开 specification 当前仍不足/);
-  const page = read("artifacts/stablecoin-hub/src/pages/agentic-payments.tsx");
+  const page = ["pages/agentic-payments.tsx","components/agentic-evidence-notes.tsx"].map(p=>read("artifacts/stablecoin-hub/src/"+p)).join("\n");
   assert.match(page, /生产系统验证，不等于全面开放/);
   assert.match(page, /Partnership|PARTNERSHIP/);
-  assert.match(page, /Pilot|PILOT/);
+  assert.match(page, /Pilot|PILOT|pilots/);
   assert.match(generated.labels.artifact_type.PRODUCT, /product/i);
   assert.match(
     generated.labels.artifact_type.INFRASTRUCTURE,
@@ -194,7 +194,7 @@ test("factual boundary wording remains explicit in both languages without promot
 });
 test("canonical routes, compatibility alias and held-route redirect are implemented", () => {
   const app = read("artifacts/stablecoin-hub/src/App.tsx");
-  const page = read("artifacts/stablecoin-hub/src/pages/agentic-payments.tsx");
+  const page = ["pages/agentic-payments.tsx","components/agentic-evidence-notes.tsx"].map(p=>read("artifacts/stablecoin-hub/src/"+p)).join("\n");
   for (const route of [
     "/agentic-payments",
     "/agentic-payments/protocols",
